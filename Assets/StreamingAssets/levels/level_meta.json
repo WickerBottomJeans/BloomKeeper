@@ -1,0 +1,62 @@
+﻿[
+  {
+    "levelId": 1,
+    "levelName": "1",
+    "normalizedX": -0.0567,
+    "normalizedY": 0.1545
+  },
+  {
+    "levelId": 2,
+    "levelName": "2",
+    "normalizedX": 0.0811,
+    "normalizedY": 0.2517
+  },
+  {
+    "levelId": 3,
+    "levelName": "3",
+    "normalizedX": -0.1146,
+    "normalizedY": 0.3587
+  },
+  {
+    "levelId": 4,
+    "levelName": "4",
+    "normalizedX": 0.1311,
+    "normalizedY": 0.4711
+  },
+  {
+    "levelId": 5,
+    "levelName": "5",
+    "normalizedX": -0.0896,
+    "normalizedY": 0.5559
+  },
+  {
+    "levelId": 6,
+    "levelName": "6",
+    "normalizedX": 0.0976,
+    "normalizedY": 0.6281
+  },
+  {
+    "levelId": 7,
+    "levelName": "7",
+    "normalizedX": -0.0939,
+    "normalizedY": 0.6850
+  },
+  {
+    "levelId": 8,
+    "levelName": "8",
+    "normalizedX": 0.0683,
+    "normalizedY": 0.7349
+  },
+  {
+    "levelId": 9,
+    "levelName": "9",
+    "normalizedX": -0.0982,
+    "normalizedY": 0.7780
+  },
+  {
+    "levelId": 10,
+    "levelName": "10",
+    "normalizedX": 0.0183,
+    "normalizedY": 0.8142
+  }
+]

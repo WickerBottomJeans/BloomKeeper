@@ -1,0 +1,396 @@
+fileFormatVersion: 2
+guid: 8dea487e821f0ca4cbf4e965d90a2546
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3527160982382401319
+    second: UILevelBoard_0
+  - first:
+      213: -4410593242804442756
+    second: UILevelBoard_1
+  - first:
+      213: 2322897407789083364
+    second: UILevelBoard_2
+  - first:
+      213: -2131924300434928563
+    second: UILevelBoard_3
+  - first:
+      213: 4503088011623779354
+    second: UILevelBoard_4
+  - first:
+      213: 81771044370849793
+    second: UILevelBoard_5
+  - first:
+      213: 7105945061561676107
+    second: UILevelBoard_6
+  - first:
+      213: -707179056188875492
+    second: UILevelBoard_7
+  - first:
+      213: 2512551194299947267
+    second: UILevelBoard_8
+  - first:
+      213: 1003987057819376277
+    second: UILevelBoard_9
+  - first:
+      213: 6487515327902642382
+    second: UILevelBoard_10
+  - first:
+      213: 5357921078350903153
+    second: UILevelBoard_11
+  - first:
+      213: 9072309028858239488
+    second: UILevelBoard_12
+  - first:
+      213: 2969828776928019253
+    second: UILevelBoard_13
+  - first:
+      213: -2687481918621700327
+    second: UILevelBoard_14
+  - first:
+      213: 9031350905602012243
+    second: UILevelBoard_15
+  - first:
+      213: -9009563967013870537
+    second: UILevelBoard_16
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Frame
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 376
+        width: 804
+        height: 557
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 169, y: 169, z: 164, w: 224}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 727558cc93ef2f030800000000000000
+      internalID: 3527160982382401319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Btn_Level
+      rect:
+        serializedVersion: 2
+        x: 863
+        y: 510
+        width: 192
+        height: 203
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7927e160dc6ac2c0800000000000000
+      internalID: -4410593242804442756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Btn_Close
+      rect:
+        serializedVersion: 2
+        x: 1102
+        y: 529
+        width: 175
+        height: 173
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4eaa1f892e69c3020800000000000000
+      internalID: 2322897407789083364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Btn_Help
+      rect:
+        serializedVersion: 2
+        x: 1321
+        y: 530
+        width: 175
+        height: 172
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4c8d88e422e962e0800000000000000
+      internalID: -2131924300434928563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Panel_Star_0
+      rect:
+        serializedVersion: 2
+        x: 59
+        y: 193
+        width: 277
+        height: 89
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1cc72d20be2e7e30800000000000000
+      internalID: 4503088011623779354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Panel_Star_1
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 192
+        width: 277
+        height: 89
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10023a4e452822100800000000000000
+      internalID: 81771044370849793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Panel_Star_2
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 192
+        width: 277
+        height: 89
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4133d372636d9260800000000000000
+      internalID: 7105945061561676107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Panel_Star_3
+      rect:
+        serializedVersion: 2
+        x: 1063
+        y: 192
+        width: 277
+        height: 89
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1d144b25689f26f0800000000000000
+      internalID: -707179056188875492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Icon_Star
+      rect:
+        serializedVersion: 2
+        x: 1397
+        y: 195
+        width: 82
+        height: 83
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 734aaf48e4997f280800000000000000
+      internalID: -9009563967013870537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: cb06d8f35342f1a428e63825852e2d4b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Btn_Close: 2322897407789083364
+      Btn_Help: -2131924300434928563
+      Btn_Level: -4410593242804442756
+      Frame: 3527160982382401319
+      Icon_Star: -9009563967013870537
+      Panel_Star_0: 4503088011623779354
+      Panel_Star_1: 81771044370849793
+      Panel_Star_2: 7105945061561676107
+      Panel_Star_3: -707179056188875492
+      UILevelBoard_10: 6487515327902642382
+      UILevelBoard_11: 5357921078350903153
+      UILevelBoard_12: 9072309028858239488
+      UILevelBoard_13: 2969828776928019253
+      UILevelBoard_14: -2687481918621700327
+      UILevelBoard_15: 9031350905602012243
+      UILevelBoard_8: 2512551194299947267
+      UILevelBoard_9: 1003987057819376277
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

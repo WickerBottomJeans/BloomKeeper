@@ -1,0 +1,22 @@
+{
+  "levelId": 10,
+  "objectives": [
+    {
+      "type": 1,
+      "petals": [
+        {
+          "petalType": 1,
+          "amount": 15
+        },
+        {
+          "petalType": 2,
+          "amount": 15
+        },
+        {
+          "petalType": 3,
+          "amount": 15
+        }
+      ]
+    }
+  ]
+}

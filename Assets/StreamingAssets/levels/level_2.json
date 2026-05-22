@@ -1,0 +1,14 @@
+{
+  "levelId": 2,
+  "objectives": [
+    {
+      "type": 1,
+      "petals": [
+        {
+          "petalType": 2,
+          "amount": 12
+        }
+      ]
+    }
+  ]
+}

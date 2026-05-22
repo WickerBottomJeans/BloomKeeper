@@ -1,17 +1,22 @@
-﻿namespace DefaultNamespace
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
+
+namespace DefaultNamespace
 {
-    //Fat, bloated 
-    [Serializable]
+
+    
     public class PetalGoal
     {
-        public string color;
+        public PetalType petalType;
         public int amount;
     }
 
-    [Serializable]
+    //Fat, bloated 
     public class ObjectiveData
     {
-        public string type;
+        public ObjectiveType type;
+        
+        //Only use for type Match
         public List<PetalGoal> petals;
     }
 }
