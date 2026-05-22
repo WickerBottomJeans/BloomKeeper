@@ -1,0 +1,34 @@
+{
+  "assets": [
+    {
+      "address": "LevelPath_5",
+      "width": 724,
+      "height": 244,
+      "index": 5
+    },
+    {
+      "address": "LevelPath_4",
+      "width": 724,
+      "height": 482,
+      "index": 4
+    },
+    {
+      "address": "LevelPath_1",
+      "width": 724,
+      "height": 482,
+      "index": 1
+    },
+    {
+      "address": "LevelPath_2",
+      "width": 724,
+      "height": 482,
+      "index": 2
+    },
+    {
+      "address": "LevelPath_3",
+      "width": 724,
+      "height": 482,
+      "index": 3
+    }
+  ]
+}

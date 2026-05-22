@@ -10,7 +10,6 @@ namespace DefaultNamespace
 {
     public class LocalProgressRepository : IProgressRepository
 {
-    //C:/Users/Gumball/AppData/LocalLow/DefaultCompany/BloomKeeper\progress.dat
     private readonly string path = Path.Combine(Application.persistentDataPath, "progress.dat");
     private readonly string key = "please_dont_hack";
     
