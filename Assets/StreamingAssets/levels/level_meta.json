@@ -1,62 +1,83 @@
-﻿[
-  {
-    "levelId": 1,
-    "levelName": "1",
-    "normalizedX": -0.0567,
-    "normalizedY": 0.1545
-  },
-  {
-    "levelId": 2,
-    "levelName": "2",
-    "normalizedX": 0.0811,
-    "normalizedY": 0.2517
-  },
-  {
-    "levelId": 3,
-    "levelName": "3",
-    "normalizedX": -0.1146,
-    "normalizedY": 0.3587
-  },
-  {
-    "levelId": 4,
-    "levelName": "4",
-    "normalizedX": 0.1311,
-    "normalizedY": 0.4711
-  },
-  {
-    "levelId": 5,
-    "levelName": "5",
-    "normalizedX": -0.0896,
-    "normalizedY": 0.5559
-  },
-  {
-    "levelId": 6,
-    "levelName": "6",
-    "normalizedX": 0.0976,
-    "normalizedY": 0.6281
-  },
-  {
-    "levelId": 7,
-    "levelName": "7",
-    "normalizedX": -0.0939,
-    "normalizedY": 0.6850
-  },
-  {
-    "levelId": 8,
-    "levelName": "8",
-    "normalizedX": 0.0683,
-    "normalizedY": 0.7349
-  },
-  {
-    "levelId": 9,
-    "levelName": "9",
-    "normalizedX": -0.0982,
-    "normalizedY": 0.7780
-  },
-  {
-    "levelId": 10,
-    "levelName": "10",
-    "normalizedX": 0.0183,
-    "normalizedY": 0.8142
-  }
-]
+{
+  "referenceScreenWidth": 1640.0,
+  "levels": [
+    {
+      "levelId": 1,
+      "levelName": "1",
+      "pixelX": -115.0,
+      "pixelY": 430.2229
+    },
+    {
+      "levelId": 2,
+      "levelName": "2",
+      "pixelX": -8.0,
+      "pixelY": 1114.2229
+    },
+    {
+      "levelId": 3,
+      "levelName": "3",
+      "pixelX": 185.0,
+      "pixelY": 1845.2229
+    },
+    {
+      "levelId": 4,
+      "levelName": "4",
+      "pixelX": 189.0,
+      "pixelY": 2457.223
+    },
+    {
+      "levelId": 5,
+      "levelName": "5",
+      "pixelX": 21.0,
+      "pixelY": 2962.223
+    },
+    {
+      "levelId": 6,
+      "levelName": "6",
+      "pixelX": 139.0,
+      "pixelY": 3474.223
+    },
+    {
+      "levelId": 7,
+      "levelName": "7",
+      "pixelX": 135.0,
+      "pixelY": 4065.223
+    },
+    {
+      "levelId": 8,
+      "levelName": "8",
+      "pixelX": 92.0,
+      "pixelY": 4595.22266
+    },
+    {
+      "levelId": 9,
+      "levelName": "9",
+      "pixelX": 300.0,
+      "pixelY": 5186.22266
+    },
+    {
+      "levelId": 10,
+      "levelName": "10",
+      "pixelX": -115.0,
+      "pixelY": 5594.22266
+    },
+    {
+      "levelId": 11,
+      "levelName": "11",
+      "pixelX": 102.0,
+      "pixelY": 6095.22266
+    },
+    {
+      "levelId": 12,
+      "levelName": "12",
+      "pixelX": -170.0,
+      "pixelY": 6555.22266
+    },
+    {
+      "levelId": 13,
+      "levelName": "13",
+      "pixelX": -74.0,
+      "pixelY": 7004.22266
+    }
+  ]
+}

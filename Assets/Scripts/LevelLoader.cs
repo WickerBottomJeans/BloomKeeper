@@ -16,11 +16,11 @@ namespace DefaultNamespace
             return JsonConvert.DeserializeObject<LevelData>(json);
         }
         
-        public static List<LevelMeta> LoadMetas()
+        public static LevelMetaCollection LoadMetas()
         {
             string path = Path.Combine(BasePath, "level_meta.json");
             string json = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<List<LevelMeta>>(json);
+            return JsonConvert.DeserializeObject<LevelMetaCollection>(json);
         }
     }
 }

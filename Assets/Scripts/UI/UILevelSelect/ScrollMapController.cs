@@ -7,7 +7,6 @@ namespace DefaultNamespace.UI
     public class ScrollMapController : MonoBehaviour
     {
         [SerializeField] private RectTransform content;
-        [SerializeField] private float backgroundAspectRatio;
         [SerializeField] private GameObject levelButtonPrefab;
         [SerializeField] private ScrollRect scrollRect;
         [SerializeField] private RectTransform viewport;
@@ -17,12 +16,12 @@ namespace DefaultNamespace.UI
         [SerializeField] private int maxPoolSize = 50;
 
         private VerticalScrollPool<LevelButton> scrollPool;
+        private LevelMetaCollection metaCollection;
         private List<LevelMeta> allMetas;
         private float halfHeightBtn;
 
-        private void Start()
+        public void Init()
         {
-            SetContentSize();
             LoadMetas();
             
             halfHeightBtn = levelButtonPrefab.GetComponent<RectTransform>().rect.height / 2f;
@@ -34,8 +33,8 @@ namespace DefaultNamespace.UI
                 levelButtonPrefab,
                 allMetas.Count,
                 i => new Vector2(
-                    allMetas[i].normalizedX * content.rect.width,
-                    allMetas[i].normalizedY * content.rect.height
+                    allMetas[i].pixelX * (content.rect.width / metaCollection.referenceScreenWidth),
+                    allMetas[i].pixelY * (content.rect.width / metaCollection.referenceScreenWidth)
                 ), i => this.halfHeightBtn,
                 null,
                 (button, i) => button.Init(allMetas[i]),
@@ -44,23 +43,22 @@ namespace DefaultNamespace.UI
                 maxPoolSize
             );
         }
-
         
-        //TODO: we  need a more dynamic way to set this other than manually set the BGAspectRatio
-        private void SetContentSize()
-        {
-            float contentHeight = Screen.width * backgroundAspectRatio;
-            content.sizeDelta = new Vector2(0, contentHeight);
-        }
 
         private void LoadMetas()
         {
-            allMetas = LevelLoader.LoadMetas();
+            metaCollection = LevelLoader.LoadMetas();
+            allMetas = metaCollection.levels;
         }
 
         private void OnDestroy()
         {
             scrollPool.Dispose();
+        }
+        
+        public void Refresh()
+        {
+            scrollPool.Refresh();
         }
     }
 }

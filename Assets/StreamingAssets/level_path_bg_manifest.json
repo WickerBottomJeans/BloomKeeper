@@ -1,10 +1,16 @@
 {
   "assets": [
     {
-      "address": "LevelPath_5",
-      "width": 724,
-      "height": 482,
-      "index": 5
+      "address": "LevelPath_6",
+      "width": 869,
+      "height": 579,
+      "index": 6
+    },
+    {
+      "address": "LevelPath_7",
+      "width": 869,
+      "height": 488,
+      "index": 7
     },
     {
       "address": "LevelPath_4",
@@ -31,16 +37,10 @@
       "index": 3
     },
     {
-      "address": "LevelPath_6",
-      "width": 724,
-      "height": 482,
-      "index": 6
-    },
-    {
-      "address": "LevelPath_7",
-      "width": 724,
-      "height": 477,
-      "index": 7
+      "address": "LevelPath_5",
+      "width": 869,
+      "height": 579,
+      "index": 5
     }
   ]
 }

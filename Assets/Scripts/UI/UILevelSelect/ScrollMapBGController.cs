@@ -17,17 +17,17 @@ namespace DefaultNamespace.UI
     private List<float> chunkHalfHeights = new List<float>();
     private VerticalScrollPool<RawImage> chunkPool;
     private List<Vector2> chunkPositions = new List<Vector2>();
-    
     /// <summary>
     /// Choose this instead of sprite sheet to manage VRAM better, those image are huge so
     /// </summary>
     private Dictionary<int, AsyncOperationHandle<Texture2D>> chunkHandles = new Dictionary<int, AsyncOperationHandle<Texture2D>>();
     private AssetManifest manifest;
     
-    private void Start()
+    public void Init()
     {
         manifest = AssetManifestLoader.LoadChunkManifest();
-        CalculateChunkPositions();
+        var contentHeight = CalculateChunkPositions();
+        content.sizeDelta = new Vector2(0, contentHeight);
 
         chunkPool = new VerticalScrollPool<RawImage>(
             content, viewport, scrollRect, chunkPrefab,
@@ -41,7 +41,7 @@ namespace DefaultNamespace.UI
         );
     }
 
-    private void CalculateChunkPositions()
+    private float CalculateChunkPositions()
     {
         chunkPositions.Clear();
         chunkHalfHeights.Clear();
@@ -59,6 +59,8 @@ namespace DefaultNamespace.UI
 
             currentY += chunkHeight;
         }
+
+        return currentY;
     }
 
     private void LoadChunk(RawImage image, int index)
@@ -97,5 +99,7 @@ namespace DefaultNamespace.UI
             if (handle.IsValid())
                 Addressables.Release(handle);
     }
+    
+    
 }
 }

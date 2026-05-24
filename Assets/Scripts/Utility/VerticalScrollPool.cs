@@ -112,6 +112,9 @@ namespace DefaultNamespace.UI
 
         public void Refresh()
         {
+            foreach (var kvp in visibleItems)
+                onShow(kvp.Value, kvp.Key);
+    
             OnScroll(scrollRect.normalizedPosition);
         }
 
