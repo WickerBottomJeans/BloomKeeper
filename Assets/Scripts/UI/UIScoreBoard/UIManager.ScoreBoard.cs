@@ -19,12 +19,12 @@ namespace DefaultNamespace.UI
             scoreBoardInstance?.Hide();
         }
 
-        public float GetScoreBoardHeight()
+        public float GetScoreBoardHeightInWorldUnit()
         {
             float result = 0;
             if (this.scoreBoardInstance != null)
             {
-                result = scoreBoardInstance.GetHeight();
+                result = scoreBoardInstance.GetHeightInWorldUnits();
             }
             return result;
         }

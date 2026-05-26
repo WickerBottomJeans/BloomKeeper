@@ -12,9 +12,7 @@ namespace Utility
         {
             Rect safeArea = Screen.safeArea;
 
-            float scoreBoardHeightPx = UIManager.Instance.GetScoreBoardHeight();
-            float scoreBoardWorldHeight = cam.ScreenToWorldPoint(new Vector3(0, scoreBoardHeightPx, 0)).y
-                                          - cam.ScreenToWorldPoint(Vector3.zero).y;
+            float scoreBoardWorldHeight = UIManager.Instance.GetScoreBoardHeightInWorldUnit();
 
             float screenWorldHeight = cam.orthographicSize * 2f;
             float screenWorldWidth  = screenWorldHeight * cam.aspect;
@@ -35,7 +33,7 @@ namespace Utility
             float originX = -totalWidth  / 2f + cellSize / 2f;
             float originY = worldBottomY + safeOffsetY + cellSize / 2f + paddingY;
 
-            return new BoardLayout(cellSize, new Vector2(originX, originY));
+            return new BoardLayout(cellSize, new Vector2(originX, originY), cols, rows);
         }
     }
 }

@@ -26,7 +26,8 @@ namespace DefaultNamespace
                 int y = i / data.boardWidth;
                 grid[x, y] = TileFactory.Create(data.tiles[i]);
             }
-
+            
+            UIManager.Instance.ShowScoreBoard();
             UIManager.Instance.ShowGameBoard(grid);
         }
     }

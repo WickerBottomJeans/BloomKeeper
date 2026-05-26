@@ -9,14 +9,15 @@ public class UIGameBoard : MonoBehaviour
     [SerializeField] private float paddingX = 0.05f;
     [SerializeField] private float paddingY = 0.05f;
     [SerializeField] private PetalViewManager petalViewManager;
-
+    [SerializeField] private BoardInputHandler boardInputHandler;
+    
     private Camera cam;
     private BoardLayout layout;
     private MeshFilter meshFilter;
 
     public void Init(Tile[,] grid)
     {
-        cam        = Camera.main;
+        cam = Camera.main;
         meshFilter = GetComponent<MeshFilter>();
 
         layout = BoardLayoutCalculator.Calculate(
@@ -25,6 +26,8 @@ public class UIGameBoard : MonoBehaviour
         meshFilter.mesh = BoardMeshBuilder.BuildFillMesh(grid, layout);
 
         petalViewManager.Init(grid, this);
+        boardInputHandler.Init(layout, cam);
+
     }
 
     public Vector2 GetCellWorldPos(int x, int y) =>

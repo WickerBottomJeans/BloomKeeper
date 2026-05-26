@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 245438484760832909}
   - component: {fileID: 2268134538387400816}
   - component: {fileID: 5895882996990725671}
+  - component: {fileID: 7623217431080173358}
   m_Layer: 5
   m_Name: UIGameBoard
   m_TagString: Untagged
@@ -111,6 +112,7 @@ MonoBehaviour:
   paddingX: 0.05
   paddingY: 0.05
   petalViewManager: {fileID: 5895882996990725671}
+  boardInputHandler: {fileID: 7623217431080173358}
 --- !u!114 &5895882996990725671
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,3 +127,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PetalViewManager
   petalViewPrefab: {fileID: -6833885268692914070, guid: 7a48f9880054d734796259e75aecdae6, type: 3}
   petalSpriteConfig: {fileID: 11400000, guid: f146145119daff74296960ec3e950014, type: 2}
+--- !u!114 &7623217431080173358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2829020016292998654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 141caad2df484c068245b471c07c3dd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BoardInputHandler
+  dragThresholdPx: 20

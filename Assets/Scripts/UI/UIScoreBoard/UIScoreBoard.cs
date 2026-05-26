@@ -2,10 +2,11 @@ using UnityEngine;
 
 public class UIScoreBoard : MonoBehaviour
 {
-    public float GetHeight()
+    public float GetHeightInWorldUnits()
     {
-        //TODO: Replace with actual logic later
-        return GetComponent<RectTransform>().rect.height;
+        Vector3[] corners = new Vector3[4];
+        GetComponent<RectTransform>().GetWorldCorners(corners);
+        return corners[1].y - corners[0].y;
     }
     
     public void Show()
