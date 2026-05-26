@@ -8,7 +8,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private ScrollMapBGController bgController;
         [SerializeField] private ScrollMapController mapController;
 
-        private void Start()
+        private void Awake()
         {
             bgController.Init();
             mapController.Init();

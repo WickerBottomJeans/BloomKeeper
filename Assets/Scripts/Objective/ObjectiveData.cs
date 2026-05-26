@@ -3,15 +3,13 @@ using Newtonsoft.Json;
 
 namespace DefaultNamespace
 {
-
-    
     public class PetalGoal
     {
         public PetalType petalType;
         public int amount;
     }
 
-    //Fat, bloated 
+    //fat DTO - only for JSON deserialization
     public class ObjectiveData
     {
         public ObjectiveType type;

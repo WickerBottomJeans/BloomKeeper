@@ -1,20 +1,22 @@
-﻿namespace DefaultNamespace.UI
+﻿using UnityEngine;
+
+namespace DefaultNamespace.UI
 {
     public partial class UIManager
     {
-        public const string Address_UILevelSelect = "UILevelSelect";
+        [SerializeField] private UILevelSelect levelSelectPrefab;
         private UILevelSelect levelSelectInstance;
 
-        public async void ShowLevelSelect()
+        public void ShowLevelSelect()
         {
             if (levelSelectInstance == null)
-                levelSelectInstance = await LoadPanel<UILevelSelect>(Address_UILevelSelect);
-            levelSelectInstance.gameObject.SetActive(true);
+                levelSelectInstance = Instantiate(levelSelectPrefab, canvas.transform);
+            levelSelectInstance.Show();
         }
 
         public void HideLevelSelect()
         {
-            levelSelectInstance?.gameObject.SetActive(false);
+            levelSelectInstance?.Hide();
         }
     }
 }

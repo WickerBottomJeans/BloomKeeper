@@ -1,5 +1,38 @@
 {
   "levelId": 1,
+  "boardWidth": 5,
+  "boardHeight": 5,
+  "tiles": [
+    { "type": 1 },
+    { "type": 1 },
+    { "type": 1 },
+    { "type": 1 },
+    { "type": 1 },
+
+    { "type": 1 },
+    { "type": 3, "webLevel": 2 },
+    { "type": 1 },
+    { "type": 3, "webLevel": 1 },
+    { "type": 1 },
+
+    { "type": 1 },
+    { "type": 1 },
+    { "type": 2 },
+    { "type": 1 },
+    { "type": 1 },
+
+    { "type": 1 },
+    { "type": 1 },
+    { "type": 1 },
+    { "type": 1 },
+    { "type": 1 },
+
+    { "type": 1 },
+    { "type": 1 },
+    { "type": 1 },
+    { "type": 1 },
+    { "type": 1 }
+  ],
   "objectives": [
     {
       "type": 1,

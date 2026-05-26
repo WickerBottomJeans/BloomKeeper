@@ -1,0 +1,87 @@
+{
+  "frames": {
+    "Panel_MoveCount": {
+      "frame": {
+        "x": 1,
+        "y": 1,
+        "w": 546,
+        "h": 545
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 546,
+        "h": 545
+      },
+      "sourceSize": {
+        "w": 546,
+        "h": 545
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "Panel_Main": {
+      "frame": {
+        "x": 1,
+        "y": 548,
+        "w": 1640,
+        "h": 482
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 1640,
+        "h": 482
+      },
+      "sourceSize": {
+        "w": 1640,
+        "h": 482
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "Panel_Score": {
+      "frame": {
+        "x": 549,
+        "y": 1,
+        "w": 510,
+        "h": 342
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 510,
+        "h": 342
+      },
+      "sourceSize": {
+        "w": 510,
+        "h": 342
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "UIScoreBoard.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1642,
+      "h": 1031
+    },
+    "scale": 1
+  }
+}
