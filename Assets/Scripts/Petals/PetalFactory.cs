@@ -26,4 +26,10 @@ public static class PetalFactory
             default: throw new System.ArgumentException($"Unknown SpecialSkillType: {type}");
         }
     }
+    
+    public static Petal CreateRandom()
+    {
+        PetalType petalType = (PetalType)rng.Next(1, System.Enum.GetValues(typeof(PetalType)).Length);
+        return new Petal(petalType, null);
+    }
 }

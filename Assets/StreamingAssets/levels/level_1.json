@@ -3,11 +3,12 @@
   "boardWidth": 5,
   "boardHeight": 5,
   "tiles": [
-    { "type": 1 },
-    { "type": 1 },
-    { "type": 1 },
-    { "type": 1 },
-    { "type": 1 },
+    { "type": 1, "petalType": 1},
+    { "type": 1, "petalType": 1},
+    { "type": 1, "petalType": 2},
+    { "type": 1, "petalType": 1},
+    { "type": 1, "petalType": 1},
+
 
     { "type": 1 },
     { "type": 3, "webLevel": 2 },

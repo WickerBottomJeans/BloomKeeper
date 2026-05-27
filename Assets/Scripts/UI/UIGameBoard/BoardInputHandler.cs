@@ -90,17 +90,7 @@ public class BoardInputHandler : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying) return;
-
-        for (int x = 0; x < boardLayout.Cols; x++)
-        {
-            for (int y = 0; y < boardLayout.Rows; y++)
-            {
-                Vector2 center = boardLayout.OriginWorldPos + new Vector2(x * boardLayout.CellSize, y * boardLayout.CellSize);
-                Gizmos.color = Color.green;
-                Gizmos.DrawWireCube(center, Vector3.one * boardLayout.CellSize);
-            }
-        }
-
+        
         if (isDragging)
         {
             Vector2 selected = boardLayout.OriginWorldPos + new Vector2(selectedCell.x * boardLayout.CellSize, selectedCell.y * boardLayout.CellSize);

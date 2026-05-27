@@ -104,6 +104,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb0711fbd5074c07a7d7d3ce30fdcd0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PetalView
-  sr: {fileID: 4144675311898496530}
+  spriteRenderer: {fileID: 4144675311898496530}
   paddingXRatio: 0.2
   paddingYRatio: 0.2

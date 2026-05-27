@@ -1,12 +1,32 @@
 {
   "levelId": 2,
+  "boardWidth": 4,
+  "boardHeight": 4,
+  "tiles": [
+    { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 1 },
+    { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 1 },
+    { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 2 },
+    { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 3 }
+  ],
   "objectives": [
     {
       "type": 1,
       "petals": [
         {
+          "petalType": 1,
+          "amount": 4
+        },
+        {
           "petalType": 2,
-          "amount": 12
+          "amount": 4
+        },
+        {
+          "petalType": 3,
+          "amount": 4
+        },
+        {
+          "petalType": 6,
+          "amount": 4
         }
       ]
     }

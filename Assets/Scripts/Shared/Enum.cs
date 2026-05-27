@@ -33,4 +33,15 @@
         Sunburst = 4,
         Butterfly = 5
     }
+    
+    public enum MatchShape
+    {
+        Three = 1,
+        Four = 2,
+        Five = 3,
+        TShape = 4,
+        LShape = 5,
+        Cross = 6,
+        Square2x2 = 7
+    }
 }

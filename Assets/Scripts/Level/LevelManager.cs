@@ -9,8 +9,6 @@ namespace DefaultNamespace
     public class LevelManager : Singleton<LevelManager>
     {
         private List<IObjective> objectives;
-        private Tile[,] grid;
-
         public void InitNewLevel(int levelId)
         {
             LevelData data = LevelLoader.Load(levelId);
@@ -19,11 +17,11 @@ namespace DefaultNamespace
                 .Select(o => ObjectiveFactory.Create(o))
                 .ToList();
 
-            grid = new Tile[data.boardWidth, data.boardHeight];
+            Tile[,] grid = new Tile[data.boardWidth, data.boardHeight];
             for (int i = 0; i < data.tiles.Count; i++)
             {
                 int x = i % data.boardWidth;
-                int y = i / data.boardWidth;
+                int y = data.boardHeight - 1 - (i / data.boardWidth);
                 grid[x, y] = TileFactory.Create(data.tiles[i]);
             }
             
