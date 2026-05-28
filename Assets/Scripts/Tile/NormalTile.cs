@@ -4,11 +4,16 @@
     {
         public override bool IsMatchable()
         {
-            return Petal != null;
+            return Petal != null && Petal.Skill != SpecialSkillType.Sunburst;
         }
         
         public override bool IsGravityAffected() => true;
         public override bool CanReceiveNewPetal() => Petal == null;
+        
+        public override void Resolve()
+        {
+            Petal = null;
+        } 
     }
 
 }

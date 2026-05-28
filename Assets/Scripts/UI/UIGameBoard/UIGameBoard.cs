@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
 using DefaultNamespace.UI;
@@ -80,18 +81,28 @@ public class UIGameBoard : MonoBehaviour
 
     private void EnterSwapping()
     {
+        pendingSkillActivations.Clear();
         swapController.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
+
         pendingMatches = MatchDetector.Detect(grid);
 
-        if (pendingMatches.Count == 0)
+        MatchGroup sunburstA = CheckAndQueueSkillSwap(swapOrigin, swapTarget);
+        MatchGroup sunburstB = CheckAndQueueSkillSwap(swapTarget, swapOrigin);
+        if (sunburstA != null) pendingMatches.Add(sunburstA);
+        if (sunburstB != null) pendingMatches.Add(sunburstB);
+
+        if (pendingMatches.Count == 0 && pendingSkillActivations.Count == 0)
         {
             swapController.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
             petalViewManager.OnSwap(swapOrigin, swapTarget, () => TransitionTo(BoardState.SwappingBack));
             return;
         }
-        
+
         petalViewManager.OnSwap(swapOrigin, swapTarget, () => TransitionTo(BoardState.Resolving));
     }
+
+
+
 
     private void EnterSwappingBack()
     {
@@ -101,7 +112,8 @@ public class UIGameBoard : MonoBehaviour
     private void EnterResolving()
     {
         var result = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
-        pendingSkillActivations = result.SkillActivations;
+        pendingMatches.Clear();
+        pendingSkillActivations.AddRange(result.SkillActivations);
         petalViewManager.OnMatchResolved(result, layout, () => TransitionTo(BoardState.ActivatingSkills));
     }
     
@@ -115,7 +127,7 @@ public class UIGameBoard : MonoBehaviour
 
         pendingMatches = new List<MatchGroup>();
         foreach (SkillActivation activation in pendingSkillActivations)
-            pendingMatches.Add(SkillManager.UseSkill(grid, activation.Position, activation.SkillType));
+            pendingMatches.Add(SkillManager.UseSkill(grid, activation));
 
         pendingSkillActivations.Clear();
         TransitionTo(BoardState.Resolving);
@@ -192,5 +204,15 @@ public class UIGameBoard : MonoBehaviour
             }
         }
     }
- 
+    private MatchGroup CheckAndQueueSkillSwap(Vector2Int cell, Vector2Int otherCell)
+    {
+        Petal petal = grid[cell.x, cell.y].Petal;
+        if (petal == null || petal.Skill != SpecialSkillType.Sunburst) return null;
+
+        Petal causerPetal = grid[otherCell.x, otherCell.y].Petal != null
+            ? new Petal(grid[otherCell.x, otherCell.y].Petal)
+            : null;
+
+        return new MatchGroup(new List<Vector2Int> { cell }, MatchShape.None, causerPetal);
+    }
 }

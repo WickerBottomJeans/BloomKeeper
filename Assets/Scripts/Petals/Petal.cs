@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using DefaultNamespace;
 using Petals;
+using UnityEngine;
 
 public class Petal
 {
@@ -11,5 +12,17 @@ public class Petal
     {
         PetalType = petalType;
         Skill = skill;
+    }
+    
+    public Petal(Petal source)
+    {
+        if (source == null)
+        {
+            Debug.LogError("Petal source is null");
+            return;
+        }
+
+        PetalType = source.PetalType;
+        Skill = source.Skill;
     }
 }

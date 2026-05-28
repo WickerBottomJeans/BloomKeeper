@@ -12,6 +12,9 @@
         /// <returns></returns>
         public abstract bool IsGravityAffected();
         public abstract bool CanReceiveNewPetal();
+        
+        public abstract void Resolve();
+
     }
 
 }

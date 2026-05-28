@@ -8,11 +8,13 @@ public class MatchGroup
 {
     public List<Vector2Int> Tiles;
     public MatchShape Shape;
+    public Petal Causer;
 
-    public MatchGroup(List<Vector2Int> tiles, MatchShape shape)
+    public MatchGroup(List<Vector2Int> tiles, MatchShape shape, Petal causer = null)
     {
         Tiles = tiles;
         Shape = shape;
+        Causer = causer;
     }
 }
 
@@ -33,13 +35,13 @@ public static class MatchDetector
         HashSet<Vector2Int> consumed = new HashSet<Vector2Int>();
         List<MatchGroup> results     = new List<MatchGroup>();
 
-        // Detect special shapes first (priority: Cross > T/L > Square > 5 > 4 > 3)
+        // Detect special shapes first (priority:  5 > 4 > 3 Cross > T/L > Square)
+
+        DetectLongRuns(horizontalRuns, consumed, results);
+        DetectLongRuns(verticalRuns, consumed, results);
         DetectCross(horizontalRuns, verticalRuns, consumed, results);
         DetectTAndL(horizontalRuns, verticalRuns, consumed, results);
         DetectSquare2x2(grid, cols, rows, consumed, results);
-        DetectLongRuns(horizontalRuns, consumed, results);
-        DetectLongRuns(verticalRuns, consumed, results);
-
         return results;
     }
 

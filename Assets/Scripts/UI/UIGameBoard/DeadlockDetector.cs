@@ -32,6 +32,7 @@ namespace DefaultNamespace.UI
         Tile tileB = grid[cellB.x, cellB.y];
 
         if (!tileA.IsMatchable() || !tileB.IsMatchable()) return false;
+        if (tileA.Petal?.Skill == SpecialSkillType.Sunburst || tileB.Petal?.Skill == SpecialSkillType.Sunburst) return true;
 
         Petal temp = tileA.Petal;
         tileA.Petal = tileB.Petal;

@@ -15,7 +15,7 @@ namespace DefaultNamespace
             };
 
             if (data.type != TileType.Inactive)
-                tile.Petal = PetalFactory.Create(data);
+                tile.Petal = PetalFactory.CreateForTileMap(data);
 
             return tile;
         }

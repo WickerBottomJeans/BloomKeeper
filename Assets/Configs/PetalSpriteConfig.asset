@@ -103,3 +103,39 @@ MonoBehaviour:
   - petalType: 4
     sprite: {fileID: 4844612080916984270, guid: 39b1b4e731cff734596f55e1cb308cef, type: 3}
     skillType: 5
+  - petalType: 1
+    sprite: {fileID: 2784853675574404663, guid: 39b1b4e731cff734596f55e1cb308cef, type: 3}
+    skillType: 0
+  - petalType: 1
+    sprite: {fileID: 21300000, guid: 0908483f100247f41a03660be1e001b9, type: 3}
+    skillType: 4
+  - petalType: 2
+    sprite: {fileID: 4031784643165736616, guid: 39b1b4e731cff734596f55e1cb308cef, type: 3}
+    skillType: 0
+  - petalType: 2
+    sprite: {fileID: 21300000, guid: 0908483f100247f41a03660be1e001b9, type: 3}
+    skillType: 4
+  - petalType: 3
+    sprite: {fileID: -5887886423744229021, guid: 39b1b4e731cff734596f55e1cb308cef, type: 3}
+    skillType: 0
+  - petalType: 3
+    sprite: {fileID: 21300000, guid: 0908483f100247f41a03660be1e001b9, type: 3}
+    skillType: 4
+  - petalType: 4
+    sprite: {fileID: -5287674269102614001, guid: 39b1b4e731cff734596f55e1cb308cef, type: 3}
+    skillType: 0
+  - petalType: 4
+    sprite: {fileID: 21300000, guid: 0908483f100247f41a03660be1e001b9, type: 3}
+    skillType: 4
+  - petalType: 5
+    sprite: {fileID: 5264839415384867811, guid: 39b1b4e731cff734596f55e1cb308cef, type: 3}
+    skillType: 0
+  - petalType: 5
+    sprite: {fileID: 21300000, guid: 0908483f100247f41a03660be1e001b9, type: 3}
+    skillType: 4
+  - petalType: 6
+    sprite: {fileID: 8187893134507343650, guid: 39b1b4e731cff734596f55e1cb308cef, type: 3}
+    skillType: 0
+  - petalType: 6
+    sprite: {fileID: 21300000, guid: 0908483f100247f41a03660be1e001b9, type: 3}
+    skillType: 4

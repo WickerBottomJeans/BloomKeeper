@@ -1,20 +1,23 @@
 {
   "levelId": 5,
+  "boardWidth": 12,
+  "boardHeight": 2,
+  "tiles": [
+
+    { "type": 1, "petalType": 3, "skillType" :  3}, { "type": 1 }, { "type": 1}, { "type": 1 }, { "type": 1, "petalType": 3 }, { "type": 1,"petalType": 3 },    { "type": 1, "petalType": 3, "skillType" :  3}, { "type": 1 }, { "type": 1,"petalType": 3}, { "type": 1,"petalType": 3 }, { "type": 1, "petalType": 3 }, { "type": 1,"petalType": 3 },
+
+    { "type": 1, "petalType": 1, "skillType" :  3}, { "type": 1 }, { "type": 1,"petalType": 2}, { "type": 1,"petalType": 4 }, { "type": 1, "petalType": 6 }, { "type": 1,"petalType": 3 },    { "type": 1, "petalType": 1, "skillType" :  3}, { "type": 1 }, { "type": 1,"petalType": 2}, { "type": 1,"petalType": 4 }, { "type": 1, "petalType": 6 }, { "type": 1,"petalType": 3 }
+
+  ],
   "objectives": [
     {
       "type": 1,
       "petals": [
         {
-          "petalType": 1,
-          "amount": 15
+          "amount": 8
         },
         {
-          "petalType": 2,
-          "amount": 15
-        },
-        {
-          "petalType": 3,
-          "amount": 15
+          "amount": 8
         }
       ]
     }

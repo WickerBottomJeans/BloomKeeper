@@ -1,12 +1,21 @@
 {
-  "levelId": 4,
+  "levelId": 5,
+  "boardWidth": 6,
+  "boardHeight": 1,
+  "tiles": [
+
+    { "type": 1, "petalType": 3, "skillType" :  3}, { "type": 1 }, { "type": 1,"petalType": 3}, { "type": 1,"petalType": 3 }, { "type": 1, "petalType": 3 }, { "type": 1,"petalType": 3 },
+
+  ],
   "objectives": [
     {
       "type": 1,
       "petals": [
         {
-          "petalType": 3,
-          "amount": 20
+          "amount": 8
+        },
+        {
+          "amount": 8
         }
       ]
     }

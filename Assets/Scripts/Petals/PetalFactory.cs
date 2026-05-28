@@ -6,7 +6,12 @@ public static class PetalFactory
 {
     private static readonly System.Random rng = new System.Random();
 
-    public static Petal Create(TileData data)
+    /// <summary>
+    /// Only use this to init a tilemap read from config
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    public static Petal CreateForTileMap(TileData data)
     {
         PetalType petalType = data.petalType == PetalType.None
             ? (PetalType)rng.Next(1, System.Enum.GetValues(typeof(PetalType)).Length)

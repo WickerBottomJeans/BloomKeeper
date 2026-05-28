@@ -1,38 +1,11 @@
 {
   "levelId": 1,
   "boardWidth": 5,
-  "boardHeight": 5,
+  "boardHeight": 3,
   "tiles": [
-    { "type": 1, "petalType": 1},
-    { "type": 1, "petalType": 1},
-    { "type": 1, "petalType": 2},
-    { "type": 1, "petalType": 1},
-    { "type": 1, "petalType": 1},
-
-
-    { "type": 1 },
-    { "type": 3, "webLevel": 2 },
-    { "type": 1 },
-    { "type": 3, "webLevel": 1 },
-    { "type": 1 },
-
-    { "type": 1 },
-    { "type": 1 },
-    { "type": 2 },
-    { "type": 1 },
-    { "type": 1 },
-
-    { "type": 1 },
-    { "type": 1 },
-    { "type": 1 },
-    { "type": 1 },
-    { "type": 1 },
-
-    { "type": 1 },
-    { "type": 1 },
-    { "type": 1 },
-    { "type": 1 },
-    { "type": 1 }
+    { "type": 1, "petalType": 3},    { "type": 1, "petalType": 1}, { "type": 1, "petalType": 2},{ "type": 2, "petalType": 2},{ "type": 1, "petalType": 2},
+    { "type": 1, "petalType": 1},    { "type": 1, "petalType": 2}, { "type": 1, "petalType": 1},{ "type": 2, "petalType": 2},{ "type": 1, "petalType": 3},
+    { "type": 1, "petalType": 1, "skillType" : 4},    { "type": 1, "petalType": 1}, { "type": 1, "petalType": 1, "skillType": 1},{ "type": 2, "petalType": 2},{ "type": 1, "petalType": 2}
   ],
   "objectives": [
     {

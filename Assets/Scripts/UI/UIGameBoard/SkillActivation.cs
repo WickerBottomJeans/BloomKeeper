@@ -7,10 +7,20 @@ namespace DefaultNamespace.UI
         public Vector2Int Position;
         public SpecialSkillType SkillType;
 
-        public SkillActivation(Vector2Int position, SpecialSkillType skillType)
+        /// <summary>
+        /// Petal that get this skill executed
+        /// </summary>
+        public Petal CauserPetal;
+
+        public Petal SelfPetal;
+
+        public SkillActivation(Vector2Int position, SpecialSkillType skillType, Petal selfPetal,
+            Petal causerPetal = null)
         {
             Position = position;
             SkillType = skillType;
+            CauserPetal = causerPetal;
+            SelfPetal = selfPetal;
         }
     }
 }
