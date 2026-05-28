@@ -8,6 +8,6 @@ namespace DefaultNamespace
         public TileType type;
         public int webLevel;
         public PetalType petalType;
-        public SpecialSkillType skillType;
+        public SpecialSkillType skillType =  SpecialSkillType.None;
     }
 }

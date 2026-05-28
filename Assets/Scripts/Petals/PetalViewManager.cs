@@ -78,32 +78,50 @@ public class PetalViewManager : MonoBehaviour
         });
     }
 
-    public void OnMatchResolved(List<MatchGroup> matches, Action onComplete = null)
+    public void OnMatchResolved(MatchResolveResult result, BoardLayout boardLayout, Action onComplete = null)
+    {
+        ClearPetalViews(result.ClearedPositions, () =>
+        {
+            SpawnSkillPetalViews(result.SpawnedPetals, boardLayout);
+            onComplete?.Invoke();
+        });
+    }
+
+    private void ClearPetalViews(List<Vector2Int> cleared, Action onComplete)
     {
         int total = 0;
         int done = 0;
 
-        foreach (MatchGroup match in matches)
-        foreach (Vector2Int cell in match.Tiles)
+        foreach (Vector2Int cell in cleared)
             if (petalViews[cell.x, cell.y] != null) total++;
 
         if (total == 0) { onComplete?.Invoke(); return; }
 
-        foreach (MatchGroup match in matches)
+        foreach (Vector2Int cell in cleared)
         {
-            foreach (Vector2Int cell in match.Tiles)
-            {
-                PetalView view = petalViews[cell.x, cell.y];
-                if (view == null) continue;
+            PetalView view = petalViews[cell.x, cell.y];
+            if (view == null) continue;
 
-                petalViews[cell.x, cell.y] = null;
-                PetalViewAnimator.PlayDestroy(view, onComplete:() =>
-                {
-                    pool.Release(view);
-                    done++;
-                    if (done == total) onComplete?.Invoke();
-                });
-            }
+            petalViews[cell.x, cell.y] = null;
+            PetalViewAnimator.PlayDestroy(view, onComplete: () =>
+            {
+                pool.Release(view);
+                done++;
+                if (done == total) onComplete?.Invoke();
+            });
+        }
+    }
+
+    private void SpawnSkillPetalViews(List<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> spawns, BoardLayout boardLayout)
+    {
+        foreach (var (pos, petalType, skillType) in spawns)
+        {
+            Vector2 worldPos = boardLayout.GetCellWorldPos(pos.x, pos.y);
+            PetalView view = pool.Get();
+            view.transform.position = worldPos;
+            view.Init(new Petal(petalType, skillType), boardLayout.CellSize, petalSpriteConfig);
+            petalViews[pos.x, pos.y] = view;
+            PetalViewAnimator.PlaySpawn(view);
         }
     }
 

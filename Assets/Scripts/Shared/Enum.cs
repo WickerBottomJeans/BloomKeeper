@@ -36,6 +36,7 @@
     
     public enum MatchShape
     {
+        None = 0,
         Three = 1,
         Four = 2,
         Five = 3,

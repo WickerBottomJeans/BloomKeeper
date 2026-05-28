@@ -13,7 +13,7 @@ public class PetalView : MonoBehaviour
     {
         spriteRenderer.sprite = config.GetSprite(
             petal.PetalType,
-            petal.Skill?.SkillType ?? SpecialSkillType.None
+            petal.Skill
         );
 
         Vector2 spriteWorldSize = spriteRenderer.sprite.bounds.size;

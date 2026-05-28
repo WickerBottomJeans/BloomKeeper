@@ -3,7 +3,7 @@
   "boardWidth": 4,
   "boardHeight": 4,
   "tiles": [
-    { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 1 },
+    { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 4 },
     { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 1 },
     { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 2 },
     { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 3 }

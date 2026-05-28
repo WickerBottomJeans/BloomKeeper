@@ -12,24 +12,19 @@ public static class PetalFactory
             ? (PetalType)rng.Next(1, System.Enum.GetValues(typeof(PetalType)).Length)
             : data.petalType;
 
-        ISpecialSkill skill = data.skillType != SpecialSkillType.None
-            ? CreateSkill(data.skillType)
-            : null;
+        SpecialSkillType skill = data.skillType;
 
         return new Petal(petalType, skill);
-    }
-
-    private static ISpecialSkill CreateSkill(SpecialSkillType type)
-    {
-        switch (type)
-        {
-            default: throw new System.ArgumentException($"Unknown SpecialSkillType: {type}");
-        }
     }
     
     public static Petal CreateRandom()
     {
         PetalType petalType = (PetalType)rng.Next(1, System.Enum.GetValues(typeof(PetalType)).Length);
-        return new Petal(petalType, null);
+        return new Petal(petalType);
+    }
+    
+    public static Petal CreateSpecial(PetalType petalType, SpecialSkillType skillType)
+    {
+        return new Petal(petalType, skillType);
     }
 }

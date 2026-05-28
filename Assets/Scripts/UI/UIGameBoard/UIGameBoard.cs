@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using DefaultNamespace;
 using DefaultNamespace.UI;
 using Petals;
+using Skills;
 using UnityEditor;
 using UnityEngine;
 using Utility;
@@ -22,12 +23,12 @@ public class UIGameBoard : MonoBehaviour
     private Tile[,] grid;
 
     private BoardState currentState = BoardState.Idle;
-    private Vector2Int pendingCellA;
-    private Vector2Int pendingCellB;
+    private Vector2Int swapOrigin;
+    private Vector2Int swapTarget;
     private List<MatchGroup> pendingMatches;
     private List<(Vector2Int from, Vector2Int to)> pendingMoves;
-
-    private enum BoardState { Idle, Swapping, SwappingBack, Resolving, Gravity, Filling, Cascade, Shuffling }
+    private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
+    private enum BoardState { Idle, Swapping, SwappingBack, Resolving, ActivatingSkills , Gravity, Filling, Cascade, Shuffling }
     
     public void Init(Tile[,] grid)
     {
@@ -52,8 +53,8 @@ public class UIGameBoard : MonoBehaviour
         if (currentState != BoardState.Idle) return;
         if (!swapController.Validate(cellA, cellB, grid)) return;
 
-        pendingCellA = cellA;
-        pendingCellB = cellB;
+        swapOrigin = cellA;
+        swapTarget = cellB;
         TransitionTo(BoardState.Swapping);
     }
 
@@ -66,6 +67,8 @@ public class UIGameBoard : MonoBehaviour
             case BoardState.Swapping:     EnterSwapping();     break;
             case BoardState.SwappingBack: EnterSwappingBack(); break;
             case BoardState.Resolving:    EnterResolving();    break;
+            case BoardState.ActivatingSkills: EnterActivatingSkills(); break;
+
             case BoardState.Gravity:      EnterGravity();      break;
             case BoardState.Filling:      EnterFilling();      break;
             case BoardState.Cascade:      EnterCascade();      break;
@@ -77,28 +80,45 @@ public class UIGameBoard : MonoBehaviour
 
     private void EnterSwapping()
     {
-        swapController.ExecuteSwapPetal(pendingCellA, pendingCellB, grid);
+        swapController.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
         pendingMatches = MatchDetector.Detect(grid);
 
         if (pendingMatches.Count == 0)
         {
-            swapController.ExecuteSwapPetal(pendingCellA, pendingCellB, grid);
-            petalViewManager.OnSwap(pendingCellA, pendingCellB, () => TransitionTo(BoardState.SwappingBack));
+            swapController.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
+            petalViewManager.OnSwap(swapOrigin, swapTarget, () => TransitionTo(BoardState.SwappingBack));
             return;
         }
-
-        petalViewManager.OnSwap(pendingCellA, pendingCellB, () => TransitionTo(BoardState.Resolving));
+        
+        petalViewManager.OnSwap(swapOrigin, swapTarget, () => TransitionTo(BoardState.Resolving));
     }
 
     private void EnterSwappingBack()
     {
-        petalViewManager.OnSwap(pendingCellB, pendingCellA, () => TransitionTo(BoardState.Idle));
+        petalViewManager.OnSwap(swapTarget, swapOrigin, () => TransitionTo(BoardState.Idle));
     }
 
     private void EnterResolving()
     {
-        MatchResolver.Resolve(pendingMatches, grid);
-        petalViewManager.OnMatchResolved(pendingMatches, () => TransitionTo(BoardState.Gravity));
+        var result = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
+        pendingSkillActivations = result.SkillActivations;
+        petalViewManager.OnMatchResolved(result, layout, () => TransitionTo(BoardState.ActivatingSkills));
+    }
+    
+    private void EnterActivatingSkills()
+    {
+        if (pendingSkillActivations.Count == 0)
+        {
+            TransitionTo(BoardState.Gravity);
+            return;
+        }
+
+        pendingMatches = new List<MatchGroup>();
+        foreach (SkillActivation activation in pendingSkillActivations)
+            pendingMatches.Add(SkillManager.UseSkill(grid, activation.Position, activation.SkillType));
+
+        pendingSkillActivations.Clear();
+        TransitionTo(BoardState.Resolving);
     }
 
     private void EnterGravity()

@@ -1,0 +1,22 @@
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+namespace DefaultNamespace.UI
+{
+    public class MatchResolveResult
+    {
+        public List<Vector2Int> ClearedPositions;
+        public List<SkillActivation> SkillActivations;
+        public List<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> SpawnedPetals;
+
+        public MatchResolveResult(
+            List<Vector2Int> clearedPositions,
+            List<SkillActivation> skillActivations,
+            List<(Vector2Int, PetalType, SpecialSkillType)> spawnedPetals)
+        {
+            ClearedPositions = clearedPositions;
+            SkillActivations = skillActivations;
+            SpawnedPetals = spawnedPetals;
+        }
+    }
+}
