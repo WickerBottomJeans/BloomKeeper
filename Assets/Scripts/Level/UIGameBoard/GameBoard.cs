@@ -11,7 +11,7 @@ using UnityEngine;
 using Utility;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class UIGameBoard : MonoBehaviour
+public class GameBoard : MonoBehaviour
 {
     [SerializeField] private float paddingX = 0.05f;
     [SerializeField] private float paddingY = 0.05f;

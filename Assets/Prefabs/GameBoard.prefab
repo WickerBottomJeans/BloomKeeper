@@ -9,13 +9,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 950882905977853268}
-  - component: {fileID: 4262878945172447638}
-  - component: {fileID: 245438484760832909}
   - component: {fileID: 2268134538387400816}
   - component: {fileID: 5895882996990725671}
   - component: {fileID: 7623217431080173358}
-  m_Layer: 5
-  m_Name: UIGameBoard
+  - component: {fileID: -6730967265607117894}
+  - component: {fileID: 2760625105494387680}
+  - component: {fileID: 6124048787579082683}
+  m_Layer: 0
+  m_Name: GameBoard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40,7 +41,58 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!33 &4262878945172447638
+--- !u!114 &2268134538387400816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2829020016292998654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e5a090069ee45e79ef6798eb82aae92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIGameBoard
+  paddingX: 0.05
+  paddingY: 0.05
+  petalViewManager: {fileID: 5895882996990725671}
+  boardInputHandler: {fileID: 7623217431080173358}
+--- !u!114 &5895882996990725671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2829020016292998654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da625d37791b43c0806f366c9bf22378, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PetalViewManager
+  petalViewPrefab: {fileID: -6833885268692914070, guid: 7a48f9880054d734796259e75aecdae6, type: 3}
+  petalSpriteConfig: {fileID: 11400000, guid: f146145119daff74296960ec3e950014, type: 2}
+--- !u!114 &7623217431080173358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2829020016292998654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 141caad2df484c068245b471c07c3dd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BoardInputHandler
+  dragThresholdPx: 20
+--- !u!222 &-6730967265607117894
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2829020016292998654}
+  m_CullTransparentMesh: 1
+--- !u!33 &2760625105494387680
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -48,7 +100,7 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2829020016292998654}
   m_Mesh: {fileID: 0}
---- !u!23 &245438484760832909
+--- !u!23 &6124048787579082683
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -97,46 +149,3 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &2268134538387400816
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2829020016292998654}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e5a090069ee45e79ef6798eb82aae92, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIGameBoard
-  paddingX: 0.05
-  paddingY: 0.05
-  petalViewManager: {fileID: 5895882996990725671}
-  boardInputHandler: {fileID: 7623217431080173358}
---- !u!114 &5895882996990725671
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2829020016292998654}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da625d37791b43c0806f366c9bf22378, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PetalViewManager
-  petalViewPrefab: {fileID: -6833885268692914070, guid: 7a48f9880054d734796259e75aecdae6, type: 3}
-  petalSpriteConfig: {fileID: 11400000, guid: f146145119daff74296960ec3e950014, type: 2}
---- !u!114 &7623217431080173358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2829020016292998654}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 141caad2df484c068245b471c07c3dd6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BoardInputHandler
-  dragThresholdPx: 20

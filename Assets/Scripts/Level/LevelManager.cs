@@ -9,6 +9,8 @@ namespace DefaultNamespace
     public class LevelManager : Singleton<LevelManager>
     {
         private ObjectiveManager objectiveManager;
+        [SerializeField] private GameBoard gameBoardPrefab;
+        private GameBoard gameBoardInstance;
         public void InitNewLevel(int levelId)
         {
             LevelData data = LevelLoader.Load(levelId);
@@ -27,7 +29,20 @@ namespace DefaultNamespace
             }
             
             UIManager.Instance.ShowScoreBoard();
-            UIManager.Instance.ShowGameBoard(grid);
+            SpawnGameBoard(grid);
+        }
+        
+        private void SpawnGameBoard(Tile[,] grid)
+        {
+            if (gameBoardInstance != null)
+            {
+                gameBoardInstance.OnPetalsCleared -= ReportCleared;
+                Destroy(gameBoardInstance.gameObject);
+            }
+
+            gameBoardInstance = Instantiate(gameBoardPrefab);
+            gameBoardInstance.Init(grid);
+            gameBoardInstance.OnPetalsCleared += ReportCleared;
         }
 
         public void ReportCleared(List<PetalType> clearedPetals)
