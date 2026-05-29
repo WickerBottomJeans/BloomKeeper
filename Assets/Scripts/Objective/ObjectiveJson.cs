@@ -9,8 +9,8 @@ namespace DefaultNamespace
         public int amount;
     }
 
-    //fat DTO - only for JSON deserialization
-    public class ObjectiveData
+    //fat - only for JSON deserialization
+    public class ObjectiveJson
     {
         public ObjectiveType type;
         

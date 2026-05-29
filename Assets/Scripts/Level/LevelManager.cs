@@ -8,15 +8,16 @@ namespace DefaultNamespace
 {
     public class LevelManager : Singleton<LevelManager>
     {
-        private List<IObjective> objectives;
+        private ObjectiveManager objectiveManager;
         public void InitNewLevel(int levelId)
         {
             LevelData data = LevelLoader.Load(levelId);
 
-            objectives = data.objectives
+            List<IObjective> objectives = data.objectives
                 .Select(o => ObjectiveFactory.Create(o))
                 .ToList();
-
+            objectiveManager = new ObjectiveManager(objectives);
+            objectiveManager.OnAllComplete += HandleLevelComplete;
             Tile[,] grid = new Tile[data.boardWidth, data.boardHeight];
             for (int i = 0; i < data.tiles.Count; i++)
             {
@@ -27,6 +28,16 @@ namespace DefaultNamespace
             
             UIManager.Instance.ShowScoreBoard();
             UIManager.Instance.ShowGameBoard(grid);
+        }
+
+        public void ReportCleared(List<PetalType> clearedPetals)
+        {
+            objectiveManager.Report(new PetalsClearedEvent(clearedPetals));
+        }
+        
+        private void HandleLevelComplete()
+        {
+            UIManager.Instance.ShowWinScreen();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
@@ -30,7 +31,7 @@ public class UIGameBoard : MonoBehaviour
     private List<(Vector2Int from, Vector2Int to)> pendingMoves;
     private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
     private enum BoardState { Idle, Swapping, SwappingBack, Resolving, ActivatingSkills , Gravity, Filling, Cascade, Shuffling }
-    
+    public event Action<List<PetalType>> OnPetalsCleared;
     public void Init(Tile[,] grid)
     {
         cam = Camera.main;
@@ -114,6 +115,7 @@ public class UIGameBoard : MonoBehaviour
         var result = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
         pendingMatches.Clear();
         pendingSkillActivations.AddRange(result.SkillActivations);
+        OnPetalsCleared?.Invoke(result.ClearedPetalTypes);
         petalViewManager.OnMatchResolved(result, layout, () => TransitionTo(BoardState.ActivatingSkills));
     }
     

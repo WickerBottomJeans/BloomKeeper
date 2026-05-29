@@ -12,6 +12,7 @@ namespace DefaultNamespace.UI
             var activations = new List<SkillActivation>();
             var cleared = new List<Vector2Int>();
             var pendingSpawns = new List<(Vector2Int, PetalType, SpecialSkillType)>();
+            var clearedPetalTypes = new List<PetalType>();
 
             foreach (MatchGroup match in matches)
             {
@@ -37,25 +38,27 @@ namespace DefaultNamespace.UI
                         pendingSpawns.Add((spawnPos, matchedType, spawnSkill.Value));
                     }
                 }
-
                 foreach (Vector2Int cell in match.Tiles)
                 {
                     Tile tile = grid[cell.x, cell.y];
                     Petal petal = tile.Petal;
                     if (petal != null && petal.Skill != SpecialSkillType.None)
                         activations.Add(new SkillActivation(cell, petal.Skill, petal, match.Causer != null ? new Petal(match.Causer) : null));
+                    if (tile.Petal != null)
+                        clearedPetalTypes.Add(tile.Petal.PetalType);
 
                     tile.Resolve();
 
                     if (tile.Petal == null)
                         cleared.Add(cell);
+
                 }
             }
 
             foreach (var (pos, petalType, skill) in pendingSpawns)
                 grid[pos.x, pos.y].Petal = PetalFactory.CreateSpecial(petalType, skill);
 
-            return new MatchResolveResult(cleared, activations, pendingSpawns);
+            return new MatchResolveResult(cleared, clearedPetalTypes, activations, pendingSpawns);
         }
 
         private static Vector2Int DetermineSpawnPos(MatchGroup match, Vector2Int swapOrigin, Vector2Int swapTarget)

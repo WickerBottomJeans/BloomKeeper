@@ -8,13 +8,13 @@ using UnityEngine;
 public static class ObjectiveFactory
 {
     
-    public static IObjective Create(ObjectiveData data)
+    public static IObjective Create(ObjectiveJson json)
     {
-        switch (data.type)
+        switch (json.type)
         {
-            case ObjectiveType.Match: return new MatchObjective(data);
+            case ObjectiveType.Match: return new MatchObjective(json);
             //case ObjectiveType.Butterfly: return new ButterflyObjective(data);
-            default: throw new Exception($"Unknown objective type: {data.type}");
+            default: throw new Exception($"Unknown objective type: {json.type}");
         }
     }
 }

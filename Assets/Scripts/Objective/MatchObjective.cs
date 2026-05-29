@@ -6,16 +6,22 @@ namespace DefaultNamespace
     public class MatchObjective : IObjective
     {
         private List<PetalGoal> goals;
-        private Dictionary<PetalType, int> progress;
 
-        public MatchObjective(ObjectiveData data)
+        public MatchObjective(ObjectiveJson json)
         {
-            goals = data.petals;
+            goals = json.petals;
         }
 
-        public bool CheckObjective()
+        public bool CheckObjective() => goals.All(g => g.amount <= 0);
+
+        public void Report(ObjectiveDTO e)
         {
-            return goals.All(g => g.amount <= 0);
+            if (e is not PetalsClearedEvent cleared) return;
+            foreach (PetalType petalType in cleared.ClearedPetals)
+            {
+                PetalGoal goal = goals.FirstOrDefault(g => g.petalType == petalType);
+                if (goal != null) goal.amount--;
+            }
         }
     }
 }

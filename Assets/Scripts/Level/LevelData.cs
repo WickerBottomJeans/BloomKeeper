@@ -8,6 +8,6 @@ namespace DefaultNamespace
         public int boardWidth;
         public int boardHeight;
         public List<TileData> tiles;
-        public List<ObjectiveData> objectives;
+        public List<ObjectiveJson> objectives;
     }
 }
