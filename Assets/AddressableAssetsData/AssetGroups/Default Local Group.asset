@@ -15,8 +15,18 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 577a4e9dcbc7251429f0bf481d12a64b
   m_SerializeEntries:
+  - m_GUID: 3323c3c1d976c024d967eddfdf42fe06
+    m_Address: PetalSpriteSheet
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aa48054d7c54a8c4788b890aa21117af
     m_Address: UILevelSelect
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ff9572532075af946842342b39f15587
+    m_Address: ObjectiveIcons
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

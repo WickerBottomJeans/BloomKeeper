@@ -56,7 +56,7 @@ namespace DefaultNamespace.UI
             }
 
             foreach (var (pos, petalType, skill) in pendingSpawns)
-                grid[pos.x, pos.y].Petal = PetalFactory.CreateSpecial(petalType, skill);
+                grid[pos.x, pos.y].Petal = PetalFactory.CreatePetal(petalType, skill);
 
             return new MatchResolveResult(cleared, clearedPetalTypes, activations, pendingSpawns);
         }

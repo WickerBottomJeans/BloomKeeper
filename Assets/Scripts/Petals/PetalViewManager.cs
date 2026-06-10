@@ -213,4 +213,10 @@ public class PetalViewManager : MonoBehaviour
         }
     }
     
+    public static string GetPetalSpriteKey(PetalType type, SpecialSkillType skill)
+    {
+        string skillName = skill == SpecialSkillType.None ? "Default" : skill.ToString();
+        return $"{type}_{skillName}";
+    }
+    
 }

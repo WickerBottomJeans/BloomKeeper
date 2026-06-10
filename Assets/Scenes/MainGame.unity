@@ -348,6 +348,7 @@ GameObject:
   - component: {fileID: 438607905}
   - component: {fileID: 438607904}
   - component: {fileID: 438607906}
+  - component: {fileID: 438607907}
   m_Layer: 0
   m_Name: 'GameServices '
   m_TagString: Untagged
@@ -423,6 +424,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.LevelManager
   gameBoardPrefab: {fileID: 2268134538387400816, guid: 97c35de863043504ea7b36f955c7c451, type: 3}
+--- !u!114 &438607907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438607901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 868c67f0ea4042e3bb34e20017c4b23e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.SpriteLoader
+  atlasKeys:
+  - PetalSpriteSheet
+  - SunBurst
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

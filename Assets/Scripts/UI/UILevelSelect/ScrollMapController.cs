@@ -47,7 +47,7 @@ namespace DefaultNamespace.UI
 
         private void LoadMetas()
         {
-            metaCollection = LevelLoader.LoadMetas();
+            metaCollection = LevelLoader.LoadLevelMetas();
             allMetas = metaCollection.levels;
         }
 

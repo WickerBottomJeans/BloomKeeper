@@ -7,12 +7,13 @@ namespace DefaultNamespace
     {
         public PetalType petalType;
         public int amount;
+        public string spriteKey;
     }
 
-    //fat - only for JSON deserialization
     public class ObjectiveJson
     {
         public ObjectiveType type;
+        public string spriteKey;
         
         //Only use for type Match
         public List<PetalGoal> petals;

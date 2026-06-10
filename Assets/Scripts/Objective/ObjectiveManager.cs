@@ -8,6 +8,7 @@ namespace DefaultNamespace
     {
         private List<IObjective> objectives;
         public event Action OnAllComplete;
+        public event Action OnProgressUpdated;
 
         public ObjectiveManager(List<IObjective> objectives)
         {
@@ -18,10 +19,13 @@ namespace DefaultNamespace
         {
             foreach (IObjective objective in objectives)
                 objective.Report(e);
-    
+
+            OnProgressUpdated?.Invoke();
+
             if (objectives.All(o => o.CheckObjective()))
                 OnAllComplete?.Invoke();
         }
 
-        public bool AllComplete => objectives.All(o => o.CheckObjective());    }
+        public bool AllComplete => objectives.All(o => o.CheckObjective());
+    }
 }

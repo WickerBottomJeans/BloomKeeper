@@ -1,4 +1,5 @@
 ﻿using DefaultNamespace;
+using Petals;
 using UnityEngine;
 
 public class PetalView : MonoBehaviour
@@ -11,10 +12,14 @@ public class PetalView : MonoBehaviour
 
     public void Init(Petal petal, float cellSize, PetalSpriteConfig config)
     {
-        spriteRenderer.sprite = config.GetSprite(
-            petal.PetalType,
-            petal.Skill
-        );
+        string spriteKey = PetalSpriteKey.GetPetalSpriteKey(petal.PetalType, petal.Skill);
+        var sprite = SpriteLoader.Instance.GetSprite(spriteKey);
+        if (sprite == null)
+        {
+            Debug.LogError($"Sprite {spriteKey} not found");
+            return;
+        }
+        spriteRenderer.sprite = SpriteLoader.Instance.GetSprite(spriteKey);
 
         Vector2 spriteWorldSize = spriteRenderer.sprite.bounds.size;
 

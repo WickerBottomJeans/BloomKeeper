@@ -1,0 +1,1030 @@
+fileFormatVersion: 2
+guid: ff9572532075af946842342b39f15587
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8396178571933810758
+    second: PetalSpriteSheet_0
+  - first:
+      213: -1001651977738796951
+    second: PetalSpriteSheet_1
+  - first:
+      213: 3802797375861509440
+    second: PetalSpriteSheet_2
+  - first:
+      213: 8905934475788951959
+    second: PetalSpriteSheet_3
+  - first:
+      213: -6740459864306280238
+    second: PetalSpriteSheet_4
+  - first:
+      213: 8405955547577158005
+    second: PetalSpriteSheet_5
+  - first:
+      213: 3371762766881921038
+    second: PetalSpriteSheet_6
+  - first:
+      213: 6331541745523021893
+    second: PetalSpriteSheet_7
+  - first:
+      213: -4143547077116415562
+    second: PetalSpriteSheet_8
+  - first:
+      213: -3285892529860526194
+    second: PetalSpriteSheet_9
+  - first:
+      213: 7911893979319433791
+    second: PetalSpriteSheet_10
+  - first:
+      213: 8763921232105962714
+    second: PetalSpriteSheet_11
+  - first:
+      213: 5772684604005066749
+    second: PetalSpriteSheet_12
+  - first:
+      213: -3233342995925148152
+    second: PetalSpriteSheet_13
+  - first:
+      213: 1469771844729335866
+    second: PetalSpriteSheet_14
+  - first:
+      213: 8583294459618968816
+    second: PetalSpriteSheet_15
+  - first:
+      213: 6002904437904369238
+    second: PetalSpriteSheet_16
+  - first:
+      213: 2080351003758471813
+    second: PetalSpriteSheet_17
+  - first:
+      213: -7359986761278796404
+    second: PetalSpriteSheet_18
+  - first:
+      213: 5738314317635951561
+    second: PetalSpriteSheet_19
+  - first:
+      213: 1477186983650290539
+    second: PetalSpriteSheet_20
+  - first:
+      213: 8449414996157027508
+    second: PetalSpriteSheet_21
+  - first:
+      213: -1246444455372381273
+    second: PetalSpriteSheet_22
+  - first:
+      213: -2242053025573255103
+    second: PetalSpriteSheet_23
+  - first:
+      213: 4155032398836580676
+    second: PetalSpriteSheet_24
+  - first:
+      213: -7443652025614145872
+    second: PetalSpriteSheet_25
+  - first:
+      213: -3599792554363758564
+    second: PetalSpriteSheet_26
+  - first:
+      213: 3936950050991681590
+    second: PetalSpriteSheet_27
+  - first:
+      213: -5429657622384323016
+    second: PetalSpriteSheet_28
+  - first:
+      213: 5283884713581959866
+    second: PetalSpriteSheet_29
+  - first:
+      213: 2784853675574404663
+    second: Rose_Default
+  - first:
+      213: 4031784643165736616
+    second: Daisy_Default
+  - first:
+      213: -5887886423744229021
+    second: Bluebell_Default
+  - first:
+      213: -5287674269102614001
+    second: Sunflower_Default
+  - first:
+      213: 5264839415384867811
+    second: Lavender_Default
+  - first:
+      213: 8187893134507343650
+    second: Clover_Default
+  - first:
+      213: 1434189156347455820
+    second: Rose_StripedHorizontal
+  - first:
+      213: -5165619865937001507
+    second: Daisy_StripedHorizontal
+  - first:
+      213: 2380463984167193446
+    second: Bluebell_StripedHorizontal
+  - first:
+      213: 6099863928995865526
+    second: Sunflower_StripedHorizontal
+  - first:
+      213: -6360592780530472294
+    second: Lavender_StripedHorizontal
+  - first:
+      213: -7155853427206305188
+    second: Clover_StripedHorizontal
+  - first:
+      213: 8502081930026842584
+    second: Rose_StripedVertical
+  - first:
+      213: -8118947191296923919
+    second: Daisy_StripedVertical
+  - first:
+      213: -2975391358145002897
+    second: Bluebell_StripedVertical
+  - first:
+      213: 2566053190990691073
+    second: Sunflower_StripedVertical
+  - first:
+      213: -1908200623576912868
+    second: Lavender_StripedVertical
+  - first:
+      213: 2195206527641713494
+    second: Clover_StripedVertical
+  - first:
+      213: -1828136385479692845
+    second: Rose_Bouquet
+  - first:
+      213: -4937458455745920465
+    second: Daisy_Bouquet
+  - first:
+      213: -6530182752672109398
+    second: Bluebell_Bouquet
+  - first:
+      213: -1880829378528532425
+    second: Sunflower_Bouquet
+  - first:
+      213: 914400571342519510
+    second: Lavender_Bouquet
+  - first:
+      213: 1605683400806280044
+    second: Clover_Bouquet
+  - first:
+      213: 2312262632825079026
+    second: Rose_Butterfly
+  - first:
+      213: 8303341867161651752
+    second: Daisy_Butterfly
+  - first:
+      213: -8306818806747109344
+    second: Bluebell_Butterfly
+  - first:
+      213: 4844612080916984270
+    second: Sunflower_Butterfly
+  - first:
+      213: 6521789270256327027
+    second: Lavender_Butterfly
+  - first:
+      213: 4285085124304489579
+    second: Clover_Butterfly
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Rose_Default
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 813
+        width: 144
+        height: 150
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 736ad04c9a9c5a620800000000000000
+      internalID: 2784853675574404663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Daisy_Default
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 811
+        width: 142
+        height: 156
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8aec4ca85c6c3f730800000000000000
+      internalID: 4031784643165736616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bluebell_Default
+      rect:
+        serializedVersion: 2
+        x: 367
+        y: 809
+        width: 127
+        height: 166
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36151e23e760a4ea0800000000000000
+      internalID: -5887886423744229021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sunflower_Default
+      rect:
+        serializedVersion: 2
+        x: 532
+        y: 810
+        width: 145
+        height: 159
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0a5a2e74486e96b0800000000000000
+      internalID: -5287674269102614001
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Lavender_Default
+      rect:
+        serializedVersion: 2
+        x: 719
+        y: 806
+        width: 113
+        height: 173
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e38d71dd87701940800000000000000
+      internalID: 5264839415384867811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clover_Default
+      rect:
+        serializedVersion: 2
+        x: 875
+        y: 811
+        width: 132
+        height: 147
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22f7b2dac6d31a170800000000000000
+      internalID: 8187893134507343650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Rose_StripedHorizontal
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 613
+        width: 141
+        height: 144
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c49aec4607347e310800000000000000
+      internalID: 1434189156347455820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Daisy_StripedHorizontal
+      rect:
+        serializedVersion: 2
+        x: 190
+        y: 611
+        width: 143
+        height: 153
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd3cf1eb9180058b0800000000000000
+      internalID: -5165619865937001507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bluebell_StripedHorizontal
+      rect:
+        serializedVersion: 2
+        x: 367
+        y: 610
+        width: 127
+        height: 162
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66b85e0a16b190120800000000000000
+      internalID: 2380463984167193446
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sunflower_StripedHorizontal
+      rect:
+        serializedVersion: 2
+        x: 533
+        y: 610
+        width: 144
+        height: 155
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b3640acce117a450800000000000000
+      internalID: 6099863928995865526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Lavender_StripedHorizontal
+      rect:
+        serializedVersion: 2
+        x: 721
+        y: 606
+        width: 111
+        height: 169
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9a2193e092aab7a0800000000000000
+      internalID: -6360592780530472294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clover_StripedHorizontal
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 611
+        width: 131
+        height: 142
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5a4b96a83d41bc90800000000000000
+      internalID: -7155853427206305188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Rose_StripedVertical
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 417
+        width: 142
+        height: 145
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d9748a28767df570800000000000000
+      internalID: 8502081930026842584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Daisy_StripedVertical
+      rect:
+        serializedVersion: 2
+        x: 190
+        y: 415
+        width: 143
+        height: 153
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f66798ab84b35f80800000000000000
+      internalID: -8118947191296923919
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bluebell_StripedVertical
+      rect:
+        serializedVersion: 2
+        x: 367
+        y: 414
+        width: 127
+        height: 162
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f620006f25945b6d0800000000000000
+      internalID: -2975391358145002897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sunflower_StripedVertical
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 414
+        width: 145
+        height: 156
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10bf1cb18c37c9320800000000000000
+      internalID: 2566053190990691073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Lavender_StripedVertical
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 410
+        width: 111
+        height: 169
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1ce48794a5b485e0800000000000000
+      internalID: -1908200623576912868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clover_StripedVertical
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 415
+        width: 131
+        height: 143
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65bf3b8c4b0f67e10800000000000000
+      internalID: 2195206527641713494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Rose_Bouquet
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 181
+        width: 144
+        height: 195
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3dd248ea4a721a6e0800000000000000
+      internalID: -1828136385479692845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Daisy_Bouquet
+      rect:
+        serializedVersion: 2
+        x: 189
+        y: 181
+        width: 144
+        height: 193
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f22040cb1bf9a7bb0800000000000000
+      internalID: -4937458455745920465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bluebell_Bouquet
+      rect:
+        serializedVersion: 2
+        x: 359
+        y: 181
+        width: 141
+        height: 197
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aaca89482612065a0800000000000000
+      internalID: -6530182752672109398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sunflower_Bouquet
+      rect:
+        serializedVersion: 2
+        x: 526
+        y: 181
+        width: 151
+        height: 200
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73820b135a3f5e5e0800000000000000
+      internalID: -1880829378528532425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Lavender_Bouquet
+      rect:
+        serializedVersion: 2
+        x: 711
+        y: 181
+        width: 128
+        height: 202
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6dcf845997a90bc00800000000000000
+      internalID: 914400571342519510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clover_Bouquet
+      rect:
+        serializedVersion: 2
+        x: 872
+        y: 181
+        width: 139
+        height: 190
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6bacc6bb88884610800000000000000
+      internalID: 1605683400806280044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Rose_Butterfly
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 37
+        width: 147
+        height: 117
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f4c2f81d9ec61020800000000000000
+      internalID: 2312262632825079026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Daisy_Butterfly
+      rect:
+        serializedVersion: 2
+        x: 185
+        y: 39
+        width: 148
+        height: 114
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82a8cc86f656b3370800000000000000
+      internalID: 8303341867161651752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bluebell_Butterfly
+      rect:
+        serializedVersion: 2
+        x: 356
+        y: 39
+        width: 147
+        height: 114
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 028ed428e4048bc80800000000000000
+      internalID: -8306818806747109344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sunflower_Butterfly
+      rect:
+        serializedVersion: 2
+        x: 526
+        y: 39
+        width: 149
+        height: 114
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec17f9d05058b3340800000000000000
+      internalID: 4844612080916984270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Lavender_Butterfly
+      rect:
+        serializedVersion: 2
+        x: 699
+        y: 39
+        width: 147
+        height: 114
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 379159199cc028a50800000000000000
+      internalID: 6521789270256327027
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clover_Butterfly
+      rect:
+        serializedVersion: 2
+        x: 868
+        y: 39
+        width: 147
+        height: 114
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6cca7a973ea77b30800000000000000
+      internalID: 4285085124304489579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 8d5e64a8d620b4c42a8b8a07fae218b6
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Bluebell_Bouquet: -6530182752672109398
+      Bluebell_Butterfly: -8306818806747109344
+      Bluebell_Default: -5887886423744229021
+      Bluebell_StripedHorizontal: 2380463984167193446
+      Bluebell_StripedVertical: -2975391358145002897
+      Clover_Bouquet: 1605683400806280044
+      Clover_Butterfly: 4285085124304489579
+      Clover_Default: 8187893134507343650
+      Clover_StripedHorizontal: -7155853427206305188
+      Clover_StripedVertical: 2195206527641713494
+      Daisy_Bouquet: -4937458455745920465
+      Daisy_Butterfly: 8303341867161651752
+      Daisy_Default: 4031784643165736616
+      Daisy_StripedHorizontal: -5165619865937001507
+      Daisy_StripedVertical: -8118947191296923919
+      Lavender_Bouquet: 914400571342519510
+      Lavender_Butterfly: 6521789270256327027
+      Lavender_Default: 5264839415384867811
+      Lavender_StripedHorizontal: -6360592780530472294
+      Lavender_StripedVertical: -1908200623576912868
+      PetalSpriteSheet_0: -8396178571933810758
+      PetalSpriteSheet_1: -1001651977738796951
+      PetalSpriteSheet_10: 7911893979319433791
+      PetalSpriteSheet_11: 8763921232105962714
+      PetalSpriteSheet_12: 5772684604005066749
+      PetalSpriteSheet_13: -3233342995925148152
+      PetalSpriteSheet_14: 1469771844729335866
+      PetalSpriteSheet_15: 8583294459618968816
+      PetalSpriteSheet_16: 6002904437904369238
+      PetalSpriteSheet_17: 2080351003758471813
+      PetalSpriteSheet_18: -7359986761278796404
+      PetalSpriteSheet_19: 5738314317635951561
+      PetalSpriteSheet_2: 3802797375861509440
+      PetalSpriteSheet_20: 1477186983650290539
+      PetalSpriteSheet_21: 8449414996157027508
+      PetalSpriteSheet_22: -1246444455372381273
+      PetalSpriteSheet_23: -2242053025573255103
+      PetalSpriteSheet_24: 4155032398836580676
+      PetalSpriteSheet_25: -7443652025614145872
+      PetalSpriteSheet_26: -3599792554363758564
+      PetalSpriteSheet_27: 3936950050991681590
+      PetalSpriteSheet_28: -5429657622384323016
+      PetalSpriteSheet_29: 5283884713581959866
+      PetalSpriteSheet_3: 8905934475788951959
+      PetalSpriteSheet_4: -6740459864306280238
+      PetalSpriteSheet_5: 8405955547577158005
+      PetalSpriteSheet_6: 3371762766881921038
+      PetalSpriteSheet_7: 6331541745523021893
+      PetalSpriteSheet_8: -4143547077116415562
+      PetalSpriteSheet_9: -3285892529860526194
+      Rose_Bouquet: -1828136385479692845
+      Rose_Butterfly: 2312262632825079026
+      Rose_Default: 2784853675574404663
+      Rose_StripedHorizontal: 1434189156347455820
+      Rose_StripedVertical: 8502081930026842584
+      Sunflower_Bouquet: -1880829378528532425
+      Sunflower_Butterfly: 4844612080916984270
+      Sunflower_Default: -5287674269102614001
+      Sunflower_StripedHorizontal: 6099863928995865526
+      Sunflower_StripedVertical: 2566053190990691073
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

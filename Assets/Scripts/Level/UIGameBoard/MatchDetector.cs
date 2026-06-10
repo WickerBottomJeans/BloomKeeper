@@ -45,6 +45,15 @@ public static class MatchDetector
         return results;
     }
 
+    
+    //TODO: optimize this later, detecting on the whole grid is waisteful
+    public static bool WouldCompleteMatch(Tile[,] grid, int x, int y)
+    {
+        List<MatchGroup> matches = Detect(grid);
+        Vector2Int cell = new Vector2Int(x, y);
+        return matches.Exists(g => g.Tiles.Contains(cell));
+    }
+    
     private static List<List<Vector2Int>> FindRuns(Tile[,] grid, int cols, int rows, bool horizontal)
     {
         List<List<Vector2Int>> runs = new List<List<Vector2Int>>();

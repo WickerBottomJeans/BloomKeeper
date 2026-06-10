@@ -57,6 +57,7 @@ MonoBehaviour:
   paddingY: 0.05
   petalViewManager: {fileID: 5895882996990725671}
   boardInputHandler: {fileID: 7623217431080173358}
+  boardTexture: {fileID: 2800000, guid: e8a9b3242574c2347a3db89faa1e20a1, type: 3}
 --- !u!114 &5895882996990725671
 MonoBehaviour:
   m_ObjectHideFlags: 0

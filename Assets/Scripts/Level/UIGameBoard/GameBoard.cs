@@ -17,7 +17,9 @@ public class GameBoard : MonoBehaviour
     [SerializeField] private float paddingY = 0.05f;
     [SerializeField] private PetalViewManager petalViewManager;
     [SerializeField] private BoardInputHandler boardInputHandler;
-
+    
+    //TODO: make it load dynamically from json 
+    [SerializeField] private Texture2D boardTexture;
     private Camera cam;
     private BoardLayout layout;
     private MeshFilter meshFilter;
@@ -41,8 +43,8 @@ public class GameBoard : MonoBehaviour
         layout = BoardLayoutCalculator.Calculate(
             grid.GetLength(0), grid.GetLength(1), cam, paddingX, paddingY);
 
-        meshFilter.mesh = BoardMeshBuilder.BuildFillMesh(grid, layout);
-
+        meshFilter.mesh = BoardMeshBuilder.BuildFillMesh(grid, layout, boardTexture.width / (float)boardTexture.height);
+        
         petalViewManager.Init(grid, layout);
         boardInputHandler.Init(layout, cam);
 

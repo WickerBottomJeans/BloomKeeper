@@ -28,7 +28,11 @@ namespace DefaultNamespace
         {
             return webLevel == 0;
         }
-        public override bool CanReceiveNewPetal() => false;
+
+        public override bool CanReceiveNewPetal()
+        {
+            return webLevel == 0;
+        }
 
         public override void Resolve()
         {

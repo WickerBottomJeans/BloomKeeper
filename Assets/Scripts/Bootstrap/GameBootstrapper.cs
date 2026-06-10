@@ -5,8 +5,9 @@ namespace DefaultNamespace
 {
     public class GameBootstrapper : MonoBehaviour
     {
-        private void Start()
+        private async void Start()
         {
+            await SpriteLoader.Instance.LoadAll();
             UIManager.Instance.ShowLevelSelect();
         }
     }

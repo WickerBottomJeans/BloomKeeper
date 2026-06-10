@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using DefaultNamespace;
+using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
@@ -7,10 +9,11 @@ namespace DefaultNamespace.UI
         [SerializeField] private UIScoreBoard scoreBoardPrefab;
         private UIScoreBoard scoreBoardInstance;
 
-        public void ShowScoreBoard()
+        public void ShowScoreBoard(List<IObjective> objectives)
         {
             if (scoreBoardInstance == null)
                 scoreBoardInstance = Instantiate(scoreBoardPrefab, canvas.transform);
+            scoreBoardInstance.Init(objectives);
             scoreBoardInstance.Show();
         }
 
@@ -27,6 +30,15 @@ namespace DefaultNamespace.UI
                 result = scoreBoardInstance.GetHeightInWorldUnits();
             }
             return result;
+        }
+
+        public void RefreshObjectiveOnScoreBoard()
+        {
+            if (scoreBoardInstance == null)
+            {
+                return;
+            }
+            scoreBoardInstance.Refresh();
         }
     }
 }

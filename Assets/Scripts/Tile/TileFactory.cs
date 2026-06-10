@@ -13,10 +13,6 @@ namespace DefaultNamespace
                 TileType.Web      => new WebTile(data.webLevel),
                 _                 => throw new Exception($"Unknown tile type: {data.type}")
             };
-
-            if (data.type != TileType.Inactive)
-                tile.Petal = PetalFactory.CreateForTileMap(data);
-
             return tile;
         }
     }
