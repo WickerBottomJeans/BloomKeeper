@@ -3,6 +3,7 @@
     public abstract class Tile
     {
         public Petal Petal { get; set; }
+        public abstract TileType TileType { get; }
 
         public abstract bool IsMatchable();
 
@@ -16,10 +17,12 @@
 
         public abstract void Resolve();
 
-        public virtual void OnAdjacentTileMatched()
+        public virtual bool OnAdjacentTileMatched()
         {
+            return false;
         }
 
-    }
+        public virtual string GetOverlaySpriteKey() => null;
 
+    }
 }

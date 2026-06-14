@@ -4,6 +4,9 @@ namespace DefaultNamespace.UI
 {
     public class BoardLayout
     {
+        /// <summary>
+        /// Size of a single square cell in world units.
+        /// </summary>
         public readonly float CellSize;
         public readonly Vector2 OriginWorldPos;
         public readonly int Cols;

@@ -27,6 +27,7 @@ namespace DefaultNamespace.UI
             var cleared = new List<Vector2Int>();
             var clearedPetalTypes = new List<PetalType>();
             var pendingSpawns = new List<(Vector2Int, PetalType, SpecialSkillType)>();
+            var changedTiles = new List<Vector2Int>();
 
             foreach (MatchGroup match in matches)
             {
@@ -35,10 +36,11 @@ namespace DefaultNamespace.UI
             }
 
             ApplyPendingSpawns(grid, pendingSpawns);
-            NotifyNeighborsOfMatch(grid, cleared);
+            NotifyNeighborsOfMatch(grid, cleared, changedTiles);
 
-            return new MatchResolveResult(cleared, clearedPetalTypes, activations, pendingSpawns);
+            return new MatchResolveResult(cleared, clearedPetalTypes, activations, pendingSpawns, changedTiles);
         }
+
 
         private static void ProcessMatch(
             MatchGroup match,
@@ -167,7 +169,8 @@ namespace DefaultNamespace.UI
                 : SpecialSkillType.StripedVertical;
         }
 
-        private static void NotifyNeighborsOfMatch(Tile[,] grid, List<Vector2Int> cleared)
+        private static void NotifyNeighborsOfMatch(Tile[,] grid, List<Vector2Int> cleared,
+            List<Vector2Int> changedTiles)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -187,8 +190,9 @@ namespace DefaultNamespace.UI
                     if (!notifiedTiles.Add(neighborPos))
                         continue;
 
-                    grid[neighborPos.x, neighborPos.y]
-                        .OnAdjacentTileMatched();
+                    bool changed = grid[neighborPos.x, neighborPos.y].OnAdjacentTileMatched();
+                    if (changed)
+                        changedTiles.Add(neighborPos);
                 }
             }
         }

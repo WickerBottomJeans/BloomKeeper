@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: -6730967265607117894}
   - component: {fileID: 2760625105494387680}
   - component: {fileID: 6124048787579082683}
+  - component: {fileID: 3912862298464110975}
   m_Layer: 0
   m_Name: GameBoard
   m_TagString: Untagged
@@ -56,6 +57,7 @@ MonoBehaviour:
   paddingX: 0.05
   paddingY: 0.05
   petalViewManager: {fileID: 5895882996990725671}
+  tileViewManager: {fileID: 3912862298464110975}
   boardInputHandler: {fileID: 7623217431080173358}
   boardTexture: {fileID: 2800000, guid: e8a9b3242574c2347a3db89faa1e20a1, type: 3}
 --- !u!114 &5895882996990725671
@@ -150,3 +152,16 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &3912862298464110975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2829020016292998654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 260dd6ef97a24d84a91c2818664e12d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.TileViewManager
+  _tileViewPrefab: {fileID: 3171136553859467040, guid: fba785c9e7b48414b9ebf792fbe5c6f0, type: 3}

@@ -90,6 +90,7 @@ public class BoardInputHandler : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying) return;
+        if (boardLayout == null) return;
         
         if (isDragging)
         {

@@ -165,11 +165,4 @@ public class PetalViewManager : MonoBehaviour
         await PetalViewAnimator.PlaySpawn(newView);
         await PetalViewAnimator.PlayDrop(newView, targetPos);
     }
-    
-    public static string GetPetalSpriteKey(PetalType type, SpecialSkillType skill)
-    {
-        string skillName = skill == SpecialSkillType.None ? "Default" : skill.ToString();
-        return $"{type}_{skillName}";
-    }
-    
 }

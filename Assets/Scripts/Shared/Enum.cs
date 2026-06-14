@@ -24,6 +24,12 @@
         Inactive = 2,
         Web = 3
     }
+    
+    public enum TileOverlay
+    {
+        None = 0,
+        Web = 1
+    }
 
     public enum SpecialSkillType
     {

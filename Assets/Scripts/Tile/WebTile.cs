@@ -1,9 +1,12 @@
 ﻿using System;
+using DefaultNamespace.Utility;
 
 namespace DefaultNamespace
 {
     public class WebTile : Tile
     {
+        public override TileType TileType => TileType.Web;
+
         private int _webLevel;
         private int webLevel
         {
@@ -39,22 +42,26 @@ namespace DefaultNamespace
             Petal = null;
         } 
         
-        public override void OnAdjacentTileMatched()
+        public override bool OnAdjacentTileMatched()
         {
-            ReduceWebLevel();
+            return TryReduceWebLevel();
         }
-        
-        private void ReduceWebLevel()
+
+        private bool TryReduceWebLevel()
         {
             if (webLevel <= 0)
-                return;
+                return false;
 
             webLevel--;
-
-            if (webLevel == 0)
-            {
-                //RemoveWeb();
-            }
+            return true;
+        }
+        
+        public override string GetOverlaySpriteKey()
+        {
+            if (webLevel <= 0)
+                return null;
+    
+            return SpriteKeyHelper.GetWebOverlayKey(webLevel);
         }
     }
 }

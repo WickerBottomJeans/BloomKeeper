@@ -2,6 +2,8 @@
 {
     public class NormalTile : Tile
     {
+        public override TileType TileType => TileType.Normal;
+
         public override bool IsMatchable()
         {
             return Petal != null && Petal.Skill != SpecialSkillType.Sunburst;
@@ -13,10 +15,6 @@
         public override void Resolve()
         {
             Petal = null;
-        }
-
-        public override void OnAdjacentTileMatched()
-        {
         }
     }
 

@@ -3,11 +3,8 @@ using UnityEngine;
 
 namespace Utility
 {
-    
-    
     public static class BoardLayoutCalculator
     {
-        //TODO: somethign arnt right here. bad feeling bout UIManager.Instance.GetScoreBoardHeight();
         public static BoardLayout Calculate(int cols, int rows, Camera cam, float paddingX, float paddingY)
         {
             Rect safeArea = Screen.safeArea;

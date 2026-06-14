@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using DefaultNamespace.Utility;
 using Petals;
 using UnityEngine;
 
@@ -31,7 +32,7 @@ namespace DefaultNamespace
         {
             return goals.ConvertAll(g => new ObjectiveViewData
             {
-                spriteKey = PetalSpriteKey.GetPetalSpriteKey(g.petalType, SpecialSkillType.None),
+                spriteKey = SpriteKeyHelper.GetPetalSpriteKey(g.petalType, SpecialSkillType.None),
                 objectiveText = Mathf.Max(0, g.amount).ToString()
             });
         }

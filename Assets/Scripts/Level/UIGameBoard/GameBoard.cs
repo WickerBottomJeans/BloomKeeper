@@ -17,6 +17,8 @@ public class GameBoard : MonoBehaviour
     [SerializeField] private float paddingX = 0.05f;
     [SerializeField] private float paddingY = 0.05f;
     [SerializeField] private PetalViewManager petalViewManager;
+    [SerializeField] private TileViewManager tileViewManager;
+
     [SerializeField] private BoardInputHandler boardInputHandler;
 
     //TODO: make it load dynamically from json 
@@ -60,6 +62,8 @@ public class GameBoard : MonoBehaviour
         meshFilter.mesh = BoardMeshBuilder.BuildFillMesh(grid, layout, boardTexture.width / (float)boardTexture.height);
 
         petalViewManager.Init(grid, layout);
+        tileViewManager.Init(grid, layout);
+
         boardInputHandler.Init(layout, cam);
 
         boardInputHandler.OnSwapRequested += HandleSwap;
@@ -125,6 +129,7 @@ public class GameBoard : MonoBehaviour
         pendingMatches.Clear();
         pendingSkillActivations.AddRange(result.SkillActivations);
         OnPetalsCleared?.Invoke(result.ClearedPetalTypes);
+        tileViewManager.OnMatchResolved(result, grid);
         await petalViewManager.OnMatchResolved(result, layout);
         TransitionTo(BoardState.ActivatingSkills);
     }
@@ -188,6 +193,8 @@ public class GameBoard : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying) return;
+        if (grid == null) return;
+        if (layout == null) return;
 
         for (int x = 0; x < grid.GetLength(0); x++)
         {

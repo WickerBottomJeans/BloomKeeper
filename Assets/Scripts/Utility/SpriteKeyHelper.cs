@@ -1,8 +1,8 @@
 ﻿using DefaultNamespace;
 
-namespace Petals
+namespace DefaultNamespace.Utility
 {
-    public class PetalSpriteKey
+    public class SpriteKeyHelper
     {
         public static string GetPetalSpriteKey(PetalType type, SpecialSkillType skill)
         {
@@ -12,6 +12,16 @@ namespace Petals
             }
             string skillName = skill == SpecialSkillType.None ? "Default" : skill.ToString();
             return $"{type}_{skillName}";
+        }
+        
+        public static string GetTileSpriteKey(TileType type)
+        {
+            return $"Tile_{type}";
+        }
+        
+        public static string GetWebOverlayKey(int webLevel)
+        {
+            return $"Overlay_Web_{webLevel}";
         }
     }
 }

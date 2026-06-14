@@ -1,4 +1,5 @@
 ﻿using DefaultNamespace;
+using DefaultNamespace.Utility;
 using Petals;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ public class PetalView : MonoBehaviour
 
     public void Init(Petal petal, float cellSize, PetalSpriteConfig config)
     {
-        string spriteKey = PetalSpriteKey.GetPetalSpriteKey(petal.PetalType, petal.Skill);
+        string spriteKey = SpriteKeyHelper.GetPetalSpriteKey(petal.PetalType, petal.Skill);
         var sprite = SpriteLoader.Instance.GetSprite(spriteKey);
         if (sprite == null)
         {
