@@ -107,6 +107,7 @@ namespace Skills
             for (int x = 0; x < cols; x++)
             for (int y = 0; y < rows; y++)
             {
+                //TODO: why are we using webtile here??
                 if (grid[x, y] is WebTile) webTiles.Add(new Vector2Int(x, y));
                 else if (grid[x, y].Petal != null) allTiles.Add(new Vector2Int(x, y));
             }

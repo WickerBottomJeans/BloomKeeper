@@ -6,13 +6,13 @@ using UnityEngine;
 
 public class MatchGroup
 {
-    public List<Vector2Int> Tiles;
+    public List<Vector2Int> TilePositions;
     public MatchShape Shape;
     public Petal Causer;
 
-    public MatchGroup(List<Vector2Int> tiles, MatchShape shape, Petal causer = null)
+    public MatchGroup(List<Vector2Int> tilePositions, MatchShape shape, Petal causer = null)
     {
-        Tiles = tiles;
+        TilePositions = tilePositions;
         Shape = shape;
         Causer = causer;
     }
@@ -51,7 +51,7 @@ public static class MatchDetector
     {
         List<MatchGroup> matches = Detect(grid);
         Vector2Int cell = new Vector2Int(x, y);
-        return matches.Exists(g => g.Tiles.Contains(cell));
+        return matches.Exists(g => g.TilePositions.Contains(cell));
     }
     
     private static List<List<Vector2Int>> FindRuns(Tile[,] grid, int cols, int rows, bool horizontal)

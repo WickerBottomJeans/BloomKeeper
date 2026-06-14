@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
 using DefaultNamespace.UI;
@@ -17,13 +18,12 @@ public class GameBoard : MonoBehaviour
     [SerializeField] private float paddingY = 0.05f;
     [SerializeField] private PetalViewManager petalViewManager;
     [SerializeField] private BoardInputHandler boardInputHandler;
-    
+
     //TODO: make it load dynamically from json 
     [SerializeField] private Texture2D boardTexture;
     private Camera cam;
     private BoardLayout layout;
     private MeshFilter meshFilter;
-    private SwapController swapController;
     private Tile[,] grid;
 
     private BoardState currentState = BoardState.Idle;
@@ -32,8 +32,22 @@ public class GameBoard : MonoBehaviour
     private List<MatchGroup> pendingMatches;
     private List<(Vector2Int from, Vector2Int to)> pendingMoves;
     private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
-    private enum BoardState { Idle, Swapping, SwappingBack, Resolving, ActivatingSkills , Gravity, Filling, Cascade, Shuffling }
+
+    private enum BoardState
+    {
+        Idle,
+        Swapping,
+        SwappingBack,
+        Resolving,
+        ActivatingSkills,
+        Gravity,
+        Filling,
+        Cascade,
+        Shuffling
+    }
+
     public event Action<List<PetalType>> OnPetalsCleared;
+
     public void Init(Tile[,] grid)
     {
         cam = Camera.main;
@@ -44,83 +58,77 @@ public class GameBoard : MonoBehaviour
             grid.GetLength(0), grid.GetLength(1), cam, paddingX, paddingY);
 
         meshFilter.mesh = BoardMeshBuilder.BuildFillMesh(grid, layout, boardTexture.width / (float)boardTexture.height);
-        
+
         petalViewManager.Init(grid, layout);
         boardInputHandler.Init(layout, cam);
 
-        swapController = new SwapController();
         boardInputHandler.OnSwapRequested += HandleSwap;
     }
 
     private void HandleSwap(Vector2Int cellA, Vector2Int cellB)
     {
         if (currentState != BoardState.Idle) return;
-        if (!swapController.Validate(cellA, cellB, grid)) return;
+        if (!PetalSwapper.Validate(cellA, cellB, grid)) return;
 
         swapOrigin = cellA;
         swapTarget = cellB;
         TransitionTo(BoardState.Swapping);
     }
 
-    private async void TransitionTo(BoardState newState)
+    private void TransitionTo(BoardState newState)
     {
         currentState = newState;
-        await UniTask.NextFrame();
         switch (newState)
         {
-            case BoardState.Swapping:     EnterSwapping();     break;
+            case BoardState.Swapping: EnterSwapping(); break;
             case BoardState.SwappingBack: EnterSwappingBack(); break;
-            case BoardState.Resolving:    EnterResolving();    break;
+            case BoardState.Resolving: EnterResolving(); break;
             case BoardState.ActivatingSkills: EnterActivatingSkills(); break;
-
-            case BoardState.Gravity:      EnterGravity();      break;
-            case BoardState.Filling:      EnterFilling();      break;
-            case BoardState.Cascade:      EnterCascade();      break;
-            case BoardState.Idle:         EnterIdle();         break;
-            case BoardState.Shuffling:    EnterShuffling(); break;
+            case BoardState.Gravity: EnterGravity(); break;
+            case BoardState.Filling: EnterFilling(); break;
+            case BoardState.Cascade: EnterCascade(); break;
+            case BoardState.Idle: EnterIdle(); break;
+            case BoardState.Shuffling: EnterShuffling(); break;
 
         }
     }
 
-    private void EnterSwapping()
+    private async UniTask EnterSwapping()
     {
         pendingSkillActivations.Clear();
-        swapController.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
+
+        PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
+        await petalViewManager.OnSwap(swapOrigin, swapTarget);
 
         pendingMatches = MatchDetector.Detect(grid);
-
-        MatchGroup sunburstA = CheckAndQueueSkillSwap(swapOrigin, swapTarget);
-        MatchGroup sunburstB = CheckAndQueueSkillSwap(swapTarget, swapOrigin);
-        if (sunburstA != null) pendingMatches.Add(sunburstA);
-        if (sunburstB != null) pendingMatches.Add(sunburstB);
-
+        pendingMatches.AddRange(SkillDetector.DetectOnSwap(grid, swapOrigin, swapTarget));
+        
         if (pendingMatches.Count == 0 && pendingSkillActivations.Count == 0)
         {
-            swapController.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
-            petalViewManager.OnSwap(swapOrigin, swapTarget, () => TransitionTo(BoardState.SwappingBack));
+            PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
+            TransitionTo(BoardState.SwappingBack);
             return;
         }
 
-        petalViewManager.OnSwap(swapOrigin, swapTarget, () => TransitionTo(BoardState.Resolving));
+        TransitionTo(BoardState.Resolving);
     }
 
-
-
-
-    private void EnterSwappingBack()
+    private async UniTask EnterSwappingBack()
     {
-        petalViewManager.OnSwap(swapTarget, swapOrigin, () => TransitionTo(BoardState.Idle));
+        await petalViewManager.OnSwap(swapTarget, swapOrigin);
+        TransitionTo(BoardState.Idle);
     }
 
-    private void EnterResolving()
+    private async UniTask EnterResolving()
     {
         var result = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
         pendingMatches.Clear();
         pendingSkillActivations.AddRange(result.SkillActivations);
         OnPetalsCleared?.Invoke(result.ClearedPetalTypes);
-        petalViewManager.OnMatchResolved(result, layout, () => TransitionTo(BoardState.ActivatingSkills));
+        await petalViewManager.OnMatchResolved(result, layout);
+        TransitionTo(BoardState.ActivatingSkills);
     }
-    
+
     private void EnterActivatingSkills()
     {
         if (pendingSkillActivations.Count == 0)
@@ -137,16 +145,18 @@ public class GameBoard : MonoBehaviour
         TransitionTo(BoardState.Resolving);
     }
 
-    private void EnterGravity()
+    private async UniTask EnterGravity()
     {
         pendingMoves = GravityController.Apply(grid);
-        petalViewManager.OnGravityApplied(pendingMoves, layout, () => TransitionTo(BoardState.Filling));
+        await petalViewManager.OnGravityApplied(pendingMoves, layout);
+        TransitionTo(BoardState.Filling);
     }
 
-    private void EnterFilling()
+    private async UniTask EnterFilling()
     {
         List<Vector2Int> filled = PetalFiller.Fill(grid);
-        petalViewManager.OnFilled(filled, layout, grid, () => TransitionTo(BoardState.Cascade));
+        await petalViewManager.OnFilled(filled, layout, grid);
+        TransitionTo(BoardState.Cascade);
     }
 
     private void EnterCascade()
@@ -167,13 +177,14 @@ public class GameBoard : MonoBehaviour
         if (!DeadlockDetector.HasValidMove(grid))
             TransitionTo(BoardState.Shuffling);
     }
-    
-    private void EnterShuffling()
+
+    private async UniTask EnterShuffling()
     {
         List<Vector2Int> shuffled = BoardShuffler.Shuffle(grid);
-        petalViewManager.OnShuffled(shuffled, layout, grid, () => TransitionTo(BoardState.Cascade));
+        await petalViewManager.OnShuffled(shuffled, layout, grid);
+        TransitionTo(BoardState.Cascade);
     }
-    
+
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying) return;
@@ -188,14 +199,15 @@ public class GameBoard : MonoBehaviour
                 Gizmos.color = tile switch
                 {
                     InactiveTile => new Color(0.55f, 0.1f, 0.1f, 0.8f),
-                    WebTile      => new Color(0.6f, 0.6f, 0.6f, 0.8f),
-                    NormalTile   => new Color(0.2f, 0.8f, 0.2f, 0.8f),
-                    _            => Color.white
+                    WebTile => new Color(0.6f, 0.6f, 0.6f, 0.8f),
+                    NormalTile => new Color(0.2f, 0.8f, 0.2f, 0.8f),
+                    _ => Color.white
                 };
 
                 Gizmos.DrawWireCube(center, Vector3.one * layout.CellSize * 0.95f);
             }
         }
+
         for (int x = 0; x < grid.GetLength(0); x++)
         {
             for (int y = 0; y < grid.GetLength(1); y++)
@@ -207,16 +219,5 @@ public class GameBoard : MonoBehaviour
                 int i = 1;
             }
         }
-    }
-    private MatchGroup CheckAndQueueSkillSwap(Vector2Int cell, Vector2Int otherCell)
-    {
-        Petal petal = grid[cell.x, cell.y].Petal;
-        if (petal == null || petal.Skill != SpecialSkillType.Sunburst) return null;
-
-        Petal causerPetal = grid[otherCell.x, otherCell.y].Petal != null
-            ? new Petal(grid[otherCell.x, otherCell.y].Petal)
-            : null;
-
-        return new MatchGroup(new List<Vector2Int> { cell }, MatchShape.None, causerPetal);
     }
 }

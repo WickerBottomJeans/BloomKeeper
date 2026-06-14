@@ -3,7 +3,8 @@
     public enum ObjectiveType
     {
         Match = 1,
-        Butterfly = 2
+        Butterfly = 2,
+        ClearSpiderWeb = 3,
     }
     
     public enum PetalType

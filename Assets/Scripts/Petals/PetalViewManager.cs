@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using DefaultNamespace;
 using DefaultNamespace.UI;
 using Petals;
@@ -44,173 +45,125 @@ public class PetalViewManager : MonoBehaviour
 
     public PetalView GetView(int x, int y) => petalViews[x, y];
 
-    public void OnSwap(Vector2Int cellA, Vector2Int cellB, Action onComplete = null)
+    public async UniTask OnSwap(Vector2Int cellA, Vector2Int cellB)
     {
         PetalView viewA = petalViews[cellA.x, cellA.y];
         PetalView viewB = petalViews[cellB.x, cellB.y];
 
-        Vector2 posA = viewA.transform.position;
-        Vector2 posB = viewB.transform.position;
+        await UniTask.WhenAll(
+            PetalViewAnimator.PlaySwap(viewA, viewB.transform.position),
+            PetalViewAnimator.PlaySwap(viewB, viewA.transform.position)
+        );
 
-        bool aDone = false;
-        bool bDone = false;
-
-        PetalViewAnimator.PlaySwap(viewA, posB, () =>
-        {
-            aDone = true;
-            if (bDone)
-            {
-                petalViews[cellA.x, cellA.y] = viewB;
-                petalViews[cellB.x, cellB.y] = viewA;
-                onComplete?.Invoke();
-            }
-        });
-
-        PetalViewAnimator.PlaySwap(viewB, posA, () =>
-        {
-            bDone = true;
-            if (aDone)
-            {
-                petalViews[cellA.x, cellA.y] = viewB;
-                petalViews[cellB.x, cellB.y] = viewA;
-                onComplete?.Invoke();
-            }
-        });
+        petalViews[cellA.x, cellA.y] = viewB;
+        petalViews[cellB.x, cellB.y] = viewA;
+    }
+    public async UniTask OnMatchResolved(MatchResolveResult result, BoardLayout boardLayout)
+    {
+        await ClearPetalViews(result.ClearedPositions);
+        await SpawnSkillPetalViews(result.SpawnedPetals, boardLayout);
     }
 
-    public void OnMatchResolved(MatchResolveResult result, BoardLayout boardLayout, Action onComplete = null)
+    private async UniTask ClearPetalViews(List<Vector2Int> cleared)
     {
-        ClearPetalViews(result.ClearedPositions, () =>
-        {
-            SpawnSkillPetalViews(result.SpawnedPetals, boardLayout);
-            onComplete?.Invoke();
-        });
-    }
-
-    private void ClearPetalViews(List<Vector2Int> cleared, Action onComplete)
-    {
-        int total = 0;
-        int done = 0;
-
-        foreach (Vector2Int cell in cleared)
-            if (petalViews[cell.x, cell.y] != null) total++;
-
-        if (total == 0) { onComplete?.Invoke(); return; }
-
+        var tasks = new List<UniTask>();
         foreach (Vector2Int cell in cleared)
         {
             PetalView view = petalViews[cell.x, cell.y];
             if (view == null) continue;
-
             petalViews[cell.x, cell.y] = null;
-            PetalViewAnimator.PlayDestroy(view, onComplete: () =>
-            {
-                pool.Release(view);
-                done++;
-                if (done == total) onComplete?.Invoke();
-            });
+            tasks.Add(DestroyAndRelease(view));
         }
+        await UniTask.WhenAll(tasks);
     }
 
-    private void SpawnSkillPetalViews(List<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> spawns, BoardLayout boardLayout)
+    private async UniTask DestroyAndRelease(PetalView view)
     {
+        await PetalViewAnimator.PlayDestroy(view);
+        pool.Release(view);
+    }
+    
+    //TODO: make this async
+    private async UniTask SpawnSkillPetalViews(
+        List<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> spawns,
+        BoardLayout boardLayout)
+    {
+        var tasks = new List<UniTask>();
+
         foreach (var (pos, petalType, skillType) in spawns)
         {
             Vector2 worldPos = boardLayout.GetCellWorldPos(pos.x, pos.y);
+
             PetalView view = pool.Get();
             view.transform.position = worldPos;
             view.Init(new Petal(petalType, skillType), boardLayout.CellSize, petalSpriteConfig);
+
             petalViews[pos.x, pos.y] = view;
-            PetalViewAnimator.PlaySpawn(view);
+
+            tasks.Add(PetalViewAnimator.PlaySpawn(view));
         }
+
+        await UniTask.WhenAll(tasks);
     }
 
-    public void OnGravityApplied(List<(Vector2Int from, Vector2Int to)> moves, BoardLayout boardLayout, Action onComplete = null)
+    public async UniTask OnGravityApplied(List<(Vector2Int from, Vector2Int to)> moves, BoardLayout boardLayout)
     {
-        int total = moves.Count;
-        int done = 0;
-
-        if (total == 0) { onComplete?.Invoke(); return; }
-
+        var tasks = new List<UniTask>();
         foreach (var (from, to) in moves)
         {
             PetalView view = petalViews[from.x, from.y];
             if (view == null) continue;
-
             Vector2 targetPos = boardLayout.GetCellWorldPos(to.x, to.y);
             petalViews[to.x, to.y] = view;
             petalViews[from.x, from.y] = null;
-
-            PetalViewAnimator.PlayDrop(view, targetPos, () =>
-            {
-                done++;
-                if (done == total) onComplete?.Invoke();
-            });
+            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos));
         }
+        await UniTask.WhenAll(tasks);
     }
     
-    public void OnFilled(List<Vector2Int> filledCells, BoardLayout boardLayout, Tile[,] grid, Action onComplete = null)
+    public async UniTask OnFilled(List<Vector2Int> filledCells, BoardLayout boardLayout, Tile[,] grid)
     {
-        if (filledCells.Count == 0) { onComplete?.Invoke(); return; }
-
         filledCells.Sort((a, b) => a.y.CompareTo(b.y));
-
-        int total = filledCells.Count;
-        int done = 0;
-
+        var tasks = new List<UniTask>();
         foreach (Vector2Int cell in filledCells)
         {
             Vector2 targetPos = boardLayout.GetCellWorldPos(cell.x, cell.y);
             Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.CellSize);
-
             PetalView view = pool.Get();
             view.transform.position = spawnPos;
             view.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize, petalSpriteConfig);
             petalViews[cell.x, cell.y] = view;
-
             PetalViewAnimator.PlaySpawn(view);
-            PetalViewAnimator.PlayDrop(view, targetPos, () =>
-            {
-                done++;
-                if (done == total) onComplete?.Invoke();
-            });
+            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos));
         }
+        await UniTask.WhenAll(tasks);
     }
     
-    public void OnShuffled(List<Vector2Int> cells, BoardLayout boardLayout, Tile[,] grid, Action onComplete = null)
+    public async UniTask OnShuffled(List<Vector2Int> cells, BoardLayout boardLayout, Tile[,] grid)
     {
-        float delayPerColumn = 0.05f;
-        int total = cells.Count;
-        int done = 0;
-
+        var tasks = new List<UniTask>();
         foreach (Vector2Int cell in cells)
         {
             PetalView view = petalViews[cell.x, cell.y];
             if (view == null) continue;
-
-            float delay = cell.x * delayPerColumn;
-            petalViews[cell.x, cell.y] = null;
-
-            PetalViewAnimator.PlayDestroy(view, delay, () =>
-            {
-                pool.Release(view);
-
-                Vector2 targetPos = boardLayout.GetCellWorldPos(cell.x, cell.y);
-                Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.CellSize);
-
-                PetalView newView = pool.Get();
-                newView.transform.position = spawnPos;
-                newView.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize, petalSpriteConfig);
-                petalViews[cell.x, cell.y] = newView;
-
-                PetalViewAnimator.PlaySpawn(newView);
-                PetalViewAnimator.PlayDrop(newView, targetPos, () =>
-                {
-                    done++;
-                    if (done == total) onComplete?.Invoke();
-                });
-            });
+            tasks.Add(ShuffleCell(view, cell, cell.x * 0.05f, boardLayout, grid));
         }
+        await UniTask.WhenAll(tasks);
+    }
+    
+    private async UniTask ShuffleCell(PetalView view, Vector2Int cell, float delay, BoardLayout boardLayout, Tile[,] grid)
+    {
+        await PetalViewAnimator.PlayDestroy(view, delay);
+        pool.Release(view);
+
+        Vector2 targetPos = boardLayout.GetCellWorldPos(cell.x, cell.y);
+        Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.CellSize);
+        PetalView newView = pool.Get();
+        newView.transform.position = spawnPos;
+        newView.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize, petalSpriteConfig);
+        petalViews[cell.x, cell.y] = newView;
+        await PetalViewAnimator.PlaySpawn(newView);
+        await PetalViewAnimator.PlayDrop(newView, targetPos);
     }
     
     public static string GetPetalSpriteKey(PetalType type, SpecialSkillType skill)

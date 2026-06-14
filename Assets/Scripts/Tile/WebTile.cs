@@ -31,18 +31,30 @@ namespace DefaultNamespace
 
         public override bool CanReceiveNewPetal()
         {
-            return webLevel == 0;
+            return webLevel == 0 && Petal == null; ;
         }
 
         public override void Resolve()
         {
-            if (webLevel > 0)
-            {
-                webLevel--;
-            } else 
-            {
-                Petal = null;
-            }
+            Petal = null;
         } 
+        
+        public override void OnAdjacentTileMatched()
+        {
+            ReduceWebLevel();
+        }
+        
+        private void ReduceWebLevel()
+        {
+            if (webLevel <= 0)
+                return;
+
+            webLevel--;
+
+            if (webLevel == 0)
+            {
+                //RemoveWeb();
+            }
+        }
     }
 }

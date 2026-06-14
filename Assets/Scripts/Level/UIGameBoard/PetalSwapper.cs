@@ -2,9 +2,12 @@
 
 namespace DefaultNamespace.UI
 {
-    public class SwapController
+    /// <summary>
+    /// Swap tile's petal in Tile[,]
+    /// </summary>
+    public static class  PetalSwapper
     {
-        public bool Validate(Vector2Int cellA, Vector2Int cellB, Tile[,] grid)
+        public static bool Validate(Vector2Int cellA, Vector2Int cellB, Tile[,] grid)
         {
             Tile tileA = grid[cellA.x, cellA.y];
             Tile tileB = grid[cellB.x, cellB.y];
@@ -15,7 +18,7 @@ namespace DefaultNamespace.UI
             return true;
         }
 
-        public void ExecuteSwapPetal(Vector2Int cellA, Vector2Int cellB, Tile[,] grid)
+        public static void ExecuteSwapPetal(Vector2Int cellA, Vector2Int cellB, Tile[,] grid)
         {
             Petal temp = grid[cellA.x, cellA.y].Petal;
             grid[cellA.x, cellA.y].Petal = grid[cellB.x, cellB.y].Petal;

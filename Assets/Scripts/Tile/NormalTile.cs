@@ -13,7 +13,11 @@
         public override void Resolve()
         {
             Petal = null;
-        } 
+        }
+
+        public override void OnAdjacentTileMatched()
+        {
+        }
     }
 
 }

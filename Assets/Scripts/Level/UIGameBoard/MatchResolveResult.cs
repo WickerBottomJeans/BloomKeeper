@@ -8,6 +8,7 @@ namespace DefaultNamespace.UI
         public List<Vector2Int> ClearedPositions;
         public List<PetalType> ClearedPetalTypes;
         public List<SkillActivation> SkillActivations;
+        //TODO: why dont we just use Petal here?
         public List<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> SpawnedPetals;
 
         public MatchResolveResult(
