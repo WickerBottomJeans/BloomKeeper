@@ -407,9 +407,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e745d875c4334a038ad0bf645bcb4ace, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.UIManager
+  backdropPrefab: {fileID: 8339736254305832784, guid: eadd338566c53e543bbaf6d632391f75, type: 3}
+  petalEditorPrefab: {fileID: 8406235925533610904, guid: 46b455af4d951334595ff0b29c2f8dd7, type: 3}
   levelSelectPrefab: {fileID: 4418083477373149365, guid: aa48054d7c54a8c4788b890aa21117af, type: 3}
   canvas: {fileID: 1778504641}
   scoreBoardPrefab: {fileID: 5393505987680992950, guid: 8597623135086ff4f8ac05830fbd9af1, type: 3}
+  testerTogglePrefab: {fileID: 7168729738933843627, guid: 3073f85176c8204478725179b3c68a8a, type: 3}
   winScreenPrefab: {fileID: -3536508388563471518, guid: 5debd5ac8c84fc04882506032b470d45, type: 3}
 --- !u!114 &438607906
 MonoBehaviour:

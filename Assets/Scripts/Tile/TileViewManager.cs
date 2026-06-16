@@ -1,4 +1,6 @@
-﻿using DefaultNamespace.UI;
+﻿using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using DefaultNamespace.UI;
 using DefaultNamespace.Utility;
 using UnityEngine;
 
@@ -53,14 +55,8 @@ namespace DefaultNamespace
         /// <param name="tile"></param>
         private void RefreshView(int col, int row, Tile tile)
         {
-            string key = SpriteKeyHelper.GetTileSpriteKey(tile.TileType);
-            _views[col, row].SetBase(SpriteLoader.Instance.GetSprite(key));
-
-            string overlayKey = tile.GetOverlaySpriteKey();
-            if (overlayKey != null)
-                _views[col, row].SetOverlay(SpriteLoader.Instance.GetSprite(overlayKey));
-            else
-                _views[col, row].ClearOverlay();
+            RefreshBase(col, row, tile);
+            RefreshOverlay(col, row, tile);
         }
         
         /// <summary>
@@ -68,10 +64,33 @@ namespace DefaultNamespace
         /// </summary>
         /// <param name="result"></param>
         /// <param name="grid"></param>
-        public void OnMatchResolved(MatchResolveResult result, Tile[,] grid)
+        public async UniTask OnMatchResolved(MatchResolveResult result, Tile[,] grid)
         {
+            var transitionTasks = new List<UniTask>();
+
             foreach (Vector2Int pos in result.ChangedTiles)
-                RefreshView(pos.x, pos.y, grid[pos.x, pos.y]);
+            {
+                TileView view = _views[pos.x, pos.y];
+                Tile tile = grid[pos.x, pos.y];
+                string newOverlayKey = tile.GetOverlaySpriteKey();
+
+                if (view.OverlayRenderer.sprite != null && newOverlayKey != null)
+                {
+                    Sprite incoming = SpriteLoader.Instance.GetSprite(newOverlayKey);
+                    transitionTasks.Add(TileViewAnimator.PlayOverlayTransition(view, incoming));
+                }
+                else if (view.OverlayRenderer.sprite != null && newOverlayKey == null)
+                {
+                    transitionTasks.Add(TileViewAnimator.PlayOverlayDespawn(view));
+                }
+                else if (view.OverlayRenderer.sprite == null && newOverlayKey != null)
+                {
+                    view.SetOverlay(SpriteLoader.Instance.GetSprite(newOverlayKey));
+                    transitionTasks.Add(TileViewAnimator.PlayOverlaySpawn(view));
+                }
+            }
+
+            await UniTask.WhenAll(transitionTasks);
         }
     }
 }

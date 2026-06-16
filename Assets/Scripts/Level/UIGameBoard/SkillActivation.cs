@@ -12,6 +12,7 @@ namespace DefaultNamespace.UI
         /// </summary>
         public Petal CauserPetal;
 
+        //TODO: why do we still have a dedicated SkillType field when this exist???
         public Petal SelfPetal;
 
         public SkillActivation(Vector2Int position, SpecialSkillType skillType, Petal selfPetal,

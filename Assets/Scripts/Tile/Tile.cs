@@ -5,6 +5,10 @@
         public Petal Petal { get; set; }
         public abstract TileType TileType { get; }
 
+        /// <summary>
+        /// Would this be consider in match detecting phase in Match detector?
+        /// </summary>
+        /// <returns></returns>
         public abstract bool IsMatchable();
 
         /// <summary>

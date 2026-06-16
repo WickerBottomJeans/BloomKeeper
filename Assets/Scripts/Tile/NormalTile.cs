@@ -6,7 +6,7 @@
 
         public override bool IsMatchable()
         {
-            return Petal != null && Petal.Skill != SpecialSkillType.Sunburst;
+            return Petal != null && Petal.IsMatchable();
         }
         
         public override bool IsGravityAffected() => true;

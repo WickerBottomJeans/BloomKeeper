@@ -1,4 +1,5 @@
 ﻿using System;
+using Core;
 using DefaultNamespace.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -6,6 +7,13 @@ using UnityEngine.InputSystem;
 public class BoardInputHandler : MonoBehaviour
 {
     [SerializeField] private float dragThresholdPx = 20f;
+    
+    /// <summary>
+    /// double tap to edit petal if in admin mode
+    /// </summary>
+    [SerializeField] private float doubleTapInterval = 0.3f;
+
+    public event Action<Vector2Int> OnEditRequested;
 
     public event Action<Vector2Int, Vector2Int> OnSwapRequested;
 
@@ -17,6 +25,9 @@ public class BoardInputHandler : MonoBehaviour
     private Vector2Int selectedCell;
     private Vector3 lastResolvedWorldPos;
     private Vector2Int lastResolvedCell;
+    
+    private float lastTapTime = -1f;
+    private Vector2Int lastTappedCell;
     public void Init(BoardLayout boardLayout, Camera camera)
     {
         this.boardLayout = boardLayout;
@@ -39,6 +50,21 @@ public class BoardInputHandler : MonoBehaviour
     private void OnTouchBegan(Vector2 screenPos)
     {
         if (!TryResolveCell(screenPos, out var cell)) return;
+
+        if (GlobalState.IsAdminMode)
+        {
+            float timeSinceLast = Time.time - lastTapTime;
+            if (timeSinceLast <= doubleTapInterval && cell == lastTappedCell)
+            {
+                OnEditRequested?.Invoke(cell);
+                lastTapTime = -1f;
+                return;
+            }
+
+            lastTapTime = Time.time;
+            lastTappedCell = cell;
+            return;
+        }
 
         isDragging = true;
         touchStartScreenPos = screenPos;

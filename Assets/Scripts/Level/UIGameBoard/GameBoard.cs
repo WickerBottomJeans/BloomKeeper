@@ -27,7 +27,11 @@ public class GameBoard : MonoBehaviour
     private BoardLayout layout;
     private MeshFilter meshFilter;
     private Tile[,] grid;
-
+    
+    /// <summary>
+    /// Use for tester's petal editor
+    /// </summary>
+    private Vector2Int editingCell;
     private BoardState currentState = BoardState.Idle;
     private Vector2Int swapOrigin;
     private Vector2Int swapTarget;
@@ -67,6 +71,9 @@ public class GameBoard : MonoBehaviour
         boardInputHandler.Init(layout, cam);
 
         boardInputHandler.OnSwapRequested += HandleSwap;
+        boardInputHandler.OnEditRequested += HandleEditRequested;
+        UIManager.Instance.OnPetalEditConfirmed += HandlePetalEditConfirmed;
+
     }
 
     private void HandleSwap(Vector2Int cellA, Vector2Int cellB)
@@ -77,6 +84,25 @@ public class GameBoard : MonoBehaviour
         swapOrigin = cellA;
         swapTarget = cellB;
         TransitionTo(BoardState.Swapping);
+    }
+    
+    private void HandleEditRequested(Vector2Int cell)
+    {
+        if (currentState != BoardState.Idle) return;
+
+        editingCell = cell;
+
+        Vector2 worldPos = layout.GetCellWorldPos(cell.x, cell.y);
+        Vector2 screenPos = cam.WorldToScreenPoint(worldPos);
+
+        UIManager.Instance.ShowPetalEditorPopup(screenPos);
+    }
+
+    private void HandlePetalEditConfirmed(PetalType petalType, SpecialSkillType skillType)
+    {
+        Petal petal = new Petal(petalType, skillType);
+        grid[editingCell.x, editingCell.y].Petal = petal;
+        petalViewManager.RefreshCell(editingCell, petal, layout);
     }
 
     private void TransitionTo(BoardState newState)
@@ -129,8 +155,10 @@ public class GameBoard : MonoBehaviour
         pendingMatches.Clear();
         pendingSkillActivations.AddRange(result.SkillActivations);
         OnPetalsCleared?.Invoke(result.ClearedPetalTypes);
-        tileViewManager.OnMatchResolved(result, grid);
-        await petalViewManager.OnMatchResolved(result, layout);
+        await UniTask.WhenAll(
+            tileViewManager.OnMatchResolved(result, grid),
+            petalViewManager.OnMatchResolved(result, layout)
+        );
         TransitionTo(BoardState.ActivatingSkills);
     }
 
@@ -190,6 +218,15 @@ public class GameBoard : MonoBehaviour
         TransitionTo(BoardState.Cascade);
     }
 
+    private void OnDestroy()
+    {
+        if (boardInputHandler != null)
+            boardInputHandler.OnEditRequested -= HandleEditRequested;
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.OnPetalEditConfirmed -= HandlePetalEditConfirmed;
+    }
+    
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying) return;

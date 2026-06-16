@@ -25,4 +25,9 @@ public class Petal
         PetalType = source.PetalType;
         Skill = source.Skill;
     }
+
+    public bool IsMatchable()
+    {
+        return Skill != SpecialSkillType.Sunburst;
+    }
 }

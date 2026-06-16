@@ -24,7 +24,7 @@ namespace DefaultNamespace
 
         public override bool IsMatchable()
         {
-            return webLevel == 0 && Petal != null && Petal.Skill != SpecialSkillType.Sunburst;
+            return webLevel == 0 && Petal != null && Petal.IsMatchable();
         }
 
         public override bool IsGravityAffected()

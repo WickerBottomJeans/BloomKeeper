@@ -11,7 +11,7 @@ public class PetalView : MonoBehaviour
     [SerializeField] [Range(0f, 1f)] private float paddingYRatio = 0.2f;
     public Vector3 TargetScale { get; private set; }
 
-    public void Init(Petal petal, float cellSize, PetalSpriteConfig config)
+    public void Init(Petal petal, float cellSize)
     {
         string spriteKey = SpriteKeyHelper.GetPetalSpriteKey(petal.PetalType, petal.Skill);
         var sprite = SpriteLoader.Instance.GetSprite(spriteKey);

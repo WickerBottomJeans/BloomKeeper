@@ -10,7 +10,6 @@ using UnityEngine.Pool;
 public class PetalViewManager : MonoBehaviour
 {
     [SerializeField] private PetalView petalViewPrefab;
-    [SerializeField] private PetalSpriteConfig petalSpriteConfig;
 
     private PetalView[,] petalViews;
     private ObjectPool<PetalView> pool;
@@ -37,7 +36,7 @@ public class PetalViewManager : MonoBehaviour
                 Vector2 pos = boardLayout.GetCellWorldPos(x, y);
                 PetalView view = pool.Get();
                 view.transform.position = pos;
-                view.Init(tile.Petal, boardLayout.CellSize, petalSpriteConfig);
+                view.Init(tile.Petal, boardLayout.CellSize);
                 petalViews[x, y] = view;
             }
         }
@@ -96,7 +95,7 @@ public class PetalViewManager : MonoBehaviour
 
             PetalView view = pool.Get();
             view.transform.position = worldPos;
-            view.Init(new Petal(petalType, skillType), boardLayout.CellSize, petalSpriteConfig);
+            view.Init(new Petal(petalType, skillType), boardLayout.CellSize);
 
             petalViews[pos.x, pos.y] = view;
 
@@ -131,7 +130,7 @@ public class PetalViewManager : MonoBehaviour
             Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.CellSize);
             PetalView view = pool.Get();
             view.transform.position = spawnPos;
-            view.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize, petalSpriteConfig);
+            view.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize);
             petalViews[cell.x, cell.y] = view;
             PetalViewAnimator.PlaySpawn(view);
             tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos));
@@ -160,9 +159,27 @@ public class PetalViewManager : MonoBehaviour
         Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.CellSize);
         PetalView newView = pool.Get();
         newView.transform.position = spawnPos;
-        newView.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize, petalSpriteConfig);
+        newView.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize);
         petalViews[cell.x, cell.y] = newView;
         await PetalViewAnimator.PlaySpawn(newView);
         await PetalViewAnimator.PlayDrop(newView, targetPos);
+    }
+    
+    public void RefreshCell(Vector2Int cell, Petal petal, BoardLayout boardLayout)
+    {
+        PetalView existing = petalViews[cell.x, cell.y];
+        if (existing != null)
+        {
+            pool.Release(existing);
+            petalViews[cell.x, cell.y] = null;
+        }
+
+        if (petal == null) return;
+
+        Vector2 pos = boardLayout.GetCellWorldPos(cell.x, cell.y);
+        PetalView view = pool.Get();
+        view.transform.position = pos;
+        view.Init(petal, boardLayout.CellSize);
+        petalViews[cell.x, cell.y] = view;
     }
 }
