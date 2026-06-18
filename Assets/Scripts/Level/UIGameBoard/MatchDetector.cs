@@ -9,12 +9,14 @@ public class MatchGroup
     public List<Vector2Int> TilePositions;
     public MatchShape Shape;
     public Petal Causer;
+    public bool IsSkillCombo;
 
-    public MatchGroup(List<Vector2Int> tilePositions, MatchShape shape, Petal causer = null)
+    public MatchGroup(List<Vector2Int> tilePositions, MatchShape shape, Petal causer = null, bool isSkillCombo = false)
     {
         TilePositions = tilePositions;
         Shape = shape;
         Causer = causer;
+        IsSkillCombo = isSkillCombo;
     }
 }
 
@@ -35,12 +37,13 @@ public static class MatchDetector
         HashSet<Vector2Int> consumed = new HashSet<Vector2Int>();
         List<MatchGroup> results     = new List<MatchGroup>();
 
-        // Detect special shapes first (priority:  5 > 4 > 3 Cross > T/L > Square)
-
-        DetectLongRuns(horizontalRuns, consumed, results);
-        DetectLongRuns(verticalRuns, consumed, results);
+        // Detection priority: Five/Four > Cross > T/L > Three > Square.
+        DetectLongRuns(horizontalRuns, consumed, results, minimumLength: 4);
+        DetectLongRuns(verticalRuns, consumed, results, minimumLength: 4);
         DetectCross(horizontalRuns, verticalRuns, consumed, results);
         DetectTAndL(horizontalRuns, verticalRuns, consumed, results);
+        DetectLongRuns(horizontalRuns, consumed, results);
+        DetectLongRuns(verticalRuns, consumed, results);
         DetectSquare2x2(grid, cols, rows, consumed, results);
         return results;
     }
@@ -119,14 +122,15 @@ public static class MatchDetector
                 if (h.Count < 3 || v.Count < 3) continue;
                 if (consumed.Contains(center)) continue;
 
+                bool hEndpoint = center == h[0] || center == h[h.Count - 1];
+                bool vEndpoint = center == v[0] || center == v[v.Count - 1];
+                if (hEndpoint || vEndpoint) continue;
+
                 HashSet<Vector2Int> tiles = new HashSet<Vector2Int>(h);
                 foreach (var t in v) tiles.Add(t);
 
                 if (tiles.Count >= 5)
-                {
-                    MatchShape shape = (h.Count >= 3 && v.Count >= 3) ? MatchShape.Cross : MatchShape.TShape;
-                    AddGroup(new List<Vector2Int>(tiles), shape, consumed, results);
-                }
+                    AddGroup(new List<Vector2Int>(tiles), MatchShape.Cross, consumed, results);
             }
         }
     }
@@ -150,7 +154,11 @@ public static class MatchDetector
                 bool hEndpoint = junction == h[0] || junction == h[h.Count - 1];
                 bool vEndpoint = junction == v[0] || junction == v[v.Count - 1];
 
-                MatchShape shape = (hEndpoint || vEndpoint) ? MatchShape.LShape : MatchShape.TShape;
+                if (!hEndpoint && !vEndpoint) continue;
+
+                MatchShape shape = hEndpoint && vEndpoint
+                    ? MatchShape.LShape
+                    : MatchShape.TShape;
 
                 HashSet<Vector2Int> tiles = new HashSet<Vector2Int>(h);
                 foreach (var t in v) tiles.Add(t);
@@ -189,12 +197,15 @@ public static class MatchDetector
     private static void DetectLongRuns(
         List<List<Vector2Int>> runs,
         HashSet<Vector2Int> consumed,
-        List<MatchGroup> results)
+        List<MatchGroup> results,
+        int minimumLength = MinRunLength)
     {
         foreach (var run in runs)
         {
+            if (run.Count < minimumLength) continue;
+
             List<Vector2Int> remaining = run.FindAll(t => !consumed.Contains(t));
-            if (remaining.Count < 3) continue;
+            if (remaining.Count < minimumLength) continue;
 
             MatchShape shape = remaining.Count >= 5 ? MatchShape.Five
                              : remaining.Count == 4 ? MatchShape.Four
