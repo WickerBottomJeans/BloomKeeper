@@ -19,7 +19,11 @@
 
         public abstract bool CanReceiveNewPetal();
 
-        public abstract void Resolve();
+        /// <summary>
+        /// Attempts to resolve this tile's current contents.
+        /// </summary>
+        /// <returns>True when a petal was removed; otherwise false.</returns>
+        public abstract bool Resolve();
 
         public virtual bool OnAdjacentTileMatched()
         {

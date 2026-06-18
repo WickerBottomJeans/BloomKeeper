@@ -13,9 +13,6 @@
         
         public override bool IsGravityAffected() => false;
         public override bool CanReceiveNewPetal() => false;
-        public override void Resolve()
-        {
-            throw new System.NotImplementedException();
-        }
+        public override bool Resolve() => false;
     }
 }

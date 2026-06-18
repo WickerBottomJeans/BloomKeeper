@@ -98,19 +98,13 @@ namespace DefaultNamespace.UI
                 Tile tile = grid[cell.x, cell.y];
                 Petal petal = tile.Petal;
 
-                if (petal != null)
-                {
-                    if (petal.Skill != SpecialSkillType.None)
-                        activations.Add(new SkillActivation(cell, petal.Skill, petal,
-                            match.Causer != null ? new Petal(match.Causer) : null));
+                if (!tile.Resolve()) continue;
 
-                    clearedPetalTypes.Add(petal.PetalType);
-                }
-
-                tile.Resolve();
-
-                if (tile.Petal == null)
-                    cleared.Add(cell);
+                if (petal.Skill != SpecialSkillType.None)
+                    activations.Add(new SkillActivation(cell, petal.Skill, petal,
+                        match.Causer != null ? new Petal(match.Causer) : null));
+                clearedPetalTypes.Add(petal.PetalType);
+                cleared.Add(cell);
             }
         }
 

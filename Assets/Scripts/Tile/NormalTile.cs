@@ -12,9 +12,12 @@
         public override bool IsGravityAffected() => true;
         public override bool CanReceiveNewPetal() => Petal == null;
         
-        public override void Resolve()
+        public override bool Resolve()
         {
+            if (Petal == null) return false;
+
             Petal = null;
+            return true;
         }
     }
 
