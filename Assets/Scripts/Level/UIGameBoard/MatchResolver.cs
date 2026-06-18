@@ -28,17 +28,22 @@ namespace DefaultNamespace.UI
             var clearedPetalTypes = new List<PetalType>();
             var pendingSpawns = new List<(Vector2Int, PetalType, SpecialSkillType)>();
             var changedTiles = new List<Vector2Int>();
+            var skillComboPositions = new List<Vector2Int>();
 
             foreach (MatchGroup match in matches)
             {
                 ProcessMatch(match, grid, swapOrigin, swapTarget, activations, cleared, clearedPetalTypes,
-                    pendingSpawns);
+                    pendingSpawns, skillComboPositions);
             }
 
             ApplyPendingSpawns(grid, pendingSpawns);
-            NotifyNeighborsOfMatch(grid, cleared, changedTiles);
 
-            return new MatchResolveResult(cleared, clearedPetalTypes, activations, pendingSpawns, changedTiles);
+            var allClearedForNeighborCheck = new List<Vector2Int>(cleared);
+            allClearedForNeighborCheck.AddRange(skillComboPositions);
+            NotifyNeighborsOfMatch(grid, allClearedForNeighborCheck, changedTiles);
+
+            return new MatchResolveResult(cleared, clearedPetalTypes, activations, pendingSpawns, changedTiles,
+                skillComboPositions);
         }
 
 
@@ -50,10 +55,11 @@ namespace DefaultNamespace.UI
             List<SkillActivation> activations,
             List<Vector2Int> cleared,
             List<PetalType> clearedPetalTypes,
-            List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns)
+            List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns,
+            List<Vector2Int> skillComboPositions)
         {
             TryQueueSkillSpawn(match, grid, swapOrigin, swapTarget, pendingSpawns);
-            ClearMatchTiles(match, grid, activations, cleared, clearedPetalTypes);
+            ClearMatchTiles(match, grid, activations, cleared, clearedPetalTypes, skillComboPositions);
         }
 
         private static void TryQueueSkillSpawn(
@@ -75,13 +81,19 @@ namespace DefaultNamespace.UI
             };
 
             if (!spawnSkill.HasValue) return;
-
+            
+            
+            //If the match group has a skill petal in it, then execute that skill petal, not forming new skill petal
             bool hasSkillPetal = match.TilePositions.Any(t => grid[t.x, t.y].Petal?.Skill != SpecialSkillType.None);
             if (hasSkillPetal) return;
 
             PetalType matchedType = grid[match.TilePositions[0].x, match.TilePositions[0].y].Petal?.PetalType
                                     ?? throw new InvalidOperationException(
                                         "Match group contains tile with null petal.");
+            if (spawnSkill == SpecialSkillType.Sunburst)
+            {
+                matchedType = PetalType.None;
+            }
             Vector2Int spawnPos = DetermineSpawnPos(match, swapOrigin, swapTarget);
             pendingSpawns.Add((spawnPos, matchedType, spawnSkill.Value));
         }
@@ -91,7 +103,8 @@ namespace DefaultNamespace.UI
             Tile[,] grid,
             List<SkillActivation> activations,
             List<Vector2Int> cleared,
-            List<PetalType> clearedPetalTypes)
+            List<PetalType> clearedPetalTypes,
+            List<Vector2Int> skillComboPositions)
         {
             foreach (Vector2Int cell in match.TilePositions)
             {
@@ -100,11 +113,15 @@ namespace DefaultNamespace.UI
 
                 if (!tile.Resolve()) continue;
 
-                if (petal.Skill != SpecialSkillType.None)
+                if (petal.Skill != SpecialSkillType.None && !match.IsSkillCombo)
                     activations.Add(new SkillActivation(cell, petal.Skill, petal,
                         match.Causer != null ? new Petal(match.Causer) : null));
                 clearedPetalTypes.Add(petal.PetalType);
-                cleared.Add(cell);
+
+                if (match.IsSkillCombo)
+                    skillComboPositions.Add(cell);
+                else
+                    cleared.Add(cell);
             }
         }
 

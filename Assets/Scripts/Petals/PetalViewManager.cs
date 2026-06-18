@@ -44,6 +44,21 @@ public class PetalViewManager : MonoBehaviour
 
     public PetalView GetView(int x, int y) => petalViews[x, y];
 
+    public async UniTask OnPetalsChanged(IReadOnlyList<PetalChange> changes, BoardLayout boardLayout)
+    {
+        var tasks = new List<UniTask>();
+
+        foreach (PetalChange change in changes)
+        {
+            PetalView view = petalViews[change.Position.x, change.Position.y];
+            if (view == null) continue;
+
+            tasks.Add(PetalViewAnimator.PlayPetalChange(view, change.After, boardLayout.CellSize));
+        }
+
+        await UniTask.WhenAll(tasks);
+    }
+
     public async UniTask OnSwap(Vector2Int cellA, Vector2Int cellB)
     {
         PetalView viewA = petalViews[cellA.x, cellA.y];
@@ -60,6 +75,7 @@ public class PetalViewManager : MonoBehaviour
     public async UniTask OnMatchResolved(MatchResolveResult result, BoardLayout boardLayout)
     {
         await ClearPetalViews(result.ClearedPositions);
+        await ClearSkillCombinationPetalView(result.SkillComboPositions);
         await SpawnSkillPetalViews(result.SpawnedPetals, boardLayout);
     }
 
@@ -105,6 +121,21 @@ public class PetalViewManager : MonoBehaviour
         await UniTask.WhenAll(tasks);
     }
 
+    private async UniTask ClearSkillCombinationPetalView(List<Vector2Int> positions)
+    {
+        if (positions.Count == 0) return;
+
+        PetalView viewA = petalViews[positions[0].x, positions[0].y];
+        PetalView viewB = petalViews[positions[1].x, positions[1].y];
+
+        petalViews[positions[0].x, positions[0].y] = null;
+        petalViews[positions[1].x, positions[1].y] = null;
+
+        await PetalViewAnimator.PlayComboFormation(viewA, viewB);
+
+        pool.Release(viewA);
+        pool.Release(viewB);
+    }
     public async UniTask OnGravityApplied(List<(Vector2Int from, Vector2Int to)> moves, BoardLayout boardLayout)
     {
         var tasks = new List<UniTask>();

@@ -38,7 +38,8 @@
         StripedVertical = 2,
         Bouquet = 3,
         Sunburst = 4,
-        Butterfly = 5
+        Butterfly = 5,
+        StripeSunburst = 6,
     }
     
     public enum MatchShape

@@ -12,7 +12,7 @@ namespace Skills
 
         public const int BouquetRange = 1;
 
-        public static MatchGroup UseSkill(Tile[,] grid, SkillActivation activation)
+        public static SkillUseResult UseSkill(Tile[,] grid, SkillActivation activation)
         {
             Petal selfPetal = new Petal(activation.SelfPetal);
 
@@ -20,15 +20,21 @@ namespace Skills
             {
                 case SpecialSkillType.StripedHorizontal:
                 case SpecialSkillType.StripedVertical:
-                    return UseStripedSkill(grid, activation.Position, activation.SkillType, selfPetal);
+                    return new SkillUseResult(
+                        UseStripedSkill(grid, activation.Position, activation.SkillType, selfPetal));
                 case SpecialSkillType.Bouquet:
-                    return UseBouquetSkill(grid, activation.Position, selfPetal);
+                    return new SkillUseResult(UseBouquetSkill(grid, activation.Position, selfPetal));
                 case SpecialSkillType.Sunburst:
                     if (activation.CauserPetal?.PetalType == null || activation.CauserPetal.PetalType == PetalType.None)
                         throw new InvalidOperationException("Sunburst activated with no valid target petal type.");
-                    return UseSunburstSkill(grid, activation.Position, activation.CauserPetal.PetalType, selfPetal);
+                    return new SkillUseResult(
+                        UseSunburstSkill(grid, activation.Position, activation.CauserPetal.PetalType, selfPetal));
                 case SpecialSkillType.Butterfly:
-                    return UseButterflySkill(grid, selfPetal);
+                    return new SkillUseResult(UseButterflySkill(grid, selfPetal));
+                case SpecialSkillType.StripeSunburst:
+                    if (activation.Combo == null)
+                        throw new InvalidOperationException("StripeSunburst activated with no ComboData.");
+                    return UseStripeSunburstSkill(grid, activation.Combo.TargetPetalType, activation.Combo.ComboSkillType, selfPetal);  
                 default:
                     throw new ArgumentException("Skill not implemented.", nameof(activation.SkillType));
             }
@@ -117,6 +123,46 @@ namespace Skills
 
             Vector2Int target = pool[rng.Next(pool.Count)];
             return new MatchGroup(new List<Vector2Int> { target }, MatchShape.None, causer);
+        }
+        
+        private static SkillUseResult UseStripeSunburstSkill(Tile[,] grid, PetalType targetType,
+            SpecialSkillType stripeDirection, Petal causer)
+        {
+            List<PetalChange> petalChanges = GiveSkillToPetalsOfType(grid, targetType, stripeDirection);
+
+            int cols = grid.GetLength(0);
+            int rows = grid.GetLength(1);
+            var tiles = new List<Vector2Int>();
+
+            for (int x = 0; x < cols; x++)
+            for (int y = 0; y < rows; y++)
+            {
+                if (grid[x, y].Petal?.PetalType == targetType)
+                    tiles.Add(new Vector2Int(x, y));
+            }
+
+            return new SkillUseResult(new MatchGroup(tiles, MatchShape.None, causer), petalChanges);
+        }
+        
+        private static List<PetalChange> GiveSkillToPetalsOfType(Tile[,] grid, PetalType targetType,
+            SpecialSkillType newSkill)
+        {
+            int cols = grid.GetLength(0);
+            int rows = grid.GetLength(1);
+            var changes = new List<PetalChange>();
+
+            for (int x = 0; x < cols; x++)
+            for (int y = 0; y < rows; y++)
+            {
+                if (grid[x, y].Petal?.PetalType != targetType) continue;
+
+                Petal before = grid[x, y].Petal;
+                Petal after = new Petal(targetType, newSkill);
+                grid[x, y].Petal = after;
+                changes.Add(new PetalChange(new Vector2Int(x, y), before, after));
+            }
+
+            return changes;
         }
     }
 }

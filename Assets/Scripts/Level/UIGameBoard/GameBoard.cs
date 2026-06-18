@@ -122,18 +122,27 @@ public class GameBoard : MonoBehaviour
 
         }
     }
-
+    
     private async UniTask EnterSwapping()
     {
         pendingSkillActivations.Clear();
+        pendingMatches = new List<MatchGroup>();
 
         PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
         await petalViewManager.OnSwap(swapOrigin, swapTarget);
 
+        pendingSkillActivations.AddRange(SkillDetector.DetectOnSwap(grid, swapOrigin, swapTarget));
+
+        if (pendingSkillActivations.Count > 0)
+        {
+            pendingMatches.Add(new MatchGroup(new List<Vector2Int> { swapOrigin, swapTarget }, MatchShape.None, isSkillCombo: true));
+            TransitionTo(BoardState.Resolving);
+            return;
+        }
+
         pendingMatches = MatchDetector.Detect(grid);
-        pendingMatches.AddRange(SkillDetector.DetectOnSwap(grid, swapOrigin, swapTarget));
-        
-        if (pendingMatches.Count == 0 && pendingSkillActivations.Count == 0)
+
+        if (pendingMatches.Count == 0)
         {
             PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
             TransitionTo(BoardState.SwappingBack);
@@ -159,10 +168,10 @@ public class GameBoard : MonoBehaviour
             tileViewManager.OnMatchResolved(result, grid),
             petalViewManager.OnMatchResolved(result, layout)
         );
-        TransitionTo(BoardState.ActivatingSkills);
+            TransitionTo(BoardState.ActivatingSkills);
     }
 
-    private void EnterActivatingSkills()
+    private async UniTask EnterActivatingSkills()
     {
         if (pendingSkillActivations.Count == 0)
         {
@@ -171,10 +180,17 @@ public class GameBoard : MonoBehaviour
         }
 
         pendingMatches = new List<MatchGroup>();
+        var petalChanges = new List<PetalChange>();
+
         foreach (SkillActivation activation in pendingSkillActivations)
-            pendingMatches.Add(SkillManager.UseSkill(grid, activation));
+        {
+            SkillUseResult result = SkillManager.UseSkill(grid, activation);
+            pendingMatches.Add(result.MatchGroup);
+            petalChanges.AddRange(result.PetalChanges);
+        }
 
         pendingSkillActivations.Clear();
+        await petalViewManager.OnPetalsChanged(petalChanges, layout);
         TransitionTo(BoardState.Resolving);
     }
 

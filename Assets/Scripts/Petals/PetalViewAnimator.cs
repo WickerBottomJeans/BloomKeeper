@@ -40,4 +40,45 @@ public static class PetalViewAnimator
             .SetEase(Ease.InQuad)
             .ToUniTask();
     }
+
+    public static async UniTask PlayPetalChange(PetalView view, Petal petal, float cellSize)
+    {
+        await view.transform.DOScale(Vector3.zero, 0.12f)
+            .SetEase(Ease.InBack)
+            .ToUniTask();
+
+        view.Init(petal, cellSize);
+        view.transform.localScale = Vector3.zero;
+
+        await view.transform.DOScale(view.TargetScale, 0.18f)
+            .SetEase(Ease.OutBack)
+            .ToUniTask();
+    }
+    
+    public static UniTask PlayComboFormation(PetalView viewA, PetalView viewB)
+    {
+        Vector3 midpoint = (viewA.transform.position + viewB.transform.position) / 2f;
+
+        Sequence seq = DOTween.Sequence();
+
+        // Stand up - quick anticipation bounce
+        seq.Append(viewA.transform.DOScale(viewA.TargetScale * 1.2f, 0.15f).SetEase(Ease.OutQuad));
+        seq.Join(viewB.transform.DOScale(viewB.TargetScale * 1.2f, 0.15f).SetEase(Ease.OutQuad));
+
+        // Fly to each other
+        seq.Append(viewA.transform.DOMove(midpoint, 0.25f).SetEase(Ease.InOutQuad));
+        seq.Join(viewB.transform.DOMove(midpoint, 0.25f).SetEase(Ease.InOutQuad));
+
+        // Spin together in place, opposite directions
+        seq.Append(viewA.transform.DORotate(new Vector3(0f, 0f, 720f), 0.5f, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad));
+        seq.Join(viewB.transform.DORotate(new Vector3(0f, 0f, -720f), 0.5f, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad));
+
+        // Burst away
+        seq.Append(viewA.transform.DOScale(Vector3.zero, 0.2f).SetEase(Ease.InBack));
+        seq.Join(viewA.spriteRenderer.DOFade(0f, 0.2f));
+        seq.Join(viewB.transform.DOScale(Vector3.zero, 0.2f).SetEase(Ease.InBack));
+        seq.Join(viewB.spriteRenderer.DOFade(0f, 0.2f));
+
+        return seq.ToUniTask();
+    }
 }
