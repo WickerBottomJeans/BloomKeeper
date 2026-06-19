@@ -44,7 +44,10 @@ public class PetalViewManager : MonoBehaviour
 
     public PetalView GetView(int x, int y) => petalViews[x, y];
 
-    public async UniTask OnPetalsChanged(IReadOnlyList<PetalChange> changes, BoardLayout boardLayout)
+    public async UniTask OnPetalsChanged(
+        IReadOnlyList<PetalChange> changes,
+        BoardLayout boardLayout,
+        float duration)
     {
         var tasks = new List<UniTask>();
 
@@ -53,7 +56,11 @@ public class PetalViewManager : MonoBehaviour
             PetalView view = petalViews[change.Position.x, change.Position.y];
             if (view == null) continue;
 
-            tasks.Add(PetalViewAnimator.PlayPetalChange(view, change.After, boardLayout.CellSize));
+            tasks.Add(PetalViewAnimator.PlayPetalChange(
+                view,
+                change.After,
+                boardLayout.CellSize,
+                duration));
         }
 
         await UniTask.WhenAll(tasks);
@@ -75,7 +82,6 @@ public class PetalViewManager : MonoBehaviour
     public async UniTask OnMatchResolved(MatchResolveResult result, BoardLayout boardLayout)
     {
         await ClearPetalViews(result.ClearedPositions);
-        await ClearSkillCombinationPetalView(result.SkillComboPositions);
         await SpawnSkillPetalViews(result.SpawnedPetals, boardLayout);
     }
 
@@ -121,18 +127,25 @@ public class PetalViewManager : MonoBehaviour
         await UniTask.WhenAll(tasks);
     }
 
-    private async UniTask ClearSkillCombinationPetalView(List<Vector2Int> positions)
+    public UniTask PlayComboMerge(Vector2Int sourceA, Vector2Int sourceB)
     {
-        if (positions.Count == 0) return;
+        PetalView viewA = petalViews[sourceA.x, sourceA.y];
+        PetalView viewB = petalViews[sourceB.x, sourceB.y];
+        return PetalViewAnimator.PlayComboMerge(viewA, viewB);
+    }
 
-        PetalView viewA = petalViews[positions[0].x, positions[0].y];
-        PetalView viewB = petalViews[positions[1].x, positions[1].y];
+    public async UniTask PlayComboSpinAndRelease(
+        Vector2Int sourceA,
+        Vector2Int sourceB,
+        float duration)
+    {
+        PetalView viewA = petalViews[sourceA.x, sourceA.y];
+        PetalView viewB = petalViews[sourceB.x, sourceB.y];
 
-        petalViews[positions[0].x, positions[0].y] = null;
-        petalViews[positions[1].x, positions[1].y] = null;
+        await PetalViewAnimator.PlayComboSpinAndDisappear(viewA, viewB, duration);
 
-        await PetalViewAnimator.PlayComboFormation(viewA, viewB);
-
+        petalViews[sourceA.x, sourceA.y] = null;
+        petalViews[sourceB.x, sourceB.y] = null;
         pool.Release(viewA);
         pool.Release(viewB);
     }

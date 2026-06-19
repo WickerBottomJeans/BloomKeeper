@@ -85,7 +85,13 @@ namespace DefaultNamespace
 
             return new List<SkillActivation>
             {
-                new SkillActivation(sunburstCell, SpecialSkillType.StripeSunburst, selfPetal, null, new ComboData(targetType, stripeDirection))
+                new SkillActivation(
+                    sunburstCell,
+                    SpecialSkillType.StripeSunburst,
+                    selfPetal,
+                    null,
+                    new ComboData(targetType, stripeDirection, cellA, cellB),
+                    ((Vector2)cellA + (Vector2)cellB) * 0.5f)
             };
         }
     }

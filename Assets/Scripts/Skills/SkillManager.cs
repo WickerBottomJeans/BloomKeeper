@@ -20,24 +20,30 @@ namespace Skills
             {
                 case SpecialSkillType.StripedHorizontal:
                 case SpecialSkillType.StripedVertical:
-                    return new SkillUseResult(
+                    return CreateResult(
                         UseStripedSkill(grid, activation.Position, activation.SkillType, selfPetal));
                 case SpecialSkillType.Bouquet:
-                    return new SkillUseResult(UseBouquetSkill(grid, activation.Position, selfPetal));
+                    return CreateResult(
+                        UseBouquetSkill(grid, activation.Position, selfPetal));
                 case SpecialSkillType.Sunburst:
                     if (activation.CauserPetal?.PetalType == null || activation.CauserPetal.PetalType == PetalType.None)
                         throw new InvalidOperationException("Sunburst activated with no valid target petal type.");
-                    return new SkillUseResult(
+                    return CreateResult(
                         UseSunburstSkill(grid, activation.Position, activation.CauserPetal.PetalType, selfPetal));
                 case SpecialSkillType.Butterfly:
-                    return new SkillUseResult(UseButterflySkill(grid, selfPetal));
+                    return CreateResult(UseButterflySkill(grid, selfPetal));
                 case SpecialSkillType.StripeSunburst:
                     if (activation.Combo == null)
                         throw new InvalidOperationException("StripeSunburst activated with no ComboData.");
-                    return UseStripeSunburstSkill(grid, activation.Combo.TargetPetalType, activation.Combo.ComboSkillType, selfPetal);  
+                    return UseStripeSunburstSkill(grid, activation, selfPetal);
                 default:
                     throw new ArgumentException("Skill not implemented.", nameof(activation.SkillType));
             }
+        }
+
+        private static SkillUseResult CreateResult(MatchGroup matchGroup)
+        {
+            return new SkillUseResult(matchGroup);
         }
 
         private static MatchGroup UseStripedSkill(Tile[,] grid, Vector2Int skillPos, SpecialSkillType skillType, Petal causer)
@@ -125,23 +131,27 @@ namespace Skills
             return new MatchGroup(new List<Vector2Int> { target }, MatchShape.None, causer);
         }
         
-        private static SkillUseResult UseStripeSunburstSkill(Tile[,] grid, PetalType targetType,
-            SpecialSkillType stripeDirection, Petal causer)
+        private static SkillUseResult UseStripeSunburstSkill(
+            Tile[,] grid,
+            SkillActivation activation,
+            Petal causer)
         {
+            PetalType targetType = activation.Combo.TargetPetalType;
+            SpecialSkillType stripeDirection = activation.Combo.ComboSkillType;
             List<PetalChange> petalChanges = GiveSkillToPetalsOfType(grid, targetType, stripeDirection);
 
-            int cols = grid.GetLength(0);
-            int rows = grid.GetLength(1);
-            var tiles = new List<Vector2Int>();
+            var mutatedPositions = new List<Vector2Int>(petalChanges.Count);
+            foreach (PetalChange change in petalChanges)
+                mutatedPositions.Add(change.Position);
 
-            for (int x = 0; x < cols; x++)
-            for (int y = 0; y < rows; y++)
-            {
-                if (grid[x, y].Petal?.PetalType == targetType)
-                    tiles.Add(new Vector2Int(x, y));
-            }
+            var matchGroup = new MatchGroup(mutatedPositions, MatchShape.None, causer);
+            var representation = new StripeSunburstRepresentationData(
+                activation.Combo.SourceA,
+                activation.Combo.SourceB,
+                activation.EffectOrigin,
+                petalChanges);
 
-            return new SkillUseResult(new MatchGroup(tiles, MatchShape.None, causer), petalChanges);
+            return new SkillUseResult(matchGroup, representation);
         }
         
         private static List<PetalChange> GiveSkillToPetalsOfType(Tile[,] grid, PetalType targetType,

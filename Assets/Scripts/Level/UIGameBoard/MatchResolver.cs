@@ -42,8 +42,7 @@ namespace DefaultNamespace.UI
             allClearedForNeighborCheck.AddRange(skillComboPositions);
             NotifyNeighborsOfMatch(grid, allClearedForNeighborCheck, changedTiles);
 
-            return new MatchResolveResult(cleared, clearedPetalTypes, activations, pendingSpawns, changedTiles,
-                skillComboPositions);
+            return new MatchResolveResult(cleared, clearedPetalTypes, activations, pendingSpawns, changedTiles);
         }
 
 

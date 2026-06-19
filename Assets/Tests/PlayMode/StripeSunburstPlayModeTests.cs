@@ -72,7 +72,12 @@ public class StripeSunburstPlayModeTests
         Sprite initialSprite = liveRenderer.sprite;
         Assert.That(initialSprite, Is.Not.Null, "The initial Rose sprite should be loaded in PlayMode.");
 
-        object combo = Activator.CreateInstance(comboDataType, rose, horizontalStripe);
+        object combo = Activator.CreateInstance(
+            comboDataType,
+            rose,
+            horizontalStripe,
+            Vector2Int.zero,
+            Vector2Int.right);
         object selfPetal = Activator.CreateInstance(petalType, rose, stripeSunburst);
         object activation = Activator.CreateInstance(
             skillActivationType,
@@ -80,19 +85,21 @@ public class StripeSunburstPlayModeTests
             stripeSunburst,
             selfPetal,
             null,
-            combo);
+            combo,
+            Vector2.zero);
 
         object result = skillManagerType
             .GetMethod("UseSkill", BindingFlags.Public | BindingFlags.Static)
             .Invoke(null, new[] { grid, activation });
-        object changes = result.GetType().GetProperty("PetalChanges").GetValue(result);
+        object representation = result.GetType().GetProperty("Representation").GetValue(result);
+        object changes = representation.GetType().GetProperty("Changes").GetValue(representation);
 
         Assert.That(((ICollection)changes).Count, Is.EqualTo(1),
             "The single Rose petal should be reported as changed.");
 
         object changeTask = petalViewManagerType
             .GetMethod("OnPetalsChanged")
-            .Invoke(petalViewManager, new[] { changes, layout });
+            .Invoke(petalViewManager, new[] { changes, layout, (object)2f });
         PropertyInfo statusProperty = changeTask.GetType().GetProperty("Status");
         yield return new WaitUntil(() => statusProperty.GetValue(changeTask).ToString() != "Pending");
 

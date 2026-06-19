@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
 using DefaultNamespace.UI;
+using DefaultNamespace.VFX;
 using Petals;
 using Skills;
 using UnityEditor;
@@ -18,6 +18,8 @@ public class GameBoard : MonoBehaviour
     [SerializeField] private float paddingY = 0.05f;
     [SerializeField] private PetalViewManager petalViewManager;
     [SerializeField] private TileViewManager tileViewManager;
+    [SerializeField] private BoardVFXManager boardVFXManager;
+    [SerializeField] private SkillRepresentationOrchestrator skillRepresentationOrchestrator;
 
     [SerializeField] private BoardInputHandler boardInputHandler;
 
@@ -67,6 +69,11 @@ public class GameBoard : MonoBehaviour
 
         petalViewManager.Init(grid, layout);
         tileViewManager.Init(grid, layout);
+        boardVFXManager.Init(layout);
+        skillRepresentationOrchestrator.Init(
+            petalViewManager,
+            boardVFXManager,
+            layout);
 
         boardInputHandler.Init(layout, cam);
 
@@ -180,17 +187,17 @@ public class GameBoard : MonoBehaviour
         }
 
         pendingMatches = new List<MatchGroup>();
-        var petalChanges = new List<PetalChange>();
+        var skillResults = new List<SkillUseResult>();
 
         foreach (SkillActivation activation in pendingSkillActivations)
         {
             SkillUseResult result = SkillManager.UseSkill(grid, activation);
+            skillResults.Add(result);
             pendingMatches.Add(result.MatchGroup);
-            petalChanges.AddRange(result.PetalChanges);
         }
 
         pendingSkillActivations.Clear();
-        await petalViewManager.OnPetalsChanged(petalChanges, layout);
+        await skillRepresentationOrchestrator.Play(skillResults);
         TransitionTo(BoardState.Resolving);
     }
 

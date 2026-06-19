@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using Skills;
+using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
@@ -6,17 +8,26 @@ namespace DefaultNamespace.UI
     {
         public PetalType TargetPetalType;
         public SpecialSkillType ComboSkillType;
+        public Vector2Int SourceA;
+        public Vector2Int SourceB;
 
-        public ComboData(PetalType targetPetalType, SpecialSkillType comboSkillType)
+        public ComboData(
+            PetalType targetPetalType,
+            SpecialSkillType comboSkillType,
+            Vector2Int sourceA,
+            Vector2Int sourceB)
         {
             TargetPetalType = targetPetalType;
             ComboSkillType = comboSkillType;
+            SourceA = sourceA;
+            SourceB = sourceB;
         }
     }
     
     public struct SkillActivation
     {
         public Vector2Int Position;
+        public Vector2 EffectOrigin;
         public SpecialSkillType SkillType;
         public ComboData Combo;
         /// <summary>
@@ -28,9 +39,10 @@ namespace DefaultNamespace.UI
         public Petal SelfPetal;
 
         public SkillActivation(Vector2Int position, SpecialSkillType skillType, Petal selfPetal,
-            Petal causerPetal = null, ComboData combo = null)
+            Petal causerPetal = null, ComboData combo = null, Vector2? effectOrigin = null)
         {
             Position = position;
+            EffectOrigin = effectOrigin ?? position;
             SkillType = skillType;
             CauserPetal = causerPetal;
             SelfPetal = selfPetal;
@@ -55,13 +67,15 @@ namespace DefaultNamespace.UI
     public sealed class SkillUseResult
     {
         public MatchGroup MatchGroup { get; }
-        public System.Collections.Generic.IReadOnlyList<PetalChange> PetalChanges { get; }
+        public SkillRepresentationData Representation { get; }
 
-        public SkillUseResult(MatchGroup matchGroup,
-            System.Collections.Generic.IReadOnlyList<PetalChange> petalChanges = null)
+        public SkillUseResult(
+            MatchGroup matchGroup,
+            SkillRepresentationData representation = null)
         {
             MatchGroup = matchGroup;
-            PetalChanges = petalChanges ?? System.Array.Empty<PetalChange>();
+            Representation = representation;
         }
     }
+
 }

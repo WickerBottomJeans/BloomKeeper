@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 2760625105494387680}
   - component: {fileID: 6124048787579082683}
   - component: {fileID: 3912862298464110975}
+  - component: {fileID: 5176382947618204359}
+  - component: {fileID: 8200000000000000001}
   m_Layer: 0
   m_Name: GameBoard
   m_TagString: Untagged
@@ -58,6 +60,8 @@ MonoBehaviour:
   paddingY: 0.05
   petalViewManager: {fileID: 5895882996990725671}
   tileViewManager: {fileID: 3912862298464110975}
+  boardVFXManager: {fileID: 5176382947618204359}
+  skillRepresentationOrchestrator: {fileID: 8200000000000000001}
   boardInputHandler: {fileID: 7623217431080173358}
   boardTexture: {fileID: 2800000, guid: e8a9b3242574c2347a3db89faa1e20a1, type: 3}
 --- !u!114 &5895882996990725671
@@ -73,7 +77,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PetalViewManager
   petalViewPrefab: {fileID: -6833885268692914070, guid: 7a48f9880054d734796259e75aecdae6, type: 3}
-  petalSpriteConfig: {fileID: 11400000, guid: f146145119daff74296960ec3e950014, type: 2}
 --- !u!114 &7623217431080173358
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -87,6 +90,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoardInputHandler
   dragThresholdPx: 20
+  doubleTapInterval: 0.3
 --- !u!222 &-6730967265607117894
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -165,3 +169,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.TileViewManager
   _tileViewPrefab: {fileID: 3171136553859467040, guid: fba785c9e7b48414b9ebf792fbe5c6f0, type: 3}
+--- !u!114 &5176382947618204359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2829020016292998654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cca8974665df9d84494be6fe2818d446, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.VFX.BoardVFXManager
+  mutationLaserPrefab: {fileID: 985442930338887914, guid: 5caaf1731217f4f4990777f336c60df4, type: 3}
+  mutationLaserOriginPrefab: {fileID: 2445573516330377593, guid: b3220e6ac9bef1240805532206e38a17, type: 3}
+  laserRoot: {fileID: 0}
+  mutationLaserWidthRatio: 0.12
+--- !u!114 &8200000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2829020016292998654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77c5198bd7b7472c80994024e74f3ae6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Skills.SkillRepresentationOrchestrator
+  stripeSunburstSpinDuration: 1
+  stripeSunburstMutationDuration: 1
+  stripeSunburstLaserDuration: 1
+  stripeSunburstLaserChargeUpDuration: 0.2
