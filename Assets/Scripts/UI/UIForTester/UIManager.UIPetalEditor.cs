@@ -46,7 +46,7 @@ namespace DefaultNamespace.UI
             UIPositionHelper.ConvertWorldToCanvasAndClampPopupPosition(
                 petalEditorInstance.GetComponent<RectTransform>(),
                 canvas,
-                screenPos
+                screenPos, 3f
             );
         }
     }
