@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2445573516330377593}
   - component: {fileID: 3497555220779039938}
   m_Layer: 0
-  m_Name: VFX_HeartVortex_Pink
+  m_Name: VFX_HeartVortex_Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4783,7 +4783,7 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: f298f360e2087d64eb877a0fe23e0f8a, type: 2}
-  - {fileID: -876546973899608171, guid: c7fb1874795bca245b4661453ee196ff, type: 3}
+  - {fileID: 2100000, guid: 1b1e37bfa5d85394ab94d73ffb1bdce0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
