@@ -80,13 +80,12 @@ public class PetalViewManager : MonoBehaviour
         petalViews[cellA.x, cellA.y] = viewB;
         petalViews[cellB.x, cellB.y] = viewA;
     }
-    public async UniTask OnMatchResolved(MatchResolveResult result, BoardLayout boardLayout)
+    public UniTask PlayNormalRemovals(IReadOnlyList<Vector2Int> positions)
     {
-        await ClearPetalViews(result.ClearedPositions);
-        await SpawnSkillPetalViews(result.SpawnedPetals, boardLayout);
+        return ClearPetalViews(positions);
     }
 
-    private async UniTask ClearPetalViews(List<Vector2Int> cleared)
+    private async UniTask ClearPetalViews(IReadOnlyList<Vector2Int> cleared)
     {
         var tasks = new List<UniTask>();
         foreach (Vector2Int cell in cleared)
@@ -123,49 +122,6 @@ public class PetalViewManager : MonoBehaviour
         await UniTask.WhenAll(tasks);
     }
 
-    public async UniTask PlayStripedDisappear(Vector2Int source, bool isVertical, float duration)
-    {
-        var disappearTasks = new List<UniTask>();
-        int maxDistance = 0;
-        int lineLength = isVertical ? petalViews.GetLength(1) : petalViews.GetLength(0);
-
-        //Get the max distance from the source to the sides
-        for (int i = 0; i < lineLength; i++)
-        {
-            int x = isVertical ? source.x : i;
-            int y = isVertical ? i : source.y;
-            if (petalViews[x, y] != null)
-                maxDistance = Mathf.Max(maxDistance, Mathf.Abs(i - (isVertical ? source.y : source.x)));
-        }
-        
-        float stepDuration = maxDistance > 0 ? duration / maxDistance : duration;
-
-        for (int distance = 0; distance <= maxDistance; distance++)
-        {
-            int directionCount = distance == 0 ? 1 : 2;
-
-            for (int direction = 0; direction < directionCount; direction++)
-            {
-                int offset = direction == 0 ? distance : -distance;
-                Vector2Int position = isVertical ? new Vector2Int(source.x, source.y + offset) : new Vector2Int(source.x + offset, source.y);
-
-                if (position.x < 0 || position.x >= petalViews.GetLength(0) || position.y < 0 || position.y >= petalViews.GetLength(1))
-                    continue;
-
-                PetalView view = petalViews[position.x, position.y];
-                if (view == null) continue;
-
-                petalViews[position.x, position.y] = null;
-                disappearTasks.Add(DisappearAndRelease(view, stepDuration));
-            }
-
-            if (distance < maxDistance)
-                await UniTask.Delay(TimeSpan.FromSeconds(stepDuration));
-        }
-
-        await UniTask.WhenAll(disappearTasks);
-    }
-
     private async UniTask DisappearAndRelease(PetalView view, float duration)
     {
         await PetalViewAnimator.PlayDisappear(view, duration);
@@ -182,7 +138,9 @@ public class PetalViewManager : MonoBehaviour
         return PetalViewAnimator.PlayFly(view, targetWorldPosition, duration);
     }
     
-    private async UniTask SpawnSkillPetalViews(List<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> spawns, BoardLayout boardLayout)
+    public async UniTask PlaySpawnedPetals(
+        IReadOnlyList<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> spawns,
+        BoardLayout boardLayout)
     {
         var tasks = new List<UniTask>();
 

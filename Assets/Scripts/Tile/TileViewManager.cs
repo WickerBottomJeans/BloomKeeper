@@ -62,13 +62,13 @@ namespace DefaultNamespace
         /// <summary>
         /// Refreshes tile views for all tiles that changed state during match resolution
         /// </summary>
-        /// <param name="result"></param>
+        /// <param name="changedTiles"></param>
         /// <param name="grid"></param>
-        public async UniTask OnMatchResolved(MatchResolveResult result, Tile[,] grid)
+        public async UniTask PlayTileChanges(List<Vector2Int> changedTiles, Tile[,] grid)
         {
             var transitionTasks = new List<UniTask>();
 
-            foreach (Vector2Int pos in result.ChangedTiles)
+            foreach (Vector2Int pos in changedTiles)
             {
                 TileView view = _views[pos.x, pos.y];
                 Tile tile = grid[pos.x, pos.y];

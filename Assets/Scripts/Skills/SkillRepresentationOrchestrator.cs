@@ -27,49 +27,46 @@ namespace Skills
         [SerializeField] private float stripeSunburstLaserChargeUpDuration = 0.5f;
 
         private PetalViewManager petalViewManager;
+        private TileViewManager tileViewManager;
         private BoardVFXManager boardVFXManager;
         private BoardLayout layout;
+        private Tile[,] grid;
 
-        public void Init(
-            PetalViewManager petalViewManager,
-            BoardVFXManager boardVFXManager,
-            BoardLayout layout)
+        public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager,
+            BoardVFXManager boardVFXManager, BoardLayout layout, Tile[,] grid)
         {
             this.petalViewManager = petalViewManager;
+            this.tileViewManager = tileViewManager;
             this.boardVFXManager = boardVFXManager;
             this.layout = layout;
+            this.grid = grid;
         }
 
-        public async UniTask Play(IReadOnlyList<SkillUseResult> skillResults)
+        public UniTask Play(SkillUseResult skillResult, MatchGroupResolveResult resolution)
         {
-            var tasks = new List<UniTask>(skillResults.Count);
-
-            foreach (SkillUseResult result in skillResults)
-                tasks.Add(Play(result.Representation));
-
-            await UniTask.WhenAll(tasks);
+            return Play(skillResult.Representation, resolution);
         }
 
-        private async UniTask Play(SkillRepresentationData representation)
+        private async UniTask Play(SkillRepresentationData representation, MatchGroupResolveResult resolution)
         {
             switch (representation)
             {
                 case null:
                     return;
                 case BouquetRepresentationData bouquet:
-                    await PlayBouquet(bouquet);
+                    await PlayBouquet(bouquet, resolution);
                     return;
                 case StripedRepresentationData striped:
-                    bool isVertical = striped.Direction == SpecialSkillType.StripedVertical;
-                    await UniTask.WhenAll(
-                        boardVFXManager.PlayStripedSkillVFX(striped.Source, isVertical, stripedPropagationDuration),
-                        petalViewManager.PlayStripedDisappear(striped.Source, isVertical, stripedPropagationDuration));
+                    await PlayStriped(striped, resolution);
                     return;
                 case ButterflyRepresentationData butterfly:
-                    await PlayButterfly(butterfly);
+                    await PlayButterfly(butterfly, resolution);
+                    return;
+                case SunburstRepresentationData sunburst:
+                    await PlaySunburst(sunburst, resolution);
                     return;
                 case StripeSunburstRepresentationData stripeSunburst:
-                    await PlayStripeSunburst(stripeSunburst);
+                    await PlayStripeSunburst(stripeSunburst, resolution);
                     return;
                 default:
                     throw new ArgumentOutOfRangeException(
@@ -79,30 +76,110 @@ namespace Skills
             }
         }
 
-        private async UniTask PlayBouquet(BouquetRepresentationData representation)
+        private async UniTask PlayBouquet(BouquetRepresentationData representation, MatchGroupResolveResult resolution)
         {
+            HashSet<Vector2Int> removedPositions = GetRemovedPositions(resolution);
+            removedPositions.Add(representation.Center);
             UniTask disappearTask = petalViewManager.PlayDisappearAndRelease(
-                representation.AffectedPositions,
+                new List<Vector2Int>(removedPositions),
                 bouquetDisappearDuration);
 
             UniTask bloomTask = boardVFXManager.PlayBouquetBloomVFX(representation.Center);
+            UniTask tileTask = PlayTileChanges(resolution);
 
-            await UniTask.WhenAll(disappearTask, bloomTask);
+            await UniTask.WhenAll(disappearTask, bloomTask, tileTask);
         }
 
-        private async UniTask PlayButterfly(ButterflyRepresentationData representation)
+        private async UniTask PlayStriped(StripedRepresentationData representation,
+            MatchGroupResolveResult resolution)
+        {
+            bool isVertical = representation.Direction == SpecialSkillType.StripedVertical;
+            HashSet<Vector2Int> removedPositions = GetRemovedPositions(resolution);
+            HashSet<Vector2Int> changedPositions = GetChangedPositions(resolution);
+            var patternPositions = new HashSet<Vector2Int> { representation.Source };
+            removedPositions.Add(representation.Source);
+
+            foreach (var impact in resolution.Impacts)
+                patternPositions.Add(impact.Position);
+
+            int maxDistance = 0;
+            foreach (Vector2Int position in patternPositions)
+            {
+                int distance = isVertical
+                    ? Mathf.Abs(position.y - representation.Source.y)
+                    : Mathf.Abs(position.x - representation.Source.x);
+                maxDistance = Mathf.Max(maxDistance, distance);
+            }
+
+            float stepDuration = maxDistance > 0
+                ? stripedPropagationDuration / maxDistance
+                : stripedPropagationDuration;
+            var tasks = new List<UniTask>
+            {
+                boardVFXManager.PlayStripedSkillVFX(
+                    representation.Source, isVertical, stripedPropagationDuration)
+            };
+
+            for (int distance = 0; distance <= maxDistance; distance++)
+            {
+                var petalWave = new List<Vector2Int>();
+                var tileWave = new List<Vector2Int>();
+                int directionCount = distance == 0 ? 1 : 2;
+
+                for (int direction = 0; direction < directionCount; direction++)
+                {
+                    int offset = direction == 0 ? distance : -distance;
+                    Vector2Int position = isVertical
+                        ? new Vector2Int(representation.Source.x, representation.Source.y + offset)
+                        : new Vector2Int(representation.Source.x + offset, representation.Source.y);
+
+                    if (removedPositions.Contains(position)) petalWave.Add(position);
+                    if (changedPositions.Contains(position)) tileWave.Add(position);
+                }
+
+                tasks.Add(petalViewManager.PlayDisappearAndRelease(petalWave, stepDuration));
+                tasks.Add(tileViewManager.PlayTileChanges(tileWave, grid));
+
+                if (distance < maxDistance)
+                    await UniTask.Delay(TimeSpan.FromSeconds(stepDuration));
+            }
+
+            await UniTask.WhenAll(tasks);
+        }
+
+        private async UniTask PlayButterfly(ButterflyRepresentationData representation, MatchGroupResolveResult resolution)
         {
             if (!representation.Target.HasValue)
             {
-                await petalViewManager.PlayDisappearAndRelease(new[] { representation.Source }, butterflyDisappearDuration);
+                await UniTask.WhenAll(
+                    petalViewManager.PlayDisappearAndRelease(
+                        new[] { representation.Source }, butterflyDisappearDuration),
+                    PlayTileChanges(resolution));
                 return;
             }
 
             await petalViewManager.PlayFly(representation.Source, representation.Target.Value, layout, butterflyFlightDuration);
-            await petalViewManager.PlayDisappearAndRelease(new[] { representation.Source, representation.Target.Value }, butterflyDisappearDuration);
+            var disappearingPositions = new List<Vector2Int> { representation.Source };
+            if (WasPetalRemovedAt(resolution, representation.Target.Value) &&
+                representation.Target.Value != representation.Source)
+                disappearingPositions.Add(representation.Target.Value);
+            await UniTask.WhenAll(
+                petalViewManager.PlayDisappearAndRelease(disappearingPositions, butterflyDisappearDuration),
+                PlayTileChanges(resolution));
         }
 
-        private async UniTask PlayStripeSunburst(StripeSunburstRepresentationData representation)
+        private UniTask PlaySunburst(SunburstRepresentationData representation,
+            MatchGroupResolveResult resolution)
+        {
+            HashSet<Vector2Int> removedPositions = GetRemovedPositions(resolution);
+            removedPositions.Add(representation.Source);
+            return UniTask.WhenAll(
+                petalViewManager.PlayNormalRemovals(new List<Vector2Int>(removedPositions)),
+                PlayTileChanges(resolution));
+        }
+
+        private async UniTask PlayStripeSunburst(StripeSunburstRepresentationData representation,
+            MatchGroupResolveResult resolution)
         {
             UniTask mergeTask = petalViewManager.PlayComboMerge(representation.SourceA, representation.SourceB);
 
@@ -123,12 +200,57 @@ namespace Skills
                 representation.Changes,
                 layout,
                 stripeSunburstMutationDuration);
+            UniTask tileTask = PlayTileChanges(resolution);
 
             await UniTask.WhenAll(
                 mergeTask,
                 spinTask,
                 mutationTask,
+                tileTask,
                 laserTask);
+        }
+
+        private static HashSet<Vector2Int> GetRemovedPositions(MatchGroupResolveResult resolution)
+        {
+            var positions = new HashSet<Vector2Int>();
+            foreach (var impact in resolution.Impacts)
+            {
+                if (impact.Outcome.RemovedPetal != null)
+                    positions.Add(impact.Position);
+            }
+            return positions;
+        }
+
+        private static HashSet<Vector2Int> GetChangedPositions(MatchGroupResolveResult resolution)
+        {
+            var positions = new HashSet<Vector2Int>();
+            foreach (var impact in resolution.Impacts)
+            {
+                if (impact.Outcome.TileChanged)
+                    positions.Add(impact.Position);
+            }
+            return positions;
+        }
+
+        private static bool WasPetalRemovedAt(MatchGroupResolveResult resolution, Vector2Int position)
+        {
+            foreach (var impact in resolution.Impacts)
+            {
+                if (impact.Position == position && impact.Outcome.RemovedPetal != null)
+                    return true;
+            }
+            return false;
+        }
+
+        private UniTask PlayTileChanges(MatchGroupResolveResult resolution)
+        {
+            var changedPositions = new List<Vector2Int>();
+            foreach (var impact in resolution.Impacts)
+            {
+                if (impact.Outcome.TileChanged)
+                    changedPositions.Add(impact.Position);
+            }
+            return tileViewManager.PlayTileChanges(changedPositions, grid);
         }
     }
 }

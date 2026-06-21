@@ -41,6 +41,8 @@ public class GameBoard : MonoBehaviour
     private List<MatchGroup> pendingMatches;
     private List<(Vector2Int from, Vector2Int to)> pendingMoves;
     private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
+    private List<SkillUseResult> pendingSkillResults = new List<SkillUseResult>();
+    private MatchPresentationCoordinator matchPresentationCoordinator;
 
     private enum BoardState
     {
@@ -72,9 +74,9 @@ public class GameBoard : MonoBehaviour
         tileViewManager.Init(grid, layout);
         boardVFXManager.Init(layout);
         skillRepresentationOrchestrator.Init(
-            petalViewManager,
-            boardVFXManager,
-            layout);
+            petalViewManager, tileViewManager, boardVFXManager, layout, grid);
+        matchPresentationCoordinator = new MatchPresentationCoordinator(
+            petalViewManager, tileViewManager, skillRepresentationOrchestrator, layout);
 
         boardInputHandler.Init(layout, cam);
 
@@ -134,6 +136,7 @@ public class GameBoard : MonoBehaviour
     private async UniTask EnterSwapping()
     {
         pendingSkillActivations.Clear();
+        pendingSkillResults.Clear();
         pendingMatches = new List<MatchGroup>();
 
         PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
@@ -172,11 +175,9 @@ public class GameBoard : MonoBehaviour
         pendingMatches.Clear();
         pendingSkillActivations.AddRange(result.SkillActivations);
         OnPetalsCleared?.Invoke(result.ClearedPetalTypes);
-        await UniTask.WhenAll(
-            tileViewManager.OnMatchResolved(result, grid),
-            petalViewManager.OnMatchResolved(result, layout)
-        );
-            TransitionTo(BoardState.ActivatingSkills);
+        await matchPresentationCoordinator.Play(result, pendingSkillResults, grid);
+        pendingSkillResults.Clear();
+        TransitionTo(BoardState.ActivatingSkills);
     }
 
     private async UniTask EnterActivatingSkills()
@@ -188,17 +189,16 @@ public class GameBoard : MonoBehaviour
         }
 
         pendingMatches = new List<MatchGroup>();
-        var skillResults = new List<SkillUseResult>();
+        pendingSkillResults.Clear();
 
         foreach (SkillActivation activation in pendingSkillActivations)
         {
             SkillUseResult result = SkillManager.UseSkill(grid, activation);
-            skillResults.Add(result);
+            pendingSkillResults.Add(result);
             pendingMatches.Add(result.MatchGroup);
         }
 
         pendingSkillActivations.Clear();
-        await skillRepresentationOrchestrator.Play(skillResults);
         TransitionTo(BoardState.Resolving);
     }
 

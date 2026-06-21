@@ -25,43 +25,40 @@ namespace DefaultNamespace.UI
             Vector2Int swapTarget)
         {
             var activations = new List<SkillActivation>();
-            var cleared = new List<Vector2Int>();
+            var groupResults = new List<MatchGroupResolveResult>(matches.Count);
+            var removedPositions = new List<Vector2Int>();
             var clearedPetalTypes = new List<PetalType>();
             var pendingSpawns = new List<(Vector2Int, PetalType, SpecialSkillType)>();
-            var changedTiles = new List<Vector2Int>();
-            var skillComboPositions = new List<Vector2Int>();
+            var adjacentTileChanges = new List<Vector2Int>();
 
             foreach (MatchGroup match in matches)
             {
-                ProcessMatch(match, grid, swapOrigin, swapTarget, activations, cleared, clearedPetalTypes,
-                    pendingSpawns, changedTiles, skillComboPositions);
+                MatchGroupResolveResult groupResult = ProcessMatch(match, grid, swapOrigin, swapTarget,
+                    activations, removedPositions, clearedPetalTypes, pendingSpawns);
+                groupResults.Add(groupResult);
             }
 
             ApplyPendingSpawns(grid, pendingSpawns);
 
-            var allClearedForNeighborCheck = new List<Vector2Int>(cleared);
-            allClearedForNeighborCheck.AddRange(skillComboPositions);
-            NotifyNeighborsOfMatch(grid, allClearedForNeighborCheck, changedTiles);
+            NotifyNeighborsOfMatch(grid, removedPositions, adjacentTileChanges);
 
-            return new MatchResolveResult(cleared, clearedPetalTypes, activations, pendingSpawns, changedTiles);
+            return new MatchResolveResult(groupResults, clearedPetalTypes, activations, pendingSpawns,
+                adjacentTileChanges);
         }
 
 
-        private static void ProcessMatch(
+        private static MatchGroupResolveResult ProcessMatch(
             MatchGroup match,
             Tile[,] grid,
             Vector2Int swapOrigin,
             Vector2Int swapTarget,
             List<SkillActivation> activations,
-            List<Vector2Int> cleared,
+            List<Vector2Int> removedPositions,
             List<PetalType> clearedPetalTypes,
-            List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns,
-            List<Vector2Int> changedTiles,
-            List<Vector2Int> skillComboPositions)
+            List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns)
         {
             TryQueueSkillSpawn(match, grid, swapOrigin, swapTarget, pendingSpawns);
-            ClearMatchTiles(match, grid, activations, cleared, clearedPetalTypes, changedTiles,
-                skillComboPositions);
+            return ClearMatchTiles(match, grid, activations, removedPositions, clearedPetalTypes);
         }
 
         private static void TryQueueSkillSpawn(
@@ -100,23 +97,20 @@ namespace DefaultNamespace.UI
             pendingSpawns.Add((spawnPos, matchedType, spawnSkill.Value));
         }
 
-        private static void ClearMatchTiles(
+        private static MatchGroupResolveResult ClearMatchTiles(
             MatchGroup match,
             Tile[,] grid,
             List<SkillActivation> activations,
-            List<Vector2Int> cleared,
-            List<PetalType> clearedPetalTypes,
-            List<Vector2Int> changedTiles,
-            List<Vector2Int> skillComboPositions)
+            List<Vector2Int> removedPositions,
+            List<PetalType> clearedPetalTypes)
         {
-            bool isFromSkillExecution = match?.Causer != null && match.Causer.Skill != SpecialSkillType.None;
+            var impacts = new List<(Vector2Int Position, TileImpactResult Outcome)>(match.TilePositions.Count);
+
             foreach (Vector2Int cell in match.TilePositions)
             {
                 Tile tile = grid[cell.x, cell.y];
                 TileImpactResult impactResult = tile.ApplyClearEffect();
-
-                if (impactResult.TileChanged && !changedTiles.Contains(cell))
-                    changedTiles.Add(cell);
+                impacts.Add((cell, impactResult));
 
                 Petal petal = impactResult.RemovedPetal;
                 if (petal == null) continue;
@@ -125,20 +119,12 @@ namespace DefaultNamespace.UI
                 {
                     activations.Add(new SkillActivation(cell, petal.Skill, petal, match.Causer != null ? new Petal(match.Causer) : null));
                 }
+
+                removedPositions.Add(cell);
                 clearedPetalTypes.Add(petal.PetalType);
-                
-                //These cases belong to a different VFX system
-                if (match.IsFromSkillCombo || isFromSkillExecution || petal.Skill != SpecialSkillType.None)
-                {
-                    if (!skillComboPositions.Contains(cell))
-                        skillComboPositions.Add(cell);
-                }
-                //TODO: since skill have a fancy VFX classs, should normal petals have one too?
-                else
-                {
-                    cleared.Add(cell);
-                }
             }
+
+            return new MatchGroupResolveResult(match, impacts);
         }
 
         private static void ApplyPendingSpawns(Tile[,] grid,

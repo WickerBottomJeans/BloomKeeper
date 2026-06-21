@@ -55,6 +55,16 @@ namespace Skills
         }
     }
 
+    public sealed class SunburstRepresentationData : SkillRepresentationData
+    {
+        public Vector2Int Source { get; }
+
+        public SunburstRepresentationData(Vector2Int source)
+        {
+            Source = source;
+        }
+    }
+
     public sealed class StripeSunburstRepresentationData : SkillRepresentationData
     {
         public Vector2Int SourceA { get; }

@@ -26,8 +26,9 @@ namespace Skills
                 case SpecialSkillType.Sunburst:
                     if (activation.CauserPetal?.PetalType == null || activation.CauserPetal.PetalType == PetalType.None)
                         throw new InvalidOperationException("Sunburst activated with no valid target petal type.");
-                    return CreateResult(
-                        UseSunburstSkill(grid, activation.Position, activation.CauserPetal.PetalType, selfPetal));
+                    MatchGroup sunburstMatch = UseSunburstSkill(
+                        grid, activation.Position, activation.CauserPetal.PetalType, selfPetal);
+                    return new SkillUseResult(sunburstMatch, new SunburstRepresentationData(activation.Position));
                 case SpecialSkillType.Butterfly:
                     return UseButterflySkill(grid, activation.Position, selfPetal);
                 case SpecialSkillType.StripeSunburst:
@@ -37,11 +38,6 @@ namespace Skills
                 default:
                     throw new ArgumentException("Skill not implemented.", nameof(activation.SkillType));
             }
-        }
-
-        private static SkillUseResult CreateResult(MatchGroup matchGroup)
-        {
-            return new SkillUseResult(matchGroup);
         }
 
         private static SkillUseResult UseStripedSkill(
