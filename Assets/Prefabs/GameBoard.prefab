@@ -183,6 +183,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.VFX.BoardVFXManager
   mutationLaserPrefab: {fileID: 985442930338887914, guid: 5caaf1731217f4f4990777f336c60df4, type: 3}
   mutationLaserOriginPrefab: {fileID: 2445573516330377593, guid: b3220e6ac9bef1240805532206e38a17, type: 3}
+  bouquetBloomPrefab: {fileID: 6101317438218409531, guid: 61f3069a1d426ef4cb3ccb102796e50d, type: 3}
+  stripedSkillPrefab: {fileID: -1084145305644319253, guid: 50e5a9fe26adf834997a8212715a527d, type: 3}
   laserRoot: {fileID: 0}
   mutationLaserWidthRatio: 0.12
 --- !u!114 &8200000000000000001
@@ -197,6 +199,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77c5198bd7b7472c80994024e74f3ae6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Skills.SkillRepresentationOrchestrator
+  bouquetDisappearDuration: 0.2
+  stripedPropagationDuration: 0.5
   stripeSunburstSpinDuration: 1
   stripeSunburstMutationDuration: 1
   stripeSunburstLaserDuration: 1

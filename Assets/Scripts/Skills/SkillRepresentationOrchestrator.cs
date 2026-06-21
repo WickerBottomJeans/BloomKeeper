@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DefaultNamespace;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using UnityEngine;
@@ -9,6 +10,12 @@ namespace Skills
 {
     public class SkillRepresentationOrchestrator : MonoBehaviour
     {
+        [Header("Bouquet Timing")]
+        [SerializeField] private float bouquetDisappearDuration = 0.2f;
+
+        [Header("Striped Timing")]
+        [SerializeField] private float stripedPropagationDuration = 0.2f;
+
         [Header("Stripe Sunburst Timing")]
         [SerializeField] private float stripeSunburstSpinDuration = 2f;
         [SerializeField] private float stripeSunburstMutationDuration = 1f;
@@ -45,6 +52,15 @@ namespace Skills
             {
                 case null:
                     return;
+                case BouquetRepresentationData bouquet:
+                    await PlayBouquet(bouquet);
+                    return;
+                case StripedRepresentationData striped:
+                    bool isVertical = striped.Direction == SpecialSkillType.StripedVertical;
+                    await UniTask.WhenAll(
+                        boardVFXManager.PlayStripedSkillVFX(striped.Source, isVertical, stripedPropagationDuration),
+                        petalViewManager.PlayStripedDisappear(striped.Source, isVertical, stripedPropagationDuration));
+                    return;
                 case StripeSunburstRepresentationData stripeSunburst:
                     await PlayStripeSunburst(stripeSunburst);
                     return;
@@ -54,6 +70,17 @@ namespace Skills
                         representation.GetType(),
                         "Skill representation is not supported.");
             }
+        }
+
+        private async UniTask PlayBouquet(BouquetRepresentationData representation)
+        {
+            UniTask disappearTask = petalViewManager.PlayDisappearAndRelease(
+                representation.AffectedPositions,
+                bouquetDisappearDuration);
+
+            UniTask bloomTask = boardVFXManager.PlayBouquetBloomVFX(representation.Center);
+
+            await UniTask.WhenAll(disappearTask, bloomTask);
         }
 
         private async UniTask PlayStripeSunburst(StripeSunburstRepresentationData representation)

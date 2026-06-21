@@ -20,6 +20,13 @@ public static class PetalViewAnimator
         return seq.ToUniTask();
     }
 
+    public static UniTask PlayDisappear(PetalView view, float duration)
+    {
+        return view.transform.DOScale(Vector3.zero, duration)
+            .SetEase(Ease.InBack)
+            .ToUniTask();
+    }
+
     public static UniTask PlaySpawn(PetalView view)
     {
         view.transform.localScale = Vector3.zero;

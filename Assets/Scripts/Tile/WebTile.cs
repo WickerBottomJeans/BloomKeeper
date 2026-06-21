@@ -45,6 +45,7 @@ namespace DefaultNamespace
             return true;
         } 
         
+        //TODO: this doesnt look right, not controlled by boardVFX when affected by a skill. FIX THIS later :)
         public override bool OnAdjacentTileMatched()
         {
             return TryReduceWebLevel();

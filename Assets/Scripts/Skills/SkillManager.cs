@@ -20,11 +20,9 @@ namespace Skills
             {
                 case SpecialSkillType.StripedHorizontal:
                 case SpecialSkillType.StripedVertical:
-                    return CreateResult(
-                        UseStripedSkill(grid, activation.Position, activation.SkillType, selfPetal));
+                    return UseStripedSkill(grid, activation.Position, activation.SkillType, selfPetal);
                 case SpecialSkillType.Bouquet:
-                    return CreateResult(
-                        UseBouquetSkill(grid, activation.Position, selfPetal));
+                    return UseBouquetSkill(grid, activation.Position, selfPetal);
                 case SpecialSkillType.Sunburst:
                     if (activation.CauserPetal?.PetalType == null || activation.CauserPetal.PetalType == PetalType.None)
                         throw new InvalidOperationException("Sunburst activated with no valid target petal type.");
@@ -46,7 +44,11 @@ namespace Skills
             return new SkillUseResult(matchGroup);
         }
 
-        private static MatchGroup UseStripedSkill(Tile[,] grid, Vector2Int skillPos, SpecialSkillType skillType, Petal causer)
+        private static SkillUseResult UseStripedSkill(
+            Tile[,] grid,
+            Vector2Int skillPos,
+            SpecialSkillType skillType,
+            Petal causer)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -73,10 +75,12 @@ namespace Skills
                 throw new ArgumentException("Not a striped skill type.", nameof(skillType));
             }
 
-            return new MatchGroup(tiles, MatchShape.None, causer);
+            var matchGroup = new MatchGroup(tiles, MatchShape.None, causer);
+            var representation = new StripedRepresentationData(skillPos, skillType, tiles);
+            return new SkillUseResult(matchGroup, representation);
         }
         
-        public static MatchGroup UseBouquetSkill(Tile[,] grid, Vector2Int center, Petal causer)
+        public static SkillUseResult UseBouquetSkill(Tile[,] grid, Vector2Int center, Petal causer)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -89,7 +93,9 @@ namespace Skills
                 tiles.Add(new Vector2Int(x, y));
             }
 
-            return new MatchGroup(tiles, MatchShape.None, causer);
+            var matchGroup = new MatchGroup(tiles, MatchShape.None, causer);
+            var representation = new BouquetRepresentationData(center, tiles);
+            return new SkillUseResult(matchGroup, representation);
         }
         
         public static MatchGroup UseSunburstSkill(Tile[,] grid, Vector2Int position, PetalType targetType, Petal causer)

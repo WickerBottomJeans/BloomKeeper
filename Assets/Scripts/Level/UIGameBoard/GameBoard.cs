@@ -142,7 +142,7 @@ public class GameBoard : MonoBehaviour
 
         if (pendingSkillActivations.Count > 0)
         {
-            pendingMatches.Add(new MatchGroup(new List<Vector2Int> { swapOrigin, swapTarget }, MatchShape.None, isSkillCombo: true));
+            pendingMatches.Add(new MatchGroup(new List<Vector2Int> { swapOrigin, swapTarget }, MatchShape.None, isFromSkillCombo: true));
             TransitionTo(BoardState.Resolving);
             return;
         }

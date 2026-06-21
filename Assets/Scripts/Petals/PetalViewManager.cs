@@ -103,6 +103,73 @@ public class PetalViewManager : MonoBehaviour
         await PetalViewAnimator.PlayDestroy(view);
         pool.Release(view);
     }
+
+    public async UniTask PlayDisappearAndRelease(
+        IReadOnlyList<Vector2Int> positions,
+        float duration)
+    {
+        var tasks = new List<UniTask>();
+
+        foreach (Vector2Int position in positions)
+        {
+            PetalView view = petalViews[position.x, position.y];
+            if (view == null) continue;
+
+            petalViews[position.x, position.y] = null;
+            tasks.Add(DisappearAndRelease(view, duration));
+        }
+
+        await UniTask.WhenAll(tasks);
+    }
+
+    public async UniTask PlayStripedDisappear(Vector2Int source, bool isVertical, float duration)
+    {
+        var disappearTasks = new List<UniTask>();
+        int maxDistance = 0;
+        int lineLength = isVertical ? petalViews.GetLength(1) : petalViews.GetLength(0);
+
+        //Get the max distance from the source to the sides
+        for (int i = 0; i < lineLength; i++)
+        {
+            int x = isVertical ? source.x : i;
+            int y = isVertical ? i : source.y;
+            if (petalViews[x, y] != null)
+                maxDistance = Mathf.Max(maxDistance, Mathf.Abs(i - (isVertical ? source.y : source.x)));
+        }
+        
+        float stepDuration = maxDistance > 0 ? duration / maxDistance : duration;
+
+        for (int distance = 0; distance <= maxDistance; distance++)
+        {
+            int directionCount = distance == 0 ? 1 : 2;
+
+            for (int direction = 0; direction < directionCount; direction++)
+            {
+                int offset = direction == 0 ? distance : -distance;
+                Vector2Int position = isVertical ? new Vector2Int(source.x, source.y + offset) : new Vector2Int(source.x + offset, source.y);
+
+                if (position.x < 0 || position.x >= petalViews.GetLength(0) || position.y < 0 || position.y >= petalViews.GetLength(1))
+                    continue;
+
+                PetalView view = petalViews[position.x, position.y];
+                if (view == null) continue;
+
+                petalViews[position.x, position.y] = null;
+                disappearTasks.Add(DisappearAndRelease(view, stepDuration));
+            }
+
+            if (distance < maxDistance)
+                await UniTask.Delay(TimeSpan.FromSeconds(stepDuration));
+        }
+
+        await UniTask.WhenAll(disappearTasks);
+    }
+
+    private async UniTask DisappearAndRelease(PetalView view, float duration)
+    {
+        await PetalViewAnimator.PlayDisappear(view, duration);
+        pool.Release(view);
+    }
     
     //TODO: make this async
     private async UniTask SpawnSkillPetalViews(

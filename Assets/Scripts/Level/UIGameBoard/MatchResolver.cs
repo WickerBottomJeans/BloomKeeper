@@ -105,6 +105,7 @@ namespace DefaultNamespace.UI
             List<PetalType> clearedPetalTypes,
             List<Vector2Int> skillComboPositions)
         {
+            bool isFromSkillExecution = match?.Causer != null && match.Causer.Skill != SpecialSkillType.None;
             foreach (Vector2Int cell in match.TilePositions)
             {
                 Tile tile = grid[cell.x, cell.y];
@@ -112,15 +113,23 @@ namespace DefaultNamespace.UI
 
                 if (!tile.Resolve()) continue;
 
-                if (petal.Skill != SpecialSkillType.None && !match.IsSkillCombo)
-                    activations.Add(new SkillActivation(cell, petal.Skill, petal,
-                        match.Causer != null ? new Petal(match.Causer) : null));
+                if (petal.Skill != SpecialSkillType.None && !match.IsFromSkillCombo)
+                {
+                    activations.Add(new SkillActivation(cell, petal.Skill, petal, match.Causer != null ? new Petal(match.Causer) : null));
+                }
                 clearedPetalTypes.Add(petal.PetalType);
-
-                if (match.IsSkillCombo)
-                    skillComboPositions.Add(cell);
+                
+                //These cases belong to a different VFX system
+                if (match.IsFromSkillCombo || isFromSkillExecution || petal.Skill != SpecialSkillType.None)
+                {
+                    if (!skillComboPositions.Contains(cell))
+                        skillComboPositions.Add(cell);
+                }
+                //TODO: since skill have a fancy VFX classs, should normal petals have one too?
                 else
+                {
                     cleared.Add(cell);
+                }
             }
         }
 
