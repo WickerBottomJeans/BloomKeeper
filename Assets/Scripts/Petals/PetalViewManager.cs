@@ -9,6 +9,7 @@ using UnityEngine.Pool;
 
 public class PetalViewManager : MonoBehaviour
 {
+    //TODO: should this cache board layout, the layout dont really channge over time
     [SerializeField] private PetalView petalViewPrefab;
 
     private PetalView[,] petalViews;
@@ -168,13 +169,20 @@ public class PetalViewManager : MonoBehaviour
     private async UniTask DisappearAndRelease(PetalView view, float duration)
     {
         await PetalViewAnimator.PlayDisappear(view, duration);
+        view.transform.localRotation = Quaternion.identity;
         pool.Release(view);
     }
+
+    public UniTask PlayFly(Vector2Int sourceCell, Vector2Int targetCell, BoardLayout boardLayout, float duration)
+    {
+        PetalView view = petalViews[sourceCell.x, sourceCell.y];
+        if (view == null) return UniTask.CompletedTask;
+
+        Vector2 targetWorldPosition = boardLayout.GetCellWorldPos(targetCell.x, targetCell.y);
+        return PetalViewAnimator.PlayFly(view, targetWorldPosition, duration);
+    }
     
-    //TODO: make this async
-    private async UniTask SpawnSkillPetalViews(
-        List<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> spawns,
-        BoardLayout boardLayout)
+    private async UniTask SpawnSkillPetalViews(List<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> spawns, BoardLayout boardLayout)
     {
         var tasks = new List<UniTask>();
 

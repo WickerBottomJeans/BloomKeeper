@@ -20,10 +20,9 @@
         public abstract bool CanReceiveNewPetal();
 
         /// <summary>
-        /// Attempts to resolve this tile's current contents.
+        /// Applies an effect that attempts to clear this tile's petal.
         /// </summary>
-        /// <returns>True when a petal was removed; otherwise false.</returns>
-        public abstract bool Resolve();
+        public abstract TileImpactResult ApplyClearEffect();
 
         public virtual bool OnAdjacentTileMatched()
         {

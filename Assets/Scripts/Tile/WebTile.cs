@@ -37,12 +37,17 @@ namespace DefaultNamespace
             return webLevel == 0 && Petal == null; ;
         }
 
-        public override bool Resolve()
+        public override TileImpactResult ApplyClearEffect()
         {
-            if (Petal == null) return false;
+            if (TryReduceWebLevel())
+            {
+                return new TileImpactResult(null, true);
+            }
+            if (Petal == null) return new TileImpactResult(null, false);
 
+            Petal removedPetal = Petal;
             Petal = null;
-            return true;
+            return new TileImpactResult(removedPetal, false);
         } 
         
         //TODO: this doesnt look right, not controlled by boardVFX when affected by a skill. FIX THIS later :)

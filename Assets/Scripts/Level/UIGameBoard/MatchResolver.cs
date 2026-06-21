@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
+    //TODO: this should only decide what hapend to the grid ... when some cell get impacted (a match some ppl say)
     public static class MatchResolver
     {
 
@@ -33,7 +34,7 @@ namespace DefaultNamespace.UI
             foreach (MatchGroup match in matches)
             {
                 ProcessMatch(match, grid, swapOrigin, swapTarget, activations, cleared, clearedPetalTypes,
-                    pendingSpawns, skillComboPositions);
+                    pendingSpawns, changedTiles, skillComboPositions);
             }
 
             ApplyPendingSpawns(grid, pendingSpawns);
@@ -55,10 +56,12 @@ namespace DefaultNamespace.UI
             List<Vector2Int> cleared,
             List<PetalType> clearedPetalTypes,
             List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns,
+            List<Vector2Int> changedTiles,
             List<Vector2Int> skillComboPositions)
         {
             TryQueueSkillSpawn(match, grid, swapOrigin, swapTarget, pendingSpawns);
-            ClearMatchTiles(match, grid, activations, cleared, clearedPetalTypes, skillComboPositions);
+            ClearMatchTiles(match, grid, activations, cleared, clearedPetalTypes, changedTiles,
+                skillComboPositions);
         }
 
         private static void TryQueueSkillSpawn(
@@ -103,15 +106,20 @@ namespace DefaultNamespace.UI
             List<SkillActivation> activations,
             List<Vector2Int> cleared,
             List<PetalType> clearedPetalTypes,
+            List<Vector2Int> changedTiles,
             List<Vector2Int> skillComboPositions)
         {
             bool isFromSkillExecution = match?.Causer != null && match.Causer.Skill != SpecialSkillType.None;
             foreach (Vector2Int cell in match.TilePositions)
             {
                 Tile tile = grid[cell.x, cell.y];
-                Petal petal = tile.Petal;
+                TileImpactResult impactResult = tile.ApplyClearEffect();
 
-                if (!tile.Resolve()) continue;
+                if (impactResult.TileChanged && !changedTiles.Contains(cell))
+                    changedTiles.Add(cell);
+
+                Petal petal = impactResult.RemovedPetal;
+                if (petal == null) continue;
 
                 if (petal.Skill != SpecialSkillType.None && !match.IsFromSkillCombo)
                 {
@@ -208,7 +216,7 @@ namespace DefaultNamespace.UI
 
                     if (!notifiedTiles.Add(neighborPos))
                         continue;
-
+                    //TODO: one problem, wouldnt a web get its web destroy 3 times if a stripe get exeucted
                     bool changed = grid[neighborPos.x, neighborPos.y].OnAdjacentTileMatched();
                     if (changed)
                         changedTiles.Add(neighborPos);

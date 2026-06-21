@@ -29,7 +29,7 @@ namespace Skills
                     return CreateResult(
                         UseSunburstSkill(grid, activation.Position, activation.CauserPetal.PetalType, selfPetal));
                 case SpecialSkillType.Butterfly:
-                    return CreateResult(UseButterflySkill(grid, selfPetal));
+                    return UseButterflySkill(grid, activation.Position, selfPetal);
                 case SpecialSkillType.StripeSunburst:
                     if (activation.Combo == null)
                         throw new InvalidOperationException("StripeSunburst activated with no ComboData.");
@@ -114,7 +114,7 @@ namespace Skills
             return new MatchGroup(tiles, MatchShape.None, causer);
         }
         
-        public static MatchGroup UseButterflySkill(Tile[,] grid, Petal causer)
+        public static SkillUseResult UseButterflySkill(Tile[,] grid, Vector2Int source, Petal causer)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -131,10 +131,19 @@ namespace Skills
             }
 
             List<Vector2Int> pool = webTiles.Count > 0 ? webTiles : allTiles;
-            if (pool.Count == 0) return new MatchGroup(new List<Vector2Int>(), MatchShape.None);
+            if (pool.Count == 0)
+            {
+                //TODO: test this case
+                Debug.LogWarning("ButterFly have no place to fly to");
+                var emptyMatch = new MatchGroup(new List<Vector2Int>(), MatchShape.None, causer);
+                var emptyRepresentation = new ButterflyRepresentationData(source, null);
+                return new SkillUseResult(emptyMatch, emptyRepresentation);
+            }
 
             Vector2Int target = pool[rng.Next(pool.Count)];
-            return new MatchGroup(new List<Vector2Int> { target }, MatchShape.None, causer);
+            var matchGroup = new MatchGroup(new List<Vector2Int> { target }, MatchShape.None, causer);
+            var representation = new ButterflyRepresentationData(source, target);
+            return new SkillUseResult(matchGroup, representation);
         }
         
         private static SkillUseResult UseStripeSunburstSkill(

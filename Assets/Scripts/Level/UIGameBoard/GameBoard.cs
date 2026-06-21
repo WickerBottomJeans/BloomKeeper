@@ -14,6 +14,7 @@ using Utility;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class GameBoard : MonoBehaviour
 {
+    //TODO: maybe make the about to active petal to like blink blink or sth
     [SerializeField] private float paddingX = 0.05f;
     [SerializeField] private float paddingY = 0.05f;
     [SerializeField] private PetalViewManager petalViewManager;

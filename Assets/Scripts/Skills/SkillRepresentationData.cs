@@ -43,6 +43,18 @@ namespace Skills
         }
     }
 
+    public sealed class ButterflyRepresentationData : SkillRepresentationData
+    {
+        public Vector2Int Source { get; }
+        public Vector2Int? Target { get; }
+
+        public ButterflyRepresentationData(Vector2Int source, Vector2Int? target)
+        {
+            Source = source;
+            Target = target;
+        }
+    }
+
     public sealed class StripeSunburstRepresentationData : SkillRepresentationData
     {
         public Vector2Int SourceA { get; }

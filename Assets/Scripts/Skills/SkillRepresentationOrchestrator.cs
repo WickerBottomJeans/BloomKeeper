@@ -16,6 +16,10 @@ namespace Skills
         [Header("Striped Timing")]
         [SerializeField] private float stripedPropagationDuration = 0.2f;
 
+        [Header("Butterfly Timing")]
+        [SerializeField] private float butterflyFlightDuration = 0.5f;
+        [SerializeField] private float butterflyDisappearDuration = 0.2f;
+
         [Header("Stripe Sunburst Timing")]
         [SerializeField] private float stripeSunburstSpinDuration = 2f;
         [SerializeField] private float stripeSunburstMutationDuration = 1f;
@@ -61,6 +65,9 @@ namespace Skills
                         boardVFXManager.PlayStripedSkillVFX(striped.Source, isVertical, stripedPropagationDuration),
                         petalViewManager.PlayStripedDisappear(striped.Source, isVertical, stripedPropagationDuration));
                     return;
+                case ButterflyRepresentationData butterfly:
+                    await PlayButterfly(butterfly);
+                    return;
                 case StripeSunburstRepresentationData stripeSunburst:
                     await PlayStripeSunburst(stripeSunburst);
                     return;
@@ -81,6 +88,18 @@ namespace Skills
             UniTask bloomTask = boardVFXManager.PlayBouquetBloomVFX(representation.Center);
 
             await UniTask.WhenAll(disappearTask, bloomTask);
+        }
+
+        private async UniTask PlayButterfly(ButterflyRepresentationData representation)
+        {
+            if (!representation.Target.HasValue)
+            {
+                await petalViewManager.PlayDisappearAndRelease(new[] { representation.Source }, butterflyDisappearDuration);
+                return;
+            }
+
+            await petalViewManager.PlayFly(representation.Source, representation.Target.Value, layout, butterflyFlightDuration);
+            await petalViewManager.PlayDisappearAndRelease(new[] { representation.Source, representation.Target.Value }, butterflyDisappearDuration);
         }
 
         private async UniTask PlayStripeSunburst(StripeSunburstRepresentationData representation)

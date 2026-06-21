@@ -33,6 +33,11 @@
 - Before implementation, identify any coupling, special-case dispatch, type checks, or volatility introduced by the design so the user can review it explicitly.
 - If only a brittle or temporary solution is currently possible, stop and explain the limitation instead of coding it.
 
+## Code Formatting
+
+- Keep function calls and signatures compact. Never format parameters or arguments one per line.
+- Library calls, such as DOTween APIs, are exempt when the library's conventional formatting places each parameter or argument on its own line for readability.
+
 ## Verification
 
 - Do not build, run tests, launch Unity, or perform other verification unless the user explicitly asks for it.

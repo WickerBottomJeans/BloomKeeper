@@ -12,12 +12,13 @@
         public override bool IsGravityAffected() => true;
         public override bool CanReceiveNewPetal() => Petal == null;
         
-        public override bool Resolve()
+        public override TileImpactResult ApplyClearEffect()
         {
-            if (Petal == null) return false;
+            if (Petal == null) return new TileImpactResult(null, false);
 
+            Petal removedPetal = Petal;
             Petal = null;
-            return true;
+            return new TileImpactResult(removedPetal, false);
         }
     }
 

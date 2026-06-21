@@ -48,6 +48,24 @@ public static class PetalViewAnimator
             .ToUniTask();
     }
 
+    public static async UniTask PlayFly(PetalView view, Vector2 targetWorldPosition, float duration)
+    {
+        Vector2 flightDirection = targetWorldPosition - (Vector2)view.transform.position;
+        float targetAngle = Vector2.SignedAngle(Vector2.up, flightDirection);
+
+        Tween flapTween = view.transform.DOScaleX(0f, 0.1f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+
+        try
+        {
+            await UniTask.WhenAll(view.transform.DOMove(targetWorldPosition, duration).SetEase(Ease.Linear).ToUniTask(), view.transform.DORotate(new Vector3(0f, 0f, targetAngle), duration, RotateMode.Fast).SetEase(Ease.OutQuad).ToUniTask());
+        }
+        finally
+        {
+            flapTween.Kill();
+            view.transform.localScale = view.TargetScale;
+        }
+    }
+
     public static async UniTask PlayPetalChange(
         PetalView view,
         Petal petal,
