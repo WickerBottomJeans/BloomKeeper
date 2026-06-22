@@ -58,6 +58,11 @@ namespace DefaultNamespace
             return handler(grid, cellA, cellB);
         }
 
+        public static bool HasActivationOnSwap(SpecialSkillType skillA, SpecialSkillType skillB)
+        {
+            return _handlers.ContainsKey(new SkillKey(skillA, skillB));
+        }
+
         private static List<SkillActivation> HandleSunburst(Tile[,] grid, Vector2Int cellA, Vector2Int cellB)
         {
             Vector2Int sunburstCell = grid[cellA.x, cellA.y].Petal?.Skill == SpecialSkillType.Sunburst ? cellA : cellB;

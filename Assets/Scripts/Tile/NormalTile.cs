@@ -11,6 +11,7 @@
         
         public override bool IsGravityAffected() => true;
         public override bool CanReceiveNewPetal() => Petal == null;
+        public override bool CanSwapPetal() => Petal != null;
         public override bool HasClearableObstacle() => false;
         public override bool CanClearPetal() => Petal != null;
         

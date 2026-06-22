@@ -31,18 +31,16 @@ namespace DefaultNamespace.UI
             Tile tileA = grid[cellA.x, cellA.y];
             Tile tileB = grid[cellB.x, cellB.y];
 
+            if (!PetalSwapper.Validate(cellA, cellB, grid)) return false;
+            if (SkillDetector.HasActivationOnSwap(tileA.Petal.Skill, tileB.Petal.Skill)) return true;
             if (!tileA.IsMatchable() || !tileB.IsMatchable()) return false;
-            if (tileA.Petal?.Skill == SpecialSkillType.Sunburst || tileB.Petal?.Skill == SpecialSkillType.Sunburst) return true;
 
-            Petal temp = tileA.Petal;
-            tileA.Petal = tileB.Petal;
-            tileB.Petal = temp;
+            PetalSwapper.ExecuteSwapPetal(cellA, cellB, grid);
 
             bool hasMatch = MatchDetector.WouldCompleteMatch(grid, cellA.x, cellA.y)
                             || MatchDetector.WouldCompleteMatch(grid, cellB.x, cellB.y);
 
-            tileB.Petal = tileA.Petal;
-            tileA.Petal = temp;
+            PetalSwapper.ExecuteSwapPetal(cellA, cellB, grid);
 
             return hasMatch;
         }

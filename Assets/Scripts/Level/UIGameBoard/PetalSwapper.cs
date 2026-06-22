@@ -12,10 +12,7 @@ namespace DefaultNamespace.UI
             Tile tileA = grid[cellA.x, cellA.y];
             Tile tileB = grid[cellB.x, cellB.y];
 
-            if (tileA is not NormalTile || tileB is not NormalTile) return false;
-            if (tileA.Petal == null || tileB.Petal == null) return false;
-
-            return true;
+            return tileA.CanSwapPetal() && tileB.CanSwapPetal();
         }
 
         public static void ExecuteSwapPetal(Vector2Int cellA, Vector2Int cellB, Tile[,] grid)

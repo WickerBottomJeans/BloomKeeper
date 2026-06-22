@@ -19,6 +19,8 @@
 
         public abstract bool CanReceiveNewPetal();
 
+        public abstract bool CanSwapPetal();
+
         public abstract bool HasClearableObstacle();
 
         public abstract bool CanClearPetal();
