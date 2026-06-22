@@ -13,6 +13,8 @@
         
         public override bool IsGravityAffected() => false;
         public override bool CanReceiveNewPetal() => false;
+        public override bool HasClearableObstacle() => false;
+        public override bool CanClearPetal() => false;
         public override TileImpactResult ApplyClearEffect() => new TileImpactResult(null, false);
     }
 }

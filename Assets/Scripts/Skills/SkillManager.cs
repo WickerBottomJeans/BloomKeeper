@@ -115,18 +115,17 @@ namespace Skills
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
 
-            var webTiles = new List<Vector2Int>();
-            var allTiles = new List<Vector2Int>();
+            var obstacleTargets = new List<Vector2Int>();
+            var petalTargets = new List<Vector2Int>();
 
             for (int x = 0; x < cols; x++)
             for (int y = 0; y < rows; y++)
             {
-                //TODO: why are we using webtile here??
-                if (grid[x, y] is WebTile) webTiles.Add(new Vector2Int(x, y));
-                else if (grid[x, y].Petal != null) allTiles.Add(new Vector2Int(x, y));
+                if (grid[x, y].HasClearableObstacle()) obstacleTargets.Add(new Vector2Int(x, y));
+                else if (grid[x, y].CanClearPetal()) petalTargets.Add(new Vector2Int(x, y));
             }
 
-            List<Vector2Int> pool = webTiles.Count > 0 ? webTiles : allTiles;
+            List<Vector2Int> pool = obstacleTargets.Count > 0 ? obstacleTargets : petalTargets;
             if (pool.Count == 0)
             {
                 //TODO: test this case

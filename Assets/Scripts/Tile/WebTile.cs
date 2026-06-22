@@ -37,6 +37,10 @@ namespace DefaultNamespace
             return webLevel == 0 && Petal == null; ;
         }
 
+        public override bool HasClearableObstacle() => webLevel > 0;
+
+        public override bool CanClearPetal() => webLevel == 0 && Petal != null;
+
         public override TileImpactResult ApplyClearEffect()
         {
             if (TryReduceWebLevel())

@@ -19,6 +19,10 @@
 
         public abstract bool CanReceiveNewPetal();
 
+        public abstract bool HasClearableObstacle();
+
+        public abstract bool CanClearPetal();
+
         /// <summary>
         /// Applies an effect that attempts to clear this tile's petal.
         /// </summary>
