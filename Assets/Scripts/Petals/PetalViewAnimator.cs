@@ -57,7 +57,9 @@ public static class PetalViewAnimator
 
         try
         {
-            await UniTask.WhenAll(view.transform.DOMove(targetWorldPosition, duration).SetEase(Ease.Linear).ToUniTask(), view.transform.DORotate(new Vector3(0f, 0f, targetAngle), duration, RotateMode.Fast).SetEase(Ease.OutQuad).ToUniTask());
+            await UniTask.WhenAll(view.transform.DOMove(targetWorldPosition, duration).SetEase(Ease.Linear).ToUniTask(),
+                view.transform.DORotate(new Vector3(0f, 0f, targetAngle), duration, RotateMode.Fast)
+                    .SetEase(Ease.OutQuad).ToUniTask());
         }
         finally
         {
@@ -66,11 +68,7 @@ public static class PetalViewAnimator
         }
     }
 
-    public static async UniTask PlayPetalChange(
-        PetalView view,
-        Petal petal,
-        float cellSize,
-        float duration)
+    public static async UniTask PlayPetalChange(PetalView view, Petal petal, float cellSize, float duration)
     {
         await view.transform.DOScale(Vector3.zero, duration * 0.4f)
             .SetEase(Ease.InBack)
@@ -83,7 +81,7 @@ public static class PetalViewAnimator
             .SetEase(Ease.OutBack)
             .ToUniTask();
     }
-    
+
     public static UniTask PlayComboMerge(PetalView viewA, PetalView viewB)
     {
         Vector3 midpoint = (viewA.transform.position + viewB.transform.position) / 2f;
@@ -111,8 +109,10 @@ public static class PetalViewAnimator
         float disappearDuration = duration * (2f / 7f);
 
         // Spin together in place, opposite directions
-        seq.Append(viewA.transform.DORotate(new Vector3(0f, 0f, 720f), spinDuration, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad));
-        seq.Join(viewB.transform.DORotate(new Vector3(0f, 0f, -720f), spinDuration, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad));
+        seq.Append(viewA.transform.DORotate(new Vector3(0f, 0f, 720f), spinDuration, RotateMode.FastBeyond360)
+            .SetEase(Ease.InOutQuad));
+        seq.Join(viewB.transform.DORotate(new Vector3(0f, 0f, -720f), spinDuration, RotateMode.FastBeyond360)
+            .SetEase(Ease.InOutQuad));
 
         // Burst away
         seq.Append(viewA.transform.DOScale(Vector3.zero, disappearDuration).SetEase(Ease.InBack));

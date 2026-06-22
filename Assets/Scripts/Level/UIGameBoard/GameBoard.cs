@@ -7,7 +7,9 @@ using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using Petals;
 using Skills;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using Utility;
 
@@ -257,6 +259,7 @@ public class GameBoard : MonoBehaviour
         if (grid == null) return;
         if (layout == null) return;
 
+#if UNITY_EDITOR
         for (int x = 0; x < grid.GetLength(0); x++)
         {
             for (int y = 0; y < grid.GetLength(1); y++)
@@ -287,5 +290,6 @@ public class GameBoard : MonoBehaviour
                 int i = 1;
             }
         }
+#endif
     }
 }
