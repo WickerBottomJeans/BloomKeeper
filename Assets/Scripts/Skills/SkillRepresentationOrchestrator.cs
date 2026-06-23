@@ -176,13 +176,15 @@ namespace Skills
 
             UniTask affectedPetalTask;
             List<Vector2Int> laserTargets;
+            
+            //If is SunBurst + Normal petal
             if (representation.ComboSkillType == SpecialSkillType.Sunburst)
             {
                 HashSet<Vector2Int> removedPositions = GetRemovedPositions(resolution);
                 removedPositions.Remove(representation.SourceA);
                 removedPositions.Remove(representation.SourceB);
                 laserTargets = new List<Vector2Int>(removedPositions);
-                affectedPetalTask = petalViewManager.PlayNormalRemovals(laserTargets);
+                affectedPetalTask = petalViewManager.PlayNormalRemovals(laserTargets, stripeSunburstMutationDuration);
             }
             else
             {

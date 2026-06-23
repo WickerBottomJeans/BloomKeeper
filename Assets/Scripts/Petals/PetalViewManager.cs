@@ -45,10 +45,7 @@ public class PetalViewManager : MonoBehaviour
 
     public PetalView GetView(int x, int y) => petalViews[x, y];
 
-    public async UniTask OnPetalsChanged(
-        IReadOnlyList<PetalChange> changes,
-        BoardLayout boardLayout,
-        float duration)
+    public async UniTask OnPetalsChanged(IReadOnlyList<PetalChange> changes, BoardLayout boardLayout, float duration)
     {
         var tasks = new List<UniTask>();
 
@@ -80,12 +77,12 @@ public class PetalViewManager : MonoBehaviour
         petalViews[cellA.x, cellA.y] = viewB;
         petalViews[cellB.x, cellB.y] = viewA;
     }
-    public UniTask PlayNormalRemovals(IReadOnlyList<Vector2Int> positions)
+    public UniTask PlayNormalRemovals(IReadOnlyList<Vector2Int> positions, float duration = 0f)
     {
-        return ClearPetalViews(positions);
+        return ClearPetalViews(positions, duration);
     }
 
-    private async UniTask ClearPetalViews(IReadOnlyList<Vector2Int> cleared)
+    private async UniTask ClearPetalViews(IReadOnlyList<Vector2Int> cleared, float duration)
     {
         var tasks = new List<UniTask>();
         foreach (Vector2Int cell in cleared)
@@ -93,14 +90,17 @@ public class PetalViewManager : MonoBehaviour
             PetalView view = petalViews[cell.x, cell.y];
             if (view == null) continue;
             petalViews[cell.x, cell.y] = null;
-            tasks.Add(DestroyAndRelease(view));
+            tasks.Add(DestroyAndRelease(view, duration));
         }
         await UniTask.WhenAll(tasks);
     }
 
-    private async UniTask DestroyAndRelease(PetalView view)
+    private async UniTask DestroyAndRelease(PetalView view, float duration)
     {
-        await PetalViewAnimator.PlayDestroy(view);
+        if (duration <= 0f)
+            await PetalViewAnimator.PlayDestroy(view);
+        else
+            await PetalViewAnimator.PlayDisappear(view, duration);
         pool.Release(view);
     }
 

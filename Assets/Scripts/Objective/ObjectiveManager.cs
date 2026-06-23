@@ -14,7 +14,7 @@ namespace DefaultNamespace
         /// Value: objective event handlers that declared they handle that event type.
         /// Example: PetalsClearedEvent -> [MatchObjective instance, ...]
         /// </summary>
-        private readonly Dictionary<Type, List<IObjectiveEventHandler>> handlersByEventType = new();
+        private readonly Dictionary<Type, List<IGameplayEventHandler>> handlersByEventType = new();
 
         public event Action OnAllComplete;
         public event Action OnProgressUpdated;
@@ -26,13 +26,13 @@ namespace DefaultNamespace
                 RegisterHandlers(objective);
         }
 
-        public void Report(IObjectiveEvent e)
+        public void Report(IGameplayEvent e)
         {
             Type eventType = e.GetType();
-            if (!handlersByEventType.TryGetValue(eventType, out List<IObjectiveEventHandler> handlers))
+            if (!handlersByEventType.TryGetValue(eventType, out List<IGameplayEventHandler> handlers))
                 return;
 
-            foreach (IObjectiveEventHandler handler in handlers)
+            foreach (IGameplayEventHandler handler in handlers)
                 handler.Handle(e);
 
             OnProgressUpdated?.Invoke();
@@ -45,12 +45,12 @@ namespace DefaultNamespace
 
         private void RegisterHandlers(IObjective objective)
         {
-            if (objective is not IObjectiveEventHandler handler) return;
+            if (objective is not IGameplayEventHandler handler) return;
 
             Type eventType = handler.HandledEventType;
-            if (!handlersByEventType.TryGetValue(eventType, out List<IObjectiveEventHandler> handlers))
+            if (!handlersByEventType.TryGetValue(eventType, out List<IGameplayEventHandler> handlers))
             {
-                handlers = new List<IObjectiveEventHandler>();
+                handlers = new List<IGameplayEventHandler>();
                 handlersByEventType[eventType] = handlers;
             }
 

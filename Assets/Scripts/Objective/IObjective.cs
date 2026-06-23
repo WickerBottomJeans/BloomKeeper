@@ -11,9 +11,9 @@ namespace DefaultNamespace
         List<ObjectiveViewData> GetViewData();
     }
 
-    public interface IObjectiveEventHandler
+    public interface IGameplayEventHandler
     {
         Type HandledEventType { get; }
-        void Handle(IObjectiveEvent e);
+        void Handle(IGameplayEvent e);
     }
 }

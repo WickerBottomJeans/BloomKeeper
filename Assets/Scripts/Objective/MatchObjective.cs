@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace DefaultNamespace
 {
-    public class MatchObjective : IObjective, IObjectiveEventHandler
+    public class MatchObjective : IObjective, IGameplayEventHandler
     {
         private List<PetalGoal> goals;
 
@@ -20,7 +20,7 @@ namespace DefaultNamespace
         public bool CheckObjective() => goals.All(g => g.amount <= 0);
         public Type HandledEventType => typeof(PetalsClearedEvent);
 
-        public void Handle(IObjectiveEvent e)
+        public void Handle(IGameplayEvent e)
         {
             PetalsClearedEvent cleared = (PetalsClearedEvent)e;
             foreach (PetalType petalType in cleared.ClearedPetals)

@@ -59,7 +59,7 @@ public class GameBoard : MonoBehaviour
         Shuffling
     }
 
-    public event Action<IObjectiveEvent> OnObjectiveEvent;
+    public event Action<IGameplayEvent> OnGameplayEvent;
 
     public void Init(Tile[,] grid)
     {
@@ -176,8 +176,8 @@ public class GameBoard : MonoBehaviour
         var result = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
         pendingMatches.Clear();
         pendingSkillActivations.AddRange(result.SkillActivations);
-        OnObjectiveEvent?.Invoke(new PetalsClearedEvent(result.ClearedPetalTypes));
-        if (result.CleanedSpiderWebTileCount > 0) OnObjectiveEvent?.Invoke(new SpiderWebClearedEvent(result.CleanedSpiderWebTileCount));
+        OnGameplayEvent?.Invoke(new PetalsClearedEvent(result.ClearedPetalTypes));
+        if (result.CleanedSpiderWebTileCount > 0) OnGameplayEvent?.Invoke(new SpiderWebClearedEvent(result.CleanedSpiderWebTileCount));
         await matchPresentationCoordinator.Play(result, pendingSkillResults, grid);
         pendingSkillResults.Clear();
         TransitionTo(BoardState.ActivatingSkills);

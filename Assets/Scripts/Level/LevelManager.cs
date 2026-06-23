@@ -41,13 +41,13 @@ namespace DefaultNamespace
         {
             if (gameBoardInstance != null)
             {
-                gameBoardInstance.OnObjectiveEvent -= boardEventObjectiveManager.Report;
+                gameBoardInstance.OnGameplayEvent -= boardEventObjectiveManager.Report;
                 Destroy(gameBoardInstance.gameObject);
             }
 
             gameBoardInstance = Instantiate(gameBoardPrefab);
             gameBoardInstance.Init(grid);
-            gameBoardInstance.OnObjectiveEvent += objectiveManager.Report;
+            gameBoardInstance.OnGameplayEvent += objectiveManager.Report;
             boardEventObjectiveManager = objectiveManager;
         }
         

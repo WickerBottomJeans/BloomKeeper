@@ -2,9 +2,9 @@
 
 namespace DefaultNamespace
 {
-    public interface IObjectiveEvent { }
+    public interface IGameplayEvent { }
 
-    public class PetalsClearedEvent : IObjectiveEvent
+    public class PetalsClearedEvent : IGameplayEvent
     {
         public List<PetalType> ClearedPetals { get; }
 
@@ -14,7 +14,7 @@ namespace DefaultNamespace
         }
     }
 
-    public class SpiderWebClearedEvent : IObjectiveEvent
+    public class SpiderWebClearedEvent : IGameplayEvent
     {
         public int CleanedTileCount { get; }
 
