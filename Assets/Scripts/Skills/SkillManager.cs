@@ -24,17 +24,19 @@ namespace Skills
                 case SpecialSkillType.Bouquet:
                     return UseBouquetSkill(grid, activation.Position, selfPetal);
                 case SpecialSkillType.Sunburst:
-                    if (activation.CauserPetal?.PetalType == null || activation.CauserPetal.PetalType == PetalType.None)
+                    //TODO: should we remove causer? dont seem like its needed anymore => nah. cases like stripe break a sunburst
+                    PetalType targetType = activation.Combo != null ? activation.Combo.TargetPetalType : activation.CauserPetal?.PetalType ?? PetalType.None;
+                    if (targetType == PetalType.None)
                         throw new InvalidOperationException("Sunburst activated with no valid target petal type.");
-                    MatchGroup sunburstMatch = UseSunburstSkill(
-                        grid, activation.Position, activation.CauserPetal.PetalType, selfPetal);
-                    return new SkillUseResult(sunburstMatch, new SunburstRepresentationData(activation.Position));
+                    return UseSunburstSkill(grid, activation.Position, targetType, SpecialSkillType.None, selfPetal, activation);
                 case SpecialSkillType.Butterfly:
                     return UseButterflySkill(grid, activation.Position, selfPetal);
                 case SpecialSkillType.StripeSunburst:
+                case SpecialSkillType.BouquetSunburst:
+                case SpecialSkillType.ButterflySunburst:
                     if (activation.Combo == null)
-                        throw new InvalidOperationException("StripeSunburst activated with no ComboData.");
-                    return UseStripeSunburstSkill(grid, activation, selfPetal);
+                        throw new InvalidOperationException($"{activation.SkillType} activated with no ComboData.");
+                    return UseSunburstSkill(grid, activation.Position, activation.Combo.TargetPetalType, activation.Combo.SunburstComboType, selfPetal, activation);
                 default:
                     throw new ArgumentException("Skill not implemented.", nameof(activation.SkillType));
             }
@@ -109,6 +111,29 @@ namespace Skills
 
             return new MatchGroup(tiles, MatchShape.None, causer);
         }
+
+        private static SkillUseResult UseSunburstSkill(Tile[,] grid, Vector2Int position, PetalType targetType, SpecialSkillType comboSkillType, Petal causer, SkillActivation activation)
+        {
+            if (comboSkillType == SpecialSkillType.None)
+            {
+                MatchGroup sunburstMatch = UseSunburstSkill(grid, position, targetType, causer);
+                Vector2Int sourceA = activation.Combo != null ? activation.Combo.SourceA : activation.Position;
+                Vector2Int sourceB = activation.Combo != null ? activation.Combo.SourceB : activation.Position;
+                var sunburstRepresentation  = new SunburstComboRepresentationData(sourceA, sourceB, activation.EffectOrigin, new List<PetalChange>(), SpecialSkillType.Sunburst);
+                return new SkillUseResult(sunburstMatch, sunburstRepresentation );
+            }
+
+            List<PetalChange> petalChanges = GiveSkillToPetalsOfType(grid, targetType, comboSkillType);
+
+            var mutatedPositions = new List<Vector2Int>(petalChanges.Count);
+            foreach (PetalChange change in petalChanges)
+                mutatedPositions.Add(change.Position);
+
+            var matchGroup = new MatchGroup(mutatedPositions, MatchShape.None, causer);
+            var representation = new SunburstComboRepresentationData(activation.Combo.SourceA, activation.Combo.SourceB, activation.EffectOrigin, petalChanges, activation.SkillType);
+
+            return new SkillUseResult(matchGroup, representation);
+        }
         
         public static SkillUseResult UseButterflySkill(Tile[,] grid, Vector2Int source, Petal causer)
         {
@@ -138,29 +163,6 @@ namespace Skills
             Vector2Int target = pool[rng.Next(pool.Count)];
             var matchGroup = new MatchGroup(new List<Vector2Int> { target }, MatchShape.None, causer);
             var representation = new ButterflyRepresentationData(source, target);
-            return new SkillUseResult(matchGroup, representation);
-        }
-        
-        private static SkillUseResult UseStripeSunburstSkill(
-            Tile[,] grid,
-            SkillActivation activation,
-            Petal causer)
-        {
-            PetalType targetType = activation.Combo.TargetPetalType;
-            SpecialSkillType stripeDirection = activation.Combo.ComboSkillType;
-            List<PetalChange> petalChanges = GiveSkillToPetalsOfType(grid, targetType, stripeDirection);
-
-            var mutatedPositions = new List<Vector2Int>(petalChanges.Count);
-            foreach (PetalChange change in petalChanges)
-                mutatedPositions.Add(change.Position);
-
-            var matchGroup = new MatchGroup(mutatedPositions, MatchShape.None, causer);
-            var representation = new StripeSunburstRepresentationData(
-                activation.Combo.SourceA,
-                activation.Combo.SourceB,
-                activation.EffectOrigin,
-                petalChanges);
-
             return new SkillUseResult(matchGroup, representation);
         }
         

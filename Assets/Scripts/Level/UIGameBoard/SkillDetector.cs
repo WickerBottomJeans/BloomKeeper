@@ -28,18 +28,11 @@ namespace DefaultNamespace
         private static readonly Dictionary<SkillKey, Func<Tile[,], Vector2Int, Vector2Int, List<SkillActivation>>> _handlers =
             new()
             {
-                {
-                    new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.None),
-                    HandleSunburst
-                },
-                {
-                    new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.StripedHorizontal),
-                    HandleStripeSunburst
-                },
-                {
-                    new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.StripedVertical),
-                    HandleStripeSunburst
-                },
+                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.None), HandleSunburst },
+                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.StripedHorizontal), HandleSunburst },
+                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.StripedVertical), HandleSunburst },
+                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Bouquet), HandleSunburst },
+                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Butterfly), HandleSunburst },
             };
 
         public static List<SkillActivation> DetectOnSwap(Tile[,] grid, Vector2Int cellA, Vector2Int cellB)
@@ -66,37 +59,31 @@ namespace DefaultNamespace
         private static List<SkillActivation> HandleSunburst(Tile[,] grid, Vector2Int cellA, Vector2Int cellB)
         {
             Vector2Int sunburstCell = grid[cellA.x, cellA.y].Petal?.Skill == SpecialSkillType.Sunburst ? cellA : cellB;
-            Vector2Int causerCell = sunburstCell == cellA ? cellB : cellA;
+            Vector2Int targetCell = sunburstCell == cellA ? cellB : cellA;
 
             Petal selfPetal = new Petal(grid[sunburstCell.x, sunburstCell.y].Petal);
-            Petal causerPetal = grid[causerCell.x, causerCell.y].Petal != null
-                ? new Petal(grid[causerCell.x, causerCell.y].Petal)
+            Petal targetPetal = grid[targetCell.x, targetCell.y].Petal != null
+                ? new Petal(grid[targetCell.x, targetCell.y].Petal)
                 : null;
-
-            return new List<SkillActivation>
+            SpecialSkillType targetSkill = targetPetal?.Skill ?? SpecialSkillType.None;
+            SpecialSkillType activationSkill = targetSkill switch
             {
-                new SkillActivation(sunburstCell, SpecialSkillType.Sunburst, selfPetal, causerPetal)
+                SpecialSkillType.None => SpecialSkillType.Sunburst,
+                SpecialSkillType.StripedHorizontal => SpecialSkillType.StripeSunburst,
+                SpecialSkillType.StripedVertical => SpecialSkillType.StripeSunburst,
+                SpecialSkillType.Bouquet => SpecialSkillType.BouquetSunburst,
+                SpecialSkillType.Butterfly => SpecialSkillType.ButterflySunburst,
+                _ => throw new ArgumentOutOfRangeException(nameof(targetSkill), targetSkill, "Sunburst combo is not supported.")
             };
-        }
-        
-        private static List<SkillActivation> HandleStripeSunburst(Tile[,] grid, Vector2Int cellA, Vector2Int cellB)
-        {
-            Vector2Int stripeCell = grid[cellA.x, cellA.y].Petal?.Skill is SpecialSkillType.StripedHorizontal or SpecialSkillType.StripedVertical ? cellA : cellB;
-            Vector2Int sunburstCell = stripeCell == cellA ? cellB : cellA;
+            ComboData combo = new ComboData(targetPetal.PetalType, targetSkill, cellA, cellB);
+            Vector2 effectOrigin = ((Vector2)cellA + (Vector2)cellB) * 0.5f;
 
-            Petal selfPetal = new Petal(grid[stripeCell.x, stripeCell.y].Petal.PetalType, SpecialSkillType.StripeSunburst);
-            PetalType targetType = grid[stripeCell.x, stripeCell.y].Petal.PetalType;
-            SpecialSkillType stripeDirection = grid[stripeCell.x, stripeCell.y].Petal.Skill;
+            if (activationSkill != SpecialSkillType.Sunburst)
+                selfPetal = new Petal(targetPetal.PetalType, activationSkill);
 
             return new List<SkillActivation>
             {
-                new SkillActivation(
-                    sunburstCell,
-                    SpecialSkillType.StripeSunburst,
-                    selfPetal,
-                    null,
-                    new ComboData(targetType, stripeDirection, cellA, cellB),
-                    ((Vector2)cellA + (Vector2)cellB) * 0.5f)
+                new SkillActivation(sunburstCell, activationSkill, selfPetal, targetPetal, combo, effectOrigin)
             };
         }
     }

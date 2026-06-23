@@ -143,11 +143,7 @@ namespace DefaultNamespace.VFX
             return false;
         }
 
-        public async UniTask PlayMutationLaserVFX(
-            Vector2 originPosition,
-            IReadOnlyList<PetalChange> changes,
-            float chargeUpDuration,
-            float duration)
+        public async UniTask PlayMutationLaserVFX(Vector2 originPosition, IReadOnlyList<Vector2Int> targetPositions, float chargeUpDuration, float duration)
         {
             if (mutationLaserPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
@@ -156,7 +152,7 @@ namespace DefaultNamespace.VFX
             PlayVortex(origin, duration).Forget();
 
             await UniTask.Delay(TimeSpan.FromSeconds(chargeUpDuration));
-            await PlayLasers(origin, changes, duration - chargeUpDuration);
+            await PlayLasers(origin, targetPositions, duration - chargeUpDuration);
         }
 
         private async UniTask PlayVortex(Vector2 origin, float duration)
@@ -197,17 +193,13 @@ namespace DefaultNamespace.VFX
             return longestLifetime;
         }
 
-        private async UniTask PlayLasers(
-            Vector2 origin,
-            IReadOnlyList<PetalChange> changes,
-            float duration)
+        private async UniTask PlayLasers(Vector2 origin, IReadOnlyList<Vector2Int> targetPositions, float duration)
         {
             float width = layout.CellSize * mutationLaserWidthRatio;
-            var tasks = new List<UniTask>(changes.Count);
+            var tasks = new List<UniTask>(targetPositions.Count);
 
-            foreach (PetalChange change in changes)
+            foreach (Vector2Int targetPosition in targetPositions)
             {
-                Vector2Int targetPosition = change.Position;
                 Vector2 target = layout.GetCellWorldPos(targetPosition.x, targetPosition.y);
                 tasks.Add(PlayLaser(origin, target, width, duration));
             }

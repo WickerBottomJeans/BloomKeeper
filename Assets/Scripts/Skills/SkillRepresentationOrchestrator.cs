@@ -62,11 +62,8 @@ namespace Skills
                 case ButterflyRepresentationData butterfly:
                     await PlayButterfly(butterfly, resolution);
                     return;
-                case SunburstRepresentationData sunburst:
-                    await PlaySunburst(sunburst, resolution);
-                    return;
-                case StripeSunburstRepresentationData stripeSunburst:
-                    await PlayStripeSunburst(stripeSunburst, resolution);
+                case SunburstComboRepresentationData sunburstCombo:
+                    await PlaySunburst(sunburstCombo, resolution);
                     return;
                 default:
                     throw new ArgumentOutOfRangeException(
@@ -168,18 +165,7 @@ namespace Skills
                 PlayTileChanges(resolution));
         }
 
-        private UniTask PlaySunburst(SunburstRepresentationData representation,
-            MatchGroupResolveResult resolution)
-        {
-            HashSet<Vector2Int> removedPositions = GetRemovedPositions(resolution);
-            removedPositions.Add(representation.Source);
-            return UniTask.WhenAll(
-                petalViewManager.PlayNormalRemovals(new List<Vector2Int>(removedPositions)),
-                PlayTileChanges(resolution));
-        }
-
-        private async UniTask PlayStripeSunburst(StripeSunburstRepresentationData representation,
-            MatchGroupResolveResult resolution)
+        private async UniTask PlaySunburst(SunburstComboRepresentationData representation, MatchGroupResolveResult resolution)
         {
             UniTask mergeTask = petalViewManager.PlayComboMerge(representation.SourceA, representation.SourceB);
 
@@ -187,25 +173,42 @@ namespace Skills
                 representation.SourceA,
                 representation.SourceB,
                 stripeSunburstSpinDuration);
-            
+
+            UniTask affectedPetalTask;
+            List<Vector2Int> laserTargets;
+            if (representation.ComboSkillType == SpecialSkillType.Sunburst)
+            {
+                HashSet<Vector2Int> removedPositions = GetRemovedPositions(resolution);
+                removedPositions.Remove(representation.SourceA);
+                removedPositions.Remove(representation.SourceB);
+                laserTargets = new List<Vector2Int>(removedPositions);
+                affectedPetalTask = petalViewManager.PlayNormalRemovals(laserTargets);
+            }
+            else
+            {
+                laserTargets = new List<Vector2Int>(representation.Changes.Count);
+                foreach (PetalChange change in representation.Changes)
+                    laserTargets.Add(change.Position);
+                affectedPetalTask = petalViewManager.OnPetalsChanged(
+                    representation.Changes,
+                    layout,
+                    stripeSunburstMutationDuration);
+            }
+
             UniTask laserTask = boardVFXManager.PlayMutationLaserVFX(
                 representation.Origin,
-                representation.Changes,
+                laserTargets,
                 stripeSunburstLaserChargeUpDuration,
                 stripeSunburstLaserDuration);
 
             await UniTask.Delay(TimeSpan.FromSeconds(stripeSunburstLaserChargeUpDuration));
-            
-            UniTask mutationTask = petalViewManager.OnPetalsChanged(
-                representation.Changes,
-                layout,
-                stripeSunburstMutationDuration);
+
             UniTask tileTask = PlayTileChanges(resolution);
 
             await UniTask.WhenAll(
                 mergeTask,
                 spinTask,
-                mutationTask,
+                affectedPetalTask,
                 tileTask,
                 laserTask);
         }

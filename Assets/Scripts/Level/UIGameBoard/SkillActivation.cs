@@ -7,18 +7,19 @@ namespace DefaultNamespace.UI
     public class ComboData
     {
         public PetalType TargetPetalType;
-        public SpecialSkillType ComboSkillType;
+        //TODO: It has such a specific name cuz that is the only use case for now. I bet later it would be renamed and used as something more generic
+        public SpecialSkillType SunburstComboType;
         public Vector2Int SourceA;
         public Vector2Int SourceB;
 
         public ComboData(
             PetalType targetPetalType,
-            SpecialSkillType comboSkillType,
+            SpecialSkillType sunburstComboType,
             Vector2Int sourceA,
             Vector2Int sourceB)
         {
             TargetPetalType = targetPetalType;
-            ComboSkillType = comboSkillType;
+            SunburstComboType = sunburstComboType;
             SourceA = sourceA;
             SourceB = sourceB;
         }
