@@ -45,6 +45,7 @@ public class GameBoard : MonoBehaviour
     private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
     private List<SkillUseResult> pendingSkillResults = new List<SkillUseResult>();
     private MatchPresentationCoordinator matchPresentationCoordinator;
+    private bool isResolvingPlayerMove;
 
     private enum BoardState
     {
@@ -60,6 +61,7 @@ public class GameBoard : MonoBehaviour
     }
 
     public event Action<IGameplayEvent> OnGameplayEvent;
+    public event Action OnTurnSettled;
 
     public void Init(Tile[,] grid)
     {
@@ -149,6 +151,8 @@ public class GameBoard : MonoBehaviour
         if (pendingSkillActivations.Count > 0)
         {
             pendingMatches.Add(new MatchGroup(new List<Vector2Int> { swapOrigin, swapTarget }, MatchShape.None, isFromSkillCombo: true));
+            isResolvingPlayerMove = true;
+            OnGameplayEvent?.Invoke(new PlayerMoveCommittedEvent());
             TransitionTo(BoardState.Resolving);
             return;
         }
@@ -162,6 +166,8 @@ public class GameBoard : MonoBehaviour
             return;
         }
 
+        isResolvingPlayerMove = true;
+        OnGameplayEvent?.Invoke(new PlayerMoveCommittedEvent());
         TransitionTo(BoardState.Resolving);
     }
 
@@ -224,6 +230,12 @@ public class GameBoard : MonoBehaviour
         List<MatchGroup> cascadeMatches = MatchDetector.Detect(grid);
         if (cascadeMatches.Count == 0)
         {
+            // Turn settles here after cascades end. The flag prevents shuffle or other board-only resolves from reporting a player turn.
+            if (isResolvingPlayerMove)
+            {
+                isResolvingPlayerMove = false;
+                OnTurnSettled?.Invoke();
+            }
             TransitionTo(BoardState.Idle);
             return;
         }

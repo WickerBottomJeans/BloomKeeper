@@ -6,6 +6,12 @@
         Butterfly = 2,
         ClearSpiderWeb = 3,
     }
+
+    public enum ConstrainerType
+    {
+        MoveLimit = 1,
+        TimeLimit = 2,
+    }
     
     public enum PetalType
     {

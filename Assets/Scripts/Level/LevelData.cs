@@ -9,5 +9,6 @@ namespace DefaultNamespace
         public int boardHeight;
         public List<TileData> tiles;
         public List<ObjectiveJson> objectives;
+        public List<ConstrainerJson> constrainers = new();
     }
 }

@@ -9,11 +9,11 @@ namespace DefaultNamespace.UI
         [SerializeField] private UIScoreBoard scoreBoardPrefab;
         private UIScoreBoard scoreBoardInstance;
 
-        public void ShowScoreBoard(List<IObjective> objectives)
+        public void ShowScoreBoard(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData)
         {
             if (scoreBoardInstance == null)
                 scoreBoardInstance = Instantiate(scoreBoardPrefab, canvas.transform);
-            scoreBoardInstance.Init(objectives);
+            scoreBoardInstance.Init(objectives, constrainerViewData);
             scoreBoardInstance.Show();
         }
 
@@ -38,7 +38,16 @@ namespace DefaultNamespace.UI
             {
                 return;
             }
-            scoreBoardInstance.Refresh();
+            scoreBoardInstance.RefreshObjectives();
+        }
+
+        public void RefreshConstrainersOnScoreBoard(List<ConstrainerViewData> viewData)
+        {
+            if (scoreBoardInstance == null)
+            {
+                return;
+            }
+            scoreBoardInstance.DisplayConstrainers(viewData);
         }
     }
 }

@@ -8,12 +8,15 @@ public class UIScoreBoard : MonoBehaviour
 {
     [SerializeField] private RectTransform objectiveWidgetsRoot;
     [SerializeField] private ObjectiveWidget widgetPrefab;
+    [SerializeField] private UIMoveCounter moveCounter;
+    [SerializeField] private UITimer timer;
 
     private readonly List<(ObjectiveWidget widget, Func<ObjectiveViewData> getData)> spawnedWidgets = new();
 
-    public void Init(List<IObjective> objectives)
+    public void Init(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData)
     {
         ClearWidgets();
+        ClearConstrainers();
 
         Transform parent = objectiveWidgetsRoot != null ? objectiveWidgetsRoot : transform;
 
@@ -31,12 +34,30 @@ public class UIScoreBoard : MonoBehaviour
                 spawnedWidgets.Add((widget, () => capturedObjective.GetViewData()[capturedIndex]));
             }
         }
+
+        DisplayConstrainers(constrainerViewData);
     }
 
-    public void Refresh()
+    public void RefreshObjectives()
     {
         foreach (var (widget, getData) in spawnedWidgets)
             widget.Display(getData());
+    }
+
+    public void DisplayConstrainers(List<ConstrainerViewData> viewData)
+    {
+        foreach (ConstrainerViewData data in viewData)
+        {
+            switch (data.constrainerType)
+            {
+                case ConstrainerType.MoveLimit:
+                    moveCounter?.Display(data);
+                    break;
+                case ConstrainerType.TimeLimit:
+                    timer?.Display(data);
+                    break;
+            }
+        }
     }
 
     private void ClearWidgets()
@@ -47,6 +68,12 @@ public class UIScoreBoard : MonoBehaviour
                 Destroy(widget.gameObject);
         }
         spawnedWidgets.Clear();
+    }
+
+    private void ClearConstrainers()
+    {
+        moveCounter?.Clear();
+        timer?.Clear();
     }
 
     public float GetHeightInWorldUnits()

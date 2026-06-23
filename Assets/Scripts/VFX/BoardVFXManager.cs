@@ -126,6 +126,7 @@ namespace DefaultNamespace.VFX
             }
             finally
             {
+                //TODO: test this again later, null error or sth idk
                 foreach (ParticleSystem particles in particleSystems)
                     particles.Clear(false);
 

@@ -23,4 +23,6 @@ namespace DefaultNamespace
             CleanedTileCount = cleanedTileCount;
         }
     }
+
+    public class PlayerMoveCommittedEvent : IGameplayEvent { }
 }
