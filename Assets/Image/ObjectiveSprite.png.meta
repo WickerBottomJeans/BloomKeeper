@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: 9028fcde49077254b92102a03e6e329a
+guid: d809beab859d44545b5535b5c40cdb04
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7770301930588882849
-    second: Overlay_0
-  - first:
-      213: -3479008135565763543
-    second: Overlay_1
-  - first:
-      213: -5124427195129565292
-    second: Overlay_2
+      213: 4229658373125635459
+    second: ObjectiveSprite_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -119,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Overlay_Web_3
+      name: Objective_ClearSpiderWeb
       rect:
         serializedVersion: 2
-        x: 15
-        y: 631
-        width: 226
-        height: 213
+        x: 3
+        y: 132
+        width: 418
+        height: 448
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -134,52 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1a74842ef68a5db60800000000000000
-      internalID: 7770301930588882849
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Overlay_Web_2
-      rect:
-        serializedVersion: 2
-        x: 14
-        y: 298
-        width: 228
-        height: 225
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 92c98e4888418bfc0800000000000000
-      internalID: -3479008135565763543
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Overlay_Web_1
-      rect:
-        serializedVersion: 2
-        x: 33
-        y: 12
-        width: 190
-        height: 174
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 49f63fccd9062e8b0800000000000000
-      internalID: -5124427195129565292
+      spriteID: 38df86371e3c2ba30800000000000000
+      internalID: 4229658373125635459
       vertices: []
       indices: 
       edges: []
@@ -188,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: c4261b1bb1e140e48b2406018f8d8ab4
+    spriteID: 5bbd80bb4ea36a444884a156f54e6b5f
     internalID: 0
     vertices: []
     indices: 
@@ -198,9 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Overlay_Web_1: -5124427195129565292
-      Overlay_Web_2: -3479008135565763543
-      Overlay_Web_3: 7770301930588882849
+      Objective_ClearSpiderWeb: 4229658373125635459
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

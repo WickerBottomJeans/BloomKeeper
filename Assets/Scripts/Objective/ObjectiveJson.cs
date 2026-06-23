@@ -7,15 +7,19 @@ namespace DefaultNamespace
     {
         public PetalType petalType;
         public int amount;
-        public string spriteKey;
     }
 
+    /// <summary>
+    /// Fat :)
+    /// </summary>
     public class ObjectiveJson
     {
         public ObjectiveType type;
-        public string spriteKey;
         
         //Only use for type Match
         public List<PetalGoal> petals;
+
+        //Only use for type ClearSpiderWeb
+        public int spiderWebsToClear;
     }
 }

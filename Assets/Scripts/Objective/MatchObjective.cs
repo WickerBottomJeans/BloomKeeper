@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 using System.Linq;
 using DefaultNamespace.Utility;
 using Petals;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 namespace DefaultNamespace
 {
-    public class MatchObjective : IObjective
+    public class MatchObjective : IObjective, IObjectiveEventHandler
     {
         private List<PetalGoal> goals;
 
@@ -17,10 +18,11 @@ namespace DefaultNamespace
 
         public ObjectiveType ObjectiveType { get; } = ObjectiveType.Match;
         public bool CheckObjective() => goals.All(g => g.amount <= 0);
+        public Type HandledEventType => typeof(PetalsClearedEvent);
 
-        public void Report(ObjectiveDTO e)
+        public void Handle(IObjectiveEvent e)
         {
-            if (e is not PetalsClearedEvent cleared) return;
+            PetalsClearedEvent cleared = (PetalsClearedEvent)e;
             foreach (PetalType petalType in cleared.ClearedPetals)
             {
                 PetalGoal goal = goals.FirstOrDefault(g => g.petalType == petalType);

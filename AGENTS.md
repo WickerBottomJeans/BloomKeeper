@@ -8,6 +8,7 @@
 - Before editing, list every file that will be created, modified, or deleted and describe the exact class, method, API, and behavior changes planned for each file.
 - Wait for the user to explicitly approve that exact implementation scope. Never infer approval from enthusiasm, general agreement, or approval of a broader concept.
 - Do not create a new class, interface, file, component, manager, handler, abstraction, or data type unless the user has seen and explicitly approved it.
+- This applies to every new type, including private classes, nested classes, private interfaces, helper/adaptor types, structs, records, enums, delegates, and event/data DTOs.
 - Do not add supporting changes, cleanup, formatting, refactoring, validation, defensive code, or architectural structure that was not explicitly included in the approved scope.
 - If implementation reveals any unapproved requirement or design decision, stop immediately, explain it, and wait for new approval before editing further.
 - Implement only the approved changes. Do not make adjacent or opportunistic changes.
@@ -20,6 +21,7 @@
 
 - The user must be able to review and approve every proposed change before it is made.
 - Keep proposals concrete and concise to avoid wasting the user's time and token usage.
+- When providing code snippets, always state the exact owning class and function or method they belong to; do not give loose snippets detached from implementation context.
 - Do not hide implementation decisions behind broad summaries such as "wiring," "supporting changes," or "affected files."
 - After editing, report exactly what changed and do not claim verification that was not performed.
 

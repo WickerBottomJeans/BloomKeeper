@@ -30,9 +30,9 @@
         /// </summary>
         public abstract TileImpactResult ApplyClearEffect();
 
-        public virtual bool OnAdjacentTileMatched()
+        public virtual TileImpactResult OnAdjacentTileMatched()
         {
-            return false;
+            return new TileImpactResult(null, false);
         }
 
         public virtual string GetOverlaySpriteKey() => null;

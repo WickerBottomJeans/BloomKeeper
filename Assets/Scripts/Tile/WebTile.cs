@@ -45,10 +45,15 @@ namespace DefaultNamespace
 
         public override TileImpactResult ApplyClearEffect()
         {
-            if (TryReduceWebLevel())
+            TileImpactResult webImpactResult = TryReduceWebLevel();
+            
+            //Just reduced web level
+            if (webImpactResult.TileChanged)
             {
-                return new TileImpactResult(null, true);
+                return webImpactResult;
             }
+            
+            //Have no web to reduce aka the web tile dont have web and free to do normal petal stuff
             if (Petal == null) return new TileImpactResult(null, false);
 
             Petal removedPetal = Petal;
@@ -57,18 +62,18 @@ namespace DefaultNamespace
         } 
         
         //TODO: this doesnt look right, not controlled by boardVFX when affected by a skill. FIX THIS later :)
-        public override bool OnAdjacentTileMatched()
+        public override TileImpactResult OnAdjacentTileMatched()
         {
             return TryReduceWebLevel();
         }
 
-        private bool TryReduceWebLevel()
+        private TileImpactResult TryReduceWebLevel()
         {
             if (webLevel <= 0)
-                return false;
+                return new TileImpactResult(null, false);
 
             webLevel--;
-            return true;
+            return new TileImpactResult(null, true, webLevel == 0);
         }
         
         public override string GetOverlaySpriteKey()

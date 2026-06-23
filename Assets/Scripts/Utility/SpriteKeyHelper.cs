@@ -23,5 +23,10 @@ namespace DefaultNamespace.Utility
         {
             return $"Overlay_Web_{webLevel}";
         }
+
+        public static string GetObjectiveSpriteKey(ObjectiveType objectiveType)
+        {
+            return $"Objective_{objectiveType}";
+        }
     }
 }

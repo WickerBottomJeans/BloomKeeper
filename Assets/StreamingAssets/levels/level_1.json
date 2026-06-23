@@ -20,17 +20,13 @@
       "petals": [
         {
           "petalType": 1,
-          "amount": 100
-        },
-        {
-          "petalType": 2,
-          "amount": 100
-        },
-        {
-          "petalType": 3,
-          "amount": 100
+          "amount": 10
         }
       ]
+    },
+    {
+      "type": 3,
+      "spiderWebsToClear": 1
     }
   ]
 }

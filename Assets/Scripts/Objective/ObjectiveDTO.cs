@@ -2,15 +2,25 @@
 
 namespace DefaultNamespace
 {
-    public abstract class ObjectiveDTO { }
+    public interface IObjectiveEvent { }
 
-    public class PetalsClearedEvent : ObjectiveDTO
+    public class PetalsClearedEvent : IObjectiveEvent
     {
         public List<PetalType> ClearedPetals { get; }
 
         public PetalsClearedEvent(List<PetalType> clearedPetals)
         {
             ClearedPetals = clearedPetals;
+        }
+    }
+
+    public class SpiderWebClearedEvent : IObjectiveEvent
+    {
+        public int CleanedTileCount { get; }
+
+        public SpiderWebClearedEvent(int cleanedTileCount)
+        {
+            CleanedTileCount = cleanedTileCount;
         }
     }
 }

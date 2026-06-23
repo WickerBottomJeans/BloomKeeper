@@ -122,10 +122,10 @@ TextureImporter:
       name: Tile_Normal
       rect:
         serializedVersion: 2
-        x: 38
-        y: 272
-        width: 473
-        height: 512
+        x: 96
+        y: 69
+        width: 567
+        height: 596
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,13 +141,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile_Inactive
+      name: Tile_Web
       rect:
         serializedVersion: 2
-        x: 529
-        y: 275
-        width: 475
-        height: 510
+        x: 798
+        y: 69
+        width: 568
+        height: 596
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -163,13 +163,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile_Web
+      name: Tile_Inactive
       rect:
         serializedVersion: 2
-        x: 1023
-        y: 276
-        width: 474
-        height: 509
+        x: 1501
+        y: 69
+        width: 571
+        height: 596
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -188,7 +188,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 0f62fe51e451f0f4aacdcb594606a998
+    spriteID: d58d8e3072ec2194f99a44421b93674f
     internalID: 0
     vertices: []
     indices: 
@@ -198,9 +198,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Tile_Inactive: -8377130690987618698
+      Tile_Inactive: -4684333735789482159
       Tile_Normal: 7223950226953391895
-      Tile_Web: -4684333735789482159
+      Tile_Web: -8377130690987618698
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -30,20 +30,25 @@ namespace DefaultNamespace.UI
             var clearedPetalTypes = new List<PetalType>();
             var pendingSpawns = new List<(Vector2Int, PetalType, SpecialSkillType)>();
             var adjacentTileChanges = new List<Vector2Int>();
+            int cleanedSpiderWebTileCount = 0;
 
             foreach (MatchGroup match in matches)
             {
                 MatchGroupResolveResult groupResult = ProcessMatch(match, grid, swapOrigin, swapTarget,
                     activations, removedPositions, clearedPetalTypes, pendingSpawns);
                 groupResults.Add(groupResult);
+                foreach (var impact in groupResult.Impacts)
+                {
+                    if (impact.Outcome.SpiderWebCleaned)
+                        cleanedSpiderWebTileCount++;
+                }
             }
 
             ApplyPendingSpawns(grid, pendingSpawns);
 
-            NotifyNeighborsOfMatch(grid, removedPositions, adjacentTileChanges);
+            cleanedSpiderWebTileCount += NotifyNeighborsOfMatch(grid, removedPositions, adjacentTileChanges);
 
-            return new MatchResolveResult(groupResults, clearedPetalTypes, activations, pendingSpawns,
-                adjacentTileChanges);
+            return new MatchResolveResult(groupResults, clearedPetalTypes, activations, pendingSpawns, adjacentTileChanges, cleanedSpiderWebTileCount);
         }
 
 
@@ -182,11 +187,11 @@ namespace DefaultNamespace.UI
                 : SpecialSkillType.StripedVertical;
         }
 
-        private static void NotifyNeighborsOfMatch(Tile[,] grid, List<Vector2Int> cleared,
-            List<Vector2Int> changedTiles)
+        private static int NotifyNeighborsOfMatch(Tile[,] grid, List<Vector2Int> cleared, List<Vector2Int> changedTiles)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
+            int cleanedSpiderWebTileCount = 0;
 
             HashSet<Vector2Int> notifiedTiles = new();
 
@@ -203,11 +208,15 @@ namespace DefaultNamespace.UI
                     if (!notifiedTiles.Add(neighborPos))
                         continue;
                     //TODO: one problem, wouldnt a web get its web destroy 3 times if a stripe get exeucted
-                    bool changed = grid[neighborPos.x, neighborPos.y].OnAdjacentTileMatched();
-                    if (changed)
+                    TileImpactResult impactResult = grid[neighborPos.x, neighborPos.y].OnAdjacentTileMatched();
+                    if (impactResult.TileChanged)
                         changedTiles.Add(neighborPos);
+                    if (impactResult.SpiderWebCleaned)
+                        cleanedSpiderWebTileCount++;
                 }
             }
+
+            return cleanedSpiderWebTileCount;
         }
     }
 }

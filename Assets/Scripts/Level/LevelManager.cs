@@ -13,6 +13,7 @@ namespace DefaultNamespace
         private ObjectiveManager objectiveManager;
         [SerializeField] private GameBoard gameBoardPrefab;
         private GameBoard gameBoardInstance;
+        private ObjectiveManager boardEventObjectiveManager;
         public void InitNewLevel(int levelId)
         {
             LevelData data = LevelLoader.LoadLevel(levelId);
@@ -40,18 +41,14 @@ namespace DefaultNamespace
         {
             if (gameBoardInstance != null)
             {
-                gameBoardInstance.OnPetalsCleared -= ReportCleared;
+                gameBoardInstance.OnObjectiveEvent -= boardEventObjectiveManager.Report;
                 Destroy(gameBoardInstance.gameObject);
             }
 
             gameBoardInstance = Instantiate(gameBoardPrefab);
             gameBoardInstance.Init(grid);
-            gameBoardInstance.OnPetalsCleared += ReportCleared;
-        }
-
-        public void ReportCleared(List<PetalType> clearedPetals)
-        {
-            objectiveManager.Report(new PetalsClearedEvent(clearedPetals));
+            gameBoardInstance.OnObjectiveEvent += objectiveManager.Report;
+            boardEventObjectiveManager = objectiveManager;
         }
         
         private void HandleLevelComplete()
