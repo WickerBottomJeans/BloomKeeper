@@ -2,6 +2,7 @@
 
 namespace DefaultNamespace
 {
+    //TODO: need to make sure json is legit, put that logic somewhere
     public class LevelData
     {
         public int levelId;

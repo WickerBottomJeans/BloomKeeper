@@ -32,11 +32,11 @@
   "constrainers": [
     {
       "type": 1,
-      "moveLimit": 5
+      "moveLimit": 500
     },
     {
       "type": 2,
-      "timeLimitSeconds": 100
+      "timeLimitSeconds": 10000
     }
   ]
 }

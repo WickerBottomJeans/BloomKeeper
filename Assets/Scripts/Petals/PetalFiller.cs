@@ -14,12 +14,22 @@ namespace Petals
 
             for (int x = 0; x < cols; x++)
             {
+                bool foundFillEntryCandidate = false;
+
                 for (int y = rows - 1; y >= 0; y--)
                 {
-                    if (!grid[x, y].IsGravityAffected()) break;
-                    if (!grid[x, y].CanReceiveNewPetal()) continue;
+                    BoardCell cell = grid[x, y];
 
-                    grid[x, y].Petal = PetalFactory.CreateRandom();
+                    if (!foundFillEntryCandidate)
+                    {
+                        if (!cell.IsFillEntryCandidate()) continue;
+                        foundFillEntryCandidate = true;
+                    }
+
+                    if (!cell.IsGravityAffected()) break;
+                    if (!cell.CanReceiveNewPetal()) continue;
+
+                    cell.Petal = PetalFactory.CreateRandom();
                     filled.Add(new Vector2Int(x, y));
                 }
             }

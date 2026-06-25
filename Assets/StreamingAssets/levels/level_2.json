@@ -1,12 +1,18 @@
 {
   "levelId": 2,
-  "boardWidth": 4,
-  "boardHeight": 4,
+  "boardWidth": 10,
+  "boardHeight": 10,
   "tiles": [
-    { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 4 },
-    { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 1 },
-    { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 2 },
-    { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 3 }
+    { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 },
+    { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 1 }, { "type": 1 },
+    { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 },
+    { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 },
+    { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 },
+    { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 },
+    { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }
   ],
   "objectives": [
     {
@@ -29,6 +35,10 @@
           "amount": 4
         }
       ]
+    },
+    {
+      "type": 3,
+      "spiderWebsToClear": 8
     }
   ]
 }

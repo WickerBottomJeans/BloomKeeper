@@ -16,6 +16,7 @@ namespace DefaultNamespace.UI
         }
 
         public bool IsMatchable() => !IsVoid && Tile != null && Tile.IsMatchable(Petal);
+        public bool IsFillEntryCandidate() => !IsVoid;
         public bool IsGravityAffected() => Tile != null && Tile.IsGravityAffected();
         public bool CanReceiveNewPetal() => !IsVoid && Tile != null && Tile.CanReceiveNewPetal(Petal);
         public bool CanSwapPetal() => !IsVoid && Tile != null && Tile.CanSwapPetal(Petal);
