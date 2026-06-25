@@ -31,7 +31,7 @@ namespace DefaultNamespace.VFX
             if (mutationLaserOriginPrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a mutation laser origin ParticleSystem prefab.");
             if (bouquetBloomPrefab == null)
-                throw new InvalidOperationException("BoardVFXManager requires a Bouquet bloom prefab.");
+                throw new InvalidOperationException("BoardVFXManager requires a Bomb bloom prefab.");
             if (stripedSkillPrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a striped skill prefab.");
 

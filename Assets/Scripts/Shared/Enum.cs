@@ -16,12 +16,13 @@
     public enum PetalType
     {
         None = 0,
-        Rose = 1,
-        Daisy = 2,
-        Bluebell = 3,
-        Sunflower = 4,
-        Lavender = 5,
-        Clover = 6
+        Strawberry = 1,
+        Mushroom = 2,
+        Starfruit = 3,
+        Clover = 4,
+        Dewdrop = 5,
+        BerryCluster = 6,
+        Daisy = 7
     }
 
     public enum TileType
@@ -42,7 +43,7 @@
         None = 0,
         StripedHorizontal = 1,
         StripedVertical = 2,
-        Bouquet = 3,
+        Bomb = 3,
         Sunburst = 4,
         Butterfly = 5,
         StripeSunburst = 6,

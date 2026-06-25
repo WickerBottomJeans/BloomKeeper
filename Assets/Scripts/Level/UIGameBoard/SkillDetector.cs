@@ -31,7 +31,7 @@ namespace DefaultNamespace
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.None), HandleSunburst },
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.StripedHorizontal), HandleSunburst },
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.StripedVertical), HandleSunburst },
-                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Bouquet), HandleSunburst },
+                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Bomb), HandleSunburst },
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Butterfly), HandleSunburst },
             };
 
@@ -71,7 +71,7 @@ namespace DefaultNamespace
                 SpecialSkillType.None => SpecialSkillType.Sunburst,
                 SpecialSkillType.StripedHorizontal => SpecialSkillType.StripeSunburst,
                 SpecialSkillType.StripedVertical => SpecialSkillType.StripeSunburst,
-                SpecialSkillType.Bouquet => SpecialSkillType.BouquetSunburst,
+                SpecialSkillType.Bomb => SpecialSkillType.BouquetSunburst,
                 SpecialSkillType.Butterfly => SpecialSkillType.ButterflySunburst,
                 _ => throw new ArgumentOutOfRangeException(nameof(targetSkill), targetSkill, "Sunburst combo is not supported.")
             };

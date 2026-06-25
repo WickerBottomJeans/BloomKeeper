@@ -21,7 +21,7 @@ namespace Skills
                 case SpecialSkillType.StripedHorizontal:
                 case SpecialSkillType.StripedVertical:
                     return UseStripedSkill(grid, activation.Position, activation.SkillType, selfPetal);
-                case SpecialSkillType.Bouquet:
+                case SpecialSkillType.Bomb:
                     return UseBouquetSkill(grid, activation.Position, selfPetal);
                 case SpecialSkillType.Sunburst:
                     //TODO: should we remove causer? dont seem like its needed anymore => nah. cases like stripe break a sunburst

@@ -77,9 +77,9 @@ namespace DefaultNamespace.UI
             {
                 MatchShape.Four => DetermineStripeSkill(match),
                 MatchShape.Five => SpecialSkillType.Sunburst,
-                MatchShape.TShape => SpecialSkillType.Bouquet,
-                MatchShape.LShape => SpecialSkillType.Bouquet,
-                MatchShape.Cross => SpecialSkillType.Bouquet,
+                MatchShape.TShape => SpecialSkillType.Bomb,
+                MatchShape.LShape => SpecialSkillType.Bomb,
+                MatchShape.Cross => SpecialSkillType.Bomb,
                 MatchShape.Square2x2 => SpecialSkillType.Butterfly,
                 _ => null
             };

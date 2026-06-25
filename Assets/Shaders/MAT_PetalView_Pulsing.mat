@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MAT_Petalview
+  m_Name: MAT_PetalView_Pulsing
   m_Shader: {fileID: -6465566751694194690, guid: d587a99346a8ad446a439311d5144cb2, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

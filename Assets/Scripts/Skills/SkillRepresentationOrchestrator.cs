@@ -10,7 +10,7 @@ namespace Skills
 {
     public class SkillRepresentationOrchestrator : MonoBehaviour
     {
-        [Header("Bouquet Timing")]
+        [Header("Bomb Timing")]
         [SerializeField] private float bouquetDisappearDuration = 0.2f;
 
         [Header("Striped Timing")]
@@ -53,8 +53,8 @@ namespace Skills
             {
                 case null:
                     return;
-                case BouquetRepresentationData bouquet:
-                    await PlayBouquet(bouquet, resolution);
+                case BouquetRepresentationData Bomb:
+                    await PlayBouquet(Bomb, resolution);
                     return;
                 case StripedRepresentationData striped:
                     await PlayStriped(striped, resolution);
