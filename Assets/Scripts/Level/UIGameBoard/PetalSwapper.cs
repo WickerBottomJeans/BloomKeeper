@@ -1,21 +1,21 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
     /// <summary>
-    /// Swap tile's petal in Tile[,]
+    /// Swap cell petals in BoardCell[,]
     /// </summary>
-    public static class  PetalSwapper
+    public static class PetalSwapper
     {
-        public static bool Validate(Vector2Int cellA, Vector2Int cellB, Tile[,] grid)
+        public static bool Validate(Vector2Int cellA, Vector2Int cellB, BoardCell[,] grid)
         {
-            Tile tileA = grid[cellA.x, cellA.y];
-            Tile tileB = grid[cellB.x, cellB.y];
+            BoardCell boardCellA = grid[cellA.x, cellA.y];
+            BoardCell boardCellB = grid[cellB.x, cellB.y];
 
-            return tileA.CanSwapPetal() && tileB.CanSwapPetal();
+            return boardCellA.CanSwapPetal() && boardCellB.CanSwapPetal();
         }
 
-        public static void ExecuteSwapPetal(Vector2Int cellA, Vector2Int cellB, Tile[,] grid)
+        public static void ExecuteSwapPetal(Vector2Int cellA, Vector2Int cellB, BoardCell[,] grid)
         {
             Petal temp = grid[cellA.x, cellA.y].Petal;
             grid[cellA.x, cellA.y].Petal = grid[cellB.x, cellB.y].Petal;

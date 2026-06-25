@@ -20,7 +20,7 @@ namespace DefaultNamespace.UI
             this.layout = layout;
         }
 
-        public async UniTask Play(MatchResolveResult result, IReadOnlyList<SkillUseResult> skillResults, Tile[,] grid)
+        public async UniTask Play(MatchResolveResult result, IReadOnlyList<SkillUseResult> skillResults, BoardCell[,] grid)
         {
             var skillResultsByMatch = new Dictionary<MatchGroup, SkillUseResult>(skillResults.Count);
             foreach (SkillUseResult skillResult in skillResults)

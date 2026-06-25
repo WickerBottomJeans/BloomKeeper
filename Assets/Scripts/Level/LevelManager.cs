@@ -59,13 +59,13 @@ namespace DefaultNamespace
             objectiveManager.OnProgressUpdated += HandleObjectiveProgressUpdated;
             constrainerManager.OnFailed += HandleConstrainerFailed;
             constrainerManager.OnProgressUpdated += HandleConstrainerProgressUpdated;
-            Tile[,] grid = BoardInitializer.Initialize(data);
+            BoardCell[,] grid = BoardInitializer.Initialize(data);
             
             UIManager.Instance.ShowScoreBoard(objectives, constrainerManager.GetViewData());
             SpawnGameBoard(grid);
         }
         
-        private void SpawnGameBoard(Tile[,] grid)
+        private void SpawnGameBoard(BoardCell[,] grid)
         {
             if (gameBoardInstance != null)
             {

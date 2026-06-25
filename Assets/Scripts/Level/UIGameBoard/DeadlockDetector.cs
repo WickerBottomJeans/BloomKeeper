@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
     public static class DeadlockDetector
     {
-        public static bool HasValidMove(Tile[,] grid)
+        public static bool HasValidMove(BoardCell[,] grid)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -21,19 +21,19 @@ namespace DefaultNamespace.UI
             return false;
         }
 
-        private static bool TrySwapAndDetect(Tile[,] grid, Vector2Int cellA, Vector2Int cellB)
+        private static bool TrySwapAndDetect(BoardCell[,] grid, Vector2Int cellA, Vector2Int cellB)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
 
             if (cellB.x >= cols || cellB.y >= rows) return false;
 
-            Tile tileA = grid[cellA.x, cellA.y];
-            Tile tileB = grid[cellB.x, cellB.y];
+            BoardCell boardCellA = grid[cellA.x, cellA.y];
+            BoardCell boardCellB = grid[cellB.x, cellB.y];
 
             if (!PetalSwapper.Validate(cellA, cellB, grid)) return false;
-            if (SkillDetector.HasActivationOnSwap(tileA.Petal.Skill, tileB.Petal.Skill)) return true;
-            if (!tileA.IsMatchable() || !tileB.IsMatchable()) return false;
+            if (SkillDetector.HasActivationOnSwap(boardCellA.Petal.Skill, boardCellB.Petal.Skill)) return true;
+            if (!boardCellA.IsMatchable() || !boardCellB.IsMatchable()) return false;
 
             PetalSwapper.ExecuteSwapPetal(cellA, cellB, grid);
 

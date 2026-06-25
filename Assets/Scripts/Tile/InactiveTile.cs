@@ -1,21 +1,20 @@
-﻿namespace DefaultNamespace
+namespace DefaultNamespace
 {
     //TODO: not sure if this class is justified
     public class InactiveTile : Tile
     {
         public override TileType TileType => TileType.Inactive;
 
-
-        public override bool IsMatchable()
+        public override bool IsMatchable(Petal petal)
         {
             return false;
         }
         
         public override bool IsGravityAffected() => false;
-        public override bool CanReceiveNewPetal() => false;
-        public override bool CanSwapPetal() => false;
+        public override bool CanReceiveNewPetal(Petal petal) => false;
+        public override bool CanSwapPetal(Petal petal) => false;
         public override bool HasClearableObstacle() => false;
-        public override bool CanClearPetal() => false;
-        public override TileImpactResult ApplyClearEffect() => new TileImpactResult(null, false);
+        public override bool CanClearPetal(Petal petal) => false;
+        public override TileImpactResult ApplyClearEffect(Petal petal) => new TileImpactResult(null, false);
     }
 }

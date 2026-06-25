@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,7 +8,6 @@ namespace DefaultNamespace.UI
     //TODO: this should only decide what hapend to the grid ... when some cell get impacted (a match some ppl say)
     public static class MatchResolver
     {
-
         private static readonly Vector2Int[] NeighborOffsets =
         {
             Vector2Int.up,
@@ -21,8 +20,7 @@ namespace DefaultNamespace.UI
             new Vector2Int(1, 1)
         };
 
-        public static MatchResolveResult Resolve(List<MatchGroup> matches, Tile[,] grid, Vector2Int swapOrigin,
-            Vector2Int swapTarget)
+        public static MatchResolveResult Resolve(List<MatchGroup> matches, BoardCell[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget)
         {
             var activations = new List<SkillActivation>();
             var groupResults = new List<MatchGroupResolveResult>(matches.Count);
@@ -34,8 +32,7 @@ namespace DefaultNamespace.UI
 
             foreach (MatchGroup match in matches)
             {
-                MatchGroupResolveResult groupResult = ProcessMatch(match, grid, swapOrigin, swapTarget,
-                    activations, removedPositions, clearedPetalTypes, pendingSpawns);
+                MatchGroupResolveResult groupResult = ProcessMatch(match, grid, swapOrigin, swapTarget, activations, removedPositions, clearedPetalTypes, pendingSpawns);
                 groupResults.Add(groupResult);
                 foreach (var impact in groupResult.Impacts)
                 {
@@ -51,27 +48,13 @@ namespace DefaultNamespace.UI
             return new MatchResolveResult(groupResults, clearedPetalTypes, activations, pendingSpawns, adjacentTileChanges, cleanedSpiderWebTileCount);
         }
 
-
-        private static MatchGroupResolveResult ProcessMatch(
-            MatchGroup match,
-            Tile[,] grid,
-            Vector2Int swapOrigin,
-            Vector2Int swapTarget,
-            List<SkillActivation> activations,
-            List<Vector2Int> removedPositions,
-            List<PetalType> clearedPetalTypes,
-            List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns)
+        private static MatchGroupResolveResult ProcessMatch(MatchGroup match, BoardCell[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget, List<SkillActivation> activations, List<Vector2Int> removedPositions, List<PetalType> clearedPetalTypes, List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns)
         {
             TryQueueSkillSpawn(match, grid, swapOrigin, swapTarget, pendingSpawns);
             return ClearMatchTiles(match, grid, activations, removedPositions, clearedPetalTypes);
         }
 
-        private static void TryQueueSkillSpawn(
-            MatchGroup match,
-            Tile[,] grid,
-            Vector2Int swapOrigin,
-            Vector2Int swapTarget,
-            List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns)
+        private static void TryQueueSkillSpawn(MatchGroup match, BoardCell[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget, List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns)
         {
             SpecialSkillType? spawnSkill = match.Shape switch
             {
@@ -86,14 +69,12 @@ namespace DefaultNamespace.UI
 
             if (!spawnSkill.HasValue) return;
             
-            
             //If the match group has a skill petal in it, then execute that skill petal, not forming new skill petal
             bool hasSkillPetal = match.TilePositions.Any(t => grid[t.x, t.y].Petal?.Skill != SpecialSkillType.None);
             if (hasSkillPetal) return;
 
             PetalType matchedType = grid[match.TilePositions[0].x, match.TilePositions[0].y].Petal?.PetalType
-                                    ?? throw new InvalidOperationException(
-                                        "Match group contains tile with null petal.");
+                                    ?? throw new InvalidOperationException("Match group contains tile with null petal.");
             if (spawnSkill == SpecialSkillType.Sunburst)
             {
                 matchedType = PetalType.None;
@@ -102,40 +83,34 @@ namespace DefaultNamespace.UI
             pendingSpawns.Add((spawnPos, matchedType, spawnSkill.Value));
         }
 
-        private static MatchGroupResolveResult ClearMatchTiles(
-            MatchGroup match,
-            Tile[,] grid,
-            List<SkillActivation> activations,
-            List<Vector2Int> removedPositions,
-            List<PetalType> clearedPetalTypes)
+        private static MatchGroupResolveResult ClearMatchTiles(MatchGroup match, BoardCell[,] grid, List<SkillActivation> activations, List<Vector2Int> removedPositions, List<PetalType> clearedPetalTypes)
         {
             var impacts = new List<(Vector2Int Position, TileImpactResult Outcome)>(match.TilePositions.Count);
             var triggeredSkillPositions = new List<Vector2Int>();
 
-            foreach (Vector2Int cell in match.TilePositions)
+            foreach (Vector2Int cellPosition in match.TilePositions)
             {
-                Tile tile = grid[cell.x, cell.y];
-                TileImpactResult impactResult = tile.ApplyClearEffect();
-                impacts.Add((cell, impactResult));
+                BoardCell cell = grid[cellPosition.x, cellPosition.y];
+                TileImpactResult impactResult = cell.ApplyClearEffect();
+                impacts.Add((cellPosition, impactResult));
 
                 Petal petal = impactResult.RemovedPetal;
                 if (petal == null) continue;
 
                 if (petal.Skill != SpecialSkillType.None && !match.IsFromSkillCombo)
                 {
-                    activations.Add(new SkillActivation(cell, petal.Skill, petal, match.Causer != null ? new Petal(match.Causer) : null));
-                    triggeredSkillPositions.Add(cell);
+                    activations.Add(new SkillActivation(cellPosition, petal.Skill, petal, match.Causer != null ? new Petal(match.Causer) : null));
+                    triggeredSkillPositions.Add(cellPosition);
                 }
 
-                removedPositions.Add(cell);
+                removedPositions.Add(cellPosition);
                 clearedPetalTypes.Add(petal.PetalType);
             }
 
             return new MatchGroupResolveResult(match, impacts, triggeredSkillPositions);
         }
 
-        private static void ApplyPendingSpawns(Tile[,] grid,
-            List<(Vector2Int pos, PetalType petalType, SpecialSkillType skill)> pendingSpawns)
+        private static void ApplyPendingSpawns(BoardCell[,] grid, List<(Vector2Int pos, PetalType petalType, SpecialSkillType skill)> pendingSpawns)
         {
             foreach (var (pos, petalType, skill) in pendingSpawns)
                 grid[pos.x, pos.y].Petal = PetalFactory.CreatePetal(petalType, skill);
@@ -168,10 +143,8 @@ namespace DefaultNamespace.UI
                     return GetIntersectionTile(match);
                 case MatchShape.Square2x2:
                     return match.TilePositions.OrderBy(t => t.y).ThenBy(t => t.x).First();
-
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(match.Shape), match.Shape,
-                        "No cascade spawn position defined for this shape.");
+                    throw new ArgumentOutOfRangeException(nameof(match.Shape), match.Shape, "No cascade spawn position defined for this shape.");
             }
         }
 
@@ -189,7 +162,7 @@ namespace DefaultNamespace.UI
                 : SpecialSkillType.StripedVertical;
         }
 
-        private static int NotifyNeighborsOfMatch(Tile[,] grid, List<Vector2Int> cleared, List<Vector2Int> changedTiles)
+        private static int NotifyNeighborsOfMatch(BoardCell[,] grid, List<Vector2Int> cleared, List<Vector2Int> changedTiles)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -203,14 +176,13 @@ namespace DefaultNamespace.UI
                 {
                     Vector2Int neighborPos = clearedCell + offset;
 
-                    if (neighborPos.x < 0 || neighborPos.x >= cols ||
-                        neighborPos.y < 0 || neighborPos.y >= rows)
+                    if (neighborPos.x < 0 || neighborPos.x >= cols || neighborPos.y < 0 || neighborPos.y >= rows)
                         continue;
 
                     if (!notifiedTiles.Add(neighborPos))
                         continue;
                     //TODO: one problem, wouldnt a web get its web destroy 3 times if a stripe get exeucted
-                    TileImpactResult impactResult = grid[neighborPos.x, neighborPos.y].OnAdjacentTileMatched();
+                    TileImpactResult impactResult = grid[neighborPos.x, neighborPos.y].OnAdjacentCellMatched();
                     if (impactResult.TileChanged)
                         changedTiles.Add(neighborPos);
                     if (impactResult.SpiderWebCleaned)

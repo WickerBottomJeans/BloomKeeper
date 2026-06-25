@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DefaultNamespace.Utility;
 
 namespace DefaultNamespace
@@ -22,9 +22,9 @@ namespace DefaultNamespace
             this.webLevel = webLevel;
         }
 
-        public override bool IsMatchable()
+        public override bool IsMatchable(Petal petal)
         {
-            return webLevel == 0 && Petal != null && Petal.IsMatchable();
+            return webLevel == 0 && petal != null && petal.IsMatchable();
         }
 
         public override bool IsGravityAffected()
@@ -32,18 +32,18 @@ namespace DefaultNamespace
             return webLevel == 0;
         }
 
-        public override bool CanReceiveNewPetal()
+        public override bool CanReceiveNewPetal(Petal petal)
         {
-            return webLevel == 0 && Petal == null; ;
+            return webLevel == 0 && petal == null;
         }
 
-        public override bool CanSwapPetal() => webLevel == 0 && Petal != null;
+        public override bool CanSwapPetal(Petal petal) => webLevel == 0 && petal != null;
 
         public override bool HasClearableObstacle() => webLevel > 0;
 
-        public override bool CanClearPetal() => webLevel == 0 && Petal != null;
+        public override bool CanClearPetal(Petal petal) => webLevel == 0 && petal != null;
 
-        public override TileImpactResult ApplyClearEffect()
+        public override TileImpactResult ApplyClearEffect(Petal petal)
         {
             TileImpactResult webImpactResult = TryReduceWebLevel();
             
@@ -54,11 +54,7 @@ namespace DefaultNamespace
             }
             
             //Have no web to reduce aka the web tile dont have web and free to do normal petal stuff
-            if (Petal == null) return new TileImpactResult(null, false);
-
-            Petal removedPetal = Petal;
-            Petal = null;
-            return new TileImpactResult(removedPetal, false);
+            return petal != null ? new TileImpactResult(petal, false) : new TileImpactResult(null, false);
         } 
         
         //TODO: this doesnt look right, not controlled by boardVFX when affected by a skill. FIX THIS later :)

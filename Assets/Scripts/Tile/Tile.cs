@@ -1,15 +1,14 @@
-﻿namespace DefaultNamespace
+namespace DefaultNamespace
 {
     public abstract class Tile
     {
-        public Petal Petal { get; set; }
         public abstract TileType TileType { get; }
 
         /// <summary>
         /// Would this be consider in match detecting phase in Match detector?
         /// </summary>
         /// <returns></returns>
-        public abstract bool IsMatchable();
+        public abstract bool IsMatchable(Petal petal);
 
         /// <summary>
         /// Will the petal in it be affected by gravity
@@ -17,18 +16,18 @@
         /// <returns></returns>
         public abstract bool IsGravityAffected();
 
-        public abstract bool CanReceiveNewPetal();
+        public abstract bool CanReceiveNewPetal(Petal petal);
 
-        public abstract bool CanSwapPetal();
+        public abstract bool CanSwapPetal(Petal petal);
 
         public abstract bool HasClearableObstacle();
 
-        public abstract bool CanClearPetal();
+        public abstract bool CanClearPetal(Petal petal);
 
         /// <summary>
         /// Applies an effect that attempts to clear this tile's petal.
         /// </summary>
-        public abstract TileImpactResult ApplyClearEffect();
+        public abstract TileImpactResult ApplyClearEffect(Petal petal);
 
         public virtual TileImpactResult OnAdjacentTileMatched()
         {
@@ -36,6 +35,5 @@
         }
 
         public virtual string GetOverlaySpriteKey() => null;
-
     }
 }

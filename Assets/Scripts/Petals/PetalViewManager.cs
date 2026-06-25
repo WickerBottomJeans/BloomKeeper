@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
@@ -14,11 +14,11 @@ public class PetalViewManager : MonoBehaviour
 
     private PetalView[,] petalViews;
     private ObjectPool<PetalView> pool;
-    public void Init(Tile[,] grid, BoardLayout boardLayout)
+    public void Init(BoardCell[,] grid, BoardLayout boardLayout)
     {
         pool = new ObjectPool<PetalView>(
-            createFunc:      () => Instantiate(petalViewPrefab, transform),
-            actionOnGet:     view => view.gameObject.SetActive(true),
+            createFunc: () => Instantiate(petalViewPrefab, transform),
+            actionOnGet: view => view.gameObject.SetActive(true),
             actionOnRelease: view => view.gameObject.SetActive(false),
             actionOnDestroy: view => Destroy(view.gameObject)
         );
@@ -31,13 +31,13 @@ public class PetalViewManager : MonoBehaviour
         {
             for (int y = 0; y < rows; y++)
             {
-                Tile tile = grid[x, y];
-                if (tile is InactiveTile || tile.Petal == null) continue;
+                BoardCell cell = grid[x, y];
+                if (cell.IsVoid || cell.Petal == null) continue;
 
                 Vector2 pos = boardLayout.GetCellWorldPos(x, y);
                 PetalView view = pool.Get();
                 view.transform.position = pos;
-                view.Init(tile.Petal, boardLayout.CellSize);
+                view.Init(cell.Petal, boardLayout.CellSize);
                 petalViews[x, y] = view;
             }
         }
@@ -54,11 +54,7 @@ public class PetalViewManager : MonoBehaviour
             PetalView view = petalViews[change.Position.x, change.Position.y];
             if (view == null) continue;
 
-            tasks.Add(PetalViewAnimator.PlayPetalChange(
-                view,
-                change.After,
-                boardLayout.CellSize,
-                duration));
+            tasks.Add(PetalViewAnimator.PlayPetalChange(view, change.After, boardLayout.CellSize, duration));
         }
 
         await UniTask.WhenAll(tasks);
@@ -77,6 +73,7 @@ public class PetalViewManager : MonoBehaviour
         petalViews[cellA.x, cellA.y] = viewB;
         petalViews[cellB.x, cellB.y] = viewA;
     }
+
     public UniTask PlayNormalRemovals(IReadOnlyList<Vector2Int> positions, float duration = 0f)
     {
         return ClearPetalViews(positions, duration);
@@ -104,9 +101,7 @@ public class PetalViewManager : MonoBehaviour
         pool.Release(view);
     }
 
-    public async UniTask PlayDisappearAndRelease(
-        IReadOnlyList<Vector2Int> positions,
-        float duration)
+    public async UniTask PlayDisappearAndRelease(IReadOnlyList<Vector2Int> positions, float duration)
     {
         var tasks = new List<UniTask>();
 
@@ -152,9 +147,7 @@ public class PetalViewManager : MonoBehaviour
         return PetalViewAnimator.PlayFly(view, targetWorldPosition, duration);
     }
     
-    public async UniTask PlaySpawnedPetals(
-        IReadOnlyList<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> spawns,
-        BoardLayout boardLayout)
+    public async UniTask PlaySpawnedPetals(IReadOnlyList<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> spawns, BoardLayout boardLayout)
     {
         var tasks = new List<UniTask>();
 
@@ -181,10 +174,7 @@ public class PetalViewManager : MonoBehaviour
         return PetalViewAnimator.PlayComboMerge(viewA, viewB);
     }
 
-    public async UniTask PlayComboSpinAndRelease(
-        Vector2Int sourceA,
-        Vector2Int sourceB,
-        float duration)
+    public async UniTask PlayComboSpinAndRelease(Vector2Int sourceA, Vector2Int sourceB, float duration)
     {
         //TODO: bug, when sun burst dont get executed from a swap, it wouldnt have 2 view. count for that case too
         PetalView viewA = petalViews[sourceA.x, sourceA.y];
@@ -197,6 +187,7 @@ public class PetalViewManager : MonoBehaviour
         pool.Release(viewA);
         pool.Release(viewB);
     }
+
     public async UniTask OnGravityApplied(List<(Vector2Int from, Vector2Int to)> moves, BoardLayout boardLayout)
     {
         var tasks = new List<UniTask>();
@@ -212,7 +203,7 @@ public class PetalViewManager : MonoBehaviour
         await UniTask.WhenAll(tasks);
     }
     
-    public async UniTask OnFilled(List<Vector2Int> filledCells, BoardLayout boardLayout, Tile[,] grid)
+    public async UniTask OnFilled(List<Vector2Int> filledCells, BoardLayout boardLayout, BoardCell[,] grid)
     {
         filledCells.Sort((a, b) => a.y.CompareTo(b.y));
         var tasks = new List<UniTask>();
@@ -230,7 +221,7 @@ public class PetalViewManager : MonoBehaviour
         await UniTask.WhenAll(tasks);
     }
     
-    public async UniTask OnShuffled(List<Vector2Int> cells, BoardLayout boardLayout, Tile[,] grid)
+    public async UniTask OnShuffled(List<Vector2Int> cells, BoardLayout boardLayout, BoardCell[,] grid)
     {
         var tasks = new List<UniTask>();
         foreach (Vector2Int cell in cells)
@@ -242,7 +233,7 @@ public class PetalViewManager : MonoBehaviour
         await UniTask.WhenAll(tasks);
     }
     
-    private async UniTask ShuffleCell(PetalView view, Vector2Int cell, float delay, BoardLayout boardLayout, Tile[,] grid)
+    private async UniTask ShuffleCell(PetalView view, Vector2Int cell, float delay, BoardLayout boardLayout, BoardCell[,] grid)
     {
         await PetalViewAnimator.PlayDestroy(view, delay);
         pool.Release(view);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using DefaultNamespace.UI;
 using UnityEngine;
@@ -25,7 +25,7 @@ namespace DefaultNamespace
             public override int GetHashCode() => HashCode.Combine(A, B);
         }
 
-        private static readonly Dictionary<SkillKey, Func<Tile[,], Vector2Int, Vector2Int, List<SkillActivation>>> _handlers =
+        private static readonly Dictionary<SkillKey, Func<BoardCell[,], Vector2Int, Vector2Int, List<SkillActivation>>> _handlers =
             new()
             {
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.None), HandleSunburst },
@@ -35,7 +35,7 @@ namespace DefaultNamespace
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Butterfly), HandleSunburst },
             };
 
-        public static List<SkillActivation> DetectOnSwap(Tile[,] grid, Vector2Int cellA, Vector2Int cellB)
+        public static List<SkillActivation> DetectOnSwap(BoardCell[,] grid, Vector2Int cellA, Vector2Int cellB)
         {
             Petal petalA = grid[cellA.x, cellA.y].Petal;
             Petal petalB = grid[cellB.x, cellB.y].Petal;
@@ -56,7 +56,7 @@ namespace DefaultNamespace
             return _handlers.ContainsKey(new SkillKey(skillA, skillB));
         }
 
-        private static List<SkillActivation> HandleSunburst(Tile[,] grid, Vector2Int cellA, Vector2Int cellB)
+        private static List<SkillActivation> HandleSunburst(BoardCell[,] grid, Vector2Int cellA, Vector2Int cellB)
         {
             Vector2Int sunburstCell = grid[cellA.x, cellA.y].Petal?.Skill == SpecialSkillType.Sunburst ? cellA : cellB;
             Vector2Int targetCell = sunburstCell == cellA ? cellB : cellA;

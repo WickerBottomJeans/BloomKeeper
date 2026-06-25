@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
     public static class BoardShuffler
     {
-        public static List<Vector2Int> Shuffle(Tile[,] grid)
+        public static List<Vector2Int> Shuffle(BoardCell[,] grid)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);

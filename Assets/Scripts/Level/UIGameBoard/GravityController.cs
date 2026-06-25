@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
     public static class GravityController
     {
-        public static List<(Vector2Int from, Vector2Int to)> Apply(Tile[,] grid)
+        public static List<(Vector2Int from, Vector2Int to)> Apply(BoardCell[,] grid)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);

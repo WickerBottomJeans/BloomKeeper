@@ -1,28 +1,23 @@
-﻿namespace DefaultNamespace
+namespace DefaultNamespace
 {
     public class NormalTile : Tile
     {
         public override TileType TileType => TileType.Normal;
 
-        public override bool IsMatchable()
+        public override bool IsMatchable(Petal petal)
         {
-            return Petal != null && Petal.IsMatchable();
+            return petal != null && petal.IsMatchable();
         }
         
         public override bool IsGravityAffected() => true;
-        public override bool CanReceiveNewPetal() => Petal == null;
-        public override bool CanSwapPetal() => Petal != null;
+        public override bool CanReceiveNewPetal(Petal petal) => petal == null;
+        public override bool CanSwapPetal(Petal petal) => petal != null;
         public override bool HasClearableObstacle() => false;
-        public override bool CanClearPetal() => Petal != null;
+        public override bool CanClearPetal(Petal petal) => petal != null;
         
-        public override TileImpactResult ApplyClearEffect()
+        public override TileImpactResult ApplyClearEffect(Petal petal)
         {
-            if (Petal == null) return new TileImpactResult(null, false);
-
-            Petal removedPetal = Petal;
-            Petal = null;
-            return new TileImpactResult(removedPetal, false);
+            return petal != null ? new TileImpactResult(petal, false) : new TileImpactResult(null, false);
         }
     }
-
 }

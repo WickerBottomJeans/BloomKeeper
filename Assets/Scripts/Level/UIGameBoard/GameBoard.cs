@@ -31,7 +31,7 @@ public class GameBoard : MonoBehaviour
     private Camera cam;
     private BoardLayout layout;
     private MeshFilter meshFilter;
-    private Tile[,] grid;
+    private BoardCell[,] grid;
     
     /// <summary>
     /// Use for tester's petal editor
@@ -63,7 +63,7 @@ public class GameBoard : MonoBehaviour
     public event Action<IGameplayEvent> OnGameplayEvent;
     public event Action OnTurnSettled;
 
-    public void Init(Tile[,] grid)
+    public void Init(BoardCell[,] grid)
     {
         cam = Camera.main;
         this.grid = grid;
@@ -103,6 +103,7 @@ public class GameBoard : MonoBehaviour
     private void HandleEditRequested(Vector2Int cell)
     {
         if (currentState != BoardState.Idle) return;
+        if (grid[cell.x, cell.y].IsVoid) return;
 
         editingCell = cell;
 
@@ -114,6 +115,8 @@ public class GameBoard : MonoBehaviour
 
     private void HandlePetalEditConfirmed(PetalType petalType, SpecialSkillType skillType)
     {
+        if (grid[editingCell.x, editingCell.y].IsVoid) return;
+
         Petal petal = new Petal(petalType, skillType);
         grid[editingCell.x, editingCell.y].Petal = petal;
         petalViewManager.RefreshCell(editingCell, petal, layout);
@@ -277,10 +280,11 @@ public class GameBoard : MonoBehaviour
         {
             for (int y = 0; y < grid.GetLength(1); y++)
             {
-                Tile tile = grid[x, y];
+                BoardCell cell = grid[x, y];
+                if (cell.IsVoid) continue;
                 Vector2 center = layout.GetCellWorldPos(x, y);
 
-                Gizmos.color = tile switch
+                Gizmos.color = cell.Tile switch
                 {
                     InactiveTile => new Color(0.55f, 0.1f, 0.1f, 0.8f),
                     WebTile => new Color(0.6f, 0.6f, 0.6f, 0.8f),
@@ -296,10 +300,10 @@ public class GameBoard : MonoBehaviour
         {
             for (int y = 0; y < grid.GetLength(1); y++)
             {
-                Tile tile = grid[x, y];
-                if (tile?.Petal == null) continue;
+                BoardCell cell = grid[x, y];
+                if (cell.Petal == null) continue;
                 Vector2 center = layout.GetCellWorldPos(x, y);
-                Handles.Label(center, tile.Petal.PetalType.ToString()[0].ToString());
+                Handles.Label(center, cell.Petal.PetalType.ToString()[0].ToString());
                 int i = 1;
             }
         }

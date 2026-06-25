@@ -30,10 +30,9 @@ namespace Skills
         private TileViewManager tileViewManager;
         private BoardVFXManager boardVFXManager;
         private BoardLayout layout;
-        private Tile[,] grid;
+        private BoardCell[,] grid;
 
-        public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager,
-            BoardVFXManager boardVFXManager, BoardLayout layout, Tile[,] grid)
+        public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardLayout layout, BoardCell[,] grid)
         {
             this.petalViewManager = petalViewManager;
             this.tileViewManager = tileViewManager;

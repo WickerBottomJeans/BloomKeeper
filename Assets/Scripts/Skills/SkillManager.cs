@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using DefaultNamespace;
 using DefaultNamespace.UI;
@@ -12,7 +12,7 @@ namespace Skills
 
         public const int BouquetRange = 1;
 
-        public static SkillUseResult UseSkill(Tile[,] grid, SkillActivation activation)
+        public static SkillUseResult UseSkill(BoardCell[,] grid, SkillActivation activation)
         {
             Petal selfPetal = new Petal(activation.SelfPetal);
 
@@ -42,11 +42,7 @@ namespace Skills
             }
         }
 
-        private static SkillUseResult UseStripedSkill(
-            Tile[,] grid,
-            Vector2Int skillPos,
-            SpecialSkillType skillType,
-            Petal causer)
+        private static SkillUseResult UseStripedSkill(BoardCell[,] grid, Vector2Int skillPos, SpecialSkillType skillType, Petal causer)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -78,7 +74,7 @@ namespace Skills
             return new SkillUseResult(matchGroup, representation);
         }
         
-        public static SkillUseResult UseBouquetSkill(Tile[,] grid, Vector2Int center, Petal causer)
+        public static SkillUseResult UseBouquetSkill(BoardCell[,] grid, Vector2Int center, Petal causer)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -96,7 +92,7 @@ namespace Skills
             return new SkillUseResult(matchGroup, representation);
         }
         
-        public static MatchGroup UseSunburstSkill(Tile[,] grid, Vector2Int position, PetalType targetType, Petal causer)
+        public static MatchGroup UseSunburstSkill(BoardCell[,] grid, Vector2Int position, PetalType targetType, Petal causer)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -112,15 +108,15 @@ namespace Skills
             return new MatchGroup(tiles, MatchShape.None, causer);
         }
 
-        private static SkillUseResult UseSunburstSkill(Tile[,] grid, Vector2Int position, PetalType targetType, SpecialSkillType comboSkillType, Petal causer, SkillActivation activation)
+        private static SkillUseResult UseSunburstSkill(BoardCell[,] grid, Vector2Int position, PetalType targetType, SpecialSkillType comboSkillType, Petal causer, SkillActivation activation)
         {
             if (comboSkillType == SpecialSkillType.None)
             {
                 MatchGroup sunburstMatch = UseSunburstSkill(grid, position, targetType, causer);
                 Vector2Int sourceA = activation.Combo != null ? activation.Combo.SourceA : activation.Position;
                 Vector2Int sourceB = activation.Combo != null ? activation.Combo.SourceB : activation.Position;
-                var sunburstRepresentation  = new SunburstComboRepresentationData(sourceA, sourceB, activation.EffectOrigin, new List<PetalChange>(), SpecialSkillType.Sunburst);
-                return new SkillUseResult(sunburstMatch, sunburstRepresentation );
+                var sunburstRepresentation = new SunburstComboRepresentationData(sourceA, sourceB, activation.EffectOrigin, new List<PetalChange>(), SpecialSkillType.Sunburst);
+                return new SkillUseResult(sunburstMatch, sunburstRepresentation);
             }
 
             List<PetalChange> petalChanges = GiveSkillToPetalsOfType(grid, targetType, comboSkillType);
@@ -135,7 +131,7 @@ namespace Skills
             return new SkillUseResult(matchGroup, representation);
         }
         
-        public static SkillUseResult UseButterflySkill(Tile[,] grid, Vector2Int source, Petal causer)
+        public static SkillUseResult UseButterflySkill(BoardCell[,] grid, Vector2Int source, Petal causer)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -166,8 +162,7 @@ namespace Skills
             return new SkillUseResult(matchGroup, representation);
         }
         
-        private static List<PetalChange> GiveSkillToPetalsOfType(Tile[,] grid, PetalType targetType,
-            SpecialSkillType newSkill)
+        private static List<PetalChange> GiveSkillToPetalsOfType(BoardCell[,] grid, PetalType targetType, SpecialSkillType newSkill)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);

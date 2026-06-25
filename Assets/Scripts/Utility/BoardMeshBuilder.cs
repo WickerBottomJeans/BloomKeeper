@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using DefaultNamespace;
+using System.Collections.Generic;
 using DefaultNamespace.UI;
 using UnityEngine;
 
 public static class BoardMeshBuilder
 {
-    public static Mesh BuildFillMesh(Tile[,] grid, BoardLayout layout, float textureAspect)
+    public static Mesh BuildFillMesh(BoardCell[,] grid, BoardLayout layout, float textureAspect)
     {
         var vertices = new List<Vector3>();
         var triangles = new List<int>();
@@ -42,7 +41,7 @@ public static class BoardMeshBuilder
         {
             for (int y = 0; y < rows; y++)
             {
-                if (grid[x, y] is InactiveTile) continue;
+                if (grid[x, y].IsVoid) continue;
 
                 Vector2 center = layout.OriginWorldPos + new Vector2(x * layout.CellSize, y * layout.CellSize);
 
@@ -58,14 +57,10 @@ public static class BoardMeshBuilder
                 vertices.Add(tr);
                 vertices.Add(br);
 
-                uvs.Add(new Vector2(offsetU + ((bl.x - boardLeft) / totalWidth) * scaleU,
-                    offsetV + ((bl.y - boardBottom) / totalHeight) * scaleV));
-                uvs.Add(new Vector2(offsetU + ((tl.x - boardLeft) / totalWidth) * scaleU,
-                    offsetV + ((tl.y - boardBottom) / totalHeight) * scaleV));
-                uvs.Add(new Vector2(offsetU + ((tr.x - boardLeft) / totalWidth) * scaleU,
-                    offsetV + ((tr.y - boardBottom) / totalHeight) * scaleV));
-                uvs.Add(new Vector2(offsetU + ((br.x - boardLeft) / totalWidth) * scaleU,
-                    offsetV + ((br.y - boardBottom) / totalHeight) * scaleV));
+                uvs.Add(new Vector2(offsetU + ((bl.x - boardLeft) / totalWidth) * scaleU, offsetV + ((bl.y - boardBottom) / totalHeight) * scaleV));
+                uvs.Add(new Vector2(offsetU + ((tl.x - boardLeft) / totalWidth) * scaleU, offsetV + ((tl.y - boardBottom) / totalHeight) * scaleV));
+                uvs.Add(new Vector2(offsetU + ((tr.x - boardLeft) / totalWidth) * scaleU, offsetV + ((tr.y - boardBottom) / totalHeight) * scaleV));
+                uvs.Add(new Vector2(offsetU + ((br.x - boardLeft) / totalWidth) * scaleU, offsetV + ((br.y - boardBottom) / totalHeight) * scaleV));
 
                 triangles.Add(vIndex);
                 triangles.Add(vIndex + 1);

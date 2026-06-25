@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using DefaultNamespace;
+using System.Collections.Generic;
+using DefaultNamespace.UI;
 using UnityEngine;
 
 namespace Petals
 {
     public static class PetalFiller
     {
-        public static List<Vector2Int> Fill(Tile[,] grid)
+        public static List<Vector2Int> Fill(BoardCell[,] grid)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
