@@ -40,6 +40,8 @@ namespace DefaultNamespace.UI
 
                 AddNormalRemovals(groupResult, normalRemovals);
                 AddNormalTileChanges(groupResult, normalTileChanges);
+                if (groupResult.TriggeredSkillPositions.Count > 0)
+                    tasks.Add(petalViewManager.PlayAboutToExecuteShake(groupResult.TriggeredSkillPositions));
             }
 
             tasks.Add(tileViewManager.PlayTileChanges(normalTileChanges, grid));

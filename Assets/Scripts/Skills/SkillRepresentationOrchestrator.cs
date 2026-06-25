@@ -75,23 +75,24 @@ namespace Skills
 
         private async UniTask PlayBouquet(BouquetRepresentationData representation, MatchGroupResolveResult resolution)
         {
-            HashSet<Vector2Int> removedPositions = GetRemovedPositions(resolution);
+            HashSet<Vector2Int> removedPositions = GetCurrentSkillConsumedPositions(resolution);
             removedPositions.Add(representation.Center);
             UniTask disappearTask = petalViewManager.PlayDisappearAndRelease(
                 new List<Vector2Int>(removedPositions),
                 bouquetDisappearDuration);
 
+            UniTask triggeredSkillTask = petalViewManager.PlayAboutToExecuteShake(resolution.TriggeredSkillPositions);
             UniTask bloomTask = boardVFXManager.PlayBouquetBloomVFX(representation.Center);
             UniTask tileTask = PlayTileChanges(resolution);
 
-            await UniTask.WhenAll(disappearTask, bloomTask, tileTask);
+            await UniTask.WhenAll(disappearTask, triggeredSkillTask, bloomTask, tileTask);
         }
 
         private async UniTask PlayStriped(StripedRepresentationData representation,
             MatchGroupResolveResult resolution)
         {
             bool isVertical = representation.Direction == SpecialSkillType.StripedVertical;
-            HashSet<Vector2Int> removedPositions = GetRemovedPositions(resolution);
+            HashSet<Vector2Int> removedPositions = GetCurrentSkillConsumedPositions(resolution);
             HashSet<Vector2Int> changedPositions = GetChangedPositions(resolution);
             var patternPositions = new HashSet<Vector2Int> { representation.Source };
             removedPositions.Add(representation.Source);
@@ -121,6 +122,7 @@ namespace Skills
             {
                 var petalWave = new List<Vector2Int>();
                 var tileWave = new List<Vector2Int>();
+                var triggeredSkillWave = new List<Vector2Int>();
                 int directionCount = distance == 0 ? 1 : 2;
 
                 for (int direction = 0; direction < directionCount; direction++)
@@ -132,9 +134,11 @@ namespace Skills
 
                     if (removedPositions.Contains(position)) petalWave.Add(position);
                     if (changedPositions.Contains(position)) tileWave.Add(position);
+                    if (resolution.IsTriggeredSkillPosition(position)) triggeredSkillWave.Add(position);
                 }
 
                 tasks.Add(petalViewManager.PlayDisappearAndRelease(petalWave, stepDuration));
+                tasks.Add(petalViewManager.PlayAboutToExecuteShake(triggeredSkillWave));
                 tasks.Add(tileViewManager.PlayTileChanges(tileWave, grid));
 
                 if (distance < maxDistance)
@@ -157,11 +161,17 @@ namespace Skills
 
             await petalViewManager.PlayFly(representation.Source, representation.Target.Value, layout, butterflyFlightDuration);
             var disappearingPositions = new List<Vector2Int> { representation.Source };
+            var triggeredSkillPositions = new List<Vector2Int>();
             if (WasPetalRemovedAt(resolution, representation.Target.Value) &&
-                representation.Target.Value != representation.Source)
+                representation.Target.Value != representation.Source &&
+                !resolution.IsTriggeredSkillPosition(representation.Target.Value))
                 disappearingPositions.Add(representation.Target.Value);
+            if (resolution.IsTriggeredSkillPosition(representation.Target.Value) &&
+                representation.Target.Value != representation.Source)
+                triggeredSkillPositions.Add(representation.Target.Value);
             await UniTask.WhenAll(
                 petalViewManager.PlayDisappearAndRelease(disappearingPositions, butterflyDisappearDuration),
+                petalViewManager.PlayAboutToExecuteShake(triggeredSkillPositions),
                 PlayTileChanges(resolution));
         }
 
@@ -180,11 +190,16 @@ namespace Skills
             //If is SunBurst + Normal petal
             if (representation.ComboSkillType == SpecialSkillType.Sunburst)
             {
-                HashSet<Vector2Int> removedPositions = GetRemovedPositions(resolution);
+                HashSet<Vector2Int> laserTargetPositions = GetRemovedPositions(resolution);
+                laserTargetPositions.Remove(representation.SourceA);
+                laserTargetPositions.Remove(representation.SourceB);
+                HashSet<Vector2Int> removedPositions = GetCurrentSkillConsumedPositions(resolution);
                 removedPositions.Remove(representation.SourceA);
                 removedPositions.Remove(representation.SourceB);
-                laserTargets = new List<Vector2Int>(removedPositions);
-                affectedPetalTask = petalViewManager.PlayNormalRemovals(laserTargets, stripeSunburstMutationDuration);
+                laserTargets = new List<Vector2Int>(laserTargetPositions);
+                affectedPetalTask = UniTask.WhenAll(
+                    petalViewManager.PlayNormalRemovals(new List<Vector2Int>(removedPositions), stripeSunburstMutationDuration),
+                    petalViewManager.PlayAboutToExecuteShake(resolution.TriggeredSkillPositions));
             }
             else
             {
@@ -221,6 +236,17 @@ namespace Skills
             foreach (var impact in resolution.Impacts)
             {
                 if (impact.Outcome.RemovedPetal != null)
+                    positions.Add(impact.Position);
+            }
+            return positions;
+        }
+
+        private static HashSet<Vector2Int> GetCurrentSkillConsumedPositions(MatchGroupResolveResult resolution)
+        {
+            var positions = new HashSet<Vector2Int>();
+            foreach (var impact in resolution.Impacts)
+            {
+                if (impact.Outcome.RemovedPetal != null && !resolution.IsTriggeredSkillPosition(impact.Position))
                     positions.Add(impact.Position);
             }
             return positions;

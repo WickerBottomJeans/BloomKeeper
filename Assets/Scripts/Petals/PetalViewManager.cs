@@ -122,6 +122,19 @@ public class PetalViewManager : MonoBehaviour
         await UniTask.WhenAll(tasks);
     }
 
+    public UniTask PlayAboutToExecuteShake(IReadOnlyList<Vector2Int> positions)
+    {
+        foreach (Vector2Int position in positions)
+        {
+            PetalView view = petalViews[position.x, position.y];
+            if (view == null) continue;
+
+            PetalViewAnimator.PlayAboutToExecute(view);
+        }
+
+        return UniTask.CompletedTask;
+    }
+    
     private async UniTask DisappearAndRelease(PetalView view, float duration)
     {
         await PetalViewAnimator.PlayDisappear(view, duration);
@@ -173,6 +186,7 @@ public class PetalViewManager : MonoBehaviour
         Vector2Int sourceB,
         float duration)
     {
+        //TODO: bug, when sun burst dont get executed from a swap, it wouldnt have 2 view. count for that case too
         PetalView viewA = petalViews[sourceA.x, sourceA.y];
         PetalView viewB = petalViews[sourceB.x, sourceB.y];
 

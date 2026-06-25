@@ -110,6 +110,7 @@ namespace DefaultNamespace.UI
             List<PetalType> clearedPetalTypes)
         {
             var impacts = new List<(Vector2Int Position, TileImpactResult Outcome)>(match.TilePositions.Count);
+            var triggeredSkillPositions = new List<Vector2Int>();
 
             foreach (Vector2Int cell in match.TilePositions)
             {
@@ -123,13 +124,14 @@ namespace DefaultNamespace.UI
                 if (petal.Skill != SpecialSkillType.None && !match.IsFromSkillCombo)
                 {
                     activations.Add(new SkillActivation(cell, petal.Skill, petal, match.Causer != null ? new Petal(match.Causer) : null));
+                    triggeredSkillPositions.Add(cell);
                 }
 
                 removedPositions.Add(cell);
                 clearedPetalTypes.Add(petal.PetalType);
             }
 
-            return new MatchGroupResolveResult(match, impacts);
+            return new MatchGroupResolveResult(match, impacts, triggeredSkillPositions);
         }
 
         private static void ApplyPendingSpawns(Tile[,] grid,
