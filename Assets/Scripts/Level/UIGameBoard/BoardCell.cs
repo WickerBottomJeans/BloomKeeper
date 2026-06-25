@@ -4,28 +4,27 @@ namespace DefaultNamespace.UI
 {
     public sealed class BoardCell
     {
+        public bool IsVoid { get; }
         public Tile Tile { get; }
         public Petal Petal { get; set; }
-        public bool IsVoid => Tile == null;
 
-        public BoardCell(Tile tile, Petal petal = null)
+        public BoardCell(bool isVoid, Tile tile, Petal petal = null)
         {
+            IsVoid = isVoid;
             Tile = tile;
             Petal = petal;
         }
 
-        public static BoardCell CreateVoid() => new BoardCell(null);
-
-        public bool IsMatchable() => Tile != null && Tile.IsMatchable(Petal);
+        public bool IsMatchable() => !IsVoid && Tile != null && Tile.IsMatchable(Petal);
         public bool IsGravityAffected() => Tile != null && Tile.IsGravityAffected();
-        public bool CanReceiveNewPetal() => Tile != null && Tile.CanReceiveNewPetal(Petal);
-        public bool CanSwapPetal() => Tile != null && Tile.CanSwapPetal(Petal);
-        public bool HasClearableObstacle() => Tile != null && Tile.HasClearableObstacle();
-        public bool CanClearPetal() => Tile != null && Tile.CanClearPetal(Petal);
+        public bool CanReceiveNewPetal() => !IsVoid && Tile != null && Tile.CanReceiveNewPetal(Petal);
+        public bool CanSwapPetal() => !IsVoid && Tile != null && Tile.CanSwapPetal(Petal);
+        public bool HasClearableObstacle() => !IsVoid && Tile != null && Tile.HasClearableObstacle();
+        public bool CanClearPetal() => !IsVoid && Tile != null && Tile.CanClearPetal(Petal);
 
         public TileImpactResult ApplyClearEffect()
         {
-            if (Tile == null) return new TileImpactResult(null, false);
+            if (IsVoid || Tile == null) return new TileImpactResult(null, false);
 
             TileImpactResult impact = Tile.ApplyClearEffect(Petal);
             if (impact.RemovedPetal != null)
@@ -34,7 +33,7 @@ namespace DefaultNamespace.UI
             return impact;
         }
 
-        public TileImpactResult OnAdjacentCellMatched() => Tile != null ? Tile.OnAdjacentTileMatched() : new TileImpactResult(null, false);
-        public string GetOverlaySpriteKey() => Tile?.GetOverlaySpriteKey();
+        public TileImpactResult OnAdjacentCellMatched() => !IsVoid && Tile != null ? Tile.OnAdjacentTileMatched() : new TileImpactResult(null, false);
+        public string GetOverlaySpriteKey() => !IsVoid ? Tile?.GetOverlaySpriteKey() : null;
     }
 }

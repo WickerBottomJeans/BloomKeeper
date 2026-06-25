@@ -23,8 +23,8 @@ namespace Utility
                 int y = rows - 1 - (i / cols);
                 TileData tileData = data.tiles[i];
                 grid[x, y] = tileData.isVoid
-                    ? BoardCell.CreateVoid()
-                    : new BoardCell(TileFactory.Create(tileData));
+                    ? new BoardCell(true, null)
+                    : new BoardCell(false, TileFactory.Create(tileData));
             }
 
             for (int y = rows - 1; y >= 0; y--)
