@@ -13,7 +13,6 @@ using UnityEditor;
 using UnityEngine;
 using Utility;
 
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class GameBoard : MonoBehaviour
 {
     //TODO: maybe make the about to active petal to like blink blink or sth
@@ -26,11 +25,8 @@ public class GameBoard : MonoBehaviour
 
     [SerializeField] private BoardInputHandler boardInputHandler;
 
-    //TODO: make it load dynamically from json 
-    [SerializeField] private Texture2D boardTexture;
     private Camera cam;
     private BoardLayout layout;
-    private MeshFilter meshFilter;
     private BoardCell[,] grid;
     
     /// <summary>
@@ -63,16 +59,12 @@ public class GameBoard : MonoBehaviour
     public event Action<IGameplayEvent> OnGameplayEvent;
     public event Action OnTurnSettled;
 
-    public void Init(BoardCell[,] grid)
+    public void Init(BoardCell[,] grid, Rect playAreaScreenRect)
     {
         cam = Camera.main;
         this.grid = grid;
-        meshFilter = GetComponent<MeshFilter>();
 
-        layout = BoardLayoutCalculator.Calculate(
-            grid.GetLength(0), grid.GetLength(1), cam, paddingX, paddingY);
-
-        meshFilter.mesh = BoardMeshBuilder.BuildFillMesh(grid, layout, boardTexture.width / (float)boardTexture.height);
+        layout = BoardLayoutCalculator.Calculate(grid.GetLength(0), grid.GetLength(1), cam, paddingX, paddingY, playAreaScreenRect);
 
         petalViewManager.Init(grid, layout);
         tileViewManager.Init(grid, layout);

@@ -5,10 +5,36 @@
       "type": 1,
       "petals": [
         {
+          "petalType": 1,
+          "amount": 3
+        },
+        {
+          "petalType": 2,
+          "amount": 27
+        },
+        {
           "petalType": 3,
-          "amount": 20
+          "amount": 145
+        },
+        {
+          "petalType": 4,
+          "amount": 8
         }
       ]
+    },
+    {
+      "type": 3,
+      "spiderWebsToClear": 8
+    }
+  ],
+  "constrainers": [
+    {
+      "type": 1,
+      "moveLimit": 9
+    },
+    {
+      "type": 2,
+      "timeLimitSeconds": 45
     }
   ]
 }

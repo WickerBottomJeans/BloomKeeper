@@ -6,17 +6,47 @@
       "petals": [
         {
           "petalType": 1,
-          "amount": 15
+          "amount": 999
         },
         {
           "petalType": 2,
-          "amount": 15
+          "amount": 88
         },
         {
           "petalType": 3,
-          "amount": 15
+          "amount": 777
+        },
+        {
+          "petalType": 4,
+          "amount": 66
+        },
+        {
+          "petalType": 5,
+          "amount": 555
+        },
+        {
+          "petalType": 6,
+          "amount": 44
+        },
+        {
+          "petalType": 7,
+          "amount": 333
         }
       ]
+    },
+    {
+      "type": 3,
+      "spiderWebsToClear": 12
+    }
+  ],
+  "constrainers": [
+    {
+      "type": 1,
+      "moveLimit": 99
+    },
+    {
+      "type": 2,
+      "timeLimitSeconds": 3599
     }
   ]
 }

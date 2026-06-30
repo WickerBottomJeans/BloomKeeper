@@ -411,8 +411,8 @@ MonoBehaviour:
   petalEditorPrefab: {fileID: 8406235925533610904, guid: 46b455af4d951334595ff0b29c2f8dd7, type: 3}
   levelSelectPrefab: {fileID: 4418083477373149365, guid: aa48054d7c54a8c4788b890aa21117af, type: 3}
   loseScreenPrefab: {fileID: 7851121798126105795, guid: f453ecf83aeed7742b0830acb64ae457, type: 3}
-  levelUIPrefab: {fileID: 9018714785502887193, guid: eadcc4877751d734683bb066ad3e6780, type: 3}
   canvas: {fileID: 1778504641}
+  scoreBoardPrefab: {fileID: 5393505987680992950, guid: 8597623135086ff4f8ac05830fbd9af1, type: 3}
   testerTogglePrefab: {fileID: 7168729738933843627, guid: 3073f85176c8204478725179b3c68a8a, type: 3}
   winScreenPrefab: {fileID: -3536508388563471518, guid: 5debd5ac8c84fc04882506032b470d45, type: 3}
 --- !u!114 &438607906
@@ -427,7 +427,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f09f61f8c0e4dcb9a7b3921356d9918, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.LevelManager
-  worldLevelBackgroundPrefab: {fileID: 1305454009015631812, guid: ed63accca0ada82488a7efeb37fe77a6, type: 3}
   gameBoardPrefab: {fileID: 2268134538387400816, guid: 97c35de863043504ea7b36f955c7c451, type: 3}
 --- !u!114 &438607907
 MonoBehaviour:
@@ -667,7 +666,7 @@ MonoBehaviour:
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000f9117b9fbb66a966696e72160188393d77314804
+  m_ApplyToSortingLayers: 00000000f9117b9fbb66a966696e72160188393d
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0

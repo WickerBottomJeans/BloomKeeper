@@ -14,12 +14,32 @@
       "type": 1,
       "petals": [
         {
-          "amount": 8
+          "petalType": 1,
+          "amount": 20
         },
         {
-          "amount": 8
+          "petalType": 2,
+          "amount": 20
+        },
+        {
+          "petalType": 3,
+          "amount": 20
+        },
+        {
+          "petalType": 4,
+          "amount": 20
         }
       ]
+    }
+  ],
+  "constrainers": [
+    {
+      "type": 1,
+      "moveLimit": 30
+    },
+    {
+      "type": 2,
+      "timeLimitSeconds": 120
     }
   ]
 }

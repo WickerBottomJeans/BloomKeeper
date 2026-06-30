@@ -12,7 +12,9 @@ namespace DefaultNamespace
     {
         private ObjectiveManager objectiveManager;
         private ConstrainerManager constrainerManager;
+        [SerializeField] private WorldLevelBackground worldLevelBackgroundPrefab;
         [SerializeField] private GameBoard gameBoardPrefab;
+        private WorldLevelBackground worldLevelBackgroundInstance;
         private GameBoard gameBoardInstance;
         private readonly List<ConstrainerFailureData> pendingConstrainerFailures = new();
         private bool pendingLevelComplete;
@@ -61,11 +63,26 @@ namespace DefaultNamespace
             constrainerManager.OnProgressUpdated += HandleConstrainerProgressUpdated;
             BoardCell[,] grid = BoardInitializer.Initialize(data);
             
-            UIManager.Instance.ShowScoreBoard(objectives, constrainerManager.GetViewData());
-            SpawnGameBoard(grid);
+            DisplayLevel(grid, objectives, constrainerManager.GetViewData());
+        }
+
+        private void DisplayLevel(BoardCell[,] grid, List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData)
+        {
+            ShowWorldLevelBackground();
+            UIManager.Instance.ShowLevelUI(objectives, constrainerViewData);
+            SpawnGameBoard(grid, UIManager.Instance.GetLevelBoardPlayAreaScreenRect());
+        }
+
+        private void ShowWorldLevelBackground()
+        {
+            if (worldLevelBackgroundPrefab == null) return;
+            if (worldLevelBackgroundInstance == null)
+                worldLevelBackgroundInstance = Instantiate(worldLevelBackgroundPrefab);
+            worldLevelBackgroundInstance.gameObject.SetActive(true);
+            worldLevelBackgroundInstance.FitWidthToCamera(Camera.main);
         }
         
-        private void SpawnGameBoard(BoardCell[,] grid)
+        private void SpawnGameBoard(BoardCell[,] grid, Rect playAreaScreenRect)
         {
             if (gameBoardInstance != null)
             {
@@ -75,7 +92,7 @@ namespace DefaultNamespace
             }
 
             gameBoardInstance = Instantiate(gameBoardPrefab);
-            gameBoardInstance.Init(grid);
+            gameBoardInstance.Init(grid, playAreaScreenRect);
             gameBoardInstance.OnGameplayEvent += HandleGameplayEvent;
             gameBoardInstance.OnTurnSettled += HandleTurnSettled;
         }
@@ -89,12 +106,12 @@ namespace DefaultNamespace
 
         private void HandleObjectiveProgressUpdated()
         {
-            UIManager.Instance.RefreshObjectiveOnScoreBoard();
+            UIManager.Instance.RefreshLevelObjectives();
         }
 
         private void HandleConstrainerProgressUpdated()
         {
-            UIManager.Instance.RefreshConstrainersOnScoreBoard(constrainerManager.GetViewData());
+            UIManager.Instance.RefreshLevelConstrainers(constrainerManager.GetViewData());
         }
 
         private void HandleConstrainerFailed(ConstrainerFailureData failureData)

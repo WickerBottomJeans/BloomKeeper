@@ -9,12 +9,14 @@ namespace DefaultNamespace.UI
 
         public void Display(ConstrainerViewData viewData)
         {
+            gameObject.SetActive(true);
             if (label == null) return;
             label.text = viewData.constrainerText;
         }
 
         public void Clear()
         {
+            gameObject.SetActive(false);
             if (label == null) return;
             label.text = string.Empty;
         }

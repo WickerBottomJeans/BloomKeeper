@@ -1,47 +1,24 @@
-using System;
 using System.Collections.Generic;
 using DefaultNamespace;
 using DefaultNamespace.UI;
 using UnityEngine;
 
-public class UIScoreBoard : MonoBehaviour
+public class UILevelHud : MonoBehaviour
 {
-    [SerializeField] private RectTransform objectiveWidgetsRoot;
-    [SerializeField] private ObjectiveWidget widgetPrefab;
+    [SerializeField] private ObjectiveBoard objectiveBoard;
     [SerializeField] private UIMoveCounter moveCounter;
     [SerializeField] private UITimer timer;
 
-    private readonly List<(ObjectiveWidget widget, Func<ObjectiveViewData> getData)> spawnedWidgets = new();
-
     public void Init(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData)
     {
-        ClearWidgets();
         ClearConstrainers();
-
-        Transform parent = objectiveWidgetsRoot != null ? objectiveWidgetsRoot : transform;
-
-        foreach (IObjective objective in objectives)
-        {
-            List<ObjectiveViewData> viewDataList = objective.GetViewData();
-            for (int i = 0; i < viewDataList.Count; i++)
-            {
-                int capturedIndex = i;
-                IObjective capturedObjective = objective;
-
-                ObjectiveWidget widget = Instantiate(widgetPrefab, parent);
-                widget.Display(viewDataList[capturedIndex]);
-
-                spawnedWidgets.Add((widget, () => capturedObjective.GetViewData()[capturedIndex]));
-            }
-        }
-
+        objectiveBoard.Display(objectives);
         DisplayConstrainers(constrainerViewData);
     }
 
     public void RefreshObjectives()
     {
-        foreach (var (widget, getData) in spawnedWidgets)
-            widget.Display(getData());
+        objectiveBoard.Refresh();
     }
 
     public void DisplayConstrainers(List<ConstrainerViewData> viewData)
@@ -58,16 +35,6 @@ public class UIScoreBoard : MonoBehaviour
                     break;
             }
         }
-    }
-
-    private void ClearWidgets()
-    {
-        foreach (var (widget, _) in spawnedWidgets)
-        {
-            if (widget != null)
-                Destroy(widget.gameObject);
-        }
-        spawnedWidgets.Clear();
     }
 
     private void ClearConstrainers()

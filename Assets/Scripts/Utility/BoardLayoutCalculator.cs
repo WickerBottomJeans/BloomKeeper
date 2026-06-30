@@ -5,30 +5,23 @@ namespace Utility
 {
     public static class BoardLayoutCalculator
     {
-        public static BoardLayout Calculate(int cols, int rows, Camera cam, float paddingX, float paddingY)
+        public static BoardLayout Calculate(int cols, int rows, Camera cam, float paddingX, float paddingY, Rect playAreaScreenRect)
         {
-            Rect safeArea = Screen.safeArea;
+            float cameraDistance = Mathf.Abs(cam.transform.position.z);
+            Vector3 bottomLeft = cam.ScreenToWorldPoint(new Vector3(playAreaScreenRect.xMin, playAreaScreenRect.yMin, cameraDistance));
+            Vector3 topRight = cam.ScreenToWorldPoint(new Vector3(playAreaScreenRect.xMax, playAreaScreenRect.yMax, cameraDistance));
 
-            float scoreBoardWorldHeight = UIManager.Instance.GetScoreBoardHeightInWorldUnit();
-
-            float screenWorldHeight = cam.orthographicSize * 2f;
-            float screenWorldWidth  = screenWorldHeight * cam.aspect;
-
-            float safeWidthRatio  = safeArea.width  / Screen.width;
-            float safeHeightRatio = safeArea.height / Screen.height;
-
-            float availableWidth  = screenWorldWidth  * safeWidthRatio  * (1f - paddingX * 2f);
-            float availableHeight = screenWorldHeight * safeHeightRatio * (1f - paddingY * 2f) - scoreBoardWorldHeight;
+            float availableWidth = (topRight.x - bottomLeft.x) * (1f - paddingX * 2f);
+            float availableHeight = (topRight.y - bottomLeft.y) * (1f - paddingY * 2f);
 
             float cellSize    = Mathf.Min(availableWidth / cols, availableHeight / rows);
             float totalWidth  = cols * cellSize;
             float totalHeight = rows * cellSize;
 
-            float worldBottomY = cam.ScreenToWorldPoint(Vector3.zero).y;
-            float safeOffsetY  = screenWorldHeight * (1f - safeHeightRatio) / 2f;
-
-            float originX = -totalWidth  / 2f + cellSize / 2f;
-            float originY = worldBottomY + safeOffsetY + cellSize / 2f + paddingY;
+            float centerX = (bottomLeft.x + topRight.x) * 0.5f;
+            float centerY = (bottomLeft.y + topRight.y) * 0.5f;
+            float originX = centerX - totalWidth / 2f + cellSize / 2f;
+            float originY = centerY - totalHeight / 2f + cellSize / 2f;
 
             return new BoardLayout(cellSize, new Vector2(originX, originY), cols, rows);
         }

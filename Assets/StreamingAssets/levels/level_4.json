@@ -4,7 +4,7 @@
   "boardHeight": 1,
   "tiles": [
 
-    { "type": 1, "petalType": 3, "skillType" :  3}, { "type": 1 }, { "type": 1,"petalType": 3}, { "type": 1,"petalType": 3 }, { "type": 1, "petalType": 3 }, { "type": 1,"petalType": 3 },
+    { "type": 1, "petalType": 3, "skillType" :  3}, { "type": 1 }, { "type": 1,"petalType": 3}, { "type": 1,"petalType": 3 }, { "type": 1, "petalType": 3 }, { "type": 1,"petalType": 3 }
 
   ],
   "objectives": [
@@ -12,12 +12,24 @@
       "type": 1,
       "petals": [
         {
-          "amount": 8
+          "petalType": 1,
+          "amount": 15
         },
         {
-          "amount": 8
+          "petalType": 2,
+          "amount": 15
+        },
+        {
+          "petalType": 3,
+          "amount": 15
         }
       ]
+    }
+  ],
+  "constrainers": [
+    {
+      "type": 2,
+      "timeLimitSeconds": 90
     }
   ]
 }

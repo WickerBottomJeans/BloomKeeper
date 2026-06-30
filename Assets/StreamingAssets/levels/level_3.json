@@ -3,16 +3,16 @@
   "boardWidth": 10,
   "boardHeight": 10,
   "tiles": [
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 1 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, {  "type": 1}, { "type": 1 }, { "type": 2 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
+    { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true },
+    { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true },
+    { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true },
+    { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "isVoid": true },
+    { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "isVoid": true },
+    { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }
   ],
   "objectives": [
     {
@@ -20,17 +20,19 @@
       "petals": [
         {
           "petalType": 1,
-          "amount": 100
+          "amount": 12
         },
         {
           "petalType": 2,
-          "amount": 100
-        },
-        {
-          "petalType": 3,
-          "amount": 100
+          "amount": 12
         }
       ]
+    }
+  ],
+  "constrainers": [
+    {
+      "type": 1,
+      "moveLimit": 25
     }
   ]
 }

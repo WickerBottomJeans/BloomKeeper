@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: e8a9b3242574c2347a3db89faa1e20a1
+guid: e029600412bc8fe4b985825f84856491
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5796461371197512971
-    second: GrassMaterial_0
+      213: -2699004373965415184
+    second: UI_Timer_0
+  - first:
+      213: 2873512875702233630
+    second: UI_Timer_1
+  - first:
+      213: -2161567888620095507
+    second: UI_Timer_2
+  - first:
+      213: 4097624632570709168
+    second: UI_Timer_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +122,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: GrassMaterial_0
+      name: BG_Timer
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1197
-        height: 754
+        x: 114
+        y: 270
+        width: 685
+        height: 574
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 82, y: 87, z: 88, w: 75}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fcd09262d53b8ad0800000000000000
+      internalID: -2699004373965415184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Timer_1
+      rect:
+        serializedVersion: 2
+        x: 878
+        y: 685
+        width: 448
+        height: 134
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5f2af770815de8fa0800000000000000
-      internalID: -5796461371197512971
+      spriteID: e1a2eb56cb4c0e720800000000000000
+      internalID: 2873512875702233630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Decor_Timer_2
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 546
+        width: 468
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de778e035719002e0800000000000000
+      internalID: -2161567888620095507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Decor_Timer_1
+      rect:
+        serializedVersion: 2
+        x: 989
+        y: 231
+        width: 224
+        height: 228
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b48447a4efadd830800000000000000
+      internalID: 4097624632570709168
       vertices: []
       indices: 
       edges: []
@@ -138,7 +213,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: c313feb6836a4814fa3f3372b0abe5a2
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +223,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      GrassMaterial_0: -5796461371197512971
+      BG_Timer: -2699004373965415184
+      Decor_Timer_1: 4097624632570709168
+      Decor_Timer_2: -2161567888620095507
+      UI_Timer_1: 2873512875702233630
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
