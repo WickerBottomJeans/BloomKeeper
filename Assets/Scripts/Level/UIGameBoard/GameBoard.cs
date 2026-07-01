@@ -42,6 +42,7 @@ public class GameBoard : MonoBehaviour
     private List<SkillUseResult> pendingSkillResults = new List<SkillUseResult>();
     private MatchPresentationCoordinator matchPresentationCoordinator;
     private bool isResolvingPlayerMove;
+    private int currentCascadeDepth;
 
     private enum BoardState
     {
@@ -137,6 +138,7 @@ public class GameBoard : MonoBehaviour
         pendingSkillActivations.Clear();
         pendingSkillResults.Clear();
         pendingMatches = new List<MatchGroup>();
+        currentCascadeDepth = 0;
 
         PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
         await petalViewManager.OnSwap(swapOrigin, swapTarget);
@@ -177,6 +179,7 @@ public class GameBoard : MonoBehaviour
         var result = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
         pendingMatches.Clear();
         pendingSkillActivations.AddRange(result.SkillActivations);
+        OnGameplayEvent?.Invoke(new BoardResolvedEvent(result, currentCascadeDepth, isResolvingPlayerMove));
         OnGameplayEvent?.Invoke(new PetalsClearedEvent(result.ClearedPetalTypes));
         if (result.CleanedSpiderWebTileCount > 0) OnGameplayEvent?.Invoke(new SpiderWebClearedEvent(result.CleanedSpiderWebTileCount));
         await matchPresentationCoordinator.Play(result, pendingSkillResults, grid);
@@ -229,12 +232,14 @@ public class GameBoard : MonoBehaviour
             if (isResolvingPlayerMove)
             {
                 isResolvingPlayerMove = false;
+                currentCascadeDepth = 0;
                 OnTurnSettled?.Invoke();
             }
             TransitionTo(BoardState.Idle);
             return;
         }
 
+        currentCascadeDepth++;
         pendingMatches = cascadeMatches;
         TransitionTo(BoardState.Resolving);
     }
@@ -247,6 +252,7 @@ public class GameBoard : MonoBehaviour
 
     private async UniTask EnterShuffling()
     {
+        currentCascadeDepth = 0;
         List<Vector2Int> shuffled = BoardShuffler.Shuffle(grid);
         await petalViewManager.OnShuffled(shuffled, layout, grid);
         TransitionTo(BoardState.Cascade);

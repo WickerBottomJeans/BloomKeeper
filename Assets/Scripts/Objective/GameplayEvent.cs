@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using DefaultNamespace.UI;
+
 namespace DefaultNamespace
 {
     public interface IGameplayEvent { }
@@ -25,4 +27,18 @@ namespace DefaultNamespace
     }
 
     public class PlayerMoveCommittedEvent : IGameplayEvent { }
+
+    public class BoardResolvedEvent : IGameplayEvent
+    {
+        public MatchResolveResult Result { get; }
+        public int CascadeDepth { get; }
+        public bool CountsForScore { get; }
+
+        public BoardResolvedEvent(MatchResolveResult result, int cascadeDepth, bool countsForScore)
+        {
+            Result = result;
+            CascadeDepth = cascadeDepth;
+            CountsForScore = countsForScore;
+        }
+    }
 }

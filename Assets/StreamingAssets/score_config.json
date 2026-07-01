@@ -1,0 +1,21 @@
+{
+  "rules": [
+    { "type": 1, "score": 40 },
+    { "type": 2, "score": 1000 },
+    { "type": 3, "score": 40 },
+    { "type": 4, "matchShape": 2, "score": 200 },
+    { "type": 4, "matchShape": 3, "score": 1000 },
+    { "type": 4, "matchShape": 4, "score": 500 },
+    { "type": 4, "matchShape": 5, "score": 500 },
+    { "type": 4, "matchShape": 6, "score": 500 },
+    { "type": 4, "matchShape": 7, "score": 300 },
+    { "type": 5, "skillType": 1, "score": 500 },
+    { "type": 5, "skillType": 2, "score": 500 },
+    { "type": 5, "skillType": 3, "score": 1000 },
+    { "type": 5, "skillType": 4, "score": 5000 },
+    { "type": 5, "skillType": 5, "score": 250 },
+    { "type": 5, "skillType": 6, "score": 5000 },
+    { "type": 5, "skillType": 7, "score": 5000 },
+    { "type": 5, "skillType": 8, "score": 5000 }
+  ]
+}

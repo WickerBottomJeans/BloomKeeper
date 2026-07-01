@@ -8,12 +8,14 @@ public class UILevelHud : MonoBehaviour
     [SerializeField] private ObjectiveBoard objectiveBoard;
     [SerializeField] private UIMoveCounter moveCounter;
     [SerializeField] private UITimer timer;
+    [SerializeField] private UIScoreBoard scoreBoard;
 
-    public void Init(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData)
+    public void Init(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
     {
         ClearConstrainers();
         objectiveBoard.Display(objectives);
         DisplayConstrainers(constrainerViewData);
+        scoreBoard.Init(scoreTarget, scoreMilestones, starCap);
     }
 
     public void RefreshObjectives()
@@ -41,6 +43,16 @@ public class UILevelHud : MonoBehaviour
     {
         moveCounter?.Clear();
         timer?.Clear();
+    }
+
+    public void InitScoreBoard(int targetScore, IReadOnlyList<int> milestoneScores, int starCap)
+    {
+        scoreBoard.Init(targetScore, milestoneScores, starCap);
+    }
+
+    public void DisplayScore(int score, int stars)
+    {
+        scoreBoard.DisplayScore(score, stars);
     }
 
     public float GetHeightInWorldUnits()

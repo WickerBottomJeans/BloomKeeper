@@ -1,5 +1,10 @@
 {
   "levelId": 6,
+  "starScoreThresholds": [
+    { "starCount": 1, "score": 1000 },
+    { "starCount": 2, "score": 2500 },
+    { "starCount": 3, "score": 4000 }
+  ],
   "boardWidth": 10,
   "boardHeight": 10,
   "tiles": [

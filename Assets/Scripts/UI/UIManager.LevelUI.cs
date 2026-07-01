@@ -9,12 +9,12 @@ namespace DefaultNamespace.UI
         [SerializeField] private UILevelUI levelUIPrefab;
         private UILevelUI levelUIInstance;
 
-        public void ShowLevelUI(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData)
+        public void ShowLevelUI(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
         {
             if (levelUIPrefab == null) return;
             if (levelUIInstance == null)
                 levelUIInstance = Instantiate(levelUIPrefab, canvas.transform);
-            levelUIInstance.Init(objectives, constrainerViewData);
+            levelUIInstance.Init(objectives, constrainerViewData, scoreTarget, scoreMilestones, starCap);
             levelUIInstance.Show();
         }
 
@@ -31,6 +31,11 @@ namespace DefaultNamespace.UI
         public void RefreshLevelConstrainers(List<ConstrainerViewData> viewData)
         {
             levelUIInstance?.DisplayConstrainers(viewData);
+        }
+
+        public void DisplayLevelScore(int score, int stars)
+        {
+            levelUIInstance?.DisplayScore(score, stars);
         }
 
         public Rect GetLevelBoardPlayAreaScreenRect()

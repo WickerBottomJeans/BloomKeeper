@@ -131,7 +131,7 @@ TextureImporter:
         height: 155
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 78, y: 0, z: 77, w: 0}
+      border: {x: 73, y: 0, z: 72, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -147,13 +147,13 @@ TextureImporter:
       name: ScoreBar_2
       rect:
         serializedVersion: 2
-        x: 777
+        x: 778
         y: 767
         width: 598
         height: 116
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 70, y: 0, z: 67, w: 0}
+      border: {x: 57, y: 0, z: 54, w: 0}
       customData: 
       outline: []
       physicsShape: []

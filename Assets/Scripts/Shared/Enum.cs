@@ -62,4 +62,13 @@
         Cross = 6,
         Square2x2 = 7
     }
+
+    public enum ScoreRuleType
+    {
+        PetalCleared = 1,
+        SpiderWebCleared = 2,
+        CascadeDepthPetalBonus = 3,
+        MatchShapeBonus = 4,
+        SkillActivation = 5
+    }
 }

@@ -10,10 +10,10 @@ namespace DefaultNamespace.UI
         [SerializeField] private UIBoosterBoard boosterBoard;
         [SerializeField] private RectTransform boardPlayArea;
 
-        public void Init(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData)
+        public void Init(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
         {
-            levelHud.Init(objectives, constrainerViewData);
-            boosterBoard?.Show();
+            levelHud.Init(objectives, constrainerViewData, scoreTarget, scoreMilestones, starCap);
+            boosterBoard.Show();
         }
 
         public void RefreshObjectives()
@@ -24,6 +24,16 @@ namespace DefaultNamespace.UI
         public void DisplayConstrainers(List<ConstrainerViewData> viewData)
         {
             levelHud.DisplayConstrainers(viewData);
+        }
+
+        public void InitScoreBoard(int targetScore, IReadOnlyList<int> milestoneScores, int starCap)
+        {
+            levelHud.InitScoreBoard(targetScore, milestoneScores, starCap);
+        }
+
+        public void DisplayScore(int score, int stars)
+        {
+            levelHud.DisplayScore(score, stars);
         }
 
         public Rect GetBoardPlayAreaScreenRect(Camera uiCamera)

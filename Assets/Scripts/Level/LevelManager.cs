@@ -17,6 +17,8 @@ namespace DefaultNamespace
         private WorldLevelBackground worldLevelBackgroundInstance;
         private GameBoard gameBoardInstance;
         private readonly List<ConstrainerFailureData> pendingConstrainerFailures = new();
+        private ScoreManager scoreManager;
+        private int currentLevelId;
         private bool pendingLevelComplete;
         private bool isLevelEnded;
 
@@ -28,6 +30,11 @@ namespace DefaultNamespace
         public void InitNewLevel(int levelId)
         {
             LevelData data = LevelLoader.LoadLevel(levelId);
+            currentLevelId = levelId;
+            if (scoreManager != null)
+                scoreManager.OnScoreChanged -= HandleScoreChanged;
+            scoreManager = new ScoreManager(data.starScoreThresholds);
+            scoreManager.OnScoreChanged += HandleScoreChanged;
 
             constrainerManager?.StopLevel();
             pendingConstrainerFailures.Clear();
@@ -63,13 +70,16 @@ namespace DefaultNamespace
             constrainerManager.OnProgressUpdated += HandleConstrainerProgressUpdated;
             BoardCell[,] grid = BoardInitializer.Initialize(data);
             
-            DisplayLevel(grid, objectives, constrainerManager.GetViewData());
+            DisplayLevel(grid, objectives, constrainerManager.GetViewData(), data.starScoreThresholds);
         }
 
-        private void DisplayLevel(BoardCell[,] grid, List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData)
+        private void DisplayLevel(BoardCell[,] grid, List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
         {
             ShowWorldLevelBackground();
-            UIManager.Instance.ShowLevelUI(objectives, constrainerViewData);
+            int scoreTarget = GetScoreTarget(starScoreThresholds);
+            List<int> scoreMilestones = GetScoreMilestones(starScoreThresholds);
+            int starCap = GetStarCap(starScoreThresholds);
+            UIManager.Instance.ShowLevelUI(objectives, constrainerViewData, scoreTarget, scoreMilestones, starCap);
             SpawnGameBoard(grid, UIManager.Instance.GetLevelBoardPlayAreaScreenRect());
         }
 
@@ -136,8 +146,53 @@ namespace DefaultNamespace
 
         private void HandleGameplayEvent(IGameplayEvent e)
         {
+            if (e is BoardResolvedEvent boardResolvedEvent)
+                scoreManager.Apply(boardResolvedEvent);
+
             objectiveManager.Report(e);
             constrainerManager.Apply(e);
+        }
+
+        private void HandleScoreChanged(int currentScore, int currentStars)
+        {
+            UIManager.Instance.DisplayLevelScore(currentScore, currentStars);
+        }
+
+        private static int GetScoreTarget(IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
+        {
+            int target = 0;
+            foreach (StarScoreThresholdJson threshold in starScoreThresholds)
+            {
+                if (threshold.score > target)
+                    target = threshold.score;
+            }
+
+            return target;
+        }
+
+        private static List<int> GetScoreMilestones(IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
+        {
+            int target = GetScoreTarget(starScoreThresholds);
+            List<int> milestones = new();
+            foreach (StarScoreThresholdJson threshold in starScoreThresholds)
+            {
+                if (threshold.score > 0 && threshold.score < target)
+                    milestones.Add(threshold.score);
+            }
+
+            return milestones;
+        }
+
+        private static int GetStarCap(IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
+        {
+            int starCap = 0;
+            foreach (StarScoreThresholdJson threshold in starScoreThresholds)
+            {
+                if (threshold.starCount > starCap)
+                    starCap = threshold.starCount;
+            }
+
+            return starCap;
         }
 
         private void HandleTurnSettled()
@@ -163,6 +218,10 @@ namespace DefaultNamespace
 
             isLevelEnded = true;
             constrainerManager?.StopLevel();
+            int earnedStars = scoreManager.CalculateStars();
+            int previousStars = PlayerProgress.Instance.GetStars(currentLevelId);
+            if (earnedStars > previousStars)
+                PlayerProgress.Instance.SetStars(currentLevelId, earnedStars);
             UIManager.Instance.ShowWinScreen();
         }
     }
