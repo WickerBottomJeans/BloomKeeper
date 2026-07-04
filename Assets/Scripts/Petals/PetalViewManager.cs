@@ -215,7 +215,7 @@ public class PetalViewManager : MonoBehaviour
             view.transform.position = spawnPos;
             view.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize);
             petalViews[cell.x, cell.y] = view;
-            PetalViewAnimator.PlaySpawn(view);
+            PetalViewAnimator.PlaySpawn(view).Forget();
             tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos));
         }
         await UniTask.WhenAll(tasks);

@@ -8,12 +8,13 @@ namespace DefaultNamespace.UI
         [SerializeField] private UILoseScreen loseScreenPrefab;
         private UILoseScreen loseScreenInstance;
 
-        public void ShowLoseScreen(string message)
+        public UILoseScreen ShowLoseScreen(string message)
         {
             if (loseScreenInstance == null)
                 loseScreenInstance = Instantiate(loseScreenPrefab, canvas.transform);
             loseScreenInstance.gameObject.SetActive(true);
             loseScreenInstance.Display(message);
+            return loseScreenInstance;
         }
 
         public void HideLoseScreen()

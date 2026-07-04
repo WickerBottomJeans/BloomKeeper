@@ -6,12 +6,12 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public class ScrollMapBGController : MonoBehaviour
+    public class LevelMapBackgroundLayer : MonoBehaviour
 {
     [SerializeField] private RectTransform content;
     [SerializeField] private ScrollRect scrollRect;
     [SerializeField] private RectTransform viewport;
-    [SerializeField] private GameObject chunkPrefab;
+    [SerializeField] private RawImage chunkPrefab;
     [SerializeField] private int defaultPoolCapacity = 3;
     [SerializeField] private int maxPoolCapacity = 5;
     private List<float> chunkHalfHeights = new List<float>();

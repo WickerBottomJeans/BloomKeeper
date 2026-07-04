@@ -1,10 +1,11 @@
 ﻿using System;
 using Core;
+using DefaultNamespace;
 using DefaultNamespace.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class BoardInputHandler : MonoBehaviour
+public class BoardInputHandler : MonoBehaviour, ILevelPlayerActionSource
 {
     [SerializeField] private float dragThresholdPx = 20f;
     
@@ -18,24 +19,27 @@ public class BoardInputHandler : MonoBehaviour
     public event Action<Vector2Int, Vector2Int> OnSwapRequested;
 
     private BoardLayout boardLayout;
-    private Camera camera;
+    private Camera _camera;
 
     private bool isDragging;
     private Vector2 touchStartScreenPos;
     private Vector2Int selectedCell;
     private Vector3 lastResolvedWorldPos;
     private Vector2Int lastResolvedCell;
+    private bool playerActionsEnabled;
     
     private float lastTapTime = -1f;
     private Vector2Int lastTappedCell;
     public void Init(BoardLayout boardLayout, Camera camera)
     {
         this.boardLayout = boardLayout;
-        this.camera = camera;
+        this._camera = camera;
     }
 
     private void Update()
     {
+        if (!playerActionsEnabled) return;
+
         var pointer = Pointer.current;
         if (pointer == null) return;
 
@@ -99,10 +103,17 @@ public class BoardInputHandler : MonoBehaviour
         selectedCell = default;
     }
 
+    public void SetPlayerActionsEnabled(bool enabled)
+    {
+        playerActionsEnabled = enabled;
+        if (!enabled)
+            ClearDragState();
+    }
+
     private bool TryResolveCell(Vector2 screenPos, out Vector2Int cell)
     {
         cell = default;
-        Vector3 worldPos = camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Mathf.Abs(camera.transform.position.z)));
+        Vector3 worldPos = _camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Mathf.Abs(_camera.transform.position.z)));
         lastResolvedWorldPos = worldPos;
         
         int col = Mathf.RoundToInt((worldPos.x - boardLayout.OriginWorldPos.x) / boardLayout.CellSize);

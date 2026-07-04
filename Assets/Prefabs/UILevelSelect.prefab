@@ -83,7 +83,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.ScrollMapController
   content: {fileID: 7361562844331470217}
-  levelButtonPrefab: {fileID: 4682490313267647299, guid: 0a5b06e36fa0cde4b9f6799af423ee7f, type: 3}
+  levelButtonPrefab: {fileID: 5622612125126368303, guid: 0a5b06e36fa0cde4b9f6799af423ee7f, type: 3}
   scrollRect: {fileID: 3236859085366682999}
   viewport: {fileID: 4749480718843676620}
   defaultPoolCapacity: 10
@@ -103,7 +103,7 @@ MonoBehaviour:
   content: {fileID: 7361562844331470217}
   scrollRect: {fileID: 3236859085366682999}
   viewport: {fileID: 4749480718843676620}
-  chunkPrefab: {fileID: 2965615687276958034}
+  chunkPrefab: {fileID: 4380491902775713843}
   defaultPoolCapacity: 3
   maxPoolCapacity: 5
 --- !u!114 &4418083477373149365
@@ -118,8 +118,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f88eb8e0a15e4687b7f1dc9e64d681e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.ScrollMapBootstrapper
-  bgController: {fileID: 403892543814879929}
-  mapController: {fileID: 628415899896986784}
+  backgroundLayer: {fileID: 403892543814879929}
+  mapButtonLayer: {fileID: 628415899896986784}
 --- !u!1 &1315149379328909207
 GameObject:
   m_ObjectHideFlags: 0

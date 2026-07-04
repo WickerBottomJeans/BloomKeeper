@@ -32,7 +32,7 @@ namespace DefaultNamespace.UI
             RectTransform content,
             RectTransform viewport,
             ScrollRect scrollRect,
-            GameObject prefab,
+            T prefab,
             int itemCount,
             Func<int, Vector2> getPosition,
             Func<int, float> getHalfHeight,
@@ -56,10 +56,8 @@ namespace DefaultNamespace.UI
             pool = new ObjectPool<T>(
                 () =>
                 {
-                    GameObject go = GameObject.Instantiate(prefab);
-                    go.SetActive(false);
-                    go.transform.SetParent(content, false);
-                    T item = go.GetComponent<T>();
+                    T item = GameObject.Instantiate(prefab, content);
+                    item.gameObject.SetActive(false);
                     onCreate?.Invoke(item);
                     return item;
                 },

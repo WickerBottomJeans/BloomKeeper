@@ -8,8 +8,10 @@ using Utility;
 
 namespace DefaultNamespace
 {
-    public class LevelManager : Singleton<LevelManager>
+    public class LevelSessionManager : Singleton<LevelSessionManager>
     {
+        public event Action<LevelSessionResult> OnLevelFinished;
+
         private ObjectiveManager objectiveManager;
         private ConstrainerManager constrainerManager;
         [SerializeField] private WorldLevelBackground worldLevelBackgroundPrefab;
@@ -21,25 +23,73 @@ namespace DefaultNamespace
         private int currentLevelId;
         private bool pendingLevelComplete;
         private bool isLevelEnded;
+        private bool isTurnSettling;
 
         private void Update()
         {
             constrainerManager?.Tick(Time.deltaTime);
         }
 
-        public void InitNewLevel(int levelId)
+        public void SetPlayerActionsEnabled(bool enabled)
         {
-            LevelData data = LevelLoader.LoadLevel(levelId);
-            currentLevelId = levelId;
+            gameBoardInstance?.SetPlayerActionsEnabled(enabled);
+        }
+
+        public void ClearCurrentLevelSession()
+        {
+            constrainerManager?.StopLevel();
+
+            if (objectiveManager != null)
+            {
+                objectiveManager.OnAllComplete -= HandleLevelComplete;
+                objectiveManager.OnProgressUpdated -= HandleObjectiveProgressUpdated;
+            }
+
+            if (constrainerManager != null)
+            {
+                constrainerManager.OnFailed -= HandleConstrainerFailed;
+                constrainerManager.OnProgressUpdated -= HandleConstrainerProgressUpdated;
+            }
+
             if (scoreManager != null)
                 scoreManager.OnScoreChanged -= HandleScoreChanged;
-            scoreManager = new ScoreManager(data.starScoreThresholds);
-            scoreManager.OnScoreChanged += HandleScoreChanged;
 
-            constrainerManager?.StopLevel();
+            if (gameBoardInstance != null)
+            {
+                gameBoardInstance.OnGameplayEvent -= HandleGameplayEvent;
+                gameBoardInstance.OnTurnSettled -= HandleTurnSettled;
+                Destroy(gameBoardInstance.gameObject);
+                gameBoardInstance = null;
+            }
+
+            UIManager.Instance.HideLevelUI();
+
+            if (worldLevelBackgroundInstance != null)
+                worldLevelBackgroundInstance.gameObject.SetActive(false);
+
+            objectiveManager = null;
+            constrainerManager = null;
+            scoreManager = null;
             pendingConstrainerFailures.Clear();
             pendingLevelComplete = false;
             isLevelEnded = false;
+            isTurnSettling = false;
+            currentLevelId = 0;
+        }
+
+        public void StartLevelSession(int levelId)
+        {
+            ClearCurrentLevelSession();
+
+            LevelData data = LevelLoader.LoadLevel(levelId);
+            currentLevelId = levelId;
+            scoreManager = new ScoreManager(data.starScoreThresholds);
+            scoreManager.OnScoreChanged += HandleScoreChanged;
+
+            pendingConstrainerFailures.Clear();
+            pendingLevelComplete = false;
+            isLevelEnded = false;
+            isTurnSettling = false;
 
             List<IObjective> objectives = data.objectives
                 .Select(o => ObjectiveFactory.Create(o))
@@ -48,18 +98,6 @@ namespace DefaultNamespace
             List<IConstrainer> constrainers = data.constrainers
                 .Select(c => ConstrainerFactory.Create(c))
                 .ToList();
-
-            if (objectiveManager != null)
-            {
-                objectiveManager.OnAllComplete -= HandleLevelComplete;
-                objectiveManager.OnProgressUpdated -= HandleObjectiveProgressUpdated;
-            }
-            
-            if (constrainerManager != null)
-            {
-                constrainerManager.OnFailed -= HandleConstrainerFailed;
-                constrainerManager.OnProgressUpdated -= HandleConstrainerProgressUpdated;
-            }
 
             objectiveManager = new ObjectiveManager(objectives);
             constrainerManager = new ConstrainerManager(constrainers);
@@ -94,17 +132,11 @@ namespace DefaultNamespace
         
         private void SpawnGameBoard(BoardCell[,] grid, Rect playAreaScreenRect)
         {
-            if (gameBoardInstance != null)
-            {
-                gameBoardInstance.OnGameplayEvent -= HandleGameplayEvent;
-                gameBoardInstance.OnTurnSettled -= HandleTurnSettled;
-                Destroy(gameBoardInstance.gameObject);
-            }
-
             gameBoardInstance = Instantiate(gameBoardPrefab);
             gameBoardInstance.Init(grid, playAreaScreenRect);
             gameBoardInstance.OnGameplayEvent += HandleGameplayEvent;
             gameBoardInstance.OnTurnSettled += HandleTurnSettled;
+            SetPlayerActionsEnabled(false);
         }
         
         private void HandleLevelComplete()
@@ -128,10 +160,16 @@ namespace DefaultNamespace
         {
             if (isLevelEnded) return;
 
-            pendingConstrainerFailures.Add(failureData);
+            if (isTurnSettling)
+            {
+                pendingConstrainerFailures.Add(failureData);
+                return;
+            }
+
+            FinishLevelAsLoss(new List<ConstrainerFailureData> { failureData });
         }
 
-        private void ShowLoseForConstrainers(IReadOnlyList<ConstrainerFailureData> failureData)
+        private void FinishLevelAsLoss(IReadOnlyList<ConstrainerFailureData> failureData)
         {
             if (isLevelEnded) return;
 
@@ -141,11 +179,14 @@ namespace DefaultNamespace
                 throw new InvalidOperationException("Cannot show lose screen without constrainer failure data.");
             //TODO: maybe add a way to make multireason failure sound more fun
             string message = failureData[0].failureText;
-            UIManager.Instance.ShowLoseScreen(message);
+            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, false, scoreManager.CurrentScore, scoreManager.CalculateStars(), message));
         }
 
         private void HandleGameplayEvent(IGameplayEvent e)
         {
+            if (e is PlayerMoveCommittedEvent)
+                isTurnSettling = true;
+
             if (e is BoardResolvedEvent boardResolvedEvent)
                 scoreManager.Apply(boardResolvedEvent);
 
@@ -199,20 +240,22 @@ namespace DefaultNamespace
         {
             if (isLevelEnded) return;
 
+            isTurnSettling = false;
+
             if (pendingLevelComplete || objectiveManager.AllComplete)
             {
-                ShowWin();
+                FinishLevelAsWin();
                 return;
             }
 
             if (pendingConstrainerFailures.Count == 0)
                 return;
 
-            ShowLoseForConstrainers(pendingConstrainerFailures);
+            FinishLevelAsLoss(pendingConstrainerFailures);
             pendingConstrainerFailures.Clear();
         }
 
-        private void ShowWin()
+        private void FinishLevelAsWin()
         {
             if (isLevelEnded) return;
 
@@ -222,7 +265,7 @@ namespace DefaultNamespace
             int previousStars = PlayerProgress.Instance.GetStars(currentLevelId);
             if (earnedStars > previousStars)
                 PlayerProgress.Instance.SetStars(currentLevelId, earnedStars);
-            UIManager.Instance.ShowWinScreen();
+            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, true, scoreManager.CurrentScore, earnedStars, string.Empty));
         }
     }
 }

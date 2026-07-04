@@ -16,7 +16,6 @@ GameObject:
   - component: {fileID: 3912862298464110975}
   - component: {fileID: 5176382947618204359}
   - component: {fileID: 8200000000000000001}
-  - component: {fileID: 6297984998653773159}
   m_Layer: 0
   m_Name: GameBoard
   m_TagString: Untagged
@@ -59,7 +58,6 @@ MonoBehaviour:
   paddingY: 0.05
   petalViewManager: {fileID: 5895882996990725671}
   tileViewManager: {fileID: 3912862298464110975}
-  boardOutlineView: {fileID: 6297984998653773159}
   boardVFXManager: {fileID: 5176382947618204359}
   skillRepresentationOrchestrator: {fileID: 8200000000000000001}
   boardInputHandler: {fileID: 7623217431080173358}
@@ -149,21 +147,3 @@ MonoBehaviour:
   stripeSunburstMutationDuration: 1
   stripeSunburstLaserDuration: 1
   stripeSunburstLaserChargeUpDuration: 0.2
---- !u!114 &6297984998653773159
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2829020016292998654}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d5095869e0c4e58b5213faea5390b73, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BoardOutlineView
-  rockPrefab: {fileID: 7450824753196788751, guid: 2bc31252b7aa6744f921e1ffb4f98e97, type: 3}
-  rockSpacingRatio: 0.479
-  rockPaddingRatio: 0.089
-  rockSizeRatio: 0.34
-  randomRotationDegrees: 12
-  randomScaleRatio: 0.12

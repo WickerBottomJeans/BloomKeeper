@@ -23,6 +23,7 @@
 - Keep proposals concrete and concise to avoid wasting the user's time and token usage.
 - When providing code snippets, always state the exact owning class and function or method they belong to; do not give loose snippets detached from implementation context.
 - Do not hide implementation decisions behind broad summaries such as "wiring," "supporting changes," or "affected files."
+- After editing code, check whether any touched class, method, function, field, file, or serialized API name no longer matches its current responsibility or behavior. If a name has become stale or misleading, explicitly call it out and propose the rename before continuing.
 - After editing, report exactly what changed and do not claim verification that was not performed.
 
 ## Production-Grade Quality

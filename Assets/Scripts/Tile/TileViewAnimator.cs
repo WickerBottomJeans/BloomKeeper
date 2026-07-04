@@ -17,16 +17,18 @@ public static class TileViewAnimator
         Vector3 incomingTargetScale = view.GetTargetScale(view.OverlayRenderer);
 
         Sequence outgoing = DOTween.Sequence();
-        outgoing.Append(view.OverlayAnimationRenderer.transform
-            .DOScale(outgoingTargetScale * 1.3f, 0.15f).SetEase(Ease.OutQuad));
-        outgoing.Join(view.OverlayAnimationRenderer.DOFade(0f, 0.15f));
+        Tween outgoingScale = view.OverlayAnimationRenderer.transform.DOScale(outgoingTargetScale * 1.3f, 0.15f).SetEase(Ease.OutQuad);
+        Tween outgoingFade = view.OverlayAnimationRenderer.DOFade(0f, 0.15f);
+        _ = outgoing.Append(outgoingScale);
+        _ = outgoing.Join(outgoingFade);
 
-        Sequence incoming_seq = DOTween.Sequence();
-        incoming_seq.Append(view.OverlayRenderer.transform
-            .DOScale(incomingTargetScale, 0.2f).SetEase(Ease.OutBack));
-        incoming_seq.Join(view.OverlayRenderer.DOFade(1f, 0.2f));
+        Sequence incomingSequence = DOTween.Sequence();
+        Tween incomingScale = view.OverlayRenderer.transform.DOScale(incomingTargetScale, 0.2f).SetEase(Ease.OutBack);
+        Tween incomingFade = view.OverlayRenderer.DOFade(1f, 0.2f);
+        _ = incomingSequence.Append(incomingScale);
+        _ = incomingSequence.Join(incomingFade);
 
-        await UniTask.WhenAll(outgoing.ToUniTask(), incoming_seq.ToUniTask());
+        await UniTask.WhenAll(outgoing.ToUniTask(), incomingSequence.ToUniTask());
 
         view.ClearOverlayAnimation();
     }

@@ -60,6 +60,11 @@ public class GameBoard : MonoBehaviour
     public event Action<IGameplayEvent> OnGameplayEvent;
     public event Action OnTurnSettled;
 
+    public void SetPlayerActionsEnabled(bool enabled)
+    {
+        boardInputHandler.SetPlayerActionsEnabled(enabled);
+    }
+
     public void Init(BoardCell[,] grid, Rect playAreaScreenRect)
     {
         cam = Camera.main;
@@ -120,15 +125,15 @@ public class GameBoard : MonoBehaviour
         currentState = newState;
         switch (newState)
         {
-            case BoardState.Swapping: EnterSwapping(); break;
-            case BoardState.SwappingBack: EnterSwappingBack(); break;
-            case BoardState.Resolving: EnterResolving(); break;
+            case BoardState.Swapping: EnterSwapping().Forget(); break;
+            case BoardState.SwappingBack: EnterSwappingBack().Forget(); break;
+            case BoardState.Resolving: EnterResolving().Forget(); break;
             case BoardState.ActivatingSkills: EnterActivatingSkills(); break;
-            case BoardState.Gravity: EnterGravity(); break;
-            case BoardState.Filling: EnterFilling(); break;
+            case BoardState.Gravity: EnterGravity().Forget(); break;
+            case BoardState.Filling: EnterFilling().Forget(); break;
             case BoardState.Cascade: EnterCascade(); break;
             case BoardState.Idle: EnterIdle(); break;
-            case BoardState.Shuffling: EnterShuffling(); break;
+            case BoardState.Shuffling: EnterShuffling().Forget(); break;
 
         }
     }
@@ -187,7 +192,7 @@ public class GameBoard : MonoBehaviour
         TransitionTo(BoardState.ActivatingSkills);
     }
 
-    private async UniTask EnterActivatingSkills()
+    private void EnterActivatingSkills()
     {
         if (pendingSkillActivations.Count == 0)
         {
@@ -302,7 +307,6 @@ public class GameBoard : MonoBehaviour
                 if (cell.Petal == null) continue;
                 Vector2 center = layout.GetCellWorldPos(x, y);
                 Handles.Label(center, cell.Petal.PetalType.ToString()[0].ToString());
-                int i = 1;
             }
         }
 #endif

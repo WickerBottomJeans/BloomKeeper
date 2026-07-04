@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Pool;
 using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
@@ -14,10 +13,12 @@ namespace DefaultNamespace.UI
         [SerializeField] private Button button;
 
         private int levelId;
+        private Action<int> onSelected;
 
-        public void Init(LevelMeta meta)
+        public void Init(LevelMeta meta, Action<int> onSelected)
         {
             levelId = meta.levelId;
+            this.onSelected = onSelected;
             levelNameText.text = meta.levelName;
             int earnedStars = PlayerProgress.Instance.GetStars(meta.levelId);
             starsImage.sprite = starSprites[earnedStars];
@@ -27,8 +28,7 @@ namespace DefaultNamespace.UI
 
         private void OnClick()
         {
-            LevelManager.Instance.InitNewLevel(levelId);
-            UIManager.Instance.HideLevelSelect();
+            onSelected?.Invoke(levelId);
         }
     }
 }

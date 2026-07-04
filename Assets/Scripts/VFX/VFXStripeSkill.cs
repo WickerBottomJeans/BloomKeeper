@@ -4,7 +4,7 @@ namespace DefaultNamespace.VFX
 {
     public class VFXStripeSkill : MonoBehaviour
     {
-        [SerializeField] private ParticleSystem particleSystem;
+        [SerializeField] private ParticleSystem _particleSystem;
         [SerializeField] private LineRenderer lineRenderer;
         [SerializeField] private Vector2 authoredTravelDirection = Vector2.right;
 
@@ -13,8 +13,8 @@ namespace DefaultNamespace.VFX
             float rotation = Vector2.SignedAngle(authoredTravelDirection, travelDirection);
             transform.rotation = Quaternion.Euler(0f, 0f, rotation);
             SetWidth(worldWidth);
-            particleSystem.Clear(true);
-            particleSystem.Play(true);
+            _particleSystem.Clear(true);
+            _particleSystem.Play(true);
         }
 
         public void SetWidth(float worldWidth)
@@ -22,7 +22,7 @@ namespace DefaultNamespace.VFX
             float halfWidth = worldWidth * 0.5f;
 
             // Particle edge span.
-            ParticleSystem.ShapeModule shape = particleSystem.shape;
+            ParticleSystem.ShapeModule shape = _particleSystem.shape;
             shape.radius = halfWidth;
 
             // Visible line span.

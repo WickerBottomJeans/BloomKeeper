@@ -10,7 +10,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private UIWinScreen winScreenPrefab;
         private UIWinScreen winScreenInstance;
 
-        public void ShowWinScreen()
+        public UIWinScreen ShowWinScreen()
         {
             if (winScreenInstance != null)
             {
@@ -18,6 +18,7 @@ namespace DefaultNamespace.UI
             }
 
             winScreenInstance = Instantiate(winScreenPrefab, canvas.transform);
+            return winScreenInstance;
         }
 
         public void HideWinScreen()

@@ -7,11 +7,12 @@ namespace DefaultNamespace.UI
         [SerializeField] private UILevelSelect levelSelectPrefab;
         private UILevelSelect levelSelectInstance;
 
-        public void ShowLevelSelect()
+        public UILevelSelect ShowLevelSelect()
         {
             if (levelSelectInstance == null)
                 levelSelectInstance = Instantiate(levelSelectPrefab, canvas.transform);
             levelSelectInstance.Show();
+            return levelSelectInstance;
         }
 
         public void HideLevelSelect()

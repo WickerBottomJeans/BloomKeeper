@@ -1,28 +1,41 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+using System;
+using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
     public class UILevelSelect : MonoBehaviour
     {
-        [SerializeField] private ScrollMapBGController bgController;
-        [SerializeField] private ScrollMapController mapController;
+        [SerializeField] private LevelMapBackgroundLayer backgroundLayer;
+        [SerializeField] private LevelMapButtonLayer mapButtonLayer;
+
+        public event Action<int> OnLevelSelected;
 
         private void Awake()
         {
-            bgController.Init();
-            mapController.Init();
+            backgroundLayer.Init();
+            mapButtonLayer.Init();
+            mapButtonLayer.OnLevelSelected += HandleLevelSelected;
         }
 
         public void Show()
         {
             gameObject.SetActive(true);
-            mapController.Refresh();
+            mapButtonLayer.Refresh();
         }
 
         public void Hide()
         {
             gameObject.SetActive(false);
+        }
+
+        private void HandleLevelSelected(int levelId)
+        {
+            OnLevelSelected?.Invoke(levelId);
+        }
+
+        private void OnDestroy()
+        {
+            mapButtonLayer.OnLevelSelected -= HandleLevelSelected;
         }
     }
 }

@@ -394,7 +394,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c008a05eca0b40139aa7e90af1ef6cc5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.GameBootstrapper
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.GameFlowController
 --- !u!114 &438607905
 MonoBehaviour:
   m_ObjectHideFlags: 0

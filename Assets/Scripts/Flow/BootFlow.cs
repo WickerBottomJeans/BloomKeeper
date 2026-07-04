@@ -1,19 +1,17 @@
-﻿using DefaultNamespace.UI;
-using UnityEngine;
+using System.Threading.Tasks;
+using DefaultNamespace.UI;
 
 namespace DefaultNamespace
 {
-    public class GameBootstrapper : MonoBehaviour
+    public class BootFlow
     {
-        private async void Start()
+        public async Task Enter()
         {
             await SpriteLoader.Instance.LoadAll();
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             UIManager.Instance.ShowTesterToggle();
 #endif
-
-            UIManager.Instance.ShowLevelSelect();
         }
     }
 }
