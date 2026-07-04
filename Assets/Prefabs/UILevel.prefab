@@ -2281,6 +2281,7 @@ MonoBehaviour:
   image: {fileID: 5529795151908061698}
   onSprite: {fileID: -7611271547229767461, guid: 77034e43295fa344f9f08ec55ed06914, type: 3}
   offSprite: {fileID: -8338233527242540095, guid: 77034e43295fa344f9f08ec55ed06914, type: 3}
+  toggleAnimationTime: 0.12
 --- !u!222 &6803725618555619344
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3559,6 +3560,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 669812161080971503}
     m_Modifications:
+    - target: {fileID: 486667280225965822, guid: 572fa2300172af44481b66bf08b94bd8, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 378.69
+      objectReference: {fileID: 0}
     - target: {fileID: 2011178434443376265, guid: 572fa2300172af44481b66bf08b94bd8, type: 3}
       propertyPath: m_IsActive
       value: 0

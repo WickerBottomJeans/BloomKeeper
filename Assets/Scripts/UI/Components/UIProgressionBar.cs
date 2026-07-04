@@ -38,8 +38,12 @@ namespace DefaultNamespace.UI
             RectTransform maskRect = fillMask.transform as RectTransform;
             if (maskRect == null) return;
 
-            float hiddenWidth = maskRect.rect.width * (1f - GetProgress(currentValue));
-            fillMask.padding = new Vector4(0f, 0f, hiddenWidth, 0f);
+            float progress = GetProgress(currentValue);
+            maskRect.anchorMin = new Vector2(0f, maskRect.anchorMin.y);
+            maskRect.anchorMax = new Vector2(progress, maskRect.anchorMax.y);
+            maskRect.offsetMin = new Vector2(0f, maskRect.offsetMin.y);
+            maskRect.offsetMax = new Vector2(0f, maskRect.offsetMax.y);
+            fillMask.padding = Vector4.zero;
         }
 
         private float GetProgress(int value)
