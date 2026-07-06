@@ -23,7 +23,7 @@ namespace DefaultNamespace.UI
                 return;
             }
 
-            petalEditorInstance = Instantiate(petalEditorPrefab, canvas.transform);
+            petalEditorInstance = Instantiate(petalEditorPrefab, uiRoot);
             petalEditorInstance.OnConfirmed += (petalType, skillType) =>
             {
                 OnPetalEditConfirmed?.Invoke(petalType, skillType);

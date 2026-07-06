@@ -17,7 +17,7 @@ namespace DefaultNamespace.UI
                 Destroy(winScreenInstance.gameObject);
             }
 
-            winScreenInstance = Instantiate(winScreenPrefab, canvas.transform);
+            winScreenInstance = Instantiate(winScreenPrefab, uiRoot);
             return winScreenInstance;
         }
 

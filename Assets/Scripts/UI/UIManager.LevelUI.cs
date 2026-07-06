@@ -13,7 +13,7 @@ namespace DefaultNamespace.UI
         {
             if (levelUIPrefab == null) return;
             if (levelUIInstance == null)
-                levelUIInstance = Instantiate(levelUIPrefab, canvas.transform);
+                levelUIInstance = Instantiate(levelUIPrefab, uiRoot);
             levelUIInstance.Init(objectives, constrainerViewData, scoreTarget, scoreMilestones, starCap);
             levelUIInstance.Show();
         }

@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
 
 namespace DefaultNamespace
@@ -9,10 +10,11 @@ namespace DefaultNamespace
 
         public event Action<int> StartLevelRequested;
 
-        public void Enter()
+        public async UniTask Enter()
         {
             levelSelect = UIManager.Instance.ShowLevelSelect();
             levelSelect.OnLevelSelected += HandleLevelSelected;
+            await UIManager.Instance.WaitForLevelSelectInitialBackgroundLoaded();
         }
 
         public void Exit()

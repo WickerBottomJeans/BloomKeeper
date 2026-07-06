@@ -71,4 +71,12 @@
         MatchShapeBonus = 4,
         SkillActivation = 5
     }
+
+    public enum UIJawCurtainTipCategory
+    {
+        General = 0,
+        LevelStart = 1,
+        Retry = 2,
+        ReturnHome = 3
+    }
 }

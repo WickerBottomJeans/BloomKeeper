@@ -16,6 +16,8 @@
 - A request to explore, review, or discuss an idea is not approval to edit code.
 - Only begin editing after the user clearly approves the architecture and asks for implementation.
 - If the architecture changes during implementation, stop editing and return to architecture discussion for renewed approval.
+- Do not edit Unity serialized assets or editor-authored setup files, including `.unity`, `.prefab`, `.asset`, `.mat`, `.controller`, `.anim`, `.meta`, project settings, package files, or generated Unity files.
+- Implementation work is code-only unless the user explicitly changes this rule. When Unity setup is required, explain the exact manual Editor steps instead of modifying serialized Unity files.
 
 ## User Review
 
@@ -31,6 +33,15 @@
 - Do not implement hacks, throwaway code, temporary workarounds, quick fixes, cheap fixes, or knowingly brittle solutions.
 - Do not hard-code feature-specific behavior inside generic managers, orchestrators, state machines, or shared systems.
 - Do not introduce magic values or presentation tuning directly in orchestration or gameplay logic; place approved tuning in the appropriate configuration or owning view system.
+- For responsive UI, do not hard-code screen/layout-dependent numbers such as pixel offsets, margins, breakpoints, widths, heights, or scale constants in code.
+- Responsive UI sizing and positioning must come from Unity layout, anchors, RectTransform bounds, aspect tools, or explicitly serialized/configured values owned by the relevant view.
+- Do not add speculative layout compensation values such as hidden margins, overlap pixels, or seam fixes before the visual problem is observed and approved.
+- Never silently ignore invalid runtime state, failed assumptions, or unexpected null references.
+- Never soften an error or missing required data by silently providing a fallback, default, placeholder, or alternate path.
+- Error states must be loud and visible. If a fallback is being considered, stop and ask the user for explicit approval, making the fallback question highly visible.
+- Serialized fields and scene/prefab setup references are non-null by contract. Do not write runtime null checks, `?.` guards, fallback lookup, custom `Debug.LogError`, or recovery paths for missing serialized setup.
+- Use serialized fields directly. If setup is broken, let Unity/C# surface the failure naturally.
+- Null checks are allowed only for real nullable runtime state or data, such as optional method arguments, cached instances, active tweens, lookup results, or intentionally absent content.
 - Require clear ownership, maintainable boundaries, explicit data flow, and an appropriate extension path for foreseeable production use.
 - Prefer the simplest production-grade solution, not the shortest implementation and not speculative overengineering.
 - Before implementation, identify any coupling, special-case dispatch, type checks, or volatility introduced by the design so the user can review it explicitly.

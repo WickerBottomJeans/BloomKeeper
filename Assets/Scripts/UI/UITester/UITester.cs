@@ -16,7 +16,7 @@ namespace DefaultNamespace.UI
                 testerToggleInstance.gameObject.SetActive(true);
                 return;
             }
-            testerToggleInstance = Instantiate(testerTogglePrefab, canvas.transform);
+            testerToggleInstance = Instantiate(testerTogglePrefab, uiRoot);
             testerToggleInstance.onValueChanged.AddListener(active => GlobalState.SetAdminMode(active));
         }
 

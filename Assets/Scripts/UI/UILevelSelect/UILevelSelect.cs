@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace DefaultNamespace.UI
@@ -21,6 +22,11 @@ namespace DefaultNamespace.UI
         {
             gameObject.SetActive(true);
             mapButtonLayer.Refresh();
+        }
+
+        public UniTask WaitForInitialBackgroundLoaded()
+        {
+            return backgroundLayer.WaitForInitialChunksLoaded();
         }
 
         public void Hide()

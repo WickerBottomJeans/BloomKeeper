@@ -11,7 +11,7 @@ namespace DefaultNamespace.UI
         public UILoseScreen ShowLoseScreen(string message)
         {
             if (loseScreenInstance == null)
-                loseScreenInstance = Instantiate(loseScreenPrefab, canvas.transform);
+                loseScreenInstance = Instantiate(loseScreenPrefab, uiRoot);
             loseScreenInstance.gameObject.SetActive(true);
             loseScreenInstance.Display(message);
             return loseScreenInstance;

@@ -12,7 +12,7 @@ namespace DefaultNamespace.UI
         public void ShowBackdrop(Action onDismiss, Transform popupRoot)
         {
             if (backdropInstance == null)
-                backdropInstance = Instantiate(backdropPrefab, canvas.transform);
+                backdropInstance = Instantiate(backdropPrefab, uiRoot);
 
             backdropInstance.onClick.RemoveAllListeners();
             backdropInstance.onClick.AddListener(() => onDismiss?.Invoke());

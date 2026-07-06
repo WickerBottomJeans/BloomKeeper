@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
@@ -10,9 +11,14 @@ namespace DefaultNamespace.UI
         public UILevelSelect ShowLevelSelect()
         {
             if (levelSelectInstance == null)
-                levelSelectInstance = Instantiate(levelSelectPrefab, canvas.transform);
+                levelSelectInstance = Instantiate(levelSelectPrefab, uiRoot);
             levelSelectInstance.Show();
             return levelSelectInstance;
+        }
+
+        public UniTask WaitForLevelSelectInitialBackgroundLoaded()
+        {
+            return levelSelectInstance.WaitForInitialBackgroundLoaded();
         }
 
         public void HideLevelSelect()

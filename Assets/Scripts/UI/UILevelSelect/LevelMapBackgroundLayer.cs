@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -21,6 +22,8 @@ namespace DefaultNamespace.UI
     /// Choose this instead of sprite sheet to manage VRAM better, those image are huge so
     /// </summary>
     private Dictionary<int, AsyncOperationHandle<Texture2D>> chunkHandles = new Dictionary<int, AsyncOperationHandle<Texture2D>>();
+    private List<AsyncOperationHandle<Texture2D>> initialChunkHandles = new List<AsyncOperationHandle<Texture2D>>();
+    private bool isRecordingInitialChunkLoads;
     private AssetManifest manifest;
     
     public void Init()
@@ -29,16 +32,33 @@ namespace DefaultNamespace.UI
         var contentHeight = CalculateChunkPositions();
         content.sizeDelta = new Vector2(0, contentHeight);
 
-        chunkPool = new VerticalScrollPool<RawImage>(
-            content, viewport, scrollRect, chunkPrefab,
-            manifest.assets.Count,
-            i => chunkPositions[i],
-            i => chunkHalfHeights[i],
-            image => image.transform.SetAsFirstSibling(),
-            (image, i) => LoadChunk(image, i),
-            image => ReleaseChunk(image),
-            defaultPoolCapacity, maxPoolCapacity
-        );
+        initialChunkHandles.Clear();
+        isRecordingInitialChunkLoads = true;
+        try
+        {
+            chunkPool = new VerticalScrollPool<RawImage>(
+                content, viewport, scrollRect, chunkPrefab,
+                manifest.assets.Count,
+                i => chunkPositions[i],
+                i => chunkHalfHeights[i],
+                image => image.transform.SetAsFirstSibling(),
+                (image, i) => LoadChunk(image, i),
+                image => ReleaseChunk(image),
+                defaultPoolCapacity, maxPoolCapacity
+            );
+        }
+        finally
+        {
+            isRecordingInitialChunkLoads = false;
+        }
+    }
+
+    public async UniTask WaitForInitialChunksLoaded()
+    {
+        foreach (AsyncOperationHandle<Texture2D> handle in initialChunkHandles)
+            await handle.ToUniTask();
+
+        await UniTask.Yield();
     }
 
     private float CalculateChunkPositions()
@@ -71,6 +91,8 @@ namespace DefaultNamespace.UI
         string address = manifest.assets[index].address;
         var handle = Addressables.LoadAssetAsync<Texture2D>(address);
         chunkHandles[index] = handle;
+        if (isRecordingInitialChunkLoads)
+            initialChunkHandles.Add(handle);
         handle.Completed += h =>
         {
             if (image != null)

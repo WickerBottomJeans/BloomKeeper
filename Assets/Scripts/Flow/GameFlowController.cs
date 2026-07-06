@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
 using UnityEngine;
 
@@ -5,58 +6,80 @@ namespace DefaultNamespace
 {
     public class GameFlowController : MonoBehaviour
     {
+        private BootFlow bootFlow;
         private HomeFlow homeFlow;
         private LevelSessionFlow levelSessionFlow;
         private ResultFlow resultFlow;
         private LevelSessionResult currentResult;
 
+        private void Awake()
+        {
+            InitializeFlows();
+        }
+
         private async void Start()
         {
-            BootFlow bootFlow = new BootFlow();
             await bootFlow.Enter();
-            EnterHome();
+            await EnterHome();
+            await UIManager.Instance.OpenJawCurtain();
         }
 
-        private void EnterHome()
+        private void InitializeFlows()
         {
-            homeFlow ??= new HomeFlow();
+            bootFlow = new BootFlow();
+            homeFlow = new HomeFlow();
+            levelSessionFlow = new LevelSessionFlow();
+            resultFlow = new ResultFlow();
+        }
+
+        private async UniTask EnterHome()
+        {
             homeFlow.StartLevelRequested += HandleStartLevelRequested;
-            homeFlow.Enter();
+            await homeFlow.Enter();
         }
 
-        private void HandleStartLevelRequested(int levelId)
+        private async void HandleStartLevelRequested(int levelId)
         {
-            homeFlow.StartLevelRequested -= HandleStartLevelRequested;
-            homeFlow.Exit();
-            levelSessionFlow ??= new LevelSessionFlow();
-            levelSessionFlow.LevelFinished += HandleLevelFinished;
-            levelSessionFlow.StartLevel(levelId);
+            await UIManager.Instance.PlayJawCurtainTransition(UIJawCurtainTipCategory.LevelStart, () =>
+            {
+                homeFlow.StartLevelRequested -= HandleStartLevelRequested;
+                homeFlow.Exit();
+                levelSessionFlow.LevelFinished += HandleLevelFinished;
+                levelSessionFlow.StartLevel(levelId);
+                return UniTask.CompletedTask;
+            });
         }
 
         private void HandleLevelFinished(LevelSessionResult result)
         {
             levelSessionFlow.LevelFinished -= HandleLevelFinished;
             currentResult = result;
-            resultFlow ??= new ResultFlow();
             resultFlow.HomeRequested += HandleResultHomeRequested;
             resultFlow.RetryRequested += HandleResultRetryRequested;
             resultFlow.Enter(result);
         }
 
-        private void HandleResultHomeRequested()
+        private async void HandleResultHomeRequested()
         {
-            ExitResultFlow();
-            levelSessionFlow.LeaveLevel();
-            EnterHome();
+            await UIManager.Instance.PlayJawCurtainTransition(UIJawCurtainTipCategory.ReturnHome, async () =>
+            {
+                ExitResultFlow();
+                levelSessionFlow.LeaveLevel();
+                await EnterHome();
+            });
         }
 
-        private void HandleResultRetryRequested()
+        private async void HandleResultRetryRequested()
         {
             int levelId = currentResult.LevelId;
-            ExitResultFlow();
-            levelSessionFlow.LevelFinished += HandleLevelFinished;
-            levelSessionFlow.LeaveLevel();
-            levelSessionFlow.StartLevel(levelId);
+            await UIManager.Instance.PlayJawCurtainTransition(UIJawCurtainTipCategory.Retry, () =>
+            {
+                ExitResultFlow();
+                levelSessionFlow.LevelFinished += HandleLevelFinished;
+                levelSessionFlow.LeaveLevel();
+                levelSessionFlow.StartLevel(levelId);
+                return UniTask.CompletedTask;
+            });
         }
 
         private void ExitResultFlow()
