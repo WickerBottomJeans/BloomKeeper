@@ -78,7 +78,7 @@ LineRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1870205527
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
@@ -188,7 +188,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b87cfb99513446892f3c296ddfbeebb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.VFX.VFXStripeSkill
-  particleSystem: {fileID: 5914806124079003601}
+  _particleSystem: {fileID: 5914806124079003601}
   lineRenderer: {fileID: 8646408546146685856}
   authoredTravelDirection: {x: 0, y: 1}
 --- !u!1 &7132908905178627036
@@ -4993,7 +4993,7 @@ ParticleSystemRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1870205527
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_RenderMode: 0
