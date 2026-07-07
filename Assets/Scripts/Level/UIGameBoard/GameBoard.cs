@@ -146,7 +146,7 @@ public class GameBoard : MonoBehaviour
         currentCascadeDepth = 0;
 
         PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
-        await petalViewManager.OnSwap(swapOrigin, swapTarget);
+        await petalViewManager.OnSwap(swapOrigin, swapTarget, layout.CellSize);
 
         pendingSkillActivations.AddRange(SkillDetector.DetectOnSwap(grid, swapOrigin, swapTarget));
 
@@ -175,7 +175,7 @@ public class GameBoard : MonoBehaviour
 
     private async UniTask EnterSwappingBack()
     {
-        await petalViewManager.OnSwap(swapTarget, swapOrigin);
+        await petalViewManager.OnSwap(swapTarget, swapOrigin, layout.CellSize);
         TransitionTo(BoardState.Idle);
     }
 

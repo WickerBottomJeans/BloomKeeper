@@ -60,14 +60,14 @@ public class PetalViewManager : MonoBehaviour
         await UniTask.WhenAll(tasks);
     }
 
-    public async UniTask OnSwap(Vector2Int cellA, Vector2Int cellB)
+    public async UniTask OnSwap(Vector2Int cellA, Vector2Int cellB, float cellSize)
     {
         PetalView viewA = petalViews[cellA.x, cellA.y];
         PetalView viewB = petalViews[cellB.x, cellB.y];
 
         await UniTask.WhenAll(
-            PetalViewAnimator.PlaySwap(viewA, viewB.transform.position),
-            PetalViewAnimator.PlaySwap(viewB, viewA.transform.position)
+            PetalViewAnimator.PlaySwap(viewA, viewB.transform.position, cellSize),
+            PetalViewAnimator.PlaySwap(viewB, viewA.transform.position, cellSize)
         );
 
         petalViews[cellA.x, cellA.y] = viewB;
@@ -198,7 +198,7 @@ public class PetalViewManager : MonoBehaviour
             Vector2 targetPos = boardLayout.GetCellWorldPos(to.x, to.y);
             petalViews[to.x, to.y] = view;
             petalViews[from.x, from.y] = null;
-            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos));
+            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos, boardLayout.CellSize));
         }
         await UniTask.WhenAll(tasks);
     }
@@ -216,7 +216,7 @@ public class PetalViewManager : MonoBehaviour
             view.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize);
             petalViews[cell.x, cell.y] = view;
             PetalViewAnimator.PlaySpawn(view).Forget();
-            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos));
+            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos, boardLayout.CellSize));
         }
         await UniTask.WhenAll(tasks);
     }
@@ -245,7 +245,7 @@ public class PetalViewManager : MonoBehaviour
         newView.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize);
         petalViews[cell.x, cell.y] = newView;
         await PetalViewAnimator.PlaySpawn(newView);
-        await PetalViewAnimator.PlayDrop(newView, targetPos);
+        await PetalViewAnimator.PlayDrop(newView, targetPos, boardLayout.CellSize);
     }
     
     public void RefreshCell(Vector2Int cell, Petal petal, BoardLayout boardLayout)

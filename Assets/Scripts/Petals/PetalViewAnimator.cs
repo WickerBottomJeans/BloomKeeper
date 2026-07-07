@@ -1,15 +1,13 @@
-﻿using Cysharp.Threading.Tasks;
+using System;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
 public static class PetalViewAnimator
 {
-    public static UniTask PlaySwap(PetalView view, Vector2 targetPos)
+    public static UniTask PlaySwap(PetalView view, Vector2 targetPos, float cellSize)
     {
-        view.KillRootAnimation();
-        return view.transform.DOMove(targetPos, 0.2f)
-            .SetEase(Ease.OutQuad)
-            .ToUniTask();
+        return PlayJellyishMove(view, targetPos, cellSize, 0.2f, Ease.OutQuad);
     }
 
     public static UniTask PlayDestroy(PetalView view, float delay = 0f)
@@ -63,13 +61,69 @@ public static class PetalViewAnimator
         return seq.ToUniTask();
     }
 
-    public static UniTask PlayDrop(PetalView view, Vector2 targetPos)
+    public static UniTask PlayDrop(PetalView view, Vector2 targetPos, float cellSize)
     {
-        view.KillRootAnimation();
-        return view.transform.DOMove(targetPos, 0.25f)
-            .SetEase(Ease.InQuad)
-            .ToUniTask();
+        return PlayJellyishMove(view, targetPos, cellSize, 0.25f, Ease.InQuad);
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="view"></param>
+    /// <param name="targetPos"></param>
+    /// <param name="cellSize"></param>
+    /// <param name="duration">Root movement time</param>
+    /// <param name="moveEase"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public static UniTask PlayJellyishMove(PetalView view, Vector2 targetPos, float cellSize, float duration, Ease moveEase)
+    {
+        if (cellSize <= 0f)
+            throw new ArgumentOutOfRangeException(nameof(cellSize),
+                "Directional jelly movement requires a positive cell size.");
+        if (duration <= 0f)
+            throw new ArgumentOutOfRangeException(nameof(duration),
+                "Directional jelly movement requires a positive duration.");
+
+        view.KillRootAnimation();
+        view.StretchAxis.DOKill();
+        view.ResetDirectionalJelly();
+
+        Vector2 startPos = view.transform.position;
+        Vector2 displacement = targetPos - startPos;
+
+        //If the petal basically isnt moving
+        if (displacement.sqrMagnitude <= Mathf.Epsilon)
+            return view.transform.DOMove(targetPos, duration).SetEase(moveEase).ToUniTask();
+
+        PrepareDirectionalJelly(view, displacement, cellSize, duration, out Vector3 stretchScale,
+            out Vector3 squashScale);
+
+        float squashDuration = duration * view.DirectionalJellySquashDurationRatio;
+        float settleDuration = duration * view.DirectionalJellySettleDurationRatio;
+
+        Sequence seq = DOTween.Sequence();
+        seq.SetTarget(view.transform);
+        seq.Join(view.transform.DOMove(targetPos, duration).SetEase(moveEase));
+        seq.Join(view.StretchAxis.DOScale(stretchScale, duration).SetEase(Ease.OutQuad));
+        seq.Append(view.StretchAxis.DOScale(squashScale, squashDuration).SetEase(Ease.InOutSine));
+        seq.Append(view.StretchAxis.DOScale(Vector3.one, settleDuration).SetEase(Ease.OutBack));
+        seq.OnKill(view.ResetDirectionalJelly);
+        return seq.ToUniTask();
+    }
+
+    private static void PrepareDirectionalJelly(PetalView view, Vector2 displacement, float cellSize, float duration, out Vector3 stretchScale, out Vector3 squashScale)
+    {
+        float angle = Mathf.Atan2(displacement.y, displacement.x) * Mathf.Rad2Deg;
+        float speedCellsPerSecond = displacement.magnitude / cellSize / duration;
+        float stretchAmount = Mathf.Clamp(speedCellsPerSecond * view.DirectionalJellyStrength, 0f, view.MaxDirectionalJellyStretch);
+
+        view.StretchAxis.localRotation = Quaternion.Euler(0f, 0f, angle);
+        view.VisualTransform.localRotation = Quaternion.Euler(0f, 0f, -angle);
+
+        stretchScale = new Vector3(1f + stretchAmount, 1f - stretchAmount, 1f);
+        squashScale = new Vector3(1f - stretchAmount, 1f + stretchAmount, 1f);
+    }   
 
     public static async UniTask PlayFly(PetalView view, Vector2 targetWorldPosition, float duration)
     {
@@ -126,10 +180,7 @@ public static class PetalViewAnimator
         return seq.ToUniTask();
     }
 
-    public static UniTask PlayComboSpinAndDisappear(
-        PetalView viewA,
-        PetalView viewB,
-        float duration)
+    public static UniTask PlayComboSpinAndDisappear(PetalView viewA, PetalView viewB, float duration)
     {
         viewA.KillVisualAnimation();
         viewB.KillVisualAnimation();

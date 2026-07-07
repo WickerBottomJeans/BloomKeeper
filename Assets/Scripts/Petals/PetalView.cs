@@ -8,11 +8,21 @@ public class PetalView : MonoBehaviour
 {
     public SpriteRenderer spriteRenderer;
 
+    [SerializeField] private Transform stretchAxis;
     [SerializeField] private Material aboutToExecuteMaterial;
     [SerializeField] [Range(0f, 1f)] private float paddingXRatio = 0.2f;
     [SerializeField] [Range(0f, 1f)] private float paddingYRatio = 0.2f;
+    [SerializeField] [Range(0f, 0.25f)] private float directionalJellyStrength = 0.025f;
+    [SerializeField] [Range(0f, 0.95f)] private float maxDirectionalJellyStretch = 0.16f;
+    [SerializeField] [Range(0f, 1f)] private float directionalJellySquashDurationRatio = 0.25f;
+    [SerializeField] [Range(0f, 1f)] private float directionalJellySettleDurationRatio = 0.3f;
     public Vector3 TargetScale { get; private set; }
+    public Transform StretchAxis => stretchAxis;
     public Transform VisualTransform => spriteRenderer.transform;
+    public float DirectionalJellyStrength => directionalJellyStrength;
+    public float MaxDirectionalJellyStretch => maxDirectionalJellyStretch;
+    public float DirectionalJellySquashDurationRatio => directionalJellySquashDurationRatio;
+    public float DirectionalJellySettleDurationRatio => directionalJellySettleDurationRatio;
     private Material defaultMaterial;
 
     private void Awake()
@@ -44,8 +54,8 @@ public class PetalView : MonoBehaviour
         );
         TargetScale = Vector3.one * scale;
         transform.localScale = Vector3.one;
+        ResetDirectionalJelly();
         VisualTransform.localPosition = Vector3.zero;
-        VisualTransform.localRotation = Quaternion.identity;
         VisualTransform.localScale = TargetScale;
     }
 
@@ -62,9 +72,18 @@ public class PetalView : MonoBehaviour
 
     public void KillVisualAnimation()
     {
+        stretchAxis.DOKill();
         VisualTransform.DOKill();
         spriteRenderer.DOKill();
+        ResetDirectionalJelly();
         RestoreDefaultMaterial();
+    }
+
+    public void ResetDirectionalJelly()
+    {
+        stretchAxis.localRotation = Quaternion.identity;
+        stretchAxis.localScale = Vector3.one;
+        VisualTransform.localRotation = Quaternion.identity;
     }
 
     public void UseAboutToExecuteMaterial()
