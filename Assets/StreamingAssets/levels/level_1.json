@@ -41,7 +41,7 @@
     },
     {
       "type": 2,
-      "timeLimitSeconds": 10000
+      "timeLimitSeconds": 5
     }
   ]
 }

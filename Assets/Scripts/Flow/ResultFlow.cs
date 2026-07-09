@@ -1,13 +1,10 @@
 using System;
 using DefaultNamespace.UI;
-using UI;
 
 namespace DefaultNamespace
 {
     public class ResultFlow
     {
-        private UILoseScreen loseScreen;
-
         public event Action HomeRequested;
         public event Action RetryRequested;
 
@@ -20,19 +17,16 @@ namespace DefaultNamespace
                 return;
             }
 
-            loseScreen = UIManager.Instance.ShowLoseScreen(result.FailureMessage);
-            loseScreen.RetryRequested += HandleRetryRequested;
-            loseScreen.HomeRequested += HandleHomeRequested;
+            UIManager.Instance.ShowLoseScreen(result.FailureMessage);
+            UIManager.Instance.LoseScreenRetryRequested += HandleRetryRequested;
+            UIManager.Instance.LoseScreenHomeRequested += HandleHomeRequested;
         }
 
         public void Exit()
         {
             UIManager.Instance.WinScreenHomeRequested -= HandleHomeRequested;
-            if (loseScreen != null)
-            {
-                loseScreen.RetryRequested -= HandleRetryRequested;
-                loseScreen.HomeRequested -= HandleHomeRequested;
-            }
+            UIManager.Instance.LoseScreenRetryRequested -= HandleRetryRequested;
+            UIManager.Instance.LoseScreenHomeRequested -= HandleHomeRequested;
 
             UIManager.Instance.HideWinScreen();
             UIManager.Instance.HideLoseScreen();
