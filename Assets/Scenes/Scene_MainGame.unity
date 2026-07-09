@@ -412,7 +412,7 @@ MonoBehaviour:
   backdropPrefab: {fileID: 8339736254305832784, guid: eadd338566c53e543bbaf6d632391f75, type: 3}
   petalEditorPrefab: {fileID: 8406235925533610904, guid: 46b455af4d951334595ff0b29c2f8dd7, type: 3}
   levelSelectPrefab: {fileID: 4418083477373149365, guid: aa48054d7c54a8c4788b890aa21117af, type: 3}
-  loseScreenPrefab: {fileID: 7851121798126105795, guid: f453ecf83aeed7742b0830acb64ae457, type: 3}
+  loseScreenPrefab: {fileID: 3596938511652460970, guid: f55887a9abb0dbe419bc5060378831e3, type: 3}
   levelUIPrefab: {fileID: 9018714785502887193, guid: eadcc4877751d734683bb066ad3e6780, type: 3}
   canvas: {fileID: 1778504641}
   uiRoot: {fileID: 2100000001}
