@@ -90,7 +90,6 @@ public class BoardInputHandler : MonoBehaviour, ILevelPlayerActionSource
         }
 
         OnSwapRequested?.Invoke(selectedCell, targetCell);
-        Debug.Log($"[BoardInputHandler] Swap requested: {selectedCell} → {targetCell}");
         ClearDragState();
     }
 
