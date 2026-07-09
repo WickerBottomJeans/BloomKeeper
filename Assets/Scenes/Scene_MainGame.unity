@@ -291,7 +291,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -417,7 +417,7 @@ MonoBehaviour:
   canvas: {fileID: 1778504641}
   uiRoot: {fileID: 2100000001}
   testerTogglePrefab: {fileID: 7168729738933843627, guid: 3073f85176c8204478725179b3c68a8a, type: 3}
-  winScreenPrefab: {fileID: -3536508388563471518, guid: 5debd5ac8c84fc04882506032b470d45, type: 3}
+  winScreenPrefab: {fileID: 9033160764233551407, guid: e25a04012b8990848ab73dfc2c25368e, type: 3}
 --- !u!114 &438607906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -905,6 +905,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1778504642}
     m_Modifications:
+    - target: {fileID: 2602452939401856471, guid: eb32607b816c03a4faaf279531ba075d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -51.312317
+      objectReference: {fileID: 0}
     - target: {fileID: 3201883304614562025, guid: eb32607b816c03a4faaf279531ba075d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1036,6 +1040,10 @@ PrefabInstance:
     - target: {fileID: 8814758440218207345, guid: eb32607b816c03a4faaf279531ba075d, type: 3}
       propertyPath: m_Name
       value: UIJawCurtain
+      objectReference: {fileID: 0}
+    - target: {fileID: 8814758440218207345, guid: eb32607b816c03a4faaf279531ba075d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

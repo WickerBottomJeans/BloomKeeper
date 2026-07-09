@@ -20,6 +20,7 @@ namespace DefaultNamespace
         private GameBoard gameBoardInstance;
         private readonly List<ConstrainerFailureData> pendingConstrainerFailures = new();
         private ScoreManager scoreManager;
+        private LevelData currentLevelData;
         private int currentLevelId;
         private bool pendingLevelComplete;
         private bool isLevelEnded;
@@ -70,6 +71,7 @@ namespace DefaultNamespace
             objectiveManager = null;
             constrainerManager = null;
             scoreManager = null;
+            currentLevelData = null;
             pendingConstrainerFailures.Clear();
             pendingLevelComplete = false;
             isLevelEnded = false;
@@ -81,9 +83,9 @@ namespace DefaultNamespace
         {
             ClearCurrentLevelSession();
 
-            LevelData data = LevelLoader.LoadLevel(levelId);
+            currentLevelData = LevelLoader.LoadLevel(levelId);
             currentLevelId = levelId;
-            scoreManager = new ScoreManager(data.starScoreThresholds);
+            scoreManager = new ScoreManager(currentLevelData.starScoreThresholds);
             scoreManager.OnScoreChanged += HandleScoreChanged;
 
             pendingConstrainerFailures.Clear();
@@ -91,11 +93,11 @@ namespace DefaultNamespace
             isLevelEnded = false;
             isTurnSettling = false;
 
-            List<IObjective> objectives = data.objectives
+            List<IObjective> objectives = currentLevelData.objectives
                 .Select(o => ObjectiveFactory.Create(o))
                 .ToList();
 
-            List<IConstrainer> constrainers = data.constrainers
+            List<IConstrainer> constrainers = currentLevelData.constrainers
                 .Select(c => ConstrainerFactory.Create(c))
                 .ToList();
 
@@ -106,9 +108,9 @@ namespace DefaultNamespace
             objectiveManager.OnProgressUpdated += HandleObjectiveProgressUpdated;
             constrainerManager.OnFailed += HandleConstrainerFailed;
             constrainerManager.OnProgressUpdated += HandleConstrainerProgressUpdated;
-            BoardCell[,] grid = BoardInitializer.Initialize(data);
+            BoardCell[,] grid = BoardInitializer.Initialize(currentLevelData);
             
-            DisplayLevel(grid, objectives, constrainerManager.GetViewData(), data.starScoreThresholds);
+            DisplayLevel(grid, objectives, constrainerManager.GetViewData(), currentLevelData.starScoreThresholds);
         }
 
         private void DisplayLevel(BoardCell[,] grid, List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
@@ -179,7 +181,7 @@ namespace DefaultNamespace
                 throw new InvalidOperationException("Cannot show lose screen without constrainer failure data.");
             //TODO: maybe add a way to make multireason failure sound more fun
             string message = failureData[0].failureText;
-            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, false, scoreManager.CurrentScore, scoreManager.CalculateStars(), message));
+            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, false, scoreManager.CurrentScore, scoreManager.CalculateStars(), GetStarCap(currentLevelData.starScoreThresholds), message));
         }
 
         private void HandleGameplayEvent(IGameplayEvent e)
@@ -265,7 +267,7 @@ namespace DefaultNamespace
             int previousStars = PlayerProgress.Instance.GetStars(currentLevelId);
             if (earnedStars > previousStars)
                 PlayerProgress.Instance.SetStars(currentLevelId, earnedStars);
-            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, true, scoreManager.CurrentScore, earnedStars, string.Empty));
+            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, true, scoreManager.CurrentScore, earnedStars, GetStarCap(currentLevelData.starScoreThresholds), string.Empty));
         }
     }
 }

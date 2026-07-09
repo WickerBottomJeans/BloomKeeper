@@ -15,6 +15,8 @@ namespace DefaultNamespace.UI
         private bool isOn;
         private bool hasState;
 
+        public float ToggleAnimationTime => toggleAnimationTime;
+
         public void SetImmediate(bool isOn)
         {
             toggleSequence?.Kill();
@@ -24,7 +26,7 @@ namespace DefaultNamespace.UI
             image.sprite = isOn ? onSprite : offSprite;
         }
 
-        public void SetOn(bool isOn)
+        public void SetOn(bool isOn, float delay = 0f)
         {
             if (hasState && this.isOn == isOn) return;
 
@@ -32,6 +34,8 @@ namespace DefaultNamespace.UI
             hasState = true;
             toggleSequence?.Kill();
             toggleSequence = DOTween.Sequence();
+            if (delay > 0f)
+                toggleSequence.AppendInterval(delay);
             toggleSequence.Append(transform.DOScaleX(0f, toggleAnimationTime * 0.5f).SetEase(Ease.InQuad));
             toggleSequence.AppendCallback(() => image.sprite = isOn ? onSprite : offSprite);
             toggleSequence.Append(transform.DOScaleX(1f, toggleAnimationTime * 0.5f).SetEase(Ease.OutQuad));

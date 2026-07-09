@@ -1,9 +1,9 @@
 {
   "levelId": 1,
   "starScoreThresholds": [
-    { "starCount": 1, "score": 1000 },
-    { "starCount": 2, "score": 2500 },
-    { "starCount": 3, "score": 4000 }
+    { "starCount": 1, "score": 200 },
+    { "starCount": 2, "score": 500 },
+    { "starCount": 3, "score": 1000 }
   ],
   "boardWidth": 10,
   "boardHeight": 10,

@@ -6,7 +6,6 @@ namespace DefaultNamespace
 {
     public class ResultFlow
     {
-        private UIWinScreen winScreen;
         private UILoseScreen loseScreen;
 
         public event Action HomeRequested;
@@ -16,8 +15,8 @@ namespace DefaultNamespace
         {
             if (result.DidWin)
             {
-                winScreen = UIManager.Instance.ShowWinScreen();
-                winScreen.HomeRequested += HandleHomeRequested;
+                UIManager.Instance.ShowWinScreen(result.Stars, result.StarCap);
+                UIManager.Instance.WinScreenHomeRequested += HandleHomeRequested;
                 return;
             }
 
@@ -28,8 +27,7 @@ namespace DefaultNamespace
 
         public void Exit()
         {
-            if (winScreen != null)
-                winScreen.HomeRequested -= HandleHomeRequested;
+            UIManager.Instance.WinScreenHomeRequested -= HandleHomeRequested;
             if (loseScreen != null)
             {
                 loseScreen.RetryRequested -= HandleRetryRequested;
