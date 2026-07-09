@@ -28,10 +28,6 @@
           "amount": 1
         }
       ]
-    },
-    {
-      "type": 3,
-      "spiderWebsToClear": 1
     }
   ],
   "constrainers": [
@@ -41,7 +37,7 @@
     },
     {
       "type": 2,
-      "timeLimitSeconds": 5
+      "timeLimitSeconds": 100
     }
   ]
 }
