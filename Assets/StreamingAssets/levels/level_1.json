@@ -37,7 +37,7 @@
     },
     {
       "type": 2,
-      "timeLimitSeconds": 100GetAnchoredYForEdge
+      "timeLimitSeconds": 100
     }
   ]
 }
