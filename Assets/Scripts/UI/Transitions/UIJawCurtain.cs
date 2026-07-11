@@ -1,8 +1,6 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
@@ -10,10 +8,35 @@ namespace DefaultNamespace.UI
     {
         [SerializeField] private RectTransform upperJaw;
         [SerializeField] private RectTransform lowerJaw;
-        [SerializeField] private TextMeshProUGUI tipLabel;
-        [SerializeField] private Image tipImage;
+        [SerializeField] private TipBoard tipBoard;
         [SerializeField] private float duration = 0.4f;
+        [SerializeField] private Ease closeEase = Ease.InOutCubic;
+        [SerializeField] private Ease openEase = Ease.InOutCubic;
+        [SerializeField, Range(0f, 1f)] private float closedMeetingAnchorY = 0.5f;
         private Sequence sequence;
+#if UNITY_EDITOR
+        private bool isTestOpen;
+#endif
+
+        private void Awake()
+        {
+            SnapClosed(string.Empty);
+        }
+
+#if UNITY_EDITOR
+        private void Update()
+        {
+            UnityEngine.InputSystem.Keyboard keyboard = UnityEngine.InputSystem.Keyboard.current;
+            if (keyboard == null || !keyboard.pKey.wasPressedThisFrame) return;
+
+            if (isTestOpen)
+                Close();
+            else
+                Open();
+
+            isTestOpen = !isTestOpen;
+        }
+#endif
 
         public UniTask Close(string tipText = "", Sprite tipSprite = null)
         {
@@ -22,8 +45,8 @@ namespace DefaultNamespace.UI
 
             GetClosedPositions(out float upperY, out float lowerY);
             sequence = DOTween.Sequence().SetUpdate(true);
-            sequence.Join(upperJaw.DOAnchorPosY(upperY, duration).SetEase(Ease.InOutCubic));
-            sequence.Join(lowerJaw.DOAnchorPosY(lowerY, duration).SetEase(Ease.InOutCubic));
+            sequence.Join(upperJaw.DOAnchorPosY(upperY, duration).SetEase(closeEase));
+            sequence.Join(lowerJaw.DOAnchorPosY(lowerY, duration).SetEase(closeEase));
             return PlaySequence(sequence);
         }
 
@@ -33,8 +56,8 @@ namespace DefaultNamespace.UI
 
             GetOpenPositions(out float upperY, out float lowerY);
             sequence = DOTween.Sequence().SetUpdate(true);
-            sequence.Join(upperJaw.DOAnchorPosY(upperY, duration).SetEase(Ease.InOutCubic));
-            sequence.Join(lowerJaw.DOAnchorPosY(lowerY, duration).SetEase(Ease.InOutCubic));
+            sequence.Join(upperJaw.DOAnchorPosY(upperY, duration).SetEase(openEase));
+            sequence.Join(lowerJaw.DOAnchorPosY(lowerY, duration).SetEase(openEase));
             return PlaySequence(sequence);
         }
 
@@ -57,10 +80,7 @@ namespace DefaultNamespace.UI
 
         private void SetTip(string tipText, Sprite tipSprite)
         {
-            tipLabel.text = tipText;
-            tipLabel.gameObject.SetActive(!string.IsNullOrWhiteSpace(tipText));
-            tipImage.sprite = tipSprite;
-            tipImage.gameObject.SetActive(tipSprite != null);
+            tipBoard.SetTip(tipText, tipSprite);
         }
 
         private void GetOpenPositions(out float upperY, out float lowerY)
@@ -73,8 +93,9 @@ namespace DefaultNamespace.UI
         private void GetClosedPositions(out float upperY, out float lowerY)
         {
             RectTransform root = (RectTransform)transform;
-            upperY = GetAnchoredYForEdge(root, upperJaw, root.rect.yMax, true);
-            lowerY = GetAnchoredYForEdge(root, lowerJaw, root.rect.yMin, false);
+            float meetingY = Mathf.Lerp(root.rect.yMin, root.rect.yMax, closedMeetingAnchorY);
+            upperY = GetAnchoredYForEdge(root, upperJaw, meetingY, false);
+            lowerY = GetAnchoredYForEdge(root, lowerJaw, meetingY, true);
         }
 
         private float GetAnchoredYForEdge(RectTransform root, RectTransform rect, float targetY, bool topEdge)
