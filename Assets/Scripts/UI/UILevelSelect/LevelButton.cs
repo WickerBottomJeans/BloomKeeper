@@ -20,6 +20,7 @@ namespace DefaultNamespace.UI
             levelId = meta.levelId;
             this.onSelected = onSelected;
             levelNameText.text = meta.levelName;
+            //TODO: remove this coupling later
             int earnedStars = PlayerProgress.Instance.GetStars(meta.levelId);
             starsImage.sprite = starSprites[earnedStars];
             button.onClick.RemoveAllListeners();

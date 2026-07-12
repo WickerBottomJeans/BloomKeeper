@@ -3,6 +3,7 @@ using DefaultNamespace.Utility;
 
 namespace DefaultNamespace
 {
+    //TODO: this is just temp, we gon do things online later
     public class PlayerProgress : Singleton<PlayerProgress>
     {
         private IProgressRepository repository;
