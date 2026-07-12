@@ -211,13 +211,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "com.unity.microsoft.gdk.discovery": {
-      "version": "1.2.1",
-      "depth": 1,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://packages.unity.com"
-    },
     "com.unity.multiplayer.center": {
       "version": "1.0.1",
       "depth": 0,
@@ -354,15 +347,6 @@
         "com.unity.modules.jsonserialize": "1.0.0"
       },
       "url": "https://packages.unity.com"
-    },
-    "microsoft.playfab.sdk": {
-      "version": "https://github.com/PlayFab/PlayFabSDK_Unity.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.microsoft.gdk.discovery": "1.1.0"
-      },
-      "hash": "70e412497470e453ac2ee4b272d6a11aa7ef2267"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
