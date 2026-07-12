@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
+using System;
 using UnityEngine;
 
 namespace DefaultNamespace
@@ -7,29 +8,69 @@ namespace DefaultNamespace
     public class GameFlowController : MonoBehaviour
     {
         private BootFlow bootFlow;
+        private AuthFlow authFlow;
         private HomeFlow homeFlow;
         private LevelSessionFlow levelSessionFlow;
         private ResultFlow resultFlow;
         private LevelSessionResult currentResult;
+        private PlayFabAuthSession currentAuthSession;
 
         private void Awake()
         {
             InitializeFlows();
         }
 
-        private async void Start()
+        private void Start()
         {
-            await bootFlow.Enter();
-            await EnterHome();
-            await UIManager.Instance.OpenJawCurtain();
+            EnterBootFlow();
         }
 
         private void InitializeFlows()
         {
+            var guestCustomIdStore = new GuestCustomIdStore();
+            var guestLoginService = new PlayFabGuestLoginService(guestCustomIdStore);
             bootFlow = new BootFlow();
+            authFlow = new AuthFlow(guestLoginService);
             homeFlow = new HomeFlow();
             levelSessionFlow = new LevelSessionFlow();
             resultFlow = new ResultFlow();
+        }
+
+        private void EnterBootFlow()
+        {
+            bootFlow.BootCompleted += HandleBootCompleted;
+            bootFlow.Enter();
+        }
+
+        private void HandleBootCompleted()
+        {
+            bootFlow.BootCompleted -= HandleBootCompleted;
+            EnterAuthFlow();
+        }
+
+        private void EnterAuthFlow()
+        {
+            authFlow.AuthCompleted += HandleAuthCompleted;
+            authFlow.AuthFailed += HandleAuthFailed;
+            authFlow.Enter();
+        }
+
+        private async void HandleAuthCompleted(PlayFabAuthSession authSession)
+        {
+            await UIManager.Instance.PlayJawCurtainTransition(UIJawCurtainTipCategory.General, async () =>
+            {
+                authFlow.AuthCompleted -= HandleAuthCompleted;
+                authFlow.AuthFailed -= HandleAuthFailed;
+                authFlow.Exit();
+                currentAuthSession = authSession;
+                await EnterHome();
+            });
+        }
+
+        private void HandleAuthFailed(Exception exception)
+        {
+            // TODO: just temporary, we will do a proper error notice later
+            Debug.LogWarning(exception);
         }
 
         private async UniTask EnterHome()

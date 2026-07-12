@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using DefaultNamespace.UI;
 using UnityEngine;
@@ -6,7 +7,9 @@ namespace DefaultNamespace
 {
     public class BootFlow
     {
-        public async Task Enter()
+        public event Action BootCompleted;
+
+        public async void Enter()
         {
             ConfigureFrameRate();
             await SpriteLoader.Instance.LoadAll();
@@ -14,6 +17,7 @@ namespace DefaultNamespace
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             UIManager.Instance.ShowTesterToggle();
 #endif
+            BootCompleted?.Invoke();
         }
 
         private static void ConfigureFrameRate()

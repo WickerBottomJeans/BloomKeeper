@@ -9,6 +9,7 @@ namespace DefaultNamespace.UI
     {
         [SerializeField] private Canvas canvas;
         [SerializeField] private RectTransform uiRoot;
+        [SerializeField] private RectTransform overlayRoot;
         
         private async Task<T> LoadPanel<T>(string address) where T : Component
         {

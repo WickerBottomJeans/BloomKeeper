@@ -18,11 +18,6 @@ namespace DefaultNamespace.UI
         private bool isTestOpen;
 #endif
 
-        private void Awake()
-        {
-            SnapClosed(string.Empty);
-        }
-
 #if UNITY_EDITOR
         private void Update()
         {

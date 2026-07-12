@@ -6,8 +6,9 @@ namespace DefaultNamespace.UI
 {
     public partial class UIManager
     {
-        [SerializeField] private UIJawCurtain jawCurtain;
+        [SerializeField] private UIJawCurtain jawCurtainPrefab;
         [SerializeField] private UIJawCurtainTipConfig jawCurtainTipConfig;
+        private UIJawCurtain jawCurtainInstance;
         private UIJawCurtainTipProvider jawCurtainTipProvider;
         private bool isPlayingJawCurtainTransition;
 
@@ -25,18 +26,21 @@ namespace DefaultNamespace.UI
 
         public UniTask CloseJawCurtain(string tipText, Sprite tipSprite = null)
         {
+            UIJawCurtain jawCurtain = GetJawCurtain();
             jawCurtain.transform.SetAsLastSibling();
             return jawCurtain.Close(tipText, tipSprite);
         }
 
         public void SnapJawCurtainClosed(string tipText, Sprite tipSprite = null)
         {
+            UIJawCurtain jawCurtain = GetJawCurtain();
             jawCurtain.transform.SetAsLastSibling();
             jawCurtain.SnapClosed(tipText, tipSprite);
         }
 
         public UniTask OpenJawCurtain()
         {
+            UIJawCurtain jawCurtain = GetJawCurtain();
             jawCurtain.transform.SetAsLastSibling();
             return jawCurtain.Open();
         }
@@ -75,6 +79,18 @@ namespace DefaultNamespace.UI
             if (jawCurtainTipProvider == null)
                 jawCurtainTipProvider = new UIJawCurtainTipProvider(jawCurtainTipConfig);
             return jawCurtainTipProvider;
+        }
+
+        private UIJawCurtain GetJawCurtain()
+        {
+            if (jawCurtainInstance != null) return jawCurtainInstance;
+
+            jawCurtainInstance = Instantiate(jawCurtainPrefab, overlayRoot);
+            jawCurtainInstance.transform.SetAsLastSibling();
+            jawCurtainInstance.gameObject.SetActive(false);
+            jawCurtainInstance.SnapOpen();
+            jawCurtainInstance.gameObject.SetActive(true);
+            return jawCurtainInstance;
         }
     }
 }

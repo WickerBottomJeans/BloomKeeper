@@ -23,6 +23,8 @@
 
 - The user must be able to review and approve every proposed change before it is made.
 - Keep proposals concrete and concise to avoid wasting the user's time and token usage.
+- When the user asks for big steps, concepts, architecture pictures, strategy, or high-level planning, answer at that level only. Do not provide file lists, exact code, class names, method names, implementation steps, or other low-level details unless the user explicitly asks for implementation detail.
+- Preserve the user's sense of ownership and learning. Do not hand over large prebuilt implementations or hide design choices inside generated code; explain the next concept, let the user make the design decision, challenge tradeoffs, and implement only the smallest approved step.
 - When providing code snippets, always state the exact owning class and function or method they belong to; do not give loose snippets detached from implementation context.
 - Do not hide implementation decisions behind broad summaries such as "wiring," "supporting changes," or "affected files."
 - After editing code, check whether any touched class, method, function, field, file, or serialized API name no longer matches its current responsibility or behavior. If a name has become stale or misleading, explicitly call it out and propose the rename before continuing.
