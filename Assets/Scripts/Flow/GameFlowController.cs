@@ -9,11 +9,12 @@ namespace DefaultNamespace
     {
         private BootFlow bootFlow;
         private AuthFlow authFlow;
+        private AccountLoadFlow accountLoadFlow;
         private HomeFlow homeFlow;
         private LevelSessionFlow levelSessionFlow;
         private ResultFlow resultFlow;
+        private PlayerAccountContext playerAccountContext;
         private LevelSessionResult currentResult;
-        private PlayFabAuthSession currentAuthSession;
 
         private void Awake()
         {
@@ -29,11 +30,14 @@ namespace DefaultNamespace
         {
             var guestCustomIdStore = new GuestCustomIdStore();
             var guestLoginService = new PlayFabGuestLoginService(guestCustomIdStore);
+            var progressionService = new PlayFabProgressionService();
             bootFlow = new BootFlow();
             authFlow = new AuthFlow(guestLoginService);
+            accountLoadFlow = new AccountLoadFlow(progressionService);
             homeFlow = new HomeFlow();
             levelSessionFlow = new LevelSessionFlow();
             resultFlow = new ResultFlow();
+            playerAccountContext = new PlayerAccountContext();
         }
 
         private void EnterBootFlow()
@@ -62,7 +66,9 @@ namespace DefaultNamespace
                 authFlow.AuthCompleted -= HandleAuthCompleted;
                 authFlow.AuthFailed -= HandleAuthFailed;
                 authFlow.Exit();
-                currentAuthSession = authSession;
+                PlayerAccount account = await accountLoadFlow.Enter(authSession);
+                accountLoadFlow.Exit();
+                playerAccountContext.SetCurrentAccount(account);
                 await EnterHome();
             });
         }
@@ -76,7 +82,7 @@ namespace DefaultNamespace
         private async UniTask EnterHome()
         {
             homeFlow.StartLevelRequested += HandleStartLevelRequested;
-            await homeFlow.Enter();
+            await homeFlow.Enter(playerAccountContext.CurrentAccount.Progression);
         }
 
         private async void HandleStartLevelRequested(int levelId)

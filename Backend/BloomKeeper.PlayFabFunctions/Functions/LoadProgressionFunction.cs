@@ -1,0 +1,23 @@
+using BloomKeeper.PlayFabFunctions.Models;
+using BloomKeeper.PlayFabFunctions.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
+using Newtonsoft.Json;
+
+namespace BloomKeeper.PlayFabFunctions.Functions;
+
+public class LoadProgressionFunction
+{
+    private readonly PlayFabFunctionContextReader contextReader = new PlayFabFunctionContextReader();
+    private readonly PlayFabProgressionStore progressionStore = new PlayFabProgressionStore();
+
+    [Function("LoadProgression")]
+    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest request)
+    {
+        PlayFabFunctionExecutionContext context = await contextReader.ReadContext(request);
+        PlayerProgressionData progression = await progressionStore.LoadProgression(contextReader.CreateDataApi(context), contextReader.GetCallerEntity(context));
+        string json = JsonConvert.SerializeObject(progression);
+        return new ContentResult { Content = json, ContentType = "application/json", StatusCode = StatusCodes.Status200OK };
+    }
+}

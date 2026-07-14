@@ -9,19 +9,27 @@ namespace DefaultNamespace.UI
         [SerializeField] private LevelMapBackgroundLayer backgroundLayer;
         [SerializeField] private LevelMapButtonLayer mapButtonLayer;
 
+        private bool isMapButtonLayerInitialized;
+
         public event Action<int> OnLevelSelected;
 
         private void Awake()
         {
             backgroundLayer.Init();
-            mapButtonLayer.Init();
             mapButtonLayer.OnLevelSelected += HandleLevelSelected;
         }
 
-        public void Show()
+        public void Show(PlayerProgressionData progression)
         {
             gameObject.SetActive(true);
-            mapButtonLayer.Refresh();
+            if (!isMapButtonLayerInitialized)
+            {
+                mapButtonLayer.Init(progression);
+                isMapButtonLayerInitialized = true;
+                return;
+            }
+
+            mapButtonLayer.Refresh(progression);
         }
 
         public UniTask WaitForInitialBackgroundLoaded()

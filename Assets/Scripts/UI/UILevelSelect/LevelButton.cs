@@ -15,13 +15,11 @@ namespace DefaultNamespace.UI
         private int levelId;
         private Action<int> onSelected;
 
-        public void Init(LevelMeta meta, Action<int> onSelected)
+        public void Init(LevelMeta meta, int earnedStars, Action<int> onSelected)
         {
             levelId = meta.levelId;
             this.onSelected = onSelected;
             levelNameText.text = meta.levelName;
-            //TODO: remove this coupling later
-            int earnedStars = PlayerProgress.Instance.GetStars(meta.levelId);
             starsImage.sprite = starSprites[earnedStars];
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(OnClick);

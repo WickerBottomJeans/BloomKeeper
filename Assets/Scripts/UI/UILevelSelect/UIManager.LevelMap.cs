@@ -11,13 +11,13 @@ namespace DefaultNamespace.UI
 
         public event Action<int> LevelSelected;
 
-        public void ShowLevelSelect()
+        public void ShowLevelSelect(PlayerProgressionData progression)
         {
             if (levelSelectInstance == null)
                 levelSelectInstance = Instantiate(levelSelectPrefab, uiRoot);
             UnbindLevelSelect();
             BindLevelSelect();
-            levelSelectInstance.Show();
+            levelSelectInstance.Show(progression);
         }
 
         public UniTask WaitForLevelSelectInitialBackgroundLoaded()

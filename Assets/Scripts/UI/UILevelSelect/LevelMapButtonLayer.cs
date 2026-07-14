@@ -19,12 +19,14 @@ namespace DefaultNamespace.UI
         private VerticalScrollPool<LevelButton> scrollPool;
         private LevelMetaCollection metaCollection;
         private List<LevelMeta> allMetas;
+        private PlayerProgressionData progression;
         private float halfHeightBtn;
 
         public event Action<int> OnLevelSelected;
 
-        public void Init()
+        public void Init(PlayerProgressionData progression)
         {
+            this.progression = progression ?? throw new ArgumentNullException(nameof(progression));
             LoadMetas();
             halfHeightBtn = levelButtonPrefab.GetComponent<RectTransform>().rect.height / 2f;
 
@@ -37,15 +39,16 @@ namespace DefaultNamespace.UI
                 i => new Vector2(allMetas[i].pixelX * (content.rect.width / metaCollection.referenceScreenWidth), allMetas[i].pixelY * (content.rect.width / metaCollection.referenceScreenWidth)),
                 i => halfHeightBtn,
                 null,
-                (button, i) => button.Init(allMetas[i], HandleLevelSelected),
+                (button, i) => button.Init(allMetas[i], GetEarnedStars(allMetas[i].levelId), HandleLevelSelected),
                 button => { },
                 defaultPoolCapacity,
                 maxPoolSize
             );
         }
 
-        public void Refresh()
+        public void Refresh(PlayerProgressionData progression)
         {
+            this.progression = progression ?? throw new ArgumentNullException(nameof(progression));
             scrollPool.Refresh();
         }
 
@@ -58,6 +61,11 @@ namespace DefaultNamespace.UI
         private void HandleLevelSelected(int levelId)
         {
             OnLevelSelected?.Invoke(levelId);
+        }
+
+        private int GetEarnedStars(int levelId)
+        {
+            return progression.levels.TryGetValue(levelId, out LevelProgressData levelProgress) ? levelProgress.bestStars : 0;
         }
 
         private void OnDestroy()
