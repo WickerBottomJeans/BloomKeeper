@@ -10,10 +10,10 @@ namespace DefaultNamespace
         private BootFlow bootFlow;
         private AuthFlow authFlow;
         private AccountLoadFlow accountLoadFlow;
+        private LevelCompletionFlow levelCompletionFlow;
         private HomeFlow homeFlow;
         private LevelSessionFlow levelSessionFlow;
         private ResultFlow resultFlow;
-        private PlayerAccountContext playerAccountContext;
         private LevelSessionResult currentResult;
 
         private void Awake()
@@ -34,10 +34,10 @@ namespace DefaultNamespace
             bootFlow = new BootFlow();
             authFlow = new AuthFlow(guestLoginService);
             accountLoadFlow = new AccountLoadFlow(progressionService);
+            levelCompletionFlow = new LevelCompletionFlow(progressionService);
             homeFlow = new HomeFlow();
             levelSessionFlow = new LevelSessionFlow();
             resultFlow = new ResultFlow();
-            playerAccountContext = new PlayerAccountContext();
         }
 
         private void EnterBootFlow()
@@ -68,7 +68,7 @@ namespace DefaultNamespace
                 authFlow.Exit();
                 PlayerAccount account = await accountLoadFlow.Enter(authSession);
                 accountLoadFlow.Exit();
-                playerAccountContext.SetCurrentAccount(account);
+                PlayerAccountContext.Instance.SetCurrentAccount(account);
                 await EnterHome();
             });
         }
@@ -82,7 +82,7 @@ namespace DefaultNamespace
         private async UniTask EnterHome()
         {
             homeFlow.StartLevelRequested += HandleStartLevelRequested;
-            await homeFlow.Enter(playerAccountContext.CurrentAccount.Progression);
+            await homeFlow.Enter(PlayerAccountContext.Instance.CurrentAccount.Progression);
         }
 
         private async void HandleStartLevelRequested(int levelId)
@@ -97,10 +97,12 @@ namespace DefaultNamespace
             });
         }
 
-        private void HandleLevelFinished(LevelSessionResult result)
+        private async void HandleLevelFinished(LevelSessionResult result)
         {
             levelSessionFlow.LevelFinished -= HandleLevelFinished;
             currentResult = result;
+            await levelCompletionFlow.Enter(result);
+            levelCompletionFlow.Exit();
             resultFlow.HomeRequested += HandleResultHomeRequested;
             resultFlow.RetryRequested += HandleResultRetryRequested;
             resultFlow.Enter(result);

@@ -264,9 +264,6 @@ namespace DefaultNamespace
             isLevelEnded = true;
             constrainerManager?.StopLevel();
             int earnedStars = scoreManager.CalculateStars();
-            int previousStars = PlayerProgress.Instance.GetStars(currentLevelId);
-            if (earnedStars > previousStars)
-                PlayerProgress.Instance.SetStars(currentLevelId, earnedStars);
             OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, true, scoreManager.CurrentScore, earnedStars, GetStarCap(currentLevelData.starScoreThresholds), string.Empty));
         }
     }

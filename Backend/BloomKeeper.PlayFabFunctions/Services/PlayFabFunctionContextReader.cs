@@ -31,6 +31,18 @@ public class PlayFabFunctionContextReader
         return new DataEntityKey { Id = context.CallerEntityProfile.Entity.Id, Type = context.CallerEntityProfile.Entity.Type };
     }
 
+    public T GetFunctionArgument<T>(PlayFabFunctionExecutionContext context)
+    {
+        if (context == null) throw new InvalidOperationException("PlayFab function context is missing.");
+        if (context.FunctionArgument == null) throw new InvalidOperationException("PlayFab function argument is missing.");
+
+        string json = JsonConvert.SerializeObject(context.FunctionArgument);
+        T argument = JsonConvert.DeserializeObject<T>(json);
+        if (argument is null) throw new InvalidOperationException("PlayFab function argument JSON is invalid.");
+
+        return argument;
+    }
+
     public PlayFabDataInstanceAPI CreateDataApi(PlayFabFunctionExecutionContext context)
     {
         if (context == null) throw new InvalidOperationException("PlayFab function context is missing.");
