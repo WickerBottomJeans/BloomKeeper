@@ -344,11 +344,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 438607903}
-  - component: {fileID: 438607902}
   - component: {fileID: 438607905}
   - component: {fileID: 438607904}
   - component: {fileID: 438607906}
   - component: {fileID: 438607907}
+  - component: {fileID: 438607908}
   m_Layer: 0
   m_Name: 'GameServices '
   m_TagString: Untagged
@@ -356,18 +356,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &438607902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 438607901}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f85b94cc605a491f828b2eeeab6b775b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.PlayerProgress
 --- !u!4 &438607903
 Transform:
   m_ObjectHideFlags: 0
@@ -411,6 +399,7 @@ MonoBehaviour:
   jawCurtainTipConfig: {fileID: 11400000, guid: ee582d7cfb7411d49ae195f43678ac96, type: 2}
   authScreenPrefab: {fileID: 5937290179025323228, guid: 13346db061e46a14a993adfc16b7ac73, type: 3}
   backdropPrefab: {fileID: 8339736254305832784, guid: eadd338566c53e543bbaf6d632391f75, type: 3}
+  dialogPrefab: {fileID: 2063504911643791199, guid: f2d451a0803c8a84da3f2e0497da20c3, type: 3}
   petalEditorPrefab: {fileID: 8406235925533610904, guid: 46b455af4d951334595ff0b29c2f8dd7, type: 3}
   levelSelectPrefab: {fileID: 4418083477373149365, guid: aa48054d7c54a8c4788b890aa21117af, type: 3}
   loseScreenPrefab: {fileID: 3596938511652460970, guid: f55887a9abb0dbe419bc5060378831e3, type: 3}
@@ -448,6 +437,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.SpriteLoader
   atlasKeys:
   - PetalSpriteSheet
+--- !u!114 &438607908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438607901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 617ec16cac353c144b384fa9b560bdf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.DialogManager
 --- !u!1 &439805997
 GameObject:
   m_ObjectHideFlags: 0

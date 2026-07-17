@@ -14,15 +14,13 @@ namespace DefaultNamespace.UI
 
         public void ShowWinScreen(int stars, int starCap)
         {
-            if (winScreenInstance != null)
-            {
-                UnbindWinScreen();
-                Destroy(winScreenInstance.gameObject);
-            }
+            if (winScreenInstance == null)
+                winScreenInstance = Instantiate(winScreenPrefab, uiRoot);
 
-            winScreenInstance = Instantiate(winScreenPrefab, uiRoot);
+            UnbindWinScreen();
             BindWinScreen();
             winScreenInstance.DisplayStars(stars, starCap);
+            winScreenInstance.gameObject.SetActive(true);
         }
 
         public void HideWinScreen()

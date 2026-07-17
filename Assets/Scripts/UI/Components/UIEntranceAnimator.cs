@@ -12,15 +12,30 @@ namespace DefaultNamespace.UI
 
         private Sequence entranceSequence;
         private UniTaskCompletionSource entranceCompletionSource;
+        private Vector3 restingScale;
+        private float restingAlpha;
+
+        private void Awake()
+        {
+            if (scaleTarget != null)
+                restingScale = scaleTarget.localScale;
+            if (fadeTarget != null)
+                restingAlpha = fadeTarget.alpha;
+        }
 
         private void OnEnable()
         {
             PlayEntrance().Forget();
         }
 
+        private void OnDisable()
+        {
+            CancelActiveEntrance();
+        }
+
         public UniTask PlayEntrance()
         {
-            entranceSequence?.Kill();
+            CancelActiveEntrance();
             entranceCompletionSource = new UniTaskCompletionSource();
             entranceSequence = DOTween.Sequence();
             Sequence activeSequence = entranceSequence;
@@ -29,17 +44,15 @@ namespace DefaultNamespace.UI
 
             if (scaleTarget != null)
             {
-                Vector3 targetScale = scaleTarget.localScale;
                 scaleTarget.localScale = Vector3.zero;
-                entranceSequence.Join(scaleTarget.DOScale(targetScale, duration).SetEase(Ease.OutBack));
+                entranceSequence.Join(scaleTarget.DOScale(restingScale, duration).SetEase(Ease.OutBack));
                 hasEntrance = true;
             }
 
             if (fadeTarget != null)
             {
-                float targetAlpha = fadeTarget.alpha;
                 fadeTarget.alpha = 0f;
-                entranceSequence.Join(fadeTarget.DOFade(targetAlpha, duration).SetEase(Ease.OutQuad));
+                entranceSequence.Join(fadeTarget.DOFade(restingAlpha, duration).SetEase(Ease.OutQuad));
                 hasEntrance = true;
             }
 
@@ -52,7 +65,7 @@ namespace DefaultNamespace.UI
             }
 
             entranceSequence.OnComplete(() => CompleteEntrance(activeSequence, activeCompletionSource));
-            entranceSequence.OnKill(() => CompleteEntrance(activeSequence, activeCompletionSource));
+            entranceSequence.OnKill(() => HandleEntranceKilled(activeSequence, activeCompletionSource));
 
             return WaitForEntrance();
         }
@@ -68,6 +81,35 @@ namespace DefaultNamespace.UI
 
             entranceSequence = null;
             activeCompletionSource.TrySetResult();
+        }
+
+        private void CancelActiveEntrance()
+        {
+            Sequence activeSequence = entranceSequence;
+            UniTaskCompletionSource activeCompletionSource = entranceCompletionSource;
+            entranceSequence = null;
+            activeSequence?.Kill();
+            RestoreRestingState();
+
+            if (activeSequence != null)
+                activeCompletionSource.TrySetCanceled();
+        }
+
+        private void HandleEntranceKilled(Sequence activeSequence, UniTaskCompletionSource activeCompletionSource)
+        {
+            if (entranceSequence != activeSequence) return;
+
+            entranceSequence = null;
+            RestoreRestingState();
+            activeCompletionSource.TrySetCanceled();
+        }
+
+        private void RestoreRestingState()
+        {
+            if (scaleTarget != null)
+                scaleTarget.localScale = restingScale;
+            if (fadeTarget != null)
+                fadeTarget.alpha = restingAlpha;
         }
     }
 }

@@ -4,7 +4,7 @@ namespace BloomKeeper.PlayFabFunctions.Services;
 
 public class CompleteLevelAttemptService
 {
-    //TODO: maybe add anti cheat later
+    //TODO: maybe add anti cheat later  
     public bool SanityCheck(PlayerProgressionData playerProgression, CompleteLevelAttemptRequest completeLevelAttemptRequest)
     {
         if (playerProgression == null) return false;

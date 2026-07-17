@@ -79,4 +79,25 @@
         Retry = 2,
         ReturnHome = 3
     }
+
+    /// <summary>
+    /// Convenient IDs for common dialog buttons, with no attached logic.
+    /// </summary>
+    public enum DialogButtonType
+    {
+        Ok = 1,
+        Cancel = 2,
+        Yes = 3,
+        No = 4,
+        Close = 5,
+        Retry = 6
+    }
+
+    public enum UIButtonVariant
+    {
+        Green = 1,
+        Blue = 2,
+        Orange = 3,
+        Purple = 4
+    }
 }

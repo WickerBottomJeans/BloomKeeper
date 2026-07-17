@@ -75,8 +75,22 @@ namespace DefaultNamespace
 
         private void HandleAuthFailed(Exception exception)
         {
-            // TODO: just temporary, we will do a proper error notice later
             Debug.LogWarning(exception);
+            DialogOptionButton[] options = { DialogOptionButton.Cancel, DialogOptionButton.Retry };
+            DialogManager.Instance.RunDialogWorkflow("Login failed", "Unable to connect. Check your connection and try again.", async session =>
+            {
+                int buttonId = await session.WaitForButtonClick();
+                switch ((DialogButtonType)buttonId)
+                {
+                    case DialogButtonType.Retry:
+                        authFlow.RetryLogin();
+                        return;
+                    case DialogButtonType.Cancel:
+                        return;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported login failure dialog button.");
+                }
+            }, options).Forget();
         }
 
         private async UniTask EnterHome()

@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
 
 namespace DefaultNamespace
@@ -33,7 +34,17 @@ namespace DefaultNamespace
             UIManager.Instance.HideAuthScreen();
         }
 
-        private async void HandleAuthPlayRequested()
+        public void RetryLogin()
+        {
+            AttemptGuestLogin().Forget();
+        }
+
+        private void HandleAuthPlayRequested()
+        {
+            AttemptGuestLogin().Forget();
+        }
+
+        private async UniTask AttemptGuestLogin()
         {
             if (isLoginInProgress) return;
 

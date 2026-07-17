@@ -1,19 +1,19 @@
 fileFormatVersion: 2
-guid: a52b38464ede3a24dbfddb09c2646258
+guid: 6c933d55c36b84147a34cfd08a8bf7a5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8894201953851282084
-    second: Buttons_0
+      213: 2730983844502689553
+    second: UIDialog_0
   - first:
-      213: 7664807735657788756
-    second: Buttons_1
+      213: -7517433791854963096
+    second: UIDialog_1
   - first:
-      213: -5402412272178277761
-    second: Buttons_2
+      213: 2449962045609162448
+    second: UIDialog_2
   - first:
-      213: 2013261503205373015
-    second: Buttons_3
+      213: -2645299282283933035
+    second: UIDialog_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -148,89 +148,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Buttons_0
+      name: UIDialog_0
       rect:
         serializedVersion: 2
-        x: 29
-        y: 697
-        width: 577
-        height: 269
+        x: 48
+        y: 202
+        width: 901
+        height: 723
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 125, y: 125, z: 125, w: 125}
+      border: {x: 246, y: 283, z: 246, w: 283}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4a214e3bd8d8e6b70800000000000000
-      internalID: 8894201953851282084
+      spriteID: 117d9e2565766e520800000000000000
+      internalID: 2730983844502689553
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Buttons_1
+      name: UIDialog_1
       rect:
         serializedVersion: 2
-        x: 644
-        y: 697
-        width: 578
-        height: 269
+        x: 977
+        y: 766
+        width: 396
+        height: 158
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 125, y: 125, z: 125, w: 125}
+      border: {x: 73, y: 58, z: 73, w: 58}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4557c83960ede5a60800000000000000
-      internalID: 7664807735657788756
+      spriteID: 86697fd9bc5bca790800000000000000
+      internalID: -7517433791854963096
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Buttons_2
+      name: UIDialog_2
       rect:
         serializedVersion: 2
-        x: 29
-        y: 299
-        width: 578
-        height: 269
+        x: 1063
+        y: 466
+        width: 205
+        height: 259
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 125, y: 125, z: 125, w: 125}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f725a9269a6c605b0800000000000000
-      internalID: -5402412272178277761
+      spriteID: 0d639b10083000220800000000000000
+      internalID: 2449962045609162448
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Buttons_3
+      name: UIDialog_3
       rect:
         serializedVersion: 2
-        x: 644
-        y: 298
-        width: 578
-        height: 269
+        x: 1089
+        y: 192
+        width: 192
+        height: 247
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 125, y: 125, z: 125, w: 125}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7547682abaa80fb10800000000000000
-      internalID: 2013261503205373015
+      spriteID: 592ded271520a4bd0800000000000000
+      internalID: -2645299282283933035
       vertices: []
       indices: 
       edges: []
@@ -239,7 +239,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: f33412c2b689e104d8d225771f2552fa
+    spriteID: 74b540b8a0490b9409da6ed9e9ecfa0c
     internalID: 0
     vertices: []
     indices: 
@@ -249,10 +249,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Buttons_0: 8894201953851282084
-      Buttons_1: 7664807735657788756
-      Buttons_2: -5402412272178277761
-      Buttons_3: 2013261503205373015
+      UIDialog_0: 2730983844502689553
+      UIDialog_1: -7517433791854963096
+      UIDialog_2: 2449962045609162448
+      UIDialog_3: -2645299282283933035
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
