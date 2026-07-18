@@ -15,6 +15,7 @@ namespace DefaultNamespace
         private LevelSessionFlow levelSessionFlow;
         private ResultFlow resultFlow;
         private LevelSessionResult currentResult;
+        private bool isApplicationTransitionRunning;
 
         private void Awake()
         {
@@ -23,6 +24,8 @@ namespace DefaultNamespace
 
         private void Start()
         {
+            ApplicationInputController.Instance.SetUIInputActive(true);
+            ApplicationInputController.Instance.SetGameBoardInputActive(false);
             EnterBootFlow();
         }
 
@@ -37,7 +40,7 @@ namespace DefaultNamespace
             levelCompletionFlow = new LevelCompletionFlow(progressionService);
             homeFlow = new HomeFlow();
             levelSessionFlow = new LevelSessionFlow();
-            resultFlow = new ResultFlow();
+            resultFlow = new ResultFlow(new LevelCatalog(LevelLoader.LoadLevelMetas()));
         }
 
         private void EnterBootFlow()
@@ -61,7 +64,7 @@ namespace DefaultNamespace
 
         private async void HandleAuthCompleted(PlayFabAuthSession authSession)
         {
-            await UIManager.Instance.PlayJawCurtainTransition(UIJawCurtainTipCategory.General, async () =>
+            await PlayApplicationTransition(UIJawCurtainTipCategory.General, async () =>
             {
                 authFlow.AuthCompleted -= HandleAuthCompleted;
                 authFlow.AuthFailed -= HandleAuthFailed;
@@ -96,35 +99,44 @@ namespace DefaultNamespace
         private async UniTask EnterHome()
         {
             homeFlow.StartLevelRequested += HandleStartLevelRequested;
-            await homeFlow.Enter(PlayerAccountContext.Instance.CurrentAccount.Progression);
+            await homeFlow.Enter();
         }
 
         private async void HandleStartLevelRequested(int levelId)
         {
-            await UIManager.Instance.PlayJawCurtainTransition(UIJawCurtainTipCategory.LevelStart, () =>
+            await PlayApplicationTransition(UIJawCurtainTipCategory.LevelStart, () =>
             {
                 homeFlow.StartLevelRequested -= HandleStartLevelRequested;
                 homeFlow.Exit();
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
-                levelSessionFlow.StartLevel(levelId);
+                levelSessionFlow.PrepareLevel(levelId);
                 return UniTask.CompletedTask;
-            });
+            }, levelSessionFlow.StartPreparedLevel);
         }
 
         private async void HandleLevelFinished(LevelSessionResult result)
         {
             levelSessionFlow.LevelFinished -= HandleLevelFinished;
             currentResult = result;
-            await levelCompletionFlow.Enter(result);
-            levelCompletionFlow.Exit();
-            resultFlow.HomeRequested += HandleResultHomeRequested;
-            resultFlow.RetryRequested += HandleResultRetryRequested;
-            resultFlow.Enter(result);
+            ApplicationInputController.Instance.SetInputSuspended(true);
+            try
+            {
+                await levelCompletionFlow.Enter(result);
+                levelCompletionFlow.Exit();
+                resultFlow.HomeRequested += HandleResultHomeRequested;
+                resultFlow.RetryRequested += HandleResultRetryRequested;
+                resultFlow.NextLevelRequested += HandleNextLevelRequested;
+                resultFlow.Enter(result);
+            }
+            finally
+            {
+                ApplicationInputController.Instance.SetInputSuspended(false);
+            }
         }
 
         private async void HandleResultHomeRequested()
         {
-            await UIManager.Instance.PlayJawCurtainTransition(UIJawCurtainTipCategory.ReturnHome, async () =>
+            await PlayApplicationTransition(UIJawCurtainTipCategory.ReturnHome, async () =>
             {
                 ExitResultFlow();
                 levelSessionFlow.LeaveLevel();
@@ -135,22 +147,63 @@ namespace DefaultNamespace
         private async void HandleResultRetryRequested()
         {
             int levelId = currentResult.LevelId;
-            await UIManager.Instance.PlayJawCurtainTransition(UIJawCurtainTipCategory.Retry, () =>
+            await PlayApplicationTransition(UIJawCurtainTipCategory.Retry, () =>
             {
                 ExitResultFlow();
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
                 levelSessionFlow.LeaveLevel();
-                levelSessionFlow.StartLevel(levelId);
+                levelSessionFlow.PrepareLevel(levelId);
                 return UniTask.CompletedTask;
-            });
+            }, levelSessionFlow.StartPreparedLevel);
+        }
+
+        private async void HandleNextLevelRequested(int levelId)
+        {
+            await PlayApplicationTransition(UIJawCurtainTipCategory.LevelStart, () =>
+            {
+                ExitResultFlow();
+                levelSessionFlow.LevelFinished += HandleLevelFinished;
+                levelSessionFlow.LeaveLevel();
+                levelSessionFlow.PrepareLevel(levelId);
+                return UniTask.CompletedTask;
+            }, levelSessionFlow.StartPreparedLevel);
         }
 
         private void ExitResultFlow()
         {
             resultFlow.HomeRequested -= HandleResultHomeRequested;
             resultFlow.RetryRequested -= HandleResultRetryRequested;
+            resultFlow.NextLevelRequested -= HandleNextLevelRequested;
             resultFlow.Exit();
             currentResult = null;
+        }
+
+        private async UniTask PlayApplicationTransition(UIJawCurtainTipCategory tipCategory, Func<UniTask> whileClosedOperation, Action afterOpenedOperation = null)
+        {
+            if (isApplicationTransitionRunning)
+                throw new InvalidOperationException("Cannot start an application transition while another transition is running.");
+
+            isApplicationTransitionRunning = true;
+            ApplicationInputController.Instance.SetInputSuspended(true);
+            try
+            {
+                await UIManager.Instance.CloseJawCurtain(tipCategory);
+                try
+                {
+                    await whileClosedOperation();
+                }
+                finally
+                {
+                    await UIManager.Instance.OpenJawCurtain();
+                }
+
+                afterOpenedOperation?.Invoke();
+            }
+            finally
+            {
+                ApplicationInputController.Instance.SetInputSuspended(false);
+                isApplicationTransitionRunning = false;
+            }
         }
     }
 }

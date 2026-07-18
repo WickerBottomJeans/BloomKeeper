@@ -25,15 +25,12 @@ namespace DefaultNamespace
         private bool pendingLevelComplete;
         private bool isLevelEnded;
         private bool isTurnSettling;
+        private bool isLevelSessionPrepared;
+        private bool isLevelSessionStarted;
 
         private void Update()
         {
             constrainerManager?.Tick(Time.deltaTime);
-        }
-
-        public void SetPlayerActionsEnabled(bool enabled)
-        {
-            gameBoardInstance?.SetPlayerActionsEnabled(enabled);
         }
 
         public void ClearCurrentLevelSession()
@@ -76,10 +73,12 @@ namespace DefaultNamespace
             pendingLevelComplete = false;
             isLevelEnded = false;
             isTurnSettling = false;
+            isLevelSessionPrepared = false;
+            isLevelSessionStarted = false;
             currentLevelId = 0;
         }
 
-        public void StartLevelSession(int levelId)
+        public void PrepareLevelSession(int levelId)
         {
             ClearCurrentLevelSession();
 
@@ -103,7 +102,6 @@ namespace DefaultNamespace
 
             objectiveManager = new ObjectiveManager(objectives);
             constrainerManager = new ConstrainerManager(constrainers);
-            constrainerManager.StartLevel();
             objectiveManager.OnAllComplete += HandleLevelComplete;
             objectiveManager.OnProgressUpdated += HandleObjectiveProgressUpdated;
             constrainerManager.OnFailed += HandleConstrainerFailed;
@@ -111,6 +109,18 @@ namespace DefaultNamespace
             BoardCell[,] grid = BoardInitializer.Initialize(currentLevelData);
             
             DisplayLevel(grid, objectives, constrainerManager.GetViewData(), currentLevelData.starScoreThresholds);
+            isLevelSessionPrepared = true;
+        }
+
+        public void StartPreparedLevelSession()
+        {
+            if (!isLevelSessionPrepared)
+                throw new InvalidOperationException("Cannot start a level session before it has been prepared.");
+            if (isLevelSessionStarted)
+                throw new InvalidOperationException("Cannot start a level session more than once.");
+
+            isLevelSessionStarted = true;
+            constrainerManager.StartLevel();
         }
 
         private void DisplayLevel(BoardCell[,] grid, List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
@@ -138,7 +148,6 @@ namespace DefaultNamespace
             gameBoardInstance.Init(grid, playAreaScreenRect);
             gameBoardInstance.OnGameplayEvent += HandleGameplayEvent;
             gameBoardInstance.OnTurnSettled += HandleTurnSettled;
-            SetPlayerActionsEnabled(false);
         }
         
         private void HandleLevelComplete()

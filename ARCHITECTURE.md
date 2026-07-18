@@ -1,320 +1,337 @@
 # BloomKeeper Architecture
 
-## Scope
+## Purpose
 
-This document describes the architecture currently implemented in the repository. It covers the runtime game, its serialized Unity composition, data files, and first-party editor tooling. It is descriptive only: it does not propose changes or refactors.
+This document describes the architecture currently implemented in BloomKeeper. It is a map of ownership, data flow, runtime boundaries, and known implementation limits. It is not a roadmap and does not describe planned systems as if they already exist.
 
-The project is a Unity 6 (6000.4.2f1) 2D match game. The build contains one scene, `Assets/Scenes/MainGame.unity`. That scene acts as a persistent application shell; level selection and gameplay are shown by instantiating UI and board prefabs into the same scene rather than by changing scenes.
+The source code is authoritative when this document and the implementation disagree.
 
-## Architectural overview
+BloomKeeper is a Unity 6 (`6000.4.2f1`) portrait-oriented 2D match-3 game. The client contains the match simulation and presentation. PlayFab provides player authentication and invokes Azure Functions that own progression persistence.
 
-The runtime is organized around four layers of responsibility:
-
-1. **Application services in the main scene** — `GameBootstrapper`, `UIManager`, `LevelManager`, `PlayerProgress`, and `SpriteLoader` are placed on the scene's `GameServices` object. The latter four use the project's `Singleton<T>` base and survive scene loads through `DontDestroyOnLoad`.
-2. **Session orchestration** — `LevelManager` loads one level, creates its objectives and model grid, creates the scoreboard, and owns the currently instantiated `GameBoard`.
-3. **Board domain and turn pipeline** — `GameBoard` owns the live `Tile[,]` model and is the sole coordinator of swaps, matching, skills, gravity, refill, cascades, and deadlock shuffling. Mostly stateless domain services mutate or query that grid.
-4. **Presentation** — `UIManager` owns screen/popup instances. `PetalViewManager` and `TileViewManager`, which are components of the board prefab, maintain visual arrays corresponding to the model grid and animate change sets emitted by board operations.
-
-```mermaid
-flowchart TD
-    Scene["MainGame scene / GameServices"] --> Bootstrap["GameBootstrapper"]
-    Scene --> UI["UIManager"]
-    Scene --> Levels["LevelManager"]
-    Scene --> Progress["PlayerProgress"]
-    Scene --> Sprites["SpriteLoader"]
-
-    Bootstrap -->|"loads sprite atlases"| Sprites
-    Bootstrap -->|"shows"| UI
-    UI --> Select["UILevelSelect"]
-    Select -->|"selected levelId"| Levels
-
-    Levels -->|"loads"| LevelJSON["StreamingAssets level JSON"]
-    Levels --> Objectives["ObjectiveManager + IObjective objects"]
-    Levels -->|"instantiates and initializes"| Board["GameBoard"]
-    Levels -->|"shows / refreshes"| UI
-
-    Board --> Grid["Tile[,] authoritative board model"]
-    Board --> Domain["match, skill, gravity, fill, shuffle services"]
-    Domain --> Grid
-    Board --> PetalViews["PetalViewManager"]
-    Board --> TileViews["TileViewManager"]
-    Board -->|"OnPetalsCleared"| Levels
-    Levels -->|"PetalsClearedEvent"| Objectives
-    Objectives -->|"progress / complete events"| Levels
-```
-
-## Startup and main gameplay flow
-
-### Application startup
-
-1. Unity loads the only enabled build scene, `MainGame`.
-2. `PlayerProgress.Awake` constructs a `LocalProgressRepository` and loads `progress.dat` from `Application.persistentDataPath`, or creates empty progress when the file does not exist.
-3. `GameBootstrapper.Start` awaits `SpriteLoader.LoadAll`. Sprite atlases named in the serialized `atlasKeys` list are loaded through Addressables and cached.
-4. Development and editor builds show the tester/admin toggle.
-5. `UIManager.ShowLevelSelect` instantiates or reuses the level-select prefab.
-
-### Level selection
-
-`UILevelSelect.Awake` initializes two independently pooled parts of the scrolling map:
-
-- `ScrollMapBGController` reads the map chunk manifest, calculates vertically stacked chunk positions, and loads visible texture chunks by Addressables.
-- `ScrollMapController` reads `level_meta.json` and virtualizes `LevelButton` objects at authored pixel positions.
-
-Each visible `LevelButton` reads its star sprite from `PlayerProgress`. Clicking it passes the `levelId` to `LevelManager.InitNewLevel` and hides level selection.
-
-### Starting a level
-
-`LevelManager.InitNewLevel` performs the level composition:
-
-1. `LevelLoader` deserializes `StreamingAssets/levels/level_<id>.json` into `LevelData`.
-2. `ObjectiveFactory` converts each `ObjectiveJson` into an `IObjective`; currently only `MatchObjective` is implemented.
-3. A new plain C# `ObjectiveManager` owns those objectives and is wired to `LevelManager` through progress and completion events.
-4. `BoardInitializer` converts the row-major JSON tile list into a bottom-origin `Tile[,]`. `TileFactory` creates tile polymorphs and `PetalFactory` creates their petals. Random cells are filled while avoiding an initial match.
-5. `UIManager` creates or refreshes the scoreboard directly from the same objective objects.
-6. `LevelManager` destroys the preceding board instance if present, instantiates the serialized `GameBoard` prefab, calls `Init(grid)`, and subscribes to `OnPetalsCleared`.
-
-### Playing a turn
-
-`BoardInputHandler` uses the Unity Input System's current pointer. Outside admin mode, a drag resolves to one cardinal neighbor and raises `OnSwapRequested`. `GameBoard` accepts requests only in `Idle` and only when `PetalSwapper.Validate` accepts both cells.
-
-The board immediately mutates the model for each operation and then awaits the corresponding view animation. A normal accepted swap follows this pipeline:
+## System Context
 
 ```mermaid
 flowchart LR
-    Input["Drag input"] --> Swap["swap model + animate"]
-    Swap --> Detect["detect swap skill or board matches"]
-    Detect -->|"no match"| Undo["restore model + animate back"]
-    Detect -->|"match"| Resolve["resolve model + animate change set"]
-    Resolve --> Skills{"pending skill activations?"}
-    Skills -->|"yes"| SkillGroups["convert skills to MatchGroups"]
-    SkillGroups --> Resolve
-    Skills -->|"no"| Gravity["apply gravity + animate"]
-    Gravity --> Fill["fill holes + animate"]
-    Fill --> Cascade{"new matches?"}
-    Cascade -->|"yes"| Resolve
-    Cascade -->|"no"| Deadlock{"valid move exists?"}
-    Deadlock -->|"yes"| Input
-    Deadlock -->|"no"| Shuffle["replace matchable petals + animate"]
+    Player["Player"] --> Client["Unity client"]
+    Client --> LocalContent["StreamingAssets JSON"]
+    Client --> Addressables["Addressable art"]
+    Client --> PlayFabAuth["PlayFab authentication"]
+    Client --> PlayFabFunctions["PlayFab CloudScript custom functions"]
+    PlayFabFunctions --> Azure["Azure Functions"]
+    Azure --> EntityData["PlayFab entity file: progression.json"]
+    Azure --> Monitor["Azure Monitor / OpenTelemetry"]
+```
+
+The repository contains the Unity client and the Azure Functions project. PlayFab title configuration and deployed Azure infrastructure live outside the repository.
+
+## Runtime Topology
+
+The enabled `MainGame` scene is a persistent application shell. Navigation does not load a new scene. Screens and the current board are shown, hidden, instantiated, or destroyed inside that shell.
+
+| Owner | Responsibility | Lifetime |
+| --- | --- | --- |
+| `GameFlowController` | Composes application flows and coordinates navigation between them. | Scene lifetime |
+| `UIManager` | Canvas-level UI facade split into feature-specific partial class files. | Application lifetime |
+| `LevelSessionManager` | Owns the current level, gameplay managers, board instance, and result decision. | Application lifetime; session state is replaced per level |
+| `SpriteLoader` | Loads and caches Addressable sprite atlases used by gameplay views. | Application lifetime |
+| `PlayerAccountContext` | Holds the authenticated account and its in-memory progression. | Authenticated application session |
+| `DialogManager` | Runs modal dialog workflows and resolves selected options asynchronously. | Application lifetime |
+| `GameBoard` | Owns the live board model and serializes one turn through its state machine. | One level session |
+
+`GameFlowController`, `LevelSessionManager`, `UIManager`, and `SpriteLoader` are Unity-facing composition points. Most gameplay rules are plain C# objects or static domain services. Unity views project domain state and animate changes after the model has already been mutated.
+
+## Application Flow
+
+`GameFlowController` creates the flow objects in `Awake` and enters boot from `Start`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Boot
+    Boot --> Auth
+    Auth --> AccountLoad: guest login succeeds
+    Auth --> Auth: retry after failure
+    AccountLoad --> Home
+    Home --> LevelSession: select level
+    LevelSession --> Completion: win or loss
+    Completion --> Result
+    Result --> Home: home
+    Result --> LevelSession: retry
+```
+
+| Flow | Current responsibility |
+| --- | --- |
+| `BootFlow` | Configures the current frame-rate policy, loads sprite atlases, and exposes tester UI in editor/development builds. |
+| `AuthFlow` | Shows the auth screen, prevents concurrent login attempts, and requests guest login. |
+| `AccountLoadFlow` | Loads progression through the PlayFab/Azure boundary and creates `PlayerAccount`. |
+| `HomeFlow` | Shows the level map, forwards level selection, and waits for initial map background loading. |
+| `LevelSessionFlow` | Starts a level, controls player-action availability, and holds the session when a result is produced. |
+| `LevelCompletionFlow` | Submits the level result and applies the server response to in-memory progression. |
+| `ResultFlow` | Shows win or lose UI and publishes home or retry requests. |
+
+Screen changes are commonly wrapped in `UIJawCurtain` transitions. UniTask is used to sequence asynchronous presentation and PlayFab work. C# events connect flow boundaries; each flow subscribes on entry and unsubscribes on exit.
+
+## Authentication And Account State
+
+Only guest authentication is implemented.
+
+1. `GuestCustomIdStore` obtains or creates a persistent device-local custom ID.
+2. `PlayFabGuestLoginService` calls `LoginWithCustomID` with account creation enabled.
+3. The service uses the entity token included in the login result or requests one separately.
+4. `PlayFabAuthSession` stores the PlayFab ID, session ticket, entity identity, entity token, expiration, guest custom ID, and newly-created flag.
+5. `AccountLoadFlow` loads progression and creates a `PlayerAccount`.
+6. `PlayerAccountContext` becomes the application-wide owner of that account for the active session.
+
+`PlayFabAuthSession` is an immutable snapshot. Token refresh, logout, account switching, Google login, Apple login, account linking, and account merging are not implemented. The auth view contains a separate login button, but the current flow only binds guest play.
+
+## Progression Backend
+
+The client does not persist progression to an encrypted local save. Progression is loaded and updated through PlayFab custom functions backed by Azure Functions.
+
+```mermaid
+sequenceDiagram
+    participant Client as Unity client
+    participant PF as PlayFab ExecuteFunction
+    participant AF as Azure Function
+    participant Data as PlayFab Entity Files
+
+    Client->>PF: LoadProgression or CompleteLevelAttempt
+    PF->>AF: Function context and caller entity
+    AF->>Data: GetFiles metadata
+    Data-->>AF: progression.json metadata and profile version
+    AF->>Data: Download or upload progression.json
+    AF-->>PF: JSON result
+    PF-->>Client: FunctionResult
+```
+
+### Client Boundary
+
+`PlayFabProgressionService` builds an authenticated `ExecuteFunctionRequest` from `PlayFabAuthSession`. It exposes two operations:
+
+- `LoadProgression` returns `PlayerProgressionData`.
+- `CompleteLevelAttempt` submits level ID, win state, score, and stars, then returns updated progress for that level and the highest unlocked level.
+
+Function results are converted through Newtonsoft.Json and rejected when required data is absent.
+
+### Azure Boundary
+
+The backend project is `Backend/BloomKeeper.PlayFabFunctions`.
+
+- `LoadProgressionFunction` loads the caller's progression or creates and uploads a default document.
+- `CompleteLevelAttemptFunction` loads progression with its profile version, applies an attempt, and uploads the updated document.
+- `PlayFabFunctionContextReader` validates the PlayFab function context and constructs an entity-authenticated PlayFab Data API client.
+- `PlayFabProgressionStore` owns serialization and the `progression.json` file contract.
+- `PlayFabEntityFileClient` owns entity-file metadata, download, initiate-upload, HTTP upload, and finalize-upload calls.
+- `CompleteLevelAttemptService` owns the current progression mutation rules.
+
+`PlayerProgressionData` contains a schema version, `highestUnlockedLevel`, and a dictionary of per-level progress. Each level record stores completion, best score, and best stars.
+
+The entity profile version is supplied during writes, providing PlayFab's optimistic concurrency boundary. The current implementation does not retry conflicts, attach an idempotency key, queue failed writes, or migrate schemas.
+
+The backend currently verifies basic request sanity and whether the requested level is unlocked. It trusts the client's win flag, score, and stars; it does not replay or independently validate gameplay.
+
+## Home And Level Selection
+
+`HomeFlow` gives `PlayerProgressionData` to `UILevelSelect`.
+
+- `LevelLoader.LoadLevelMetas` reads `level_meta.json`.
+- `LevelMapButtonLayer` uses `VerticalScrollPool<LevelButton>` to virtualize authored button positions.
+- Each visible button reads earned stars from the progression dictionary.
+- `LevelMapBackgroundLayer` and `LevelMapChunkTextureCache` load visible Addressable background textures from the chunk manifest.
+- Selecting a button raises a level ID through `UIManager` to `HomeFlow` and then `GameFlowController`.
+
+The progression model contains `highestUnlockedLevel`, but level buttons currently do not enforce it. Every authored map button remains selectable.
+
+## Level Session Composition
+
+`LevelSessionManager` is the composition root for one playable level.
+
+1. It clears the previous session and unsubscribes its events.
+2. `LevelLoader` deserializes `level_<id>.json` into `LevelData`.
+3. `ScoreManager` receives the level's star thresholds and loads global score rules from `score_config.json`.
+4. `ObjectiveFactory` creates match and clear-spider-web objectives.
+5. `ConstrainerFactory` creates move-limit and timer constraints.
+6. `BoardInitializer` converts the row-major tile DTO list into the live `BoardCell[,]` model and fills unspecified petals without creating an initial match.
+7. `UIManager` creates the HUD from objective, constraint, score, and star data.
+8. The manager shows the world background, instantiates `GameBoard`, passes it the model and available play-area rectangle, and enables player actions.
+
+The manager owns `ObjectiveManager`, `ConstrainerManager`, and `ScoreManager` for the session. It also mediates the end-of-turn rule: objective completion and move-limit failure can occur during cascades, but the final win or loss is emitted only after the board reports that the turn has settled.
+
+## Board Domain Model
+
+`BoardCell[,]` is the authoritative live board state.
+
+| Type | Responsibility |
+| --- | --- |
+| `BoardCell` | Holds void state, a tile, and the current petal; delegates cell capabilities to the tile. |
+| `Tile` hierarchy | Defines matching, swapping, gravity, refill, clear effects, obstacles, and adjacent-match reactions. |
+| `NormalTile` | Standard playable tile behavior. |
+| `InactiveTile` | Blocks normal board participation. |
+| `WebTile` | Owns clearable web state and changes behavior as the obstacle is damaged. |
+| `Petal` | Holds petal type and special-skill type. |
+
+A void cell is distinct from a non-void cell containing an inactive tile. Board rules query `BoardCell` capabilities instead of distributing tile-type checks throughout the turn coordinator.
+
+The model is mutated first. `PetalViewManager`, `TileViewManager`, `MatchPresentationCoordinator`, and board VFX then consume explicit result data to update the visual projection.
+
+## Turn State Machine
+
+`GameBoard` is the sole coordinator of board mutation and turn sequencing. Input is accepted only while the board is idle and player actions are enabled.
+
+| State | Responsibility |
+| --- | --- |
+| `Idle` | Accept a swap or tester action and detect deadlock. |
+| `Swapping` | Swap petals, animate them, detect swap combinations or resulting matches, and commit a valid player move. |
+| `SwappingBack` | Restore and animate an invalid swap. |
+| `Resolving` | Apply match groups, emit gameplay events, and present the resulting changes. |
+| `ActivatingSkills` | Convert queued skill activations into new match groups. |
+| `Gravity` | Mutate downward movement and animate reported moves. |
+| `Filling` | Create petals for receivable empty cells and animate entry. |
+| `Cascade` | Detect matches after refill; either resolve again or settle the turn. |
+| `Shuffling` | Replace matchable petals when no legal move exists, then re-enter cascade detection. |
+
+```mermaid
+flowchart LR
+    Input["Pointer drag"] --> Swap["Swap model and animate"]
+    Swap --> Detect{"Combination or match?"}
+    Detect -->|No| Undo["Restore swap"]
+    Undo --> Idle["Idle"]
+    Detect -->|Yes| Resolve["Resolve match groups"]
+    Resolve --> Skills{"Queued skills?"}
+    Skills -->|Yes| Resolve
+    Skills -->|No| Gravity["Gravity"]
+    Gravity --> Fill["Fill"]
+    Fill --> Cascade{"Cascade match?"}
+    Cascade -->|Yes| Resolve
+    Cascade -->|No| Settled["Turn settled"]
+    Settled --> Deadlock{"Legal move exists?"}
+    Deadlock -->|Yes| Idle
+    Deadlock -->|No| Shuffle["Shuffle"]
     Shuffle --> Cascade
 ```
 
-Every match resolution publishes the cleared petal types. `LevelManager` wraps them in `PetalsClearedEvent`, and `ObjectiveManager` reports that event to all objectives. A `MatchObjective` decrements the matching `PetalGoal.amount` values. Objective progress refreshes the scoreboard; completion causes `UIManager` to instantiate the win screen.
+### Match And Skill Services
 
-The current completion path displays the win screen only. The runtime contains star persistence and star display, but level completion does not currently call `PlayerProgress.SetStars`.
+- `PetalSwapper` validates and performs adjacent swaps.
+- `MatchDetector` identifies line, T, L, cross, and square match shapes.
+- `MatchResolver` applies groups to the model and returns cleared petals, tile changes, spawned skills, and queued activations.
+- `SkillDetector` recognizes combinations caused directly by the two swapped petals.
+- `SkillManager` converts stripe, Bouquet, Sunburst, Butterfly, and combination activations into affected match groups.
+- `GravityController`, `PetalFiller`, `DeadlockDetector`, and `BoardShuffler` own their respective board operations.
 
-## Board state machine
+`pendingMatches` and `pendingSkillActivations` carry work between states. Skills discovered during resolution are converted back into match groups, so normal matches, chained skills, gravity, refill, and cascades use one repeated pipeline.
 
-`GameBoard` implements a private, explicit state machine. `TransitionTo` sets the state and immediately invokes its entry method. Async entry methods await presentation work before making the next transition. Input methods guard on `Idle`, so animations and resolution form a serialized turn transaction from the player's perspective.
+## Gameplay Event Boundary
 
-| State | Responsibility | Outgoing transition |
-| --- | --- | --- |
-| `Idle` | Accept swap or admin edit input; test the settled board for a valid move. | `Swapping` on a valid request; `Shuffling` on deadlock. |
-| `Swapping` | Clear pending turn data, swap the two model petals, animate, detect swap-triggered skill combinations, otherwise detect matches. | `Resolving` when a skill or match exists; `SwappingBack` otherwise. |
-| `SwappingBack` | Animate the already-restored invalid swap. | `Idle`. |
-| `Resolving` | Run `MatchResolver`, collect triggered skills, publish cleared types, and await tile/petal view updates in parallel. | `ActivatingSkills`. |
-| `ActivatingSkills` | Convert every queued `SkillActivation` into a `MatchGroup` through `SkillManager`. | `Resolving` if activations existed; `Gravity` otherwise. |
-| `Gravity` | Move petals downward in the model and animate the reported moves. | `Filling`. |
-| `Filling` | Create random petals in receivable cells and animate entry from above. | `Cascade`. |
-| `Cascade` | Detect matches over the settled grid. | `Resolving` if found; `Idle` otherwise. |
-| `Shuffling` | Replace every matchable petal with a random petal and animate replacement. | `Cascade`. |
+`GameBoard` reports domain events rather than calling score, objective, or constraint systems directly.
 
-Two pieces of pending state carry data between entries:
-
-- `pendingMatches` holds match groups awaiting resolution.
-- `pendingSkillActivations` holds skills discovered while clearing. Skills are repeatedly converted back into match groups, allowing chained skills to use the same resolution path.
-
-`swapOrigin` and `swapTarget` remain the placement preference for special petals formed during the turn; cascade matches fall back to shape-specific deterministic placement.
-
-## Core systems and responsibilities
-
-### Application and lifecycle
-
-| System | Responsibility |
+| Event | Primary consumers |
 | --- | --- |
-| `GameBootstrapper` | Orders initial sprite loading and initial UI display. |
-| `Singleton<T>` | Scene lookup-backed global access, duplicate destruction, and `DontDestroyOnLoad` lifetime. |
-| `GlobalState` | Static admin-mode flag and change event. |
-| `UIManager` | Singleton UI facade, split across partial class files by feature; owns canvas-level panel/popup instances. |
-| `LevelManager` | Owns the current level session: objective manager, board instance, and their event wiring. |
+| `PlayerMoveCommittedEvent` | Move constraint and turn-settling state |
+| `BoardResolvedEvent` | Score calculation and other gameplay reporting |
+| `PetalsClearedEvent` | Match objectives |
+| `SpiderWebClearedEvent` | Clear-spider-web objectives |
 
-### Level and board model
+`LevelSessionManager` forwards every gameplay event to `ObjectiveManager` and `ConstrainerManager`; it passes board-resolution events to `ScoreManager`. This keeps the board independent from level goals, limits, scoring rules, and UI.
 
-| System | Responsibility |
+`ScoreManager` calculates score from data-driven rules for cleared petals, cascade depth, web clearing, match shapes, and skill activation. It derives stars from thresholds stored in each level.
+
+## Presentation And Input
+
+`UIManager` is a partial singleton facade. Each feature-specific partial file owns the prefab instance, event binding, and show/hide behavior for one UI area.
+
+Current UI areas include:
+
+- authentication;
+- virtualized level selection;
+- level HUD, objectives, constraints, score, and stars;
+- win and lose screens;
+- booster-board layout placeholder;
+- reusable dialogs and backdrop;
+- jaw-curtain transitions and tips;
+- development tester controls and petal editing.
+
+`BoardLayoutCalculator` uses the camera, safe area, HUD/booster geometry, board dimensions, and the provided screen rectangle to calculate a stable world-space board layout. `BoardInputHandler` maps the Unity Input System pointer to board cells and supports the same drag interaction for mouse and touch.
+
+Petal and tile views are separate from their model objects. View managers retain coordinate-aligned projections and object pools, while animator components own DOTween/UniTask presentation timing. `BoardVFXManager` owns board-level effects that do not belong to one persistent view.
+
+## Content And Asset Pipeline
+
+| Source | Runtime use |
 | --- | --- |
-| `LevelLoader` | Synchronous JSON loading of level definitions and level-map metadata from StreamingAssets. |
-| `LevelData`, `TileData`, `ObjectiveJson`, `LevelMeta*` | Deserialization DTOs for authored content. |
-| `BoardInitializer` | Builds coordinates, tile objects, and initial petals; prevents initial free matches for randomly authored cells. |
-| `TileFactory` | Maps `TileType` to `NormalTile`, `InactiveTile`, or `WebTile`. |
-| `Tile` hierarchy | Encapsulates whether a cell matches, participates in gravity, receives petals, resolves, and reacts to adjacent clears. |
-| `Petal` | Immutable petal type and skill value; determines petal matchability. |
-| `PetalFactory` | Constructs configured, explicit, or random petals. |
-| `GameBoard` | Owns the authoritative grid and coordinates the complete turn state machine. |
+| `StreamingAssets/levels/level_<id>.json` | Board dimensions, tiles, petals, star thresholds, objectives, and constraints |
+| `StreamingAssets/levels/level_meta.json` | Level-map labels and authored positions |
+| `StreamingAssets/score_config.json` | Score rules |
+| `StreamingAssets/levels/level_path_bg_manifest.json` | Ordered Addressable level-map background chunks |
+| Addressable sprite atlases | Petal, tile, obstacle, and other runtime sprites |
 
-`NormalTile` clears its petal and freely participates in gravity. `InactiveTile` blocks matching, fill, and gravity. `WebTile` blocks these behaviors while its web level is positive; adjacent resolved cells reduce that level. Once the web reaches zero it behaves as an available cell while retaining `TileType.Web` for its base view.
+`LevelLoader`, `ScoreLoader`, and `AssetManifestLoader` currently use direct filesystem reads and Newtonsoft.Json deserialization. There is no schema validation, remote manifest, download cache, content version negotiation, or last-known-good rollback.
 
-### Match and skill pipeline
+The first-party editor tools support content authoring but are not runtime dependencies:
 
-| System | Responsibility |
-| --- | --- |
-| `PetalSwapper` | Validates normal occupied cells and exchanges their `Petal` references. |
-| `MatchDetector` | Scans the entire grid, finds horizontal/vertical runs and 2x2 squares, assigns shapes, and prevents a cell from belonging to more than one returned group. |
-| `MatchGroup` | Common work unit: positions, shape, optional causing petal, and skill-combination marker. |
-| `MatchResolver` | Mutates matched tiles, selects and creates resulting special petals, collects triggered skills and cleared types, and notifies neighboring tiles. |
-| `MatchResolveResult` | Change set passed from model resolution to board presentation and objective reporting. |
-| `SkillDetector` | Dispatch table for skill combinations triggered directly by swapping two cells. Current handlers cover Sunburst with a normal petal and Sunburst with either stripe. |
-| `SkillManager` | Converts a skill activation into a `MatchGroup` representing its affected cells. Implements stripes, Bouquet, Sunburst, Butterfly, and Stripe–Sunburst. |
-| `GravityController` | Pulls the nearest reachable petal downward within each column and returns source/destination moves. |
-| `PetalFiller` | Fills empty gravity-affected cells with random petals. |
-| `DeadlockDetector` | Temporarily swaps adjacent model petals to find any match-producing move; treats a Sunburst adjacency as valid. |
-| `BoardShuffler` | Replaces all matchable petals with fresh random petals and returns affected positions. |
+- `LevelPositionExporter` exports level-map positions.
+- `AddressableMetadataExporter` exports background chunk metadata.
+- `TexturePackerImporter` imports TexturePacker data.
+- `SpriteRenamer` supports sprite naming conventions.
 
-Match-shape output is encoded in `MatchResolver`: four creates a horizontal or vertical stripe, five creates a Sunburst, T/L/Cross creates a Bouquet, and a 2x2 square creates a Butterfly. A match already containing a skilled petal triggers that petal instead of creating another special petal.
+## Failure And Recovery Behavior
 
-### Objectives and progression
+The current failure model is incomplete:
 
-| System | Responsibility |
-| --- | --- |
-| `ObjectiveFactory` | Creates the concrete objective selected by `ObjectiveType`. |
-| `IObjective` | Objective contract for event reporting, completion checks, and view-data projection. |
-| `MatchObjective` | Mutates its `PetalGoal` counters in response to `PetalsClearedEvent`. |
-| `ObjectiveManager` | Broadcasts objective DTOs, then publishes progress and all-complete events. |
-| `PlayerProgress` | Singleton owner of loaded `ProgressData`; reads/writes per-level star counts. |
-| `IProgressRepository` | Persistence boundary for progress. |
-| `LocalProgressRepository` | JSON serialization plus AES encryption to local `progress.dat`. |
+- Guest login failure is surfaced through a retry/cancel dialog.
+- Account-load and level-completion failures are not converted into dedicated recoverable flow states.
+- There is no durable offline result queue or reconnect synchronization.
+- There is no request idempotency key or explicit retry policy for progression writes.
+- Content loaders deserialize directly and do not validate semantic consistency before session construction.
+- Required Unity references are primarily supplied through scene and prefab serialization.
 
-Objectives are independent of the board model. Their only runtime input is an `ObjectiveDTO` reported by `LevelManager`. UI reads objective state through `GetViewData` rather than owning separate progress values.
+## Test Boundary
 
-### Presentation
+The repository contains two PlayMode test files. They use reflection and still construct the removed `Tile[,]` board shape and a removed `Rose` petal enum value. They do not currently represent reliable coverage of the implemented `BoardCell[,]` architecture. The Azure Functions project has no first-party automated tests.
 
-| System | Responsibility |
-| --- | --- |
-| `PetalViewManager` | Owns a `PetalView[,]` parallel to the model grid and an object pool; applies swap, clear, special spawn, gravity, fill, shuffle, and tester refresh visuals. |
-| `PetalView` / `PetalViewAnimator` | Sprite selection, sizing, and DOTween/UniTask animations for one petal. |
-| `TileViewManager` | Owns a `TileView[,]`, renders base/overlay sprites, and animates overlay changes reported by resolution. |
-| `TileView` / `TileViewAnimator` | Base and overlay renderers, sizing, and overlay transition animations. |
-| `BoardLayoutCalculator` / `BoardLayout` | Converts camera, safe area, scoreboard height, padding, and board dimensions into cell size and world positions. |
-| `BoardMeshBuilder` | Builds one textured quad per non-inactive tile behind the board. |
-| `BoardInputHandler` | Pointer-to-cell conversion, cardinal drag input, and admin-mode double-tap edit requests. |
-| `SpriteLoader` / `SpriteKeyHelper` | Addressable atlas cache and naming-convention lookup for petal, tile, and web sprites. |
-| `UIScoreBoard` | Instantiates one widget per objective view item and retains closures that re-read live objective data on refresh. |
-| `UILevelSelect` and scroll controllers | Virtualized map backgrounds and level buttons. |
-| `VerticalScrollPool<T>` | Generic viewport-buffered pooling used by both parts of the level map. |
+## External Dependencies
 
-The `GameBoard` prefab owns `GameBoard`, `BoardInputHandler`, `PetalViewManager`, and `TileViewManager` components and their referenced view prefabs. The scene-owned `LevelManager` owns the board prefab reference. The scene-owned `UIManager` owns references to the canvas and every UI prefab.
+### Unity Client
 
-## Ownership and lifetime
-
-| Owner | Owned state or instances | Lifetime |
-| --- | --- | --- |
-| `GameServices` scene object | Bootstrapper and singleton service components. | Application shell; singleton components are marked persistent. |
-| `SpriteLoader` | Loaded sprite atlas dictionary. | Application lifetime; Addressable atlas handles are retained through the loaded assets. |
-| `UIManager` | Level select, scoreboard, win screen, tester toggle, petal editor, and backdrop instances. | Application lifetime; individual panels are hidden, reused, or replaced according to each feature method. |
-| `LevelManager` | Current `ObjectiveManager` and current `GameBoard`. | Application lifetime, with owned session objects replaced per selected level. |
-| `ObjectiveManager` | Concrete objective list. | One selected level. |
-| `GameBoard` | `Tile[,]`, layout, turn state, pending work, and board-local component references. | One selected level. |
-| `PetalViewManager` | Petal view array and pool. | One board instance. |
-| `TileViewManager` | Tile view array and instantiated tile views. | One board instance. |
-| `PlayerProgress` | `ProgressData` and repository. | Application lifetime; persisted on `SetStars`, pause, and quit. |
-
-The `Tile[,]` is the authoritative gameplay state. View arrays are projections keyed by the same coordinates. Tiles own their current `Petal` reference; petals do not know their position or owner. No separate board repository or global gameplay state exists.
-
-## Data flow between systems
-
-### Authored level to live board
-
-```text
-level_<id>.json
-  -> LevelLoader / LevelData DTO
-  -> ObjectiveFactory -> ObjectiveManager
-  -> BoardInitializer -> Tile[,] with Tile and Petal domain objects
-  -> GameBoard.Init
-  -> BoardLayout + board mesh + TileView[,] + PetalView[,]
-```
-
-The JSON tile list is interpreted from top row to bottom row. `BoardInitializer` maps it into `grid[x, y]` with `y = 0` at the visual bottom.
-
-### Turn mutation to presentation
-
-```text
-BoardInputHandler event
-  -> GameBoard state transition
-  -> static domain operation mutates Tile[,]
-  -> operation returns MatchResolveResult / positions / moves
-  -> PetalViewManager and TileViewManager update parallel visual state
-  -> GameBoard awaits animation completion
-  -> next state transition
-```
-
-`MatchResolveResult` carries cleared positions and types, queued skill activations, special-petal spawns, changed tile overlays, and the two positions consumed by a skill combination. Gravity, fill, and shuffle use smaller position/move lists rather than the common result type.
-
-### Objective flow
-
-```text
-MatchResolver.ClearedPetalTypes
-  -> GameBoard.OnPetalsCleared
-  -> LevelManager.ReportCleared
-  -> PetalsClearedEvent
-  -> ObjectiveManager.Report
-  -> MatchObjective counters
-  -> OnProgressUpdated -> scoreboard refresh
-  -> OnAllComplete -> win screen
-```
-
-### Asset and map flow
-
-```text
-Addressable sprite atlases -> SpriteLoader cache -> sprite-key consumers
-level_path_bg_manifest.json -> ScrollMapBGController -> visible Addressable textures
-level_meta.json -> ScrollMapController -> pooled LevelButton positions
-progress.dat -> PlayerProgress -> LevelButton star sprite
-```
-
-Large level-path backgrounds are independently Addressable and viewport-loaded. Level gameplay JSON and metadata are direct filesystem reads from StreamingAssets.
-
-## Architectural patterns currently used
-
-- **Single-scene application shell:** navigation is prefab visibility/instantiation inside one persistent scene.
-- **Service locator / MonoBehaviour singleton:** systems reach `UIManager.Instance`, `LevelManager.Instance`, `PlayerProgress.Instance`, and `SpriteLoader.Instance` directly.
-- **State machine:** `GameBoard.BoardState` serializes turn phases and prevents input during board mutation and animation.
-- **Model–view separation:** plain `Tile`/`Petal` objects form the model; `TileView`/`PetalView` objects form the Unity presentation. Manager arrays keep them coordinate-aligned.
-- **Orchestrator plus stateless domain services:** `GameBoard` coordinates static detector, resolver, gravity, fill, shuffle, factory, and skill classes.
-- **Event-driven boundaries:** input, board clear reporting, objective progress/completion, popup confirmation, and admin state use C# events or Unity UI listeners.
-- **Factory pattern:** tile, petal, and objective construction is centralized in dedicated factories.
-- **Strategy through polymorphism:** tile behavior varies through the abstract `Tile` contract; objectives vary through `IObjective`; progress storage varies through `IProgressRepository`.
-- **DTO/event object:** JSON-specific types stay at the loading boundary, while objective notifications use `ObjectiveDTO` subclasses.
-- **Command/result-like change sets:** match resolution and movement operations mutate the model and return the exact information required by presentation and objectives.
-- **Object pooling and virtualization:** petal views are pooled, and the level map uses a reusable generic scroll pool for buttons and background chunks.
-- **Partial facade:** feature-specific files extend the single `UIManager` partial class.
-- **Convention-based asset lookup:** enum values are converted into sprite names by `SpriteKeyHelper` and resolved from preloaded atlases.
-- **Data-driven content:** level geometry, initial petals/skills, objectives, level-map positions, and background chunk metadata live in JSON rather than gameplay code.
-- **Repository abstraction:** `PlayerProgress` depends on `IProgressRepository`, currently implemented by encrypted local-file persistence.
-- **Async presentation sequencing:** UniTask and DOTween make animation completion part of board-state progression; tile and petal animations for one resolution run concurrently.
-
-## Content and editor architecture
-
-Runtime-authored content lives under `Assets/StreamingAssets/levels`:
-
-- `level_<id>.json`: board dimensions, ordered tile DTOs, and objective DTOs.
-- `level_meta.json`: level IDs, display names, and map coordinates relative to a reference width.
-- `level_path_bg_manifest.json`: ordered Addressable background texture metadata.
-
-The `Assets/Editor` tools support this pipeline:
-
-- `LevelPositionExporter` provides the level-position editing/export workflow for `level_meta.json`.
-- `AddressableMetadataExporter` exports Addressable image metadata used by the scrolling background.
-- `TexturePackerImporter` imports TexturePacker JSON/sprite-sheet data.
-- `SpriteRenamer` provides editor-side sprite renaming.
-
-The existing `Assets/Documentation/Workflow.md` documents the map-chunk and level-button authoring sequence. These tools write content consumed by the runtime loaders; they are not runtime dependencies.
-
-## External runtime dependencies
-
-- Unity Universal Render Pipeline and 2D renderer
+- Unity 6 and Universal Render Pipeline
 - Unity UI and TextMeshPro
 - Unity Input System
 - Unity Addressables
 - Newtonsoft.Json
 - Cysharp UniTask
 - DOTween
+- PlayFab Unity SDK
 
-Clipper2 is vendored under `Assets/Plugins`, but no first-party runtime script currently references it.
+### Azure Backend
+
+- .NET 10
+- Azure Functions v4 isolated worker
+- PlayFab .NET SDK
+- Newtonsoft.Json
+- OpenTelemetry with Azure Monitor exporter
+
+## Current Architectural Invariants
+
+These statements describe the boundaries the current implementation relies on:
+
+1. `GameFlowController` owns application navigation; individual screens do not choose the next application state.
+2. `LevelSessionManager` owns one level session and is the only layer that decides its final win or loss.
+3. `GameBoard` owns turn ordering and the authoritative `BoardCell[,]` model.
+4. Presentation follows model mutation and receives explicit change/result data.
+5. Gameplay events separate board mechanics from objectives, constraints, and scoring.
+6. `PlayerAccountContext` owns the active authenticated account in memory.
+7. Azure Functions, not the Unity client, own persisted progression mutations.
+8. JSON DTOs are converted into runtime domain objects at loader and factory boundaries.
+
+## Implemented Versus Missing
+
+| Area | Implemented | Not implemented |
+| --- | --- | --- |
+| Authentication | PlayFab guest account and entity session | Google, Apple, linking, merging, logout, refresh, deletion |
+| Progression | Azure-backed load and level-completion persistence | Offline queue, idempotency, conflict retry, migration |
+| Gameplay validation | Basic backend sanity checks | Deterministic replay or authoritative result validation |
+| Content | Local JSON and Addressable art | Remote hotfix pipeline, validation, cache, rollback |
+| Economy | Booster-board presentation placeholder | Currency, inventory, rewards, shop, IAP |
+| Player experience | Mouse/touch gameplay and safe-area-aware layout components | Audio system, haptics, localization, accessibility settings |
+| Operations | Azure backend telemetry exporter | Client analytics, crash reporting, CI/CD |
+| Social | None | Verified leaderboards or other player interaction |
+| Navigation | Home, play, result, home/retry paths | Enforced level locks and connected win-screen next action |

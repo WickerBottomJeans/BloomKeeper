@@ -1,50 +1,26 @@
 {
   "levelId": 5,
   "starScoreThresholds": [
-    { "starCount": 1, "score": 1000 },
-    { "starCount": 2, "score": 2500 },
-    { "starCount": 3, "score": 4000 }
+    { "starCount": 1, "score": 1800 },
+    { "starCount": 2, "score": 3300 },
+    { "starCount": 3, "score": 5200 }
   ],
-  "boardWidth": 12,
-  "boardHeight": 2,
+  "boardWidth": 8,
+  "boardHeight": 8,
   "tiles": [
-
-    { "type": 1, "petalType": 3, "skillType" :  3}, { "type": 1 }, { "type": 1}, { "type": 1 }, { "type": 1, "petalType": 3 }, { "type": 1,"petalType": 3 },    { "type": 1, "petalType": 3, "skillType" :  3}, { "type": 1 }, { "type": 1,"petalType": 3}, { "type": 1,"petalType": 3 }, { "type": 1, "petalType": 3 }, { "type": 1,"petalType": 3 },
-
-    { "type": 1, "petalType": 1, "skillType" :  3}, { "type": 1 }, { "type": 1,"petalType": 2}, { "type": 1,"petalType": 4 }, { "type": 1, "petalType": 6 }, { "type": 1,"petalType": 3 },    { "type": 1, "petalType": 1, "skillType" :  3}, { "type": 1 }, { "type": 1,"petalType": 2}, { "type": 1,"petalType": 4 }, { "type": 1, "petalType": 6 }, { "type": 1,"petalType": 3 }
-
+    { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true },
+    { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true },
+    { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }
   ],
   "objectives": [
-    {
-      "type": 1,
-      "petals": [
-        {
-          "petalType": 1,
-          "amount": 20
-        },
-        {
-          "petalType": 2,
-          "amount": 20
-        },
-        {
-          "petalType": 3,
-          "amount": 20
-        },
-        {
-          "petalType": 4,
-          "amount": 20
-        }
-      ]
-    }
+    { "type": 1, "petals": [{ "petalType": 3, "amount": 15 }, { "petalType": 4, "amount": 15 }, { "petalType": 5, "amount": 15 }] }
   ],
   "constrainers": [
-    {
-      "type": 1,
-      "moveLimit": 30
-    },
-    {
-      "type": 2,
-      "timeLimitSeconds": 120
-    }
+    { "type": 1, "moveLimit": 30 }
   ]
 }

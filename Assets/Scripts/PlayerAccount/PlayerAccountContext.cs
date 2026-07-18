@@ -18,6 +18,14 @@ namespace DefaultNamespace
             CurrentAccount = account ?? throw new ArgumentNullException(nameof(account));
         }
 
+        public PlayerProgressionData GetCurrentProgression()
+        {
+            if (CurrentAccount == null)
+                throw new InvalidOperationException("Cannot access player progression before an account is loaded.");
+
+            return CurrentAccount.Progression;
+        }
+
         public void Clear()
         {
             CurrentAccount = null;

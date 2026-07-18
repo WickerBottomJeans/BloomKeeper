@@ -60,24 +60,6 @@
       "levelName": "10",
       "pixelX": -115.0,
       "pixelY": 5594.22266
-    },
-    {
-      "levelId": 11,
-      "levelName": "11",
-      "pixelX": 102.0,
-      "pixelY": 6095.22266
-    },
-    {
-      "levelId": 12,
-      "levelName": "12",
-      "pixelX": -170.0,
-      "pixelY": 6555.22266
-    },
-    {
-      "levelId": 13,
-      "levelName": "13",
-      "pixelX": -74.0,
-      "pixelY": 7004.22266
     }
   ]
 }

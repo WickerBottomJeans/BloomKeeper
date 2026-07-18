@@ -1,34 +1,26 @@
 {
   "levelId": 2,
   "starScoreThresholds": [
-    { "starCount": 1, "score": 1000 },
-    { "starCount": 2, "score": 2500 },
-    { "starCount": 3, "score": 4000 }
+    { "starCount": 1, "score": 1200 },
+    { "starCount": 2, "score": 2200 },
+    { "starCount": 3, "score": 3500 }
   ],
-  "boardWidth": 10,
-  "boardHeight": 10,
+  "boardWidth": 8,
+  "boardHeight": 8,
   "tiles": [
-    { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 },
-    { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 3, "webLevel": 3 }, { "type": 1 }, { "type": 1 },
-    { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 },
-    { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 },
-    { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 },
-    { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 },
-    { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "type": 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }, { "isVoid" : 1 }
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
   ],
   "objectives": [
-    {
-      "type": 1,
-      "petals": [
-        {
-          "petalType": 1,
-          "amount": 1
-        }
-      ]
-    }
+    { "type": 1, "petals": [{ "petalType": 1, "amount": 15 }, { "petalType": 2, "amount": 15 }] }
   ],
-  "constrainers": []
+  "constrainers": [
+    { "type": 1, "moveLimit": 24 }
+  ]
 }

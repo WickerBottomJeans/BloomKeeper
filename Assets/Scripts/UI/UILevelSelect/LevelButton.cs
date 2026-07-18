@@ -15,14 +15,17 @@ namespace DefaultNamespace.UI
         private int levelId;
         private Action<int> onSelected;
 
-        public void Init(LevelMeta meta, int earnedStars, Action<int> onSelected)
+        public void Init(LevelMeta meta, int earnedStars, bool isUnlocked, Action<int> onSelected)
         {
             levelId = meta.levelId;
             this.onSelected = onSelected;
             levelNameText.text = meta.levelName;
             starsImage.sprite = starSprites[earnedStars];
+            starsImage.gameObject.SetActive(isUnlocked);
+            button.interactable = isUnlocked;
             button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(OnClick);
+            if (isUnlocked)
+                button.onClick.AddListener(OnClick);
         }
 
         private void OnClick()

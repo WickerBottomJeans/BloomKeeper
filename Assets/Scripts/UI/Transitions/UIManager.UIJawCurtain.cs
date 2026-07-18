@@ -1,4 +1,3 @@
-using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -10,7 +9,6 @@ namespace DefaultNamespace.UI
         [SerializeField] private UIJawCurtainTipConfig jawCurtainTipConfig;
         private UIJawCurtain jawCurtainInstance;
         private UIJawCurtainTipProvider jawCurtainTipProvider;
-        private bool isPlayingJawCurtainTransition;
 
         public UniTask CloseJawCurtain(UIJawCurtainTipCategory tipCategory)
         {
@@ -43,35 +41,6 @@ namespace DefaultNamespace.UI
             UIJawCurtain jawCurtain = GetJawCurtain();
             jawCurtain.transform.SetAsLastSibling();
             return jawCurtain.Open();
-        }
-
-        public async UniTask PlayJawCurtainTransition(UIJawCurtainTipCategory tipCategory, Func<UniTask> whileClosed)
-        {
-            if (isPlayingJawCurtainTransition) return;
-
-            isPlayingJawCurtainTransition = true;
-            bool curtainClosed = false;
-
-            try
-            {
-                await CloseJawCurtain(tipCategory);
-                curtainClosed = true;
-                await whileClosed();
-                await OpenJawCurtain();
-                curtainClosed = false;
-            }
-            finally
-            {
-                try
-                {
-                    if (curtainClosed)
-                        await OpenJawCurtain();
-                }
-                finally
-                {
-                    isPlayingJawCurtainTransition = false;
-                }
-            }
         }
 
         private UIJawCurtainTipProvider GetJawCurtainTipProvider()

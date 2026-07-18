@@ -56,7 +56,7 @@ namespace DefaultNamespace
             }
             catch (Exception exception)
             {
-                AuthFailed?.Invoke(exception);
+                    AuthFailed?.Invoke(exception);
             }
             finally
             {

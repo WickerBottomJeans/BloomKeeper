@@ -1,45 +1,27 @@
 {
   "levelId": 7,
   "starScoreThresholds": [
-    { "starCount": 1, "score": 1000 },
-    { "starCount": 2, "score": 2500 },
-    { "starCount": 3, "score": 4000 }
+    { "starCount": 1, "score": 9440 },
+    { "starCount": 2, "score": 13000 },
+    { "starCount": 3, "score": 17000 }
+  ],
+  "boardWidth": 8,
+  "boardHeight": 8,
+  "tiles": [
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 1, "skillType": 2 }, { "type": 1, "petalType": 2 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
   ],
   "objectives": [
-    {
-      "type": 1,
-      "petals": [
-        {
-          "petalType": 1,
-          "amount": 40
-        },
-        {
-          "petalType": 2,
-          "amount": 40
-        },
-        {
-          "petalType": 3,
-          "amount": 40
-        },
-        {
-          "petalType": 4,
-          "amount": 40
-        },
-        {
-          "petalType": 5,
-          "amount": 40
-        },
-        {
-          "petalType": 6,
-          "amount": 40
-        }
-      ]
-    }
+    { "type": 1, "petals": [{ "petalType": 1, "amount": 18 }, { "petalType": 2, "amount": 18 }] },
+    { "type": 3, "spiderWebsToClear": 8 }
   ],
   "constrainers": [
-    {
-      "type": 1,
-      "moveLimit": 18
-    }
+    { "type": 1, "moveLimit": 32 }
   ]
 }

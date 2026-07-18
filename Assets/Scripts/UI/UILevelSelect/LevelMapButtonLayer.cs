@@ -39,7 +39,7 @@ namespace DefaultNamespace.UI
                 i => new Vector2(allMetas[i].pixelX * (content.rect.width / metaCollection.referenceScreenWidth), allMetas[i].pixelY * (content.rect.width / metaCollection.referenceScreenWidth)),
                 i => halfHeightBtn,
                 null,
-                (button, i) => button.Init(allMetas[i], GetEarnedStars(allMetas[i].levelId), HandleLevelSelected),
+                (button, i) => button.Init(allMetas[i], GetEarnedStars(allMetas[i].levelId), IsLevelUnlocked(allMetas[i].levelId), HandleLevelSelected),
                 button => { },
                 defaultPoolCapacity,
                 maxPoolSize
@@ -66,6 +66,11 @@ namespace DefaultNamespace.UI
         private int GetEarnedStars(int levelId)
         {
             return progression.levels.TryGetValue(levelId, out LevelProgressData levelProgress) ? levelProgress.bestStars : 0;
+        }
+
+        private bool IsLevelUnlocked(int levelId)
+        {
+            return levelId <= progression.highestUnlockedLevel;
         }
 
         private void OnDestroy()

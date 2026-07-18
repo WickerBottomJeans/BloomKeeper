@@ -5,9 +5,11 @@ using DefaultNamespace.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class BoardInputHandler : MonoBehaviour, ILevelPlayerActionSource
+public class BoardInputHandler : MonoBehaviour
 {
     [SerializeField] private float dragThresholdPx = 20f;
+    [SerializeField] private InputActionReference pointerPressAction;
+    [SerializeField] private InputActionReference pointerPositionAction;
     
     /// <summary>
     /// double tap to edit petal if in admin mode
@@ -26,7 +28,6 @@ public class BoardInputHandler : MonoBehaviour, ILevelPlayerActionSource
     private Vector2Int selectedCell;
     private Vector3 lastResolvedWorldPos;
     private Vector2Int lastResolvedCell;
-    private bool playerActionsEnabled;
     
     private float lastTapTime = -1f;
     private Vector2Int lastTappedCell;
@@ -38,17 +39,20 @@ public class BoardInputHandler : MonoBehaviour, ILevelPlayerActionSource
 
     private void Update()
     {
-        if (!playerActionsEnabled) return;
+        InputAction pressAction = pointerPressAction.action;
+        if (!pressAction.enabled)
+        {
+            if (isDragging)
+                ClearDragState();
+            return;
+        }
 
-        var pointer = Pointer.current;
-        if (pointer == null) return;
-
-        if (pointer.press.wasPressedThisFrame)
-            OnTouchBegan(pointer.position.ReadValue());
-        else if (pointer.press.wasReleasedThisFrame)
+        if (pressAction.WasPressedThisFrame())
+            OnTouchBegan(pointerPositionAction.action.ReadValue<Vector2>());
+        else if (pressAction.WasReleasedThisFrame())
             OnTouchCanceled();
-        else if (isDragging && pointer.press.isPressed)
-            OnTouchMoved(pointer.position.ReadValue());
+        else if (isDragging && pressAction.IsPressed())
+            OnTouchMoved(pointerPositionAction.action.ReadValue<Vector2>());
     }
 
     private void OnTouchBegan(Vector2 screenPos)
@@ -102,12 +106,7 @@ public class BoardInputHandler : MonoBehaviour, ILevelPlayerActionSource
         selectedCell = default;
     }
 
-    public void SetPlayerActionsEnabled(bool enabled)
-    {
-        playerActionsEnabled = enabled;
-        if (!enabled)
-            ClearDragState();
-    }
+    private void OnDisable() => ClearDragState();
 
     private bool TryResolveCell(Vector2 screenPos, out Vector2Int cell)
     {

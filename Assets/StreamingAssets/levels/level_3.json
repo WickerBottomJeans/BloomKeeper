@@ -1,43 +1,26 @@
 {
   "levelId": 3,
   "starScoreThresholds": [
-    { "starCount": 1, "score": 1000 },
-    { "starCount": 2, "score": 2500 },
-    { "starCount": 3, "score": 4000 }
+    { "starCount": 1, "score": 1440 },
+    { "starCount": 2, "score": 3000 },
+    { "starCount": 3, "score": 5000 }
   ],
-  "boardWidth": 10,
-  "boardHeight": 10,
+  "boardWidth": 8,
+  "boardHeight": 8,
   "tiles": [
-    { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true },
-    { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true },
-    { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true },
-    { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "isVoid": true },
-    { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "isVoid": true },
-    { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }, { "isVoid": true }
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 3, "skillType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 3 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 3 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
   ],
   "objectives": [
-    {
-      "type": 1,
-      "petals": [
-        {
-          "petalType": 1,
-          "amount": 12
-        },
-        {
-          "petalType": 2,
-          "amount": 12
-        }
-      ]
-    }
+    { "type": 1, "petals": [{ "petalType": 3, "amount": 18 }, { "petalType": 4, "amount": 18 }] }
   ],
   "constrainers": [
-    {
-      "type": 1,
-      "moveLimit": 25
-    }
+    { "type": 1, "moveLimit": 26 }
   ]
 }

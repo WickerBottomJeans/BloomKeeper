@@ -1,40 +1,26 @@
 {
-  "levelId": 5,
+  "levelId": 4,
   "starScoreThresholds": [
-    { "starCount": 1, "score": 1000 },
-    { "starCount": 2, "score": 2500 },
-    { "starCount": 3, "score": 4000 }
+    { "starCount": 1, "score": 960 },
+    { "starCount": 2, "score": 1800 },
+    { "starCount": 3, "score": 3000 }
   ],
-  "boardWidth": 6,
-  "boardHeight": 1,
+  "boardWidth": 8,
+  "boardHeight": 8,
   "tiles": [
-
-    { "type": 1, "petalType": 3, "skillType" :  3}, { "type": 1 }, { "type": 1,"petalType": 3}, { "type": 1,"petalType": 3 }, { "type": 1, "petalType": 3 }, { "type": 1,"petalType": 3 }
-
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
   ],
   "objectives": [
-    {
-      "type": 1,
-      "petals": [
-        {
-          "petalType": 1,
-          "amount": 15
-        },
-        {
-          "petalType": 2,
-          "amount": 15
-        },
-        {
-          "petalType": 3,
-          "amount": 15
-        }
-      ]
-    }
+    { "type": 1, "petals": [{ "petalType": 1, "amount": 12 }, { "petalType": 2, "amount": 12 }] }
   ],
   "constrainers": [
-    {
-      "type": 2,
-      "timeLimitSeconds": 90
-    }
+    { "type": 2, "timeLimitSeconds": 75 }
   ]
 }

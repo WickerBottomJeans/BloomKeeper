@@ -8,9 +8,9 @@ namespace DefaultNamespace
     {
         public event Action<int> StartLevelRequested;
 
-        public async UniTask Enter(PlayerProgressionData progression)
+        public async UniTask Enter()
         {
-            UIManager.Instance.ShowLevelSelect(progression);
+            UIManager.Instance.ShowLevelSelect(PlayerAccountContext.Instance.GetCurrentProgression());
             UIManager.Instance.LevelSelected += HandleLevelSelected;
             await UIManager.Instance.WaitForLevelSelectInitialBackgroundLoaded();
         }

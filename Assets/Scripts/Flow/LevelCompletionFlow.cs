@@ -15,7 +15,7 @@ namespace DefaultNamespace
         {
             PlayerAccount account = PlayerAccountContext.Instance.CurrentAccount;
             CompleteLevelAttemptResponse response = await progressionService.CompleteLevelAttempt(account.AuthSession, CreateCompleteLevelAttemptRequest(result));
-            ApplyCompleteLevelAttemptResponse(account.Progression, response);
+            ApplyCompleteLevelAttemptResponse(response);
         }
 
         public void Exit()
@@ -27,8 +27,9 @@ namespace DefaultNamespace
             return new CompleteLevelAttemptRequest { levelId = result.LevelId, didWin = result.DidWin, score = result.Score, stars = result.Stars };
         }
 
-        private static void ApplyCompleteLevelAttemptResponse(PlayerProgressionData progression, CompleteLevelAttemptResponse response)
+        private static void ApplyCompleteLevelAttemptResponse(CompleteLevelAttemptResponse response)
         {
+            PlayerProgressionData progression = PlayerAccountContext.Instance.GetCurrentProgression();
             progression.highestUnlockedLevel = response.highestUnlockedLevel;
             progression.levels[response.levelId] = response.levelProgress;
         }

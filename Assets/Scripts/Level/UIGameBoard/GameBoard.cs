@@ -60,11 +60,6 @@ public class GameBoard : MonoBehaviour
     public event Action<IGameplayEvent> OnGameplayEvent;
     public event Action OnTurnSettled;
 
-    public void SetPlayerActionsEnabled(bool enabled)
-    {
-        boardInputHandler.SetPlayerActionsEnabled(enabled);
-    }
-
     public void Init(BoardCell[,] grid, Rect playAreaScreenRect)
     {
         cam = Camera.main;

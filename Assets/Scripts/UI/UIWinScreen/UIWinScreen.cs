@@ -44,10 +44,11 @@ namespace UI
             SetEntranceVfxActive(false);
         }
 
-        public void DisplayStars(int stars, int starCap)
+        public void Display(int stars, int starCap, bool showNext)
         {
             starBoard.Init(starCap);
             pendingStarCount = stars;
+            nextButton.gameObject.SetActive(showNext);
         }
 
         private async UniTask OnEntranceDone(CancellationToken cancellationToken)

@@ -6,9 +6,14 @@ namespace DefaultNamespace
     {
         public event Action<LevelSessionResult> LevelFinished;
 
-        public void StartLevel(int levelId)
+        public void PrepareLevel(int levelId)
         {
-            EnterStarting(levelId);
+            EnterPreparing(levelId);
+        }
+
+        public void StartPreparedLevel()
+        {
+            EnterPlaying();
         }
 
         public void LeaveLevel()
@@ -16,27 +21,28 @@ namespace DefaultNamespace
             EnterExiting();
         }
 
-        private void EnterStarting(int levelId)
+        private void EnterPreparing(int levelId)
         {
-            LevelSessionManager.Instance.SetPlayerActionsEnabled(false);
+            ApplicationInputController.Instance.SetGameBoardInputActive(false);
             LevelSessionManager.Instance.OnLevelFinished += HandleLevelFinished;
-            LevelSessionManager.Instance.StartLevelSession(levelId);
-            EnterPlaying();
+            LevelSessionManager.Instance.PrepareLevelSession(levelId);
         }
 
         private void EnterPlaying()
         {
-            LevelSessionManager.Instance.SetPlayerActionsEnabled(true);
+            LevelSessionManager.Instance.StartPreparedLevelSession();
+            ApplicationInputController.Instance.SetGameBoardInputActive(true);
         }
 
         private void EnterResultHold(LevelSessionResult result)
         {
-            LevelSessionManager.Instance.SetPlayerActionsEnabled(false);
+            ApplicationInputController.Instance.SetGameBoardInputActive(false);
             LevelFinished?.Invoke(result);
         }
 
         private void EnterExiting()
         {
+            ApplicationInputController.Instance.SetGameBoardInputActive(false);
             LevelSessionManager.Instance.OnLevelFinished -= HandleLevelFinished;
             LevelSessionManager.Instance.ClearCurrentLevelSession();
         }
