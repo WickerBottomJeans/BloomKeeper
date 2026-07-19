@@ -15,7 +15,6 @@ namespace DefaultNamespace
         private LevelSessionFlow levelSessionFlow;
         private ResultFlow resultFlow;
         private LevelSessionResult currentResult;
-        private bool isApplicationTransitionRunning;
 
         private void Awake()
         {
@@ -64,16 +63,65 @@ namespace DefaultNamespace
 
         private async void HandleAuthCompleted(PlayFabAuthSession authSession)
         {
-            await PlayApplicationTransition(UIJawCurtainTipCategory.General, async () =>
+            if (!await TryLoadAccountAndEnterHome(authSession))
+                RunAccountLoadFailureDialog(authSession).Forget();
+        }
+
+        private async UniTask<bool> TryLoadAccountAndEnterHome(PlayFabAuthSession authSession)
+        {
+            bool accountLoaded = false;
+            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.General, async () =>
             {
-                authFlow.AuthCompleted -= HandleAuthCompleted;
-                authFlow.AuthFailed -= HandleAuthFailed;
-                authFlow.Exit();
-                PlayerAccount account = await accountLoadFlow.Enter(authSession);
+                ExitAuthFlow();
+                PlayerAccount account;
+                try
+                {
+                    account = await accountLoadFlow.Enter(authSession);
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogWarning(exception);
+                    accountLoadFlow.Exit();
+                    EnterAuthFlow();
+                    return;
+                }
+
                 accountLoadFlow.Exit();
                 PlayerAccountContext.Instance.SetCurrentAccount(account);
                 await EnterHome();
+                accountLoaded = true;
             });
+
+            return accountLoaded;
+        }
+
+        private async UniTask RunAccountLoadFailureDialog(PlayFabAuthSession authSession)
+        {
+            DialogOptionButton[] options = { DialogOptionButton.Cancel, DialogOptionButton.Retry };
+            await DialogManager.Instance.RunDialogWorkflow("Account load failed", "Unable to load your account. Check your connection and try again.", async session =>
+            {
+                while (true)
+                {
+                    int buttonId = await session.WaitForButtonClick();
+                    switch ((DialogButtonType)buttonId)
+                    {
+                        case DialogButtonType.Retry:
+                            if (await TryLoadAccountAndEnterHome(authSession)) return;
+                            break;
+                        case DialogButtonType.Cancel:
+                            return;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported account load failure dialog button.");
+                    }
+                }
+            }, options);
+        }
+
+        private void ExitAuthFlow()
+        {
+            authFlow.AuthCompleted -= HandleAuthCompleted;
+            authFlow.AuthFailed -= HandleAuthFailed;
+            authFlow.Exit();
         }
 
         private void HandleAuthFailed(Exception exception)
@@ -104,7 +152,7 @@ namespace DefaultNamespace
 
         private async void HandleStartLevelRequested(int levelId)
         {
-            await PlayApplicationTransition(UIJawCurtainTipCategory.LevelStart, () =>
+            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.LevelStart, () =>
             {
                 homeFlow.StartLevelRequested -= HandleStartLevelRequested;
                 homeFlow.Exit();
@@ -118,25 +166,53 @@ namespace DefaultNamespace
         {
             levelSessionFlow.LevelFinished -= HandleLevelFinished;
             currentResult = result;
-            ApplicationInputController.Instance.SetInputSuspended(true);
+            if (!await TryCompleteLevelAndEnterResult())
+                RunLevelCompletionFailureDialog().Forget();
+        }
+
+        private async UniTask<bool> TryCompleteLevelAndEnterResult()
+        {
             try
             {
-                await levelCompletionFlow.Enter(result);
-                levelCompletionFlow.Exit();
-                resultFlow.HomeRequested += HandleResultHomeRequested;
-                resultFlow.RetryRequested += HandleResultRetryRequested;
-                resultFlow.NextLevelRequested += HandleNextLevelRequested;
-                resultFlow.Enter(result);
+                await levelCompletionFlow.Enter(currentResult);
             }
-            finally
+            catch (Exception exception)
             {
-                ApplicationInputController.Instance.SetInputSuspended(false);
+                Debug.LogWarning(exception);
+                return false;
             }
+
+            levelCompletionFlow.Exit();
+            resultFlow.HomeRequested += HandleResultHomeRequested;
+            resultFlow.RetryRequested += HandleResultRetryRequested;
+            resultFlow.NextLevelRequested += HandleNextLevelRequested;
+            resultFlow.Enter(currentResult);
+            return true;
+        }
+
+        private async UniTask RunLevelCompletionFailureDialog()
+        {
+            DialogOptionButton[] options = { DialogOptionButton.Retry };
+            await DialogManager.Instance.RunDialogWorkflow("Result submission failed", "Unable to save your level result. Check your connection and try again.", async session =>
+            {
+                while (true)
+                {
+                    int buttonId = await session.WaitForButtonClick();
+                    switch ((DialogButtonType)buttonId)
+                    {
+                        case DialogButtonType.Retry:
+                            if (await TryCompleteLevelAndEnterResult()) return;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported level completion failure dialog button.");
+                    }
+                }
+            }, options);
         }
 
         private async void HandleResultHomeRequested()
         {
-            await PlayApplicationTransition(UIJawCurtainTipCategory.ReturnHome, async () =>
+            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.ReturnHome, async () =>
             {
                 ExitResultFlow();
                 levelSessionFlow.LeaveLevel();
@@ -147,7 +223,7 @@ namespace DefaultNamespace
         private async void HandleResultRetryRequested()
         {
             int levelId = currentResult.LevelId;
-            await PlayApplicationTransition(UIJawCurtainTipCategory.Retry, () =>
+            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.Retry, () =>
             {
                 ExitResultFlow();
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
@@ -159,7 +235,7 @@ namespace DefaultNamespace
 
         private async void HandleNextLevelRequested(int levelId)
         {
-            await PlayApplicationTransition(UIJawCurtainTipCategory.LevelStart, () =>
+            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.LevelStart, () =>
             {
                 ExitResultFlow();
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
@@ -176,34 +252,6 @@ namespace DefaultNamespace
             resultFlow.NextLevelRequested -= HandleNextLevelRequested;
             resultFlow.Exit();
             currentResult = null;
-        }
-
-        private async UniTask PlayApplicationTransition(UIJawCurtainTipCategory tipCategory, Func<UniTask> whileClosedOperation, Action afterOpenedOperation = null)
-        {
-            if (isApplicationTransitionRunning)
-                throw new InvalidOperationException("Cannot start an application transition while another transition is running.");
-
-            isApplicationTransitionRunning = true;
-            ApplicationInputController.Instance.SetInputSuspended(true);
-            try
-            {
-                await UIManager.Instance.CloseJawCurtain(tipCategory);
-                try
-                {
-                    await whileClosedOperation();
-                }
-                finally
-                {
-                    await UIManager.Instance.OpenJawCurtain();
-                }
-
-                afterOpenedOperation?.Invoke();
-            }
-            finally
-            {
-                ApplicationInputController.Instance.SetInputSuspended(false);
-                isApplicationTransitionRunning = false;
-            }
         }
     }
 }

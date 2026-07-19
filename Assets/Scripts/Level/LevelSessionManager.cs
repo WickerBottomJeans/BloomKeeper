@@ -63,7 +63,7 @@ namespace DefaultNamespace
             UIManager.Instance.HideLevelUI();
 
             if (worldLevelBackgroundInstance != null)
-                worldLevelBackgroundInstance.gameObject.SetActive(false);
+                worldLevelBackgroundInstance.Hide();
 
             objectiveManager = null;
             constrainerManager = null;
@@ -138,8 +138,7 @@ namespace DefaultNamespace
             if (worldLevelBackgroundPrefab == null) return;
             if (worldLevelBackgroundInstance == null)
                 worldLevelBackgroundInstance = Instantiate(worldLevelBackgroundPrefab);
-            worldLevelBackgroundInstance.gameObject.SetActive(true);
-            worldLevelBackgroundInstance.FitWidthToCamera(Camera.main);
+            worldLevelBackgroundInstance.Show(Camera.main);
         }
         
         private void SpawnGameBoard(BoardCell[,] grid, Rect playAreaScreenRect)

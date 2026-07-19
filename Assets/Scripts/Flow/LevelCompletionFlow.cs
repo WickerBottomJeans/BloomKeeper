@@ -14,7 +14,7 @@ namespace DefaultNamespace
         public async UniTask Enter(LevelSessionResult result)
         {
             PlayerAccount account = PlayerAccountContext.Instance.CurrentAccount;
-            CompleteLevelAttemptResponse response = await progressionService.CompleteLevelAttempt(account.AuthSession, CreateCompleteLevelAttemptRequest(result));
+            CompleteLevelAttemptResponse response = await ApplicationPresentationService.Instance.RunWithLoading(() => progressionService.CompleteLevelAttempt(account.AuthSession, CreateCompleteLevelAttemptRequest(result)));
             ApplyCompleteLevelAttemptResponse(response);
         }
 

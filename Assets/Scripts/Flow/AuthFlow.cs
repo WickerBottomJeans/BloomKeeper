@@ -51,7 +51,7 @@ namespace DefaultNamespace
             isLoginInProgress = true;
             try
             {
-                PlayFabAuthSession session = await guestLoginService.LoginAsGuest();
+                PlayFabAuthSession session = await ApplicationPresentationService.Instance.RunWithLoading(() => guestLoginService.LoginAsGuest());
                 AuthCompleted?.Invoke(session);
             }
             catch (Exception exception)
