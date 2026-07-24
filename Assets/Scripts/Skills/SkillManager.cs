@@ -12,7 +12,18 @@ namespace Skills
 
         public const int BouquetRange = 1;
 
-        public static SkillUseResult UseSkill(BoardCell[,] grid, SkillActivation activation)
+        public static List<SkillUseResult> UseSkills(BoardCell[,] grid, IReadOnlyList<SkillActivation> activations)
+        {
+            var results = new List<SkillUseResult>(activations.Count);
+            var reservedButterflyObstacleTargets = new HashSet<Vector2Int>();
+
+            foreach (SkillActivation activation in activations)
+                results.Add(UseSkill(grid, activation, reservedButterflyObstacleTargets));
+
+            return results;
+        }
+
+        private static SkillUseResult UseSkill(BoardCell[,] grid, SkillActivation activation, HashSet<Vector2Int> reservedButterflyObstacleTargets)
         {
             Petal selfPetal = new Petal(activation.SelfPetal);
 
@@ -30,7 +41,7 @@ namespace Skills
                         throw new InvalidOperationException("Sunburst activated with no valid target petal type.");
                     return UseSunburstSkill(grid, activation.Position, targetType, SpecialSkillType.None, selfPetal, activation);
                 case SpecialSkillType.Butterfly:
-                    return UseButterflySkill(grid, activation.Position, selfPetal);
+                    return UseButterflySkill(grid, activation.Position, selfPetal, reservedButterflyObstacleTargets);
                 case SpecialSkillType.StripeSunburst:
                 case SpecialSkillType.BouquetSunburst:
                 case SpecialSkillType.ButterflySunburst:
@@ -131,7 +142,7 @@ namespace Skills
             return new SkillUseResult(matchGroup, representation);
         }
         
-        public static SkillUseResult UseButterflySkill(BoardCell[,] grid, Vector2Int source, Petal causer)
+        private static SkillUseResult UseButterflySkill(BoardCell[,] grid, Vector2Int source, Petal causer, HashSet<Vector2Int> reservedObstacleTargets)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -142,7 +153,11 @@ namespace Skills
             for (int x = 0; x < cols; x++)
             for (int y = 0; y < rows; y++)
             {
-                if (grid[x, y].HasClearableObstacle()) obstacleTargets.Add(new Vector2Int(x, y));
+                if (grid[x, y].HasClearableObstacle())
+                {
+                    var position = new Vector2Int(x, y);
+                    if (!reservedObstacleTargets.Contains(position)) obstacleTargets.Add(position);
+                }
                 else if (grid[x, y].CanClearPetal()) petalTargets.Add(new Vector2Int(x, y));
             }
 
@@ -157,6 +172,7 @@ namespace Skills
             }
 
             Vector2Int target = pool[rng.Next(pool.Count)];
+            if (obstacleTargets.Count > 0) reservedObstacleTargets.Add(target);
             var matchGroup = new MatchGroup(new List<Vector2Int> { target }, MatchShape.None, causer);
             var representation = new ButterflyRepresentationData(source, target);
             return new SkillUseResult(matchGroup, representation);

@@ -197,13 +197,11 @@ public class GameBoard : MonoBehaviour
 
         pendingMatches = new List<MatchGroup>();
         pendingSkillResults.Clear();
+        List<SkillUseResult> skillResults = SkillManager.UseSkills(grid, pendingSkillActivations);
+        pendingSkillResults.AddRange(skillResults);
 
-        foreach (SkillActivation activation in pendingSkillActivations)
-        {
-            SkillUseResult result = SkillManager.UseSkill(grid, activation);
-            pendingSkillResults.Add(result);
+        foreach (SkillUseResult result in skillResults)
             pendingMatches.Add(result.MatchGroup);
-        }
 
         pendingSkillActivations.Clear();
         TransitionTo(BoardState.Resolving);
