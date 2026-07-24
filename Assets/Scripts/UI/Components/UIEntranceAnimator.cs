@@ -37,7 +37,7 @@ namespace DefaultNamespace.UI
         {
             CancelActiveEntrance();
             entranceCompletionSource = new UniTaskCompletionSource();
-            entranceSequence = DOTween.Sequence();
+            entranceSequence = DOTween.Sequence().SetUpdate(true);
             Sequence activeSequence = entranceSequence;
             UniTaskCompletionSource activeCompletionSource = entranceCompletionSource;
             bool hasEntrance = false;

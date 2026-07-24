@@ -28,6 +28,7 @@ namespace DefaultNamespace
         private bool isTurnSettling;
         private bool isLevelSessionPrepared;
         private bool isLevelSessionStarted;
+        private bool isLevelSessionPaused;
 
         private void Update()
         {
@@ -37,6 +38,8 @@ namespace DefaultNamespace
         public void ClearCurrentLevelSession()
         {
             constrainerManager?.StopLevel();
+            if (isLevelSessionPaused)
+                GameTimeService.ReleasePause(this);
 
             if (objectiveManager != null)
             {
@@ -76,6 +79,7 @@ namespace DefaultNamespace
             isTurnSettling = false;
             isLevelSessionPrepared = false;
             isLevelSessionStarted = false;
+            isLevelSessionPaused = false;
             currentLevelId = 0;
             currentAttemptId = null;
         }
@@ -123,6 +127,35 @@ namespace DefaultNamespace
                 throw new InvalidOperationException("Cannot start a level session more than once.");
 
             isLevelSessionStarted = true;
+            isLevelSessionPaused = false;
+            constrainerManager.StartLevel();
+        }
+
+        public void PauseCurrentLevelSession()
+        {
+            if (!isLevelSessionStarted)
+                throw new InvalidOperationException("Cannot pause a level session before it has started.");
+            if (isLevelEnded)
+                throw new InvalidOperationException("Cannot pause a level session after it has ended.");
+            if (isLevelSessionPaused)
+                throw new InvalidOperationException("Cannot pause a level session that is already paused.");
+
+            isLevelSessionPaused = true;
+            constrainerManager.StopLevel();
+            GameTimeService.RequestPause(this);
+        }
+
+        public void ResumeCurrentLevelSession()
+        {
+            if (!isLevelSessionStarted)
+                throw new InvalidOperationException("Cannot resume a level session before it has started.");
+            if (isLevelEnded)
+                throw new InvalidOperationException("Cannot resume a level session after it has ended.");
+            if (!isLevelSessionPaused)
+                throw new InvalidOperationException("Cannot resume a level session that is not paused.");
+
+            GameTimeService.ReleasePause(this);
+            isLevelSessionPaused = false;
             constrainerManager.StartLevel();
         }
 

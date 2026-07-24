@@ -6,7 +6,7 @@ This is the shortest roadmap from the current BloomKeeper repository to a portfo
 
 `ROADMAP.md` remains the long-term production-engineering roadmap. It is not a prerequisite for applying. This roadmap ends when a recruiter can understand the project quickly, an interviewer can inspect credible engineering evidence, and another person can run the game without opening Unity.
 
-Target effort: roughly 7–12 focused working days, depending on build issues and presentation polish.
+Target effort: roughly 12–20 focused working days, depending on provider integration, build issues, and presentation polish.
 
 ## Current Portfolio Evidence
 
@@ -28,7 +28,7 @@ The problem is not insufficient feature count. The problem is that this evidence
 
 - There is no root README.
 - There are no portfolio screenshots, gameplay video, downloadable build, or release link.
-- The two existing PlayMode tests target removed gameplay types and do not demonstrate the current architecture.
+- There are currently no automated gameplay tests after the obsolete PlayMode suite was removed.
 - The backend has no first-party automated tests.
 - `ARCHITECTURE.md` contains stale claims about progression locking, result navigation, and failure recovery.
 - Featured code contains unresolved bug notes, informal comments, spelling problems, and temporary-work warnings.
@@ -46,6 +46,8 @@ BloomKeeper is job-ready when all of the following are true:
 - The public repository contains no knowingly obsolete tests, stale architecture claims, secrets, or misleading platform claims.
 - Focused automated tests prove representative gameplay rules and backend idempotency.
 - The showcase path can be completed without crashes, dead actions, broken transitions, or visible development UI.
+- A player can pause a level, adjust persistent music and SFX volume, resume safely, or abandon the level and return Home without submitting a result.
+- A guest can link a previously unused Google or Apple identity on a verified supported platform without losing progression.
 - The repository clearly distinguishes implemented behavior, sandbox/cloud dependencies, tested platforms, and known limitations.
 
 ## Phase 1: Freeze Scope And Stabilize The Showcase
@@ -71,12 +73,29 @@ Goal: prevent the first thirty seconds from looking like an unfinished engineeri
 - [ ] Set intentional product identity, version, icon, window behavior, and portrait presentation for the Windows build.
 - [ ] Ensure the first-time player can understand mouse/touch interaction and the current objective without developer explanation.
 - [ ] Perform one focused visual-consistency pass on loading, authentication, map, gameplay HUD, dialogs, win, and loss screens.
-- [ ] Add a minimal licensed audio pass if the current build is silent: one music loop plus clear swap, match, skill, win, loss, and button feedback. Do not build a large audio feature set.
+- [ ] Add a pause menu with Resume, Settings, and confirmed Quit Level actions. Pausing must stop level input and timer progress; quitting must abandon the attempt and return Home without submitting a result.
+- [ ] Add a Settings entry from Home and the pause menu with persistent music and SFX volume controls.
+- [ ] Add a minimal licensed audio pass if the current build is silent: one music loop plus clear swap, match, skill, win, loss, and button feedback routed through the persisted volume settings. Do not build a large audio feature set.
 - [ ] Fix only highly visible animation, layering, text, or transition defects encountered during the showcase.
 
 Exit condition: a reviewer can play the showcase without guidance and the recording does not look or sound obviously unfinished.
 
-## Phase 3: Create Credible Engineering Proof
+## Phase 3: Add Minimal Account Continuity
+
+Goal: let a guest keep the same progression when upgrading to a real provider identity.
+
+- [ ] Add Google authentication where it is supported and can be tested.
+- [ ] Add Sign in with Apple on a supported iOS build.
+- [ ] Link a previously unused Google or Apple identity to the current PlayFab guest account instead of creating a second progression record.
+- [ ] Let a returning linked player authenticate with the provider and recover the same PlayFab account and progression.
+- [ ] Detect when a provider identity is already linked to another PlayFab account and show an explicit conflict outcome without overwriting or silently merging either account.
+- [ ] Verify new guest linking, restart, provider sign-in, preserved progression, cancellation, provider failure, and already-linked conflict paths.
+- [ ] Document the required PlayFab/provider configuration without publishing client secrets.
+- [ ] State exactly which provider and platform combinations were built and tested. Do not claim Apple verification without a tested iOS build.
+
+Exit condition: a guest can safely upgrade through Google or Apple on each claimed platform, return through that provider, and retain the same progression; conflicting existing accounts remain protected and clearly explained.
+
+## Phase 4: Create Credible Engineering Proof
 
 Goal: replace claims with a small amount of trustworthy evidence.
 
@@ -102,7 +121,7 @@ Goal: replace claims with a small amount of trustworthy evidence.
 
 Exit condition: the repository contains a small, current, understandable test suite and measured evidence instead of obsolete test files or unsupported quality claims.
 
-## Phase 4: Package The Project For Humans
+## Phase 5: Package The Project For Humans
 
 Goal: make the work visible without requiring a reviewer to explore 145 client scripts.
 
@@ -116,7 +135,7 @@ Goal: make the work visible without requiring a reviewer to explore 145 client s
 ### Demonstration media
 
 - [ ] Capture four to six clean screenshots covering the level map, gameplay, a skill combination, an obstacle objective, and the result screen.
-- [ ] Record a 90–150 second demonstration showing gameplay, progression unlocking, persistence after restart, and the PlayFab/Azure boundary.
+- [ ] Record a 90–150 second demonstration showing gameplay, progression unlocking, persistence after restart, guest-to-provider linking, and the PlayFab/Azure boundary.
 - [ ] Keep the demonstration focused on visible proof. Do not narrate every class or roadmap item.
 
 ### Root README
@@ -133,7 +152,7 @@ Goal: make the work visible without requiring a reviewer to explore 145 client s
 
 Exit condition: a reviewer can understand, watch, download, run, and inspect the project from the README alone.
 
-## Phase 5: Clean The Public Evidence
+## Phase 6: Clean The Public Evidence
 
 Goal: remove avoidable reasons for an interviewer to doubt the work.
 
@@ -149,7 +168,7 @@ Goal: remove avoidable reasons for an interviewer to doubt the work.
 
 Exit condition: the public repository is coherent, honest, portable enough for review, and free of knowingly broken evidence.
 
-## Phase 6: Prepare The Interview Story And Apply
+## Phase 7: Prepare The Interview Story And Apply
 
 Goal: convert the project into interview performance instead of adding more code.
 
@@ -170,12 +189,12 @@ These features may deepen the project later, but they are not required to make t
 
 - Progression schema migration.
 - Offline progression cache and durable result synchronization.
-- Google or Apple authentication, account linking, and account merging.
+- Full account merging when a Google or Apple identity is already linked to another PlayFab account.
 - Currency, inventory, boosters, shop, advertising, and purchases.
 - Remote content publishing and rollback infrastructure.
 - Large level counts or additional match-3 mechanics.
 - Full localization and accessibility systems.
-- Android and iOS portfolio releases.
+- Android and iOS portfolio releases beyond the provider-verification builds required above.
 - Broad CI/CD infrastructure.
 - Deterministic replay anti-cheat and leaderboards.
 - A custom administration dashboard.

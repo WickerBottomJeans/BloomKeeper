@@ -173,9 +173,51 @@ namespace DefaultNamespace
                 homeFlow.StartLevelRequested -= HandleStartLevelRequested;
                 homeFlow.Exit();
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
+                levelSessionFlow.QuitLevelRequested += HandleQuitLevelRequested;
                 levelSessionFlow.PrepareLevel(levelId);
                 return UniTask.CompletedTask;
             }, levelSessionFlow.StartPreparedLevel);
+        }
+
+        private void HandleQuitLevelRequested()
+        {
+            RunFlowOperation(RunQuitLevelDialogAsync);
+        }
+
+        private async UniTask RunQuitLevelDialogAsync()
+        {
+            var quitButton = new DialogOptionButton(DialogButtonType.Yes, "Quit", UIButtonVariant.Orange);
+            DialogOptionButton[] options = { DialogOptionButton.Cancel, quitButton };
+            bool quitConfirmed = false;
+            await DialogManager.Instance.RunDialogWorkflow("Quit level?", "Your progress in this level will be lost.", async session =>
+            {
+                int buttonId = await session.WaitForButtonClick();
+                switch ((DialogButtonType)buttonId)
+                {
+                    case DialogButtonType.Cancel:
+                        return;
+                    case DialogButtonType.Yes:
+                        quitConfirmed = true;
+                        return;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported quit-level dialog button.");
+                }
+            }, options);
+
+            if (quitConfirmed)
+                await QuitLevelAndEnterHome();
+        }
+
+        private async UniTask QuitLevelAndEnterHome()
+        {
+            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.ReturnHome, async () =>
+            {
+                levelSessionFlow.LevelFinished -= HandleLevelFinished;
+                levelSessionFlow.QuitLevelRequested -= HandleQuitLevelRequested;
+                levelSessionFlow.LeaveLevel();
+                currentResult = null;
+                await EnterHome();
+            });
         }
 
         private void HandleLevelFinished(LevelSessionResult result)
@@ -186,6 +228,7 @@ namespace DefaultNamespace
         private async UniTask ProcessLevelFinishedAsync(LevelSessionResult result)
         {
             levelSessionFlow.LevelFinished -= HandleLevelFinished;
+            levelSessionFlow.QuitLevelRequested -= HandleQuitLevelRequested;
             currentResult = result;
             await ResolveLevelCompletion();
         }
@@ -325,6 +368,7 @@ namespace DefaultNamespace
             {
                 ExitResultFlow();
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
+                levelSessionFlow.QuitLevelRequested += HandleQuitLevelRequested;
                 levelSessionFlow.LeaveLevel();
                 levelSessionFlow.PrepareLevel(levelId);
                 return UniTask.CompletedTask;
@@ -342,6 +386,7 @@ namespace DefaultNamespace
             {
                 ExitResultFlow();
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
+                levelSessionFlow.QuitLevelRequested += HandleQuitLevelRequested;
                 levelSessionFlow.LeaveLevel();
                 levelSessionFlow.PrepareLevel(levelId);
                 return UniTask.CompletedTask;

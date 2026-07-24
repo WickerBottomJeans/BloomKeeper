@@ -18,9 +18,10 @@ namespace DefaultNamespace.UI
         [SerializeField] private float pressedScale = 0.92f;
         [SerializeField] private float scaleDuration = 0.2f;
 
-        private Action onClicked;
         private Vector3 baseScale;
         private bool isPressed;
+
+        public event Action Clicked;
 
         private void Awake()
         {
@@ -29,13 +30,12 @@ namespace DefaultNamespace.UI
             targetImage.sprite = styleConfig.GetStyle(variant).sprite;
         }
 
-        public void Configure(string text, UIButtonVariant variant, Action onClicked, bool interactable = true)
+        public void Configure(string text, UIButtonVariant variant, bool interactable = true)
         {
             label.text = text;
             this.variant = variant;
             targetImage.sprite = styleConfig.GetStyle(variant).sprite;
             button.interactable = interactable;
-            this.onClicked = onClicked;
         }
 
         public void SetInteractable(bool interactable)
@@ -51,7 +51,7 @@ namespace DefaultNamespace.UI
 
             isPressed = true;
             visualRoot.DOKill();
-            visualRoot.DOScale(baseScale * pressedScale, scaleDuration).SetEase(Ease.OutQuad);
+            visualRoot.DOScale(baseScale * pressedScale, scaleDuration).SetEase(Ease.OutQuad).SetUpdate(true);
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -72,12 +72,12 @@ namespace DefaultNamespace.UI
         {
             isPressed = false;
             visualRoot.DOKill();
-            visualRoot.DOScale(baseScale, scaleDuration).SetEase(Ease.OutQuad);
+            visualRoot.DOScale(baseScale, scaleDuration).SetEase(Ease.OutQuad).SetUpdate(true);
         }
 
         private void HandleClicked()
         {
-            onClicked();
+            Clicked?.Invoke();
         }
 
         private void OnDisable()

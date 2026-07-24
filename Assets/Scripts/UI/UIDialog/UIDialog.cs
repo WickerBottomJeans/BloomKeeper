@@ -68,7 +68,8 @@ namespace DefaultNamespace.UI
         {
             UIButtonView button = Instantiate(buttonPrefab, buttonRoot);
             int buttonId = optionButton.Id;
-            button.Configure(optionButton.Label, optionButton.Variant, () => HandleButtonClicked(buttonId));
+            button.Configure(optionButton.Label, optionButton.Variant);
+            button.Clicked += () => HandleButtonClicked(buttonId);
             activeButtons.Add(button);
             button.gameObject.SetActive(true);
         }

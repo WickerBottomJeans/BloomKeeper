@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DefaultNamespace;
 using UnityEngine;
@@ -9,6 +10,12 @@ namespace DefaultNamespace.UI
         [SerializeField] private UILevelHud levelHud;
         [SerializeField] private UIBoosterBoard boosterBoard;
         [SerializeField] private RectTransform boardPlayArea;
+
+        public event Action PauseRequested
+        {
+            add => levelHud.PauseRequested += value;
+            remove => levelHud.PauseRequested -= value;
+        }
 
         public void Init(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
         {

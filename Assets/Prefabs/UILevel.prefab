@@ -2367,6 +2367,7 @@ MonoBehaviour:
   moveCounter: {fileID: 1907192271393153761}
   timer: {fileID: 2520521039543597454}
   scoreBoard: {fileID: 7672381682373050156}
+  pauseButton: {fileID: 5302527709086359568}
 --- !u!114 &7200347751809007671
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3816,6 +3817,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3409953444622431830}
     m_Modifications:
+    - target: {fileID: 2011178434443376265, guid: a8231e04ec9269b46a8e8cdd77bac3ef, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2545877208031723215, guid: a8231e04ec9269b46a8e8cdd77bac3ef, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using DefaultNamespace;
 using DefaultNamespace.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UILevelHud : MonoBehaviour
 {
@@ -9,6 +11,14 @@ public class UILevelHud : MonoBehaviour
     [SerializeField] private UIMoveCounter moveCounter;
     [SerializeField] private UITimer timer;
     [SerializeField] private UIScoreBoard scoreBoard;
+    [SerializeField] private Button pauseButton;
+
+    public event Action PauseRequested;
+
+    private void Awake()
+    {
+        pauseButton.onClick.AddListener(HandlePauseClicked);
+    }
 
     public void Init(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
     {
@@ -64,4 +74,9 @@ public class UILevelHud : MonoBehaviour
 
     public void Show() => gameObject.SetActive(true);
     public void Hide() => gameObject.SetActive(false);
+
+    private void HandlePauseClicked()
+    {
+        PauseRequested?.Invoke();
+    }
 }
