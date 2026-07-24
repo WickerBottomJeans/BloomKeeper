@@ -28,6 +28,7 @@ This roadmap deliberately prioritizes engineering depth over adding many similar
 - [x] Enforce `highestUnlockedLevel` in the level map and show an appropriate locked state.
 - [x] Connect the win-screen Next action and define behavior for the final available level.
 - [x] Verify home, retry, next, loss, and repeated-level paths cannot create duplicate subscriptions or input during transitions.
+- [ ] Fix Butterfly targeting so multiple Butterfly effects spread across eligible web tiles instead of repeatedly targeting one web tile, while preserving normal random-tile targeting behavior.
 - [ ] Replace obsolete tests based on `Tile[,]` and removed petal values with tests for the current `BoardCell[,]` model.
 - [ ] Add regression coverage for important match shapes, skill combinations, chained skills, obstacles, gravity, deadlocks, scoring, and end-of-turn decisions.
 
@@ -37,12 +38,12 @@ Every advertised level loads valid data, the complete navigation loop has no dea
 
 ## P1: Complete And Reliable Player Loop
 
-- [ ] Convert account-load and level-completion failures into explicit recoverable flow states.
-- [ ] Distinguish retryable completion failures from authoritative rejection: retain and retry valid results after connectivity or server-availability failures, but do not update progression when the backend rejects an invalid or cheating attempt, and show the player an honest outcome for each case.
-- [ ] Show useful retry and recovery UI for authentication, progression loading, and result submission failures.
-- [ ] Prevent unobserved exceptions from asynchronous flow event handlers.
-- [ ] Make level-completion writes idempotent so retrying cannot grant or record a result twice.
-- [ ] Handle PlayFab entity profile-version conflicts with an explicit concurrency policy.
+- [x] Convert account-load and level-completion failures into explicit recoverable flow states.
+- [x] Distinguish retryable completion failures from authoritative rejection: retain and retry valid results after connectivity or server-availability failures, but do not update progression when the backend rejects an invalid or cheating attempt, and show the player an honest outcome for each case.
+- [x] Show useful retry and recovery UI for authentication, progression loading, and result submission failures.
+- [x] Prevent unobserved exceptions from asynchronous flow event handlers.
+- [x] Make level-completion writes idempotent so retrying cannot grant or record a result twice.
+- [x] Handle PlayFab entity profile-version conflicts with an explicit concurrency policy.
 - [ ] Add progression schema migration instead of only rejecting unsupported data.
 - [ ] Cache the last successfully loaded progression for online-first startup and recovery.
 - [ ] Allow an active level to finish if connectivity drops.

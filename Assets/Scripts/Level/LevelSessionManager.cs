@@ -22,6 +22,7 @@ namespace DefaultNamespace
         private ScoreManager scoreManager;
         private LevelData currentLevelData;
         private int currentLevelId;
+        private string currentAttemptId;
         private bool pendingLevelComplete;
         private bool isLevelEnded;
         private bool isTurnSettling;
@@ -76,6 +77,7 @@ namespace DefaultNamespace
             isLevelSessionPrepared = false;
             isLevelSessionStarted = false;
             currentLevelId = 0;
+            currentAttemptId = null;
         }
 
         public void PrepareLevelSession(int levelId)
@@ -84,6 +86,7 @@ namespace DefaultNamespace
 
             currentLevelData = LevelLoader.LoadLevel(levelId);
             currentLevelId = levelId;
+            currentAttemptId = Guid.NewGuid().ToString("N");
             scoreManager = new ScoreManager(currentLevelData.starScoreThresholds);
             scoreManager.OnScoreChanged += HandleScoreChanged;
 
@@ -189,7 +192,7 @@ namespace DefaultNamespace
                 throw new InvalidOperationException("Cannot show lose screen without constrainer failure data.");
             //TODO: maybe add a way to make multireason failure sound more fun
             string message = failureData[0].failureText;
-            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, false, scoreManager.CurrentScore, scoreManager.CalculateStars(), GetStarCap(currentLevelData.starScoreThresholds), message));
+            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentAttemptId, false, scoreManager.CurrentScore, scoreManager.CalculateStars(), GetStarCap(currentLevelData.starScoreThresholds), message));
         }
 
         private void HandleGameplayEvent(IGameplayEvent e)
@@ -272,7 +275,7 @@ namespace DefaultNamespace
             isLevelEnded = true;
             constrainerManager?.StopLevel();
             int earnedStars = scoreManager.CalculateStars();
-            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, true, scoreManager.CurrentScore, earnedStars, GetStarCap(currentLevelData.starScoreThresholds), string.Empty));
+            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentAttemptId, true, scoreManager.CurrentScore, earnedStars, GetStarCap(currentLevelData.starScoreThresholds), string.Empty));
         }
     }
 }

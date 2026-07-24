@@ -73,7 +73,7 @@ namespace DefaultNamespace.UI
 
                 state = DialogSessionState.Closed;
                 buttonWaitStarted = null;
-                buttonClicks.Writer.TryComplete(new InvalidOperationException("The dialog session closed before another button was clicked."));
+                buttonClicks.Writer.TryComplete();
             }
 
             public void Fail(Exception exception)

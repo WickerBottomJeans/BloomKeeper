@@ -1,8 +1,7 @@
 namespace BloomKeeper.PlayFabFunctions.Models;
 
-public class CompleteLevelAttemptRequest
+public class ProcessedLevelAttemptData
 {
-    public string attemptId;
     public int levelId;
     public bool didWin;
     public int score;

@@ -108,7 +108,7 @@ sequenceDiagram
 `PlayFabProgressionService` builds an authenticated `ExecuteFunctionRequest` from `PlayFabAuthSession`. It exposes two operations:
 
 - `LoadProgression` returns `PlayerProgressionData`.
-- `CompleteLevelAttempt` submits level ID, win state, score, and stars, then returns updated progress for that level and the highest unlocked level.
+- `CompleteLevelAttempt` submits an attempt ID, level ID, win state, score, and stars, then returns updated progress for that level and the highest unlocked level.
 
 Function results are converted through Newtonsoft.Json and rejected when required data is absent.
 
@@ -117,15 +117,17 @@ Function results are converted through Newtonsoft.Json and rejected when require
 The backend project is `Backend/BloomKeeper.PlayFabFunctions`.
 
 - `LoadProgressionFunction` loads the caller's progression or creates and uploads a default document.
-- `CompleteLevelAttemptFunction` loads progression with its profile version, applies an attempt, and uploads the updated document.
+- `CompleteLevelAttemptFunction` loads progression with its profile version, applies an attempt, and uploads the updated document only when the attempt has not already been processed.
 - `PlayFabFunctionContextReader` validates the PlayFab function context and constructs an entity-authenticated PlayFab Data API client.
 - `PlayFabProgressionStore` owns serialization and the `progression.json` file contract.
 - `PlayFabEntityFileClient` owns entity-file metadata, download, initiate-upload, HTTP upload, and finalize-upload calls.
-- `CompleteLevelAttemptService` owns the current progression mutation rules.
+- `CompleteLevelAttemptService` owns progression mutation, attempt-ID validation, duplicate detection, and conflicting attempt-ID rejection.
 
-`PlayerProgressionData` contains a schema version, `highestUnlockedLevel`, and a dictionary of per-level progress. Each level record stores completion, best score, and best stars.
+`PlayerProgressionData` contains a schema version, `highestUnlockedLevel`, a dictionary of per-level progress, and a server-private dictionary of processed level attempts keyed by canonical UUID. Each processed record retains the accepted request data so identical retries can be distinguished from conflicting UUID reuse. `LoadProgressionFunction` returns a client-facing response that excludes this private dictionary.
 
-The entity profile version is supplied during writes, providing PlayFab's optimistic concurrency boundary. The current implementation does not retry conflicts, attach an idempotency key, queue failed writes, or migrate schemas.
+`LevelSessionManager` creates one UUID when it prepares a level. `LevelSessionResult` retains that UUID after gameplay finishes, so every submission retry uses the same idempotency key. The server records the request and progression mutation in the same `progression.json` write. An identical retry returns current authoritative progression without another write; invalid UUIDs and UUIDs reused with different request data are authoritative non-retryable rejections.
+
+The entity profile version is supplied during writes, providing PlayFab's optimistic concurrency boundary. When file upload initiation reports `EntityProfileVersionMismatch` or `ConcurrentEditError`, the completion function discards its stale in-memory mutation, reloads progression, reapplies the idempotent attempt, and retries with bounded exponential backoff. After three conflicting writes it returns HTTP 409 so the client can treat the operation as retryable. The current implementation does not queue failed writes, compact processed-attempt records, or migrate schemas.
 
 The backend currently verifies basic request sanity and whether the requested level is unlocked. It trusts the client's win flag, score, and stars; it does not replay or independently validate gameplay.
 
@@ -280,7 +282,7 @@ The current failure model is incomplete:
 - Guest login failure is surfaced through a retry/cancel dialog.
 - Account-load and level-completion failures are not converted into dedicated recoverable flow states.
 - There is no durable offline result queue or reconnect synchronization.
-- There is no request idempotency key or explicit retry policy for progression writes.
+- Entity profile-version conflicts are retried server-side up to the bounded policy; continued contention returns a retryable failure to the client.
 - Content loaders deserialize directly and do not validate semantic consistency before session construction.
 - Required Unity references are primarily supplied through scene and prefab serialization.
 
@@ -327,7 +329,7 @@ These statements describe the boundaries the current implementation relies on:
 | Area | Implemented | Not implemented |
 | --- | --- | --- |
 | Authentication | PlayFab guest account and entity session | Google, Apple, linking, merging, logout, refresh, deletion |
-| Progression | Azure-backed load and level-completion persistence | Offline queue, idempotency, conflict retry, migration |
+| Progression | Azure-backed load, level-completion persistence, UUID idempotency keys, and bounded profile-conflict retry | Offline queue, processed-attempt compaction, migration |
 | Gameplay validation | Basic backend sanity checks | Deterministic replay or authoritative result validation |
 | Content | Local JSON and Addressable art | Remote hotfix pipeline, validation, cache, rollback |
 | Economy | Booster-board presentation placeholder | Currency, inventory, rewards, shop, IAP |

@@ -35,6 +35,8 @@ public class PlayFabEntityFileClient
     {
         var initiateRequest = new InitiateFileUploadsRequest { Entity = dataEntity, ProfileVersion = profileVersion, FileNames = new List<string> { fileName } };
         PlayFabResult<InitiateFileUploadsResponse> initiateResult = await dataApi.InitiateFileUploadsAsync(initiateRequest);
+        if (initiateResult?.Error != null && (initiateResult.Error.Error == PlayFabErrorCode.EntityProfileVersionMismatch || initiateResult.Error.Error == PlayFabErrorCode.ConcurrentEditError))
+            throw new EntityProfileVersionConflictException($"PlayFab InitiateFileUploads detected an entity profile version conflict: {initiateResult.Error.GenerateErrorReport()}");
         InitiateFileUploadsResponse uploadResponse = GetRequiredPlayFabResult(initiateResult, "InitiateFileUploads");
         InitiateFileUploadMetadata uploadMetadata = GetRequiredUploadMetadata(uploadResponse);
 

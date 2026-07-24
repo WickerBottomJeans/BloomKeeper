@@ -73,6 +73,14 @@ namespace DefaultNamespace
         
         #region Complete level attempt
 
+        
+        /// <summary>
+        /// Submits the locally produced result of a completed level attempt for server validation
+        /// </summary>
+        /// <param name="authSession"></param>
+        /// <param name="functionParameter"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public Task<CompleteLevelAttemptResponse> CompleteLevelAttempt(PlayFabAuthSession authSession, CompleteLevelAttemptRequest functionParameter)
         {
             if (authSession == null) throw new ArgumentNullException(nameof(authSession));
@@ -95,10 +103,7 @@ namespace DefaultNamespace
                 result => { HandleCompleteLevelAttemptResult(result, completion); },
                 error =>
                 {
-                    //TODO: notify player or sth
-                    completion.SetException(
-                        new InvalidOperationException(
-                            $"PlayFab CompleteLevelAttempt failed: {error.GenerateErrorReport()}"));
+                    completion.SetException(new LevelCompletionSubmissionException($"PlayFab CompleteLevelAttempt request failed: {error.GenerateErrorReport()}", PlayFabRetryPolicy.IsRetryable(error), error.RetryAfterSeconds));
                 });
 
             return completion.Task;
@@ -119,20 +124,25 @@ namespace DefaultNamespace
 
         private static CompleteLevelAttemptResponse CreateCompleteLevelAttemptResponseFromFunctionResult(ExecuteFunctionResult result)
         {
-            if (result == null || result.Error != null || result.FunctionResultTooLarge == true ||
-                result.FunctionResult == null)
-                throw new InvalidOperationException("PlayFab CompleteLevelAttempt failed.");
+            if (result == null) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned no execution result.");
+            if (result.Error != null) throw new LevelCompletionSubmissionException($"PlayFab CompleteLevelAttempt Azure Function failed: {result.Error.Error}: {result.Error.Message}", PlayFabRetryPolicy.IsRetryable(result.Error));
+            if (result.FunctionResultTooLarge == true) throw new LevelCompletionSubmissionException("PlayFab CompleteLevelAttempt returned a result that exceeded the PlayFab size limit.", false);
+            if (result.FunctionResult == null) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned no function result.");
 
             string json = result.FunctionResult is string stringResult
                 ? stringResult
                 : JsonConvert.SerializeObject(result.FunctionResult);
             CompleteLevelAttemptResponse response = JsonConvert.DeserializeObject<CompleteLevelAttemptResponse>(json);
 
-            if (response == null || response.levelProgress == null)
-                throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned invalid progression data.");
+            if (response == null) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned an invalid response.");
+            if (response.outcome == CompleteLevelAttemptOutcome.Saved && (response.levelProgress == null || response.rejectionReason.HasValue))
+                throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned invalid saved progression data.");
+            if (response.outcome == CompleteLevelAttemptOutcome.Rejected && !response.rejectionReason.HasValue)
+                throw new InvalidOperationException("PlayFab CompleteLevelAttempt rejected the attempt without a reason.");
+            if (response.outcome != CompleteLevelAttemptOutcome.Saved && response.outcome != CompleteLevelAttemptOutcome.Rejected)
+                throw new InvalidOperationException($"PlayFab CompleteLevelAttempt returned unsupported outcome {response.outcome}.");
 
             return response;
-            
         }
 
         #endregion

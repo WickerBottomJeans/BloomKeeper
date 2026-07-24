@@ -53,6 +53,7 @@ public class PlayFabProgressionStore
         if (progression == null) throw new InvalidOperationException("PlayFab progression file has invalid JSON.");
         if (progression.schemaVersion <= 0) throw new InvalidOperationException($"PlayFab progression file has invalid schema version: {progression.schemaVersion}.");
         if (progression.levels == null) throw new InvalidOperationException("PlayFab progression file has no level data map.");
+        if (progression.processedLevelAttempts == null) throw new InvalidOperationException("PlayFab progression file has no processed level attempt map.");
 
         return progression;
     }

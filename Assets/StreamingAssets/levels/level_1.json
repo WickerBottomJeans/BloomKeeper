@@ -18,7 +18,7 @@
     { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
   ],
   "objectives": [
-    { "type": 1, "petals": [{ "petalType": 1, "amount": 15 }] }
+    { "type": 1, "petals": [{ "petalType": 1, "amount": 3 }] }
   ],
   "constrainers": [
     { "type": 1, "moveLimit": 18 }

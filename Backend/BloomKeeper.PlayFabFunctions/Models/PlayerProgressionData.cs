@@ -11,4 +11,9 @@ public class PlayerProgressionData
     /// Key = levelId. Value = saved progress for that level.
     /// </summary>
     public Dictionary<int, LevelProgressData> levels = new Dictionary<int, LevelProgressData>();
+
+    /// <summary>
+    /// Key = canonical attempt ID. Value = the request data accepted for that attempt.
+    /// </summary>
+    public Dictionary<string, ProcessedLevelAttemptData> processedLevelAttempts = new Dictionary<string, ProcessedLevelAttemptData>();
 }

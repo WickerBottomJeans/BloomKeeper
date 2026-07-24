@@ -15,6 +15,7 @@ namespace DefaultNamespace
         private LevelSessionFlow levelSessionFlow;
         private ResultFlow resultFlow;
         private LevelSessionResult currentResult;
+        private bool isInFatalState;
 
         private void Awake()
         {
@@ -45,7 +46,7 @@ namespace DefaultNamespace
         private void EnterBootFlow()
         {
             bootFlow.BootCompleted += HandleBootCompleted;
-            bootFlow.Enter();
+            RunFlowOperation(bootFlow.Enter);
         }
 
         private void HandleBootCompleted()
@@ -61,10 +62,15 @@ namespace DefaultNamespace
             authFlow.Enter();
         }
 
-        private async void HandleAuthCompleted(PlayFabAuthSession authSession)
+        private void HandleAuthCompleted(PlayFabAuthSession authSession)
+        {
+            RunFlowOperation(() => ProcessAuthCompletedAsync(authSession));
+        }
+
+        private async UniTask ProcessAuthCompletedAsync(PlayFabAuthSession authSession)
         {
             if (!await TryLoadAccountAndEnterHome(authSession))
-                RunAccountLoadFailureDialog(authSession).Forget();
+                await RunAccountLoadFailureDialog(authSession);
         }
 
         private async UniTask<bool> TryLoadAccountAndEnterHome(PlayFabAuthSession authSession)
@@ -127,8 +133,13 @@ namespace DefaultNamespace
         private void HandleAuthFailed(Exception exception)
         {
             Debug.LogWarning(exception);
+            RunFlowOperation(RunAuthFailureDialogAsync);
+        }
+
+        private async UniTask RunAuthFailureDialogAsync()
+        {
             DialogOptionButton[] options = { DialogOptionButton.Cancel, DialogOptionButton.Retry };
-            DialogManager.Instance.RunDialogWorkflow("Login failed", "Unable to connect. Check your connection and try again.", async session =>
+            await DialogManager.Instance.RunDialogWorkflow("Login failed", "Unable to connect. Check your connection and try again.", async session =>
             {
                 int buttonId = await session.WaitForButtonClick();
                 switch ((DialogButtonType)buttonId)
@@ -141,7 +152,7 @@ namespace DefaultNamespace
                     default:
                         throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported login failure dialog button.");
                 }
-            }, options).Forget();
+            }, options);
         }
 
         private async UniTask EnterHome()
@@ -150,7 +161,12 @@ namespace DefaultNamespace
             await homeFlow.Enter();
         }
 
-        private async void HandleStartLevelRequested(int levelId)
+        private void HandleStartLevelRequested(int levelId)
+        {
+            RunFlowOperation(() => StartLevelAsync(levelId));
+        }
+
+        private async UniTask StartLevelAsync(int levelId)
         {
             await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.LevelStart, () =>
             {
@@ -162,55 +178,132 @@ namespace DefaultNamespace
             }, levelSessionFlow.StartPreparedLevel);
         }
 
-        private async void HandleLevelFinished(LevelSessionResult result)
+        private void HandleLevelFinished(LevelSessionResult result)
+        {
+            RunFlowOperation(() => ProcessLevelFinishedAsync(result));
+        }
+
+        private async UniTask ProcessLevelFinishedAsync(LevelSessionResult result)
         {
             levelSessionFlow.LevelFinished -= HandleLevelFinished;
             currentResult = result;
-            if (!await TryCompleteLevelAndEnterResult())
-                RunLevelCompletionFailureDialog().Forget();
+            await ResolveLevelCompletion();
         }
 
-        private async UniTask<bool> TryCompleteLevelAndEnterResult()
+        private async UniTask ResolveLevelCompletion()
         {
+            CompleteLevelAttemptResponse response;
             try
             {
-                await levelCompletionFlow.Enter(currentResult);
+                try
+                {
+                    response = await SubmitLevelCompletion();
+                }
+                catch (LevelCompletionSubmissionException exception) when (exception.IsRetryable)
+                {
+                    Debug.LogWarning(exception);
+                    response = await RunLevelCompletionRetryDialog();
+                }
             }
             catch (Exception exception)
             {
                 Debug.LogWarning(exception);
-                return false;
+                await RunLevelCompletionBackendFailureDialog();
+                return;
             }
 
-            levelCompletionFlow.Exit();
+            if (response.outcome == CompleteLevelAttemptOutcome.Rejected)
+            {
+                await RunLevelCompletionRejectionDialog(response.rejectionReason.Value);
+                return;
+            }
+
             resultFlow.HomeRequested += HandleResultHomeRequested;
             resultFlow.RetryRequested += HandleResultRetryRequested;
             resultFlow.NextLevelRequested += HandleNextLevelRequested;
             resultFlow.Enter(currentResult);
-            return true;
         }
 
-        private async UniTask RunLevelCompletionFailureDialog()
+        private async UniTask<CompleteLevelAttemptResponse> SubmitLevelCompletion()
         {
+            try
+            {
+                return await levelCompletionFlow.Enter(currentResult);
+            }
+            finally
+            {
+                levelCompletionFlow.Exit();
+            }
+        }
+
+        private async UniTask<CompleteLevelAttemptResponse> RunLevelCompletionRetryDialog()
+        {
+            CompleteLevelAttemptResponse response = null;
             DialogOptionButton[] options = { DialogOptionButton.Retry };
-            await DialogManager.Instance.RunDialogWorkflow("Result submission failed", "Unable to save your level result. Check your connection and try again.", async session =>
+            await DialogManager.Instance.RunDialogWorkflow(LevelCompletionDialogText.RetryTitle, LevelCompletionDialogText.RetryMessage, async session =>
             {
                 while (true)
                 {
                     int buttonId = await session.WaitForButtonClick();
-                    switch ((DialogButtonType)buttonId)
+                    if ((DialogButtonType)buttonId != DialogButtonType.Retry)
+                        throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported level completion failure dialog button.");
+
+                    try
                     {
-                        case DialogButtonType.Retry:
-                            if (await TryCompleteLevelAndEnterResult()) return;
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported level completion failure dialog button.");
+                        response = await SubmitLevelCompletion();
+                        return;
+                    }
+                    catch (LevelCompletionSubmissionException exception) when (exception.IsRetryable)
+                    {
+                        Debug.LogWarning(exception);
                     }
                 }
             }, options);
+
+            if (response == null) throw new InvalidOperationException("Level completion retry dialog closed without a submission response.");
+            return response;
         }
 
-        private async void HandleResultHomeRequested()
+        private async UniTask RunLevelCompletionBackendFailureDialog()
+        {
+            DialogOptionButton[] options = { DialogOptionButton.Ok };
+            await DialogManager.Instance.RunDialogWorkflow(LevelCompletionDialogText.BackendFailureTitle, LevelCompletionDialogText.BackendFailureMessage, async session =>
+            {
+                int buttonId = await session.WaitForButtonClick();
+                if ((DialogButtonType)buttonId != DialogButtonType.Ok)
+                    throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported level completion backend failure dialog button.");
+                await ReturnHomeFromCompletionHold();
+            }, options);
+        }
+
+        private async UniTask RunLevelCompletionRejectionDialog(CompleteLevelAttemptRejectionReason rejectionReason)
+        {
+            DialogOptionButton[] options = { DialogOptionButton.Ok };
+            await DialogManager.Instance.RunDialogWorkflow(LevelCompletionDialogText.RejectionTitle, LevelCompletionDialogText.GetRejectionMessage(rejectionReason), async session =>
+            {
+                int buttonId = await session.WaitForButtonClick();
+                if ((DialogButtonType)buttonId != DialogButtonType.Ok)
+                    throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported level completion rejection dialog button.");
+                await ReturnHomeFromCompletionHold();
+            }, options);
+        }
+
+        private async UniTask ReturnHomeFromCompletionHold()
+        {
+            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.ReturnHome, async () =>
+            {
+                levelSessionFlow.LeaveLevel();
+                currentResult = null;
+                await EnterHome();
+            });
+        }
+
+        private void HandleResultHomeRequested()
+        {
+            RunFlowOperation(ReturnHomeFromResultAsync);
+        }
+
+        private async UniTask ReturnHomeFromResultAsync()
         {
             await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.ReturnHome, async () =>
             {
@@ -220,7 +313,12 @@ namespace DefaultNamespace
             });
         }
 
-        private async void HandleResultRetryRequested()
+        private void HandleResultRetryRequested()
+        {
+            RunFlowOperation(RetryLevelFromResultAsync);
+        }
+
+        private async UniTask RetryLevelFromResultAsync()
         {
             int levelId = currentResult.LevelId;
             await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.Retry, () =>
@@ -233,7 +331,12 @@ namespace DefaultNamespace
             }, levelSessionFlow.StartPreparedLevel);
         }
 
-        private async void HandleNextLevelRequested(int levelId)
+        private void HandleNextLevelRequested(int levelId)
+        {
+            RunFlowOperation(() => StartNextLevelFromResultAsync(levelId));
+        }
+
+        private async UniTask StartNextLevelFromResultAsync(int levelId)
         {
             await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.LevelStart, () =>
             {
@@ -243,6 +346,66 @@ namespace DefaultNamespace
                 levelSessionFlow.PrepareLevel(levelId);
                 return UniTask.CompletedTask;
             }, levelSessionFlow.StartPreparedLevel);
+        }
+
+        /// <summary>
+        /// This one runs async work from a flow event
+        /// U must handle expected failures inside the delegate or they’ll be treated as fatal.
+        /// Must use on every flow event handler that starts async work.
+        /// </summary>
+        /// <param name="operation"></param>
+        private void RunFlowOperation(Func<UniTask> operation)
+        {
+            if (isInFatalState) return;
+            ObserveFlowOperationAsync(operation).Forget();
+        }
+
+        private async UniTask ObserveFlowOperationAsync(Func<UniTask> operation)
+        {
+            try
+            {
+                await operation();
+            }
+            catch (Exception exception)
+            {
+                try
+                {
+                    await EnterFatalStateAsync(exception);
+                }
+                catch (Exception fatalStateException)
+                {
+                    Debug.LogException(fatalStateException);
+                    QuitApplication();
+                }
+            }
+        }
+
+        private async UniTask EnterFatalStateAsync(Exception exception)
+        {
+            if (isInFatalState) return;
+
+            isInFatalState = true;
+            Debug.LogException(exception);
+            ApplicationInputController.Instance.SetGameBoardInputActive(false);
+
+            DialogOptionButton[] options = { DialogOptionButton.Ok };
+            await DialogManager.Instance.RunDialogWorkflow("Unexpected error", "BloomKeeper encountered an unexpected error and cannot continue safely. The game will close.", async session =>
+            {
+                int buttonId = await session.WaitForButtonClick();
+                if ((DialogButtonType)buttonId != DialogButtonType.Ok)
+                    throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported fatal error dialog button.");
+            }, options);
+
+            QuitApplication();
+        }
+
+        private static void QuitApplication()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
 
         private void ExitResultFlow()

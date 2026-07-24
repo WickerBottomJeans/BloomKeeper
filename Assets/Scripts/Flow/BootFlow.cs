@@ -1,5 +1,5 @@
 using System;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
 using UnityEngine;
 
@@ -9,7 +9,7 @@ namespace DefaultNamespace
     {
         public event Action BootCompleted;
 
-        public async void Enter()
+        public async UniTask Enter()
         {
             ConfigureFrameRate();
             await SpriteLoader.Instance.LoadAll();

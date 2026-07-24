@@ -3,6 +3,7 @@
 ## Architecture First
 
 - The primary task is discussing and agreeing on architecture with the user.
+- When the user asks to edit only Markdown files, apply the requested Markdown changes directly without asking for file-scope confirmation. Continue to require explicit scope confirmation before editing code. All other project restrictions remain in effect.
 - Do not edit production code, tests, prefabs, scenes, packages, configuration, or other project files until the user explicitly accepts the proposed architecture.
 - Before implementation, explain the proposed responsibilities, ownership, boundaries, and data flow, including meaningful alternatives and tradeoffs.
 - Before editing, list every file that will be created, modified, or deleted and describe the exact class, method, API, and behavior changes planned for each file.

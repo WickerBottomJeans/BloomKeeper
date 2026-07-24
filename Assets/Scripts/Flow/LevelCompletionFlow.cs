@@ -11,20 +11,27 @@ namespace DefaultNamespace
             this.progressionService = progressionService;
         }
 
-        public async UniTask Enter(LevelSessionResult result)
+        public async UniTask<CompleteLevelAttemptResponse> Enter(LevelSessionResult result)
         {
             PlayerAccount account = PlayerAccountContext.Instance.CurrentAccount;
             CompleteLevelAttemptResponse response = await ApplicationPresentationService.Instance.RunWithLoading(() => progressionService.CompleteLevelAttempt(account.AuthSession, CreateCompleteLevelAttemptRequest(result)));
-            ApplyCompleteLevelAttemptResponse(response);
+            if (response.outcome == CompleteLevelAttemptOutcome.Saved)
+                ApplyCompleteLevelAttemptResponse(response);
+            return response;
         }
 
         public void Exit()
         {
         }
 
+        /// <summary>
+        /// Convert local result into a DTO so the server can check if it's legit
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
         private static CompleteLevelAttemptRequest CreateCompleteLevelAttemptRequest(LevelSessionResult result)
         {
-            return new CompleteLevelAttemptRequest { levelId = result.LevelId, didWin = result.DidWin, score = result.Score, stars = result.Stars };
+            return new CompleteLevelAttemptRequest { attemptId = result.AttemptId, levelId = result.LevelId, didWin = result.DidWin, score = result.Score, stars = result.Stars };
         }
 
         private static void ApplyCompleteLevelAttemptResponse(CompleteLevelAttemptResponse response)
