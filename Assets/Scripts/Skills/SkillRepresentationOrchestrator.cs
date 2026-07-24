@@ -61,8 +61,8 @@ namespace Skills
                 case ButterflyRepresentationData butterfly:
                     await PlayButterfly(butterfly, resolution);
                     return;
-                case SunburstComboRepresentationData sunburstCombo:
-                    await PlaySunburst(sunburstCombo, resolution);
+                case SunburstRepresentationData sunburst:
+                    await PlaySunburst(sunburst, resolution);
                     return;
                 default:
                     throw new ArgumentOutOfRangeException(
@@ -174,27 +174,38 @@ namespace Skills
                 PlayTileChanges(resolution));
         }
 
-        private async UniTask PlaySunburst(SunburstComboRepresentationData representation, MatchGroupResolveResult resolution)
+        private async UniTask PlaySunburst(SunburstRepresentationData representation, MatchGroupResolveResult resolution)
         {
-            UniTask mergeTask = petalViewManager.PlayComboMerge(representation.SourceA, representation.SourceB);
-
-            UniTask spinTask = petalViewManager.PlayComboSpinAndRelease(
-                representation.SourceA,
-                representation.SourceB,
-                stripeSunburstSpinDuration);
+            UniTask sourceTask;
+            Vector2 effectOrigin;
+            if (representation.ParticipantB.HasValue)
+            {
+                Vector2Int participantB = representation.ParticipantB.Value;
+                effectOrigin = ((Vector2)representation.ParticipantA + (Vector2)participantB) * 0.5f;
+                sourceTask = UniTask.WhenAll(
+                    petalViewManager.PlayComboMerge(representation.ParticipantA, participantB),
+                    petalViewManager.PlayComboSpinAndRelease(representation.ParticipantA, participantB, stripeSunburstSpinDuration));
+            }
+            else
+            {
+                effectOrigin = representation.ParticipantA;
+                sourceTask = petalViewManager.PlayDisappearAndRelease(new[] { representation.ParticipantA }, stripeSunburstSpinDuration);
+            }
 
             UniTask affectedPetalTask;
             List<Vector2Int> laserTargets;
             
-            //If is SunBurst + Normal petal
-            if (representation.ComboSkillType == SpecialSkillType.Sunburst)
+            if (representation.ReplacementSkill == SpecialSkillType.None)
             {
                 HashSet<Vector2Int> laserTargetPositions = GetRemovedPositions(resolution);
-                laserTargetPositions.Remove(representation.SourceA);
-                laserTargetPositions.Remove(representation.SourceB);
+                laserTargetPositions.Remove(representation.ParticipantA);
                 HashSet<Vector2Int> removedPositions = GetCurrentSkillConsumedPositions(resolution);
-                removedPositions.Remove(representation.SourceA);
-                removedPositions.Remove(representation.SourceB);
+                removedPositions.Remove(representation.ParticipantA);
+                if (representation.ParticipantB.HasValue)
+                {
+                    laserTargetPositions.Remove(representation.ParticipantB.Value);
+                    removedPositions.Remove(representation.ParticipantB.Value);
+                }
                 laserTargets = new List<Vector2Int>(laserTargetPositions);
                 affectedPetalTask = UniTask.WhenAll(
                     petalViewManager.PlayNormalRemovals(new List<Vector2Int>(removedPositions), stripeSunburstMutationDuration),
@@ -212,7 +223,7 @@ namespace Skills
             }
 
             UniTask laserTask = boardVFXManager.PlayMutationLaserVFX(
-                representation.Origin,
+                effectOrigin,
                 laserTargets,
                 stripeSunburstLaserChargeUpDuration,
                 stripeSunburstLaserDuration);
@@ -222,8 +233,7 @@ namespace Skills
             UniTask tileTask = PlayTileChanges(resolution);
 
             await UniTask.WhenAll(
-                mergeTask,
-                spinTask,
+                sourceTask,
                 affectedPetalTask,
                 tileTask,
                 laserTask);

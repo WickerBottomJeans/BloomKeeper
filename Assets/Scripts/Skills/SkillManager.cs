@@ -25,31 +25,22 @@ namespace Skills
 
         private static SkillUseResult UseSkill(BoardCell[,] grid, SkillActivation activation, HashSet<Vector2Int> reservedButterflyObstacleTargets)
         {
-            Petal selfPetal = new Petal(activation.SelfPetal);
-
-            switch (activation.SkillType)
+            switch (activation.EffectType)
             {
                 case SpecialSkillType.StripedHorizontal:
                 case SpecialSkillType.StripedVertical:
-                    return UseStripedSkill(grid, activation.Position, activation.SkillType, selfPetal);
+                    return UseStripedSkill(grid, activation.ParticipantA.Position, activation.EffectType, new Petal(activation.ParticipantA.Petal));
                 case SpecialSkillType.Bomb:
-                    return UseBouquetSkill(grid, activation.Position, selfPetal);
+                    return UseBouquetSkill(grid, activation.ParticipantA.Position, new Petal(activation.ParticipantA.Petal));
                 case SpecialSkillType.Sunburst:
-                    //TODO: should we remove causer? dont seem like its needed anymore => nah. cases like stripe break a sunburst
-                    PetalType targetType = activation.Combo != null ? activation.Combo.TargetPetalType : activation.CauserPetal?.PetalType ?? PetalType.None;
-                    if (targetType == PetalType.None)
-                        throw new InvalidOperationException("Sunburst activated with no valid target petal type.");
-                    return UseSunburstSkill(grid, activation.Position, targetType, SpecialSkillType.None, selfPetal, activation);
-                case SpecialSkillType.Butterfly:
-                    return UseButterflySkill(grid, activation.Position, selfPetal, reservedButterflyObstacleTargets);
                 case SpecialSkillType.StripeSunburst:
                 case SpecialSkillType.BouquetSunburst:
                 case SpecialSkillType.ButterflySunburst:
-                    if (activation.Combo == null)
-                        throw new InvalidOperationException($"{activation.SkillType} activated with no ComboData.");
-                    return UseSunburstSkill(grid, activation.Position, activation.Combo.TargetPetalType, activation.Combo.SunburstComboType, selfPetal, activation);
+                    return UseSunburstSkill(grid, activation);
+                case SpecialSkillType.Butterfly:
+                    return UseButterflySkill(grid, activation.ParticipantA.Position, new Petal(activation.ParticipantA.Petal), reservedButterflyObstacleTargets);
                 default:
-                    throw new ArgumentException("Skill not implemented.", nameof(activation.SkillType));
+                    throw new ArgumentException("Skill not implemented.", nameof(activation.EffectType));
             }
         }
 
@@ -103,7 +94,7 @@ namespace Skills
             return new SkillUseResult(matchGroup, representation);
         }
         
-        public static MatchGroup UseSunburstSkill(BoardCell[,] grid, Vector2Int position, PetalType targetType, Petal causer)
+        private static MatchGroup CreateSunburstMatchGroup(BoardCell[,] grid, PetalType targetType, Petal causer)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -119,25 +110,62 @@ namespace Skills
             return new MatchGroup(tiles, MatchShape.None, causer);
         }
 
-        private static SkillUseResult UseSunburstSkill(BoardCell[,] grid, Vector2Int position, PetalType targetType, SpecialSkillType comboSkillType, Petal causer, SkillActivation activation)
+        private static SkillUseResult UseSunburstSkill(BoardCell[,] grid, SkillActivation activation)
         {
-            if (comboSkillType == SpecialSkillType.None)
+            SkillParticipant sunburstParticipant;
+            SkillParticipant? combinationPartner;
+            if (activation.ParticipantA.Petal.Skill == SpecialSkillType.Sunburst)
             {
-                MatchGroup sunburstMatch = UseSunburstSkill(grid, position, targetType, causer);
-                Vector2Int sourceA = activation.Combo != null ? activation.Combo.SourceA : activation.Position;
-                Vector2Int sourceB = activation.Combo != null ? activation.Combo.SourceB : activation.Position;
-                var sunburstRepresentation = new SunburstComboRepresentationData(sourceA, sourceB, activation.EffectOrigin, new List<PetalChange>(), SpecialSkillType.Sunburst);
+                sunburstParticipant = activation.ParticipantA;
+                combinationPartner = activation.ParticipantB;
+            }
+            else if (activation.ParticipantB.HasValue && activation.ParticipantB.Value.Petal.Skill == SpecialSkillType.Sunburst)
+            {
+                sunburstParticipant = activation.ParticipantB.Value;
+                combinationPartner = activation.ParticipantA;
+            }
+            else
+            {
+                throw new InvalidOperationException("Sunburst effect has no Sunburst participant.");
+            }
+
+            Petal targetPetal;
+            SpecialSkillType replacementSkill;
+
+            if (combinationPartner.HasValue)
+            {
+                targetPetal = combinationPartner.Value.Petal;
+                replacementSkill = targetPetal.Skill;
+            }
+            else
+            {
+                targetPetal = activation.TriggerPetal ?? throw new InvalidOperationException("A chained Sunburst activation requires a trigger petal.");
+                replacementSkill = SpecialSkillType.None;
+            }
+
+            if (targetPetal.PetalType == PetalType.None)
+                throw new InvalidOperationException("Sunburst activated with no valid target petal type.");
+
+            Petal selfPetal = new Petal(sunburstParticipant.Petal);
+            Vector2Int participantA = activation.ParticipantA.Position;
+            Vector2Int? participantB = activation.ParticipantB?.Position;
+
+            if (replacementSkill == SpecialSkillType.None)
+            {
+                MatchGroup sunburstMatch = CreateSunburstMatchGroup(grid, targetPetal.PetalType, selfPetal);
+                var sunburstRepresentation = new SunburstRepresentationData(participantA, participantB, replacementSkill, new List<PetalChange>());
                 return new SkillUseResult(sunburstMatch, sunburstRepresentation);
             }
 
-            List<PetalChange> petalChanges = GiveSkillToPetalsOfType(grid, targetType, comboSkillType);
+            List<PetalChange> petalChanges = GiveSkillToPetalsOfType(grid, targetPetal.PetalType, replacementSkill);
 
             var mutatedPositions = new List<Vector2Int>(petalChanges.Count);
             foreach (PetalChange change in petalChanges)
                 mutatedPositions.Add(change.Position);
 
-            var matchGroup = new MatchGroup(mutatedPositions, MatchShape.None, causer);
-            var representation = new SunburstComboRepresentationData(activation.Combo.SourceA, activation.Combo.SourceB, activation.EffectOrigin, petalChanges, activation.SkillType);
+            var effectCauser = new Petal(targetPetal.PetalType, activation.EffectType);
+            var matchGroup = new MatchGroup(mutatedPositions, MatchShape.None, effectCauser);
+            var representation = new SunburstRepresentationData(participantA, participantB, replacementSkill, petalChanges);
 
             return new SkillUseResult(matchGroup, representation);
         }

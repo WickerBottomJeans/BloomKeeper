@@ -99,7 +99,8 @@ namespace DefaultNamespace.UI
 
                 if (petal.Skill != SpecialSkillType.None && !match.IsFromSkillCombo)
                 {
-                    activations.Add(new SkillActivation(cellPosition, petal.Skill, petal, match.Causer != null ? new Petal(match.Causer) : null));
+                    Petal triggerPetal = match.Causer != null ? new Petal(match.Causer) : null;
+                    activations.Add(new SkillActivation(petal.Skill, new SkillParticipant(cellPosition, petal), triggerPetal: triggerPetal));
                     triggeredSkillPositions.Add(cellPosition);
                 }
 

@@ -58,15 +58,11 @@ namespace DefaultNamespace
 
         private static List<SkillActivation> HandleSunburst(BoardCell[,] grid, Vector2Int cellA, Vector2Int cellB)
         {
-            Vector2Int sunburstCell = grid[cellA.x, cellA.y].Petal?.Skill == SpecialSkillType.Sunburst ? cellA : cellB;
-            Vector2Int targetCell = sunburstCell == cellA ? cellB : cellA;
-
-            Petal selfPetal = new Petal(grid[sunburstCell.x, sunburstCell.y].Petal);
-            Petal targetPetal = grid[targetCell.x, targetCell.y].Petal != null
-                ? new Petal(grid[targetCell.x, targetCell.y].Petal)
-                : null;
+            Petal petalA = new Petal(grid[cellA.x, cellA.y].Petal);
+            Petal petalB = new Petal(grid[cellB.x, cellB.y].Petal);
+            Petal targetPetal = petalA.Skill == SpecialSkillType.Sunburst ? petalB : petalA;
             SpecialSkillType targetSkill = targetPetal?.Skill ?? SpecialSkillType.None;
-            SpecialSkillType activationSkill = targetSkill switch
+            SpecialSkillType effectType = targetSkill switch
             {
                 SpecialSkillType.None => SpecialSkillType.Sunburst,
                 SpecialSkillType.StripedHorizontal => SpecialSkillType.StripeSunburst,
@@ -75,15 +71,12 @@ namespace DefaultNamespace
                 SpecialSkillType.Butterfly => SpecialSkillType.ButterflySunburst,
                 _ => throw new ArgumentOutOfRangeException(nameof(targetSkill), targetSkill, "Sunburst combo is not supported.")
             };
-            ComboData combo = new ComboData(targetPetal.PetalType, targetSkill, cellA, cellB);
-            Vector2 effectOrigin = ((Vector2)cellA + (Vector2)cellB) * 0.5f;
-
-            if (activationSkill != SpecialSkillType.Sunburst)
-                selfPetal = new Petal(targetPetal.PetalType, activationSkill);
+            var participantA = new SkillParticipant(cellA, petalA);
+            var participantB = new SkillParticipant(cellB, petalB);
 
             return new List<SkillActivation>
             {
-                new SkillActivation(sunburstCell, activationSkill, selfPetal, targetPetal, combo, effectOrigin)
+                new SkillActivation(effectType, participantA, participantB)
             };
         }
     }

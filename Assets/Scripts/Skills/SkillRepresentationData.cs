@@ -55,21 +55,19 @@ namespace Skills
         }
     }
 
-    public sealed class SunburstComboRepresentationData : SkillRepresentationData
+    public sealed class SunburstRepresentationData : SkillRepresentationData
     {
-        public Vector2Int SourceA { get; }
-        public Vector2Int SourceB { get; }
-        public Vector2 Origin { get; }
+        public Vector2Int ParticipantA { get; }
+        public Vector2Int? ParticipantB { get; }
+        public SpecialSkillType ReplacementSkill { get; }
         public IReadOnlyList<PetalChange> Changes { get; }
-        public SpecialSkillType ComboSkillType { get; }
 
-        public SunburstComboRepresentationData(Vector2Int sourceA, Vector2Int sourceB, Vector2 origin, IReadOnlyList<PetalChange> changes, SpecialSkillType comboSkillType)
+        public SunburstRepresentationData(Vector2Int participantA, Vector2Int? participantB, SpecialSkillType replacementSkill, IReadOnlyList<PetalChange> changes)
         {
-            SourceA = sourceA;
-            SourceB = sourceB;
-            Origin = origin;
+            ParticipantA = participantA;
+            ParticipantB = participantB;
+            ReplacementSkill = replacementSkill;
             Changes = changes;
-            ComboSkillType = comboSkillType;
         }
     }
 }

@@ -1,53 +1,40 @@
 ﻿using System.Collections.Generic;
 using Skills;
+using System;
 using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public class ComboData
+    public readonly struct SkillParticipant
     {
-        public PetalType TargetPetalType;
-        //TODO: It has such a specific name cuz that is the only use case for now. I bet later it would be renamed and used as something more generic
-        public SpecialSkillType SunburstComboType;
-        public Vector2Int SourceA;
-        public Vector2Int SourceB;
+        public Vector2Int Position { get; }
+        public Petal Petal { get; }
 
-        public ComboData(
-            PetalType targetPetalType,
-            SpecialSkillType sunburstComboType,
-            Vector2Int sourceA,
-            Vector2Int sourceB)
+        public SkillParticipant(Vector2Int position, Petal petal)
         {
-            TargetPetalType = targetPetalType;
-            SunburstComboType = sunburstComboType;
-            SourceA = sourceA;
-            SourceB = sourceB;
+            Position = position;
+            Petal = petal ?? throw new ArgumentNullException(nameof(petal));
         }
     }
     
-    public struct SkillActivation
+    public readonly struct SkillActivation
     {
-        public Vector2Int Position;
-        public Vector2 EffectOrigin;
-        public SpecialSkillType SkillType;
-        public ComboData Combo;
-        /// <summary>
-        /// Petal that get this skill executed
-        /// </summary>
-        public Petal CauserPetal;
+        public SpecialSkillType EffectType { get; }
 
-        //TODO: why do we still have a dedicated SkillType field when this exist???
-        public Petal SelfPetal;
+        public SkillParticipant ParticipantA { get; }
 
-        public SkillActivation(Vector2Int position, SpecialSkillType skillType, Petal selfPetal,
-            Petal causerPetal = null, ComboData combo = null, Vector2? effectOrigin = null)
+        // Only set when two swapped petals trigger a combo together.
+        public SkillParticipant? ParticipantB { get; }
+
+        // The petal whose effect triggered this skill in a chain.
+        public Petal TriggerPetal { get; }
+
+        public SkillActivation(SpecialSkillType effectType, SkillParticipant participantA, SkillParticipant? participantB = null, Petal triggerPetal = null)
         {
-            Position = position;
-            EffectOrigin = effectOrigin ?? position;
-            SkillType = skillType;
-            CauserPetal = causerPetal;
-            SelfPetal = selfPetal;
-            Combo = combo;
+            EffectType = effectType;
+            ParticipantA = participantA;
+            ParticipantB = participantB;
+            TriggerPetal = triggerPetal;
         }
     }
 
