@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Skills;
+using DefaultNamespace.Audio;
 using UnityEngine;
 
 namespace DefaultNamespace.UI
@@ -9,45 +9,45 @@ namespace DefaultNamespace.UI
     {
         private readonly PetalViewManager petalViewManager;
         private readonly TileViewManager tileViewManager;
-        private readonly SkillRepresentationOrchestrator skillRepresentationOrchestrator;
-        private readonly BoardLayout layout;
+        private readonly BoardAudioManager boardAudioManager;
 
-        public MatchPresentationCoordinator(PetalViewManager petalViewManager, TileViewManager tileViewManager, SkillRepresentationOrchestrator skillRepresentationOrchestrator, BoardLayout layout)
+        public MatchPresentationCoordinator(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardAudioManager boardAudioManager)
         {
             this.petalViewManager = petalViewManager;
             this.tileViewManager = tileViewManager;
-            this.skillRepresentationOrchestrator = skillRepresentationOrchestrator;
-            this.layout = layout;
+            this.boardAudioManager = boardAudioManager;
         }
 
-        public async UniTask Play(MatchResolveResult result, IReadOnlyList<SkillUseResult> skillResults, BoardCell[,] grid)
+        public async UniTask Play(IReadOnlyList<MatchGroupResolveResult> groupResults, IReadOnlyList<SkillPetalSpawn> skillPetalSpawns, IReadOnlyList<Vector2Int> adjacentTileChanges, BoardLayout boardLayout, BoardCell[,] grid)
         {
-            var skillResultsByMatch = new Dictionary<MatchGroup, SkillUseResult>(skillResults.Count);
-            foreach (SkillUseResult skillResult in skillResults)
-                skillResultsByMatch.Add(skillResult.MatchGroup, skillResult);
-
             var normalRemovals = new List<Vector2Int>();
-            var normalTileChanges = new List<Vector2Int>(result.AdjacentTileChanges);
+            var normalTileChanges = new List<Vector2Int>(adjacentTileChanges);
             var tasks = new List<UniTask>();
 
-            foreach (MatchGroupResolveResult groupResult in result.GroupResults)
+            foreach (MatchGroupResolveResult groupResult in groupResults)
             {
-                if (skillResultsByMatch.TryGetValue(groupResult.SourceMatchGroup, out SkillUseResult skillResult))
-                {
-                    tasks.Add(skillRepresentationOrchestrator.Play(skillResult, groupResult));
-                    continue;
-                }
-
                 AddNormalRemovals(groupResult, normalRemovals);
                 AddNormalTileChanges(groupResult, normalTileChanges);
                 if (groupResult.TriggeredSkillPositions.Count > 0)
                     tasks.Add(petalViewManager.PlayAboutToExecuteShake(groupResult.TriggeredSkillPositions));
             }
 
+            if (normalRemovals.Count > 0)
+                boardAudioManager.PlayMatchClear();
+
+            var skillCreationPositions = new HashSet<Vector2Int>();
+            foreach (SkillPetalSpawn spawn in skillPetalSpawns)
+            {
+                foreach (Vector2Int position in spawn.ContributorPositions)
+                    skillCreationPositions.Add(position);
+            }
+
+            normalRemovals.RemoveAll(skillCreationPositions.Contains);
+
             tasks.Add(tileViewManager.PlayTileChanges(normalTileChanges, grid));
             tasks.Add(petalViewManager.PlayNormalRemovals(normalRemovals));
+            tasks.Add(petalViewManager.PlaySkillPetalCreations(skillPetalSpawns, boardLayout));
             await UniTask.WhenAll(tasks);
-            await petalViewManager.PlaySpawnedPetals(result.SpawnedPetals, layout);
         }
 
         private static void AddNormalRemovals(MatchGroupResolveResult groupResult, List<Vector2Int> normalRemovals)

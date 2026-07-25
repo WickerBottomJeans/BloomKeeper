@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using System;
 using UnityEngine;
@@ -13,9 +14,11 @@ namespace DefaultNamespace
         private LevelCompletionFlow levelCompletionFlow;
         private HomeFlow homeFlow;
         private LevelSessionFlow levelSessionFlow;
+        private SettingsFlow settingsFlow;
         private ResultFlow resultFlow;
         private LevelSessionResult currentResult;
         private bool isInFatalState;
+        [SerializeField] private MusicStateController musicStateController;
 
         private void Awake()
         {
@@ -40,7 +43,9 @@ namespace DefaultNamespace
             levelCompletionFlow = new LevelCompletionFlow(progressionService);
             homeFlow = new HomeFlow();
             levelSessionFlow = new LevelSessionFlow();
+            settingsFlow = new SettingsFlow();
             resultFlow = new ResultFlow(new LevelCatalog(LevelLoader.LoadLevelMetas()));
+            levelSessionFlow.SettingsRequested += HandleSettingsRequested;
         }
 
         private void EnterBootFlow()
@@ -157,6 +162,7 @@ namespace DefaultNamespace
 
         private async UniTask EnterHome()
         {
+            musicStateController.EnterHome();
             homeFlow.StartLevelRequested += HandleStartLevelRequested;
             await homeFlow.Enter();
         }
@@ -164,6 +170,11 @@ namespace DefaultNamespace
         private void HandleStartLevelRequested(int levelId)
         {
             RunFlowOperation(() => StartLevelAsync(levelId));
+        }
+
+        private void HandleSettingsRequested()
+        {
+            settingsFlow.Enter();
         }
 
         private async UniTask StartLevelAsync(int levelId)
@@ -175,6 +186,7 @@ namespace DefaultNamespace
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
                 levelSessionFlow.QuitLevelRequested += HandleQuitLevelRequested;
                 levelSessionFlow.PrepareLevel(levelId);
+                musicStateController.EnterGameplay();
                 return UniTask.CompletedTask;
             }, levelSessionFlow.StartPreparedLevel);
         }
@@ -371,6 +383,7 @@ namespace DefaultNamespace
                 levelSessionFlow.QuitLevelRequested += HandleQuitLevelRequested;
                 levelSessionFlow.LeaveLevel();
                 levelSessionFlow.PrepareLevel(levelId);
+                musicStateController.EnterGameplay();
                 return UniTask.CompletedTask;
             }, levelSessionFlow.StartPreparedLevel);
         }
@@ -389,6 +402,7 @@ namespace DefaultNamespace
                 levelSessionFlow.QuitLevelRequested += HandleQuitLevelRequested;
                 levelSessionFlow.LeaveLevel();
                 levelSessionFlow.PrepareLevel(levelId);
+                musicStateController.EnterGameplay();
                 return UniTask.CompletedTask;
             }, levelSessionFlow.StartPreparedLevel);
         }

@@ -39,7 +39,7 @@ namespace DefaultNamespace.UI
             SetTip(tipText, tipSprite);
 
             GetClosedPositions(out float upperY, out float lowerY);
-            sequence = DOTween.Sequence().SetUpdate(true);
+            sequence = DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
             sequence.Join(upperJaw.DOAnchorPosY(upperY, duration).SetEase(closeEase));
             sequence.Join(lowerJaw.DOAnchorPosY(lowerY, duration).SetEase(closeEase));
             return PlaySequence(sequence);
@@ -50,7 +50,7 @@ namespace DefaultNamespace.UI
             KillSequence();
 
             GetOpenPositions(out float upperY, out float lowerY);
-            sequence = DOTween.Sequence().SetUpdate(true);
+            sequence = DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
             sequence.Join(upperJaw.DOAnchorPosY(upperY, duration).SetEase(openEase));
             sequence.Join(lowerJaw.DOAnchorPosY(lowerY, duration).SetEase(openEase));
             return PlaySequence(sequence);

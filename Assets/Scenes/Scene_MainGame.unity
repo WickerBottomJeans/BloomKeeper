@@ -350,6 +350,9 @@ GameObject:
   - component: {fileID: 438607907}
   - component: {fileID: 438607908}
   - component: {fileID: 438607909}
+  - component: {fileID: 438607910}
+  - component: {fileID: 438607911}
+  - component: {fileID: 438607912}
   m_Layer: 0
   m_Name: 'GameServices '
   m_TagString: Untagged
@@ -384,6 +387,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c008a05eca0b40139aa7e90af1ef6cc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.GameFlowController
+  musicStateController: {fileID: 438607911}
 --- !u!114 &438607905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -409,6 +413,8 @@ MonoBehaviour:
   canvas: {fileID: 1778504641}
   uiRoot: {fileID: 2100000001}
   overlayRoot: {fileID: 1536116834}
+  pauseMenuPrefab: {fileID: 2005328267664071053, guid: ccf3b7663b4c4ce479e17c261283628d, type: 3}
+  settingsPrefab: {fileID: 715275403567547333, guid: ddc5b70845faad841ba66ae7ac4ca828, type: 3}
   testerTogglePrefab: {fileID: 7168729738933843627, guid: 3073f85176c8204478725179b3c68a8a, type: 3}
   winScreenPrefab: {fileID: 9033160764233551407, guid: e25a04012b8990848ab73dfc2c25368e, type: 3}
 --- !u!114 &438607906
@@ -465,6 +471,48 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.ApplicationInputController
   uiAction: {fileID: 7727032971491509709, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   gameBoardAction: {fileID: 8421343764587312106, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+--- !u!114 &438607910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438607901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 726643bb790391745b2e588bae96ee85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.Audio.AudioService
+  musicMixerGroup: {fileID: 6307199687280244253, guid: 88053e196e28dec4ebf41301db1cec77, type: 2}
+  gameplaySfxMixerGroup: {fileID: 1652345625730471208, guid: 88053e196e28dec4ebf41301db1cec77, type: 2}
+  uiSfxMixerGroup: {fileID: 51835174561366121, guid: 88053e196e28dec4ebf41301db1cec77, type: 2}
+  musicCrossfadeDuration: 1
+--- !u!114 &438607911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438607901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cbe803137ca21d41b4c15362f4063f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.Audio.MusicStateController
+  homeMusicCue: {fileID: 11400000, guid: 78961c774de84ee7bdcc2719b9e67e4f, type: 2}
+  gameplayMusicCue: {fileID: 11400000, guid: a53fad9f39474d5eb905e6d77632d340, type: 2}
+--- !u!114 &438607912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438607901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2528fe6cc98946643ba83eb47cf69869, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.Settings.UserSettingsService
 --- !u!1 &439805997
 GameObject:
   m_ObjectHideFlags: 0

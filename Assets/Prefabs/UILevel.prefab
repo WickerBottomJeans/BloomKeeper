@@ -1707,6 +1707,8 @@ MonoBehaviour:
   objectiveWidgetsRoot: {fileID: 5139484960908946422}
   widgetPrefab: {fileID: 7807731194648386863}
   separatedChildrenView: {fileID: 6765557476896379689}
+  objectiveProgressCue: {fileID: 11400000, guid: ca1ff1e34eab4a0a9b7f8a0d662e7790, type: 2}
+  objectiveCompleteCue: {fileID: 11400000, guid: 7d310988993e453b8b4f4b830068ddb3, type: 2}
 --- !u!114 &3579170645461853470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2653,6 +2655,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.ObjectiveWidget
   icon: {fileID: 4441338785939362229}
   label: {fileID: 5653441810172481779}
+  progressBounceScale: 1.15
+  progressBounceDuration: 0.3
+  completedAlpha: 0.45
 --- !u!114 &932020697380267430
 MonoBehaviour:
   m_ObjectHideFlags: 0

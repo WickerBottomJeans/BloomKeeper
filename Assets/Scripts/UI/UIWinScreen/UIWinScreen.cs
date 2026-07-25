@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,7 +15,9 @@ namespace UI
         [SerializeField] private StarBoard starBoard;
         [SerializeField] private UIPopupEntranceAnimator entranceAnimator;
         [SerializeField] private GameObject[] entranceVfx = Array.Empty<GameObject>();
+        [SerializeField, Min(0f)] private float entranceVfxActivationSpan;
         [SerializeField] private float starRevealDuration = 0.6f;
+        [SerializeField] private AudioCue winCue;
 
         private int pendingStarCount;
         
@@ -32,6 +35,7 @@ namespace UI
 
         private void OnEnable()
         {
+            AudioService.Instance.PlayStinger(winCue);
             entranceVfxCancellation = new CancellationTokenSource();
             OnEntranceDone(entranceVfxCancellation.Token).Forget();
         }
@@ -65,9 +69,22 @@ namespace UI
                 return;
             }
 
-            SetEntranceVfxActive(true);
             starBoard.DisplayStars(pendingStarCount, starRevealDuration);
+            await PlayEntranceVfx(cancellationToken);
+        }
 
+        private async UniTask PlayEntranceVfx(CancellationToken cancellationToken)
+        {
+            if (entranceVfx.Length == 0) return;
+
+            float activationGap = entranceVfx.Length > 1 ? entranceVfxActivationSpan / (entranceVfx.Length - 1) : 0f;
+
+            for (int index = 0; index < entranceVfx.Length; index++)
+            {
+                entranceVfx[index].SetActive(true);
+                if (index < entranceVfx.Length - 1)
+                    await UniTask.Delay(TimeSpan.FromSeconds(activationGap), true, cancellationToken: cancellationToken);
+            }
         }
 
         private void ValidateEntranceVfxInactive()

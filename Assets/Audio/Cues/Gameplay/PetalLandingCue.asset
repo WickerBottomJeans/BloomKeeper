@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb081a4581031de4ab17ede1c08e83a3, type: 3}
+  m_Name: PetalLandingCue
+  m_EditorClassIdentifier:
+  clips:
+  - {fileID: 8300000, guid: ec6e95585f73ba646a18d81a6bab7521, type: 3}
+  - {fileID: 8300000, guid: e56486af3235e034fae70f3d11d3cc7b, type: 3}
+  - {fileID: 8300000, guid: a309b3d55b0741949809197b0727025e, type: 3}
+  - {fileID: 8300000, guid: 97cad3d796753c04f8fa27d07d844b8e, type: 3}
+  bus: 1
+  volume: 1
+  minimumPitch: 1
+  maximumPitch: 1

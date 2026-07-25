@@ -55,6 +55,12 @@
 - Keep function calls and signatures compact. Never format parameters or arguments one per line.
 - Library calls, such as DOTween APIs, are exempt when the library's conventional formatting places each parameter or argument on its own line for readability.
 
+## Code Organization
+
+- Declare every project enum in `Assets/Scripts/Shared/Enum.cs`. Do not create standalone enum files or declare enums inside other project types.
+- Do not explicitly use the `internal` keyword in project-owned code until the project defines its own assembly boundaries with `.asmdef` files. Leave third-party and vendor code unchanged.
+- `GameFlowController` is always an application-level orchestrator. It may order flow transitions and make semantic calls to the systems that own work, but it must not own feature configuration, presentation assets or tuning, domain logic, or subsystem implementation. Put those responsibilities in their dedicated owning flow, service, director, or presentation component.
+
 ## Verification
 
 - Do not build, run tests, launch Unity, or perform other verification unless the user explicitly asks for it.

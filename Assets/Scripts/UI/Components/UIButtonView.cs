@@ -51,7 +51,8 @@ namespace DefaultNamespace.UI
 
             isPressed = true;
             visualRoot.DOKill();
-            visualRoot.DOScale(baseScale * pressedScale, scaleDuration).SetEase(Ease.OutQuad).SetUpdate(true);
+            visualRoot.DOScale(baseScale * pressedScale, scaleDuration).SetEase(Ease.OutQuad).SetUpdate(true)
+                .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -72,7 +73,8 @@ namespace DefaultNamespace.UI
         {
             isPressed = false;
             visualRoot.DOKill();
-            visualRoot.DOScale(baseScale, scaleDuration).SetEase(Ease.OutQuad).SetUpdate(true);
+            visualRoot.DOScale(baseScale, scaleDuration).SetEase(Ease.OutQuad).SetUpdate(true)
+                .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
         }
 
         private void HandleClicked()

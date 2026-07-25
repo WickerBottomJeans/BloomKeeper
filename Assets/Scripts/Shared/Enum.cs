@@ -7,6 +7,13 @@
         ClearSpiderWeb = 3,
     }
 
+    public enum ObjectiveUpdateState
+    {
+        NoChange,
+        Progressed,
+        Completed
+    }
+
     public enum ConstrainerType
     {
         MoveLimit = 1,
@@ -99,5 +106,12 @@
         Blue = 2,
         Orange = 3,
         Purple = 4
+    }
+
+    public enum AudioBus
+    {
+        Music,
+        GameplaySfx,
+        UiSfx
     }
 }

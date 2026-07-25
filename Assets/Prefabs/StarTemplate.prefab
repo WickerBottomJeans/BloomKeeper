@@ -54,6 +54,7 @@ MonoBehaviour:
   onSprite: {fileID: -7611271547229767461, guid: 77034e43295fa344f9f08ec55ed06914, type: 3}
   offSprite: {fileID: -8338233527242540095, guid: 77034e43295fa344f9f08ec55ed06914, type: 3}
   toggleAnimationTime: 0.12
+  starEarnedCue: {fileID: 11400000, guid: 5ddfaa58cd974280b4626ebb992339e2, type: 2}
 --- !u!222 &4458303935223695457
 CanvasRenderer:
   m_ObjectHideFlags: 0

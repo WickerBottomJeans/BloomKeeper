@@ -9,7 +9,7 @@ namespace DefaultNamespace
     /// </summary>
     public class AuthFlow
     {
-        private const string GuestPlayButtonText = "Play as guest";
+        private const string GuestPlayButtonText = "<size=70%>Play as</size> <size=120%>Guest</size>";
 
         private readonly PlayFabGuestLoginService guestLoginService;
         private bool isLoginInProgress;

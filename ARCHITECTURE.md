@@ -241,6 +241,14 @@ flowchart LR
 
 `UIManager` is a partial singleton facade. Each feature-specific partial file owns the prefab instance, event binding, and show/hide behavior for one UI area.
 
+### Reference-Driven Objective HUD
+
+The objective HUD keeps references to the live `IObjective` instances created for the level. `ObjectiveBoard` binds each spawned widget to a getter for one objective view item. An objective event therefore travels through the UI layers only as a refresh notification; the updated objective view data is not copied through `LevelSessionManager`, `UIManager`, `UILevelUI`, and `UILevelHud`.
+
+On refresh, each widget pulls its latest `ObjectiveViewData` through its stored getter and compares the remaining amount with the amount it previously displayed. That comparison controls presentation only: unchanged items stay still, progressed items animate, and newly completed items animate and enter their completed visual state. `ObjectiveManager` remains the authority for gameplay completion and the level's win condition.
+
+`ObjectiveBoard` coordinates one objective sound per refresh after collecting the widgets' presentation outcomes. A completion sound takes priority over a progress sound when several items change together. The board owns when objective audio is presented; `AudioService` continues to own playback, pooling, mixer routing, volume, and pause behavior.
+
 Current UI areas include:
 
 - authentication;

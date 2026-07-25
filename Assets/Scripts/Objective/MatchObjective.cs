@@ -35,7 +35,8 @@ namespace DefaultNamespace
             return goals.ConvertAll(g => new ObjectiveViewData
             {
                 spriteKey = SpriteKeyHelper.GetPetalSpriteKey(g.petalType, SpecialSkillType.None),
-                objectiveText = Mathf.Max(0, g.amount).ToString()
+                objectiveText = Mathf.Max(0, g.amount).ToString(),
+                remainingAmount = Mathf.Max(0, g.amount)
             });
         }
     }

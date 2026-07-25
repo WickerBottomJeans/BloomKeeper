@@ -13,11 +13,11 @@ public static class PetalViewAnimator
     public static UniTask PlayDestroy(PetalView view, float delay = 0f)
     {
         view.KillVisualAnimation();
-        Sequence seq = DOTween.Sequence();
+        Sequence seq = DOTween.Sequence().SetLink(view.gameObject, LinkBehaviour.KillOnDestroy);
         seq.AppendInterval(delay);
         seq.Append(view.VisualTransform.DOScale(Vector3.zero, 0.2f).SetEase(Ease.InBack));
         seq.Join(view.spriteRenderer.DOFade(0f, 0.2f));
-        return seq.ToUniTask();
+        return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
     public static UniTask PlayDisappear(PetalView view, float duration)
@@ -25,7 +25,8 @@ public static class PetalViewAnimator
         view.KillVisualAnimation();
         return view.VisualTransform.DOScale(Vector3.zero, duration)
             .SetEase(Ease.InBack)
-            .ToUniTask();
+            .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
+            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
     public static UniTask PlayAboutToExecute(PetalView view)
@@ -34,7 +35,7 @@ public static class PetalViewAnimator
         view.UseAboutToExecuteMaterial();
         view.VisualTransform.localScale = view.TargetScale;
 
-        Sequence seq = DOTween.Sequence();
+        Sequence seq = DOTween.Sequence().SetLink(view.gameObject, LinkBehaviour.KillOnDestroy);
         seq.Append(view.VisualTransform.DOScale(view.TargetScale * 1.08f, 0.18f).SetEase(Ease.InOutSine));
         seq.Append(view.VisualTransform.DOScale(view.TargetScale * 0.94f, 0.18f).SetEase(Ease.InOutSine));
         seq.Append(view.VisualTransform.DOScale(view.TargetScale, 0.18f).SetEase(Ease.InOutSine));
@@ -55,15 +56,22 @@ public static class PetalViewAnimator
             view.spriteRenderer.color.g,
             view.spriteRenderer.color.b, 0f);
 
-        Sequence seq = DOTween.Sequence();
+        Sequence seq = DOTween.Sequence().SetLink(view.gameObject, LinkBehaviour.KillOnDestroy);
         seq.Append(view.VisualTransform.DOScale(view.TargetScale, 0.2f).SetEase(Ease.OutBack));
         seq.Join(view.spriteRenderer.DOFade(1f, 0.2f));
-        return seq.ToUniTask();
+        return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
     public static UniTask PlayDrop(PetalView view, Vector2 targetPos, float cellSize)
     {
         return PlayJellyishMove(view, targetPos, cellSize, 0.25f, Ease.InQuad);
+    }
+
+    public static UniTask PlayGather(PetalView view, Vector2 targetPos, float duration = 0.3f)
+    {
+        view.KillActiveAnimation();
+        return view.transform.DOMove(targetPos, duration).SetEase(Ease.InBack).SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
+            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
     /// <summary>
@@ -94,7 +102,8 @@ public static class PetalViewAnimator
 
         //If the petal basically isnt moving
         if (displacement.sqrMagnitude <= Mathf.Epsilon)
-            return view.transform.DOMove(targetPos, duration).SetEase(moveEase).ToUniTask();
+            return view.transform.DOMove(targetPos, duration).SetEase(moveEase).SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
+                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
 
         PrepareDirectionalJelly(view, displacement, cellSize, duration, out Vector3 stretchScale,
             out Vector3 squashScale);
@@ -102,14 +111,18 @@ public static class PetalViewAnimator
         float squashDuration = duration * view.DirectionalJellySquashDurationRatio;
         float settleDuration = duration * view.DirectionalJellySettleDurationRatio;
 
-        Sequence seq = DOTween.Sequence();
+        Sequence seq = DOTween.Sequence().SetLink(view.gameObject, LinkBehaviour.KillOnDestroy);
         seq.SetTarget(view.transform);
         seq.Join(view.transform.DOMove(targetPos, duration).SetEase(moveEase));
         seq.Join(view.StretchAxis.DOScale(stretchScale, duration).SetEase(Ease.OutQuad));
         seq.Append(view.StretchAxis.DOScale(squashScale, squashDuration).SetEase(Ease.InOutSine));
         seq.Append(view.StretchAxis.DOScale(Vector3.one, settleDuration).SetEase(Ease.OutBack));
-        seq.OnKill(view.ResetDirectionalJelly);
-        return seq.ToUniTask();
+        seq.OnKill(() =>
+        {
+            if (view != null)
+                view.ResetDirectionalJelly();
+        });
+        return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
     private static void PrepareDirectionalJelly(PetalView view, Vector2 displacement, float cellSize, float duration, out Vector3 stretchScale, out Vector3 squashScale)
@@ -131,18 +144,24 @@ public static class PetalViewAnimator
         Vector2 flightDirection = targetWorldPosition - (Vector2)view.transform.position;
         float targetAngle = Vector2.SignedAngle(Vector2.up, flightDirection);
 
-        Tween flapTween = view.VisualTransform.DOScaleX(0f, 0.1f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+        Tween flapTween = view.VisualTransform.DOScaleX(0f, 0.1f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo)
+            .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy);
 
         try
         {
-            await UniTask.WhenAll(view.transform.DOMove(targetWorldPosition, duration).SetEase(Ease.Linear).ToUniTask(),
+            await UniTask.WhenAll(view.transform.DOMove(targetWorldPosition, duration).SetEase(Ease.Linear)
+                    .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
+                    .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy()),
                 view.VisualTransform.DORotate(new Vector3(0f, 0f, targetAngle), duration, RotateMode.Fast)
-                    .SetEase(Ease.OutQuad).ToUniTask());
+                    .SetEase(Ease.OutQuad)
+                    .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
+                    .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy()));
         }
         finally
         {
             flapTween.Kill();
-            view.VisualTransform.localScale = view.TargetScale;
+            if (view != null)
+                view.VisualTransform.localScale = view.TargetScale;
         }
     }
 
@@ -151,14 +170,16 @@ public static class PetalViewAnimator
         view.KillVisualAnimation();
         await view.VisualTransform.DOScale(Vector3.zero, duration * 0.4f)
             .SetEase(Ease.InBack)
-            .ToUniTask();
+            .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
+            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
 
         view.Init(petal, cellSize);
         view.VisualTransform.localScale = Vector3.zero;
 
         await view.VisualTransform.DOScale(view.TargetScale, duration * 0.6f)
             .SetEase(Ease.OutBack)
-            .ToUniTask();
+            .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
+            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
     public static UniTask PlayComboMerge(PetalView viewA, PetalView viewB)
@@ -167,7 +188,7 @@ public static class PetalViewAnimator
         viewB.KillActiveAnimation();
         Vector3 midpoint = (viewA.transform.position + viewB.transform.position) / 2f;
 
-        Sequence seq = DOTween.Sequence();
+        Sequence seq = DOTween.Sequence().SetLink(viewA.gameObject, LinkBehaviour.KillOnDestroy);
 
         // Stand up - quick anticipation bounce
         seq.Append(viewA.VisualTransform.DOScale(viewA.TargetScale * 1.2f, 0.15f).SetEase(Ease.OutQuad));
@@ -177,14 +198,14 @@ public static class PetalViewAnimator
         seq.Append(viewA.transform.DOMove(midpoint, 0.25f).SetEase(Ease.InOutQuad));
         seq.Join(viewB.transform.DOMove(midpoint, 0.25f).SetEase(Ease.InOutQuad));
 
-        return seq.ToUniTask();
+        return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, viewA.GetCancellationTokenOnDestroy());
     }
 
     public static UniTask PlayComboSpinAndDisappear(PetalView viewA, PetalView viewB, float duration)
     {
         viewA.KillVisualAnimation();
         viewB.KillVisualAnimation();
-        Sequence seq = DOTween.Sequence();
+        Sequence seq = DOTween.Sequence().SetLink(viewA.gameObject, LinkBehaviour.KillOnDestroy);
         float spinDuration = duration * (5f / 7f);
         float disappearDuration = duration * (2f / 7f);
 
@@ -200,6 +221,6 @@ public static class PetalViewAnimator
         seq.Join(viewB.VisualTransform.DOScale(Vector3.zero, disappearDuration).SetEase(Ease.InBack));
         seq.Join(viewB.spriteRenderer.DOFade(0f, disappearDuration));
 
-        return seq.ToUniTask();
+        return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, viewA.GetCancellationTokenOnDestroy());
     }
 }

@@ -1,3 +1,4 @@
+using DefaultNamespace.Audio;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private Sprite onSprite;
         [SerializeField] private Sprite offSprite;
         [SerializeField] private float toggleAnimationTime = 0.12f;
+        [SerializeField] private AudioCue starEarnedCue;
 
         private Sequence toggleSequence;
         private bool isOn;
@@ -33,11 +35,16 @@ namespace DefaultNamespace.UI
             this.isOn = isOn;
             hasState = true;
             toggleSequence?.Kill();
-            toggleSequence = DOTween.Sequence();
+            toggleSequence = DOTween.Sequence().SetLink(gameObject, LinkBehaviour.KillOnDestroy);
             if (delay > 0f)
                 toggleSequence.AppendInterval(delay);
             toggleSequence.Append(transform.DOScaleX(0f, toggleAnimationTime * 0.5f).SetEase(Ease.InQuad));
-            toggleSequence.AppendCallback(() => image.sprite = isOn ? onSprite : offSprite);
+            toggleSequence.AppendCallback(() =>
+            {
+                image.sprite = isOn ? onSprite : offSprite;
+                if (isOn)
+                    AudioService.Instance.PlaySfx(starEarnedCue);
+            });
             toggleSequence.Append(transform.DOScaleX(1f, toggleAnimationTime * 0.5f).SetEase(Ease.OutQuad));
         }
     }

@@ -26,7 +26,7 @@ namespace DefaultNamespace.UI
             var groupResults = new List<MatchGroupResolveResult>(matches.Count);
             var removedPositions = new List<Vector2Int>();
             var clearedPetalTypes = new List<PetalType>();
-            var pendingSpawns = new List<(Vector2Int, PetalType, SpecialSkillType)>();
+            var pendingSpawns = new List<SkillPetalSpawn>();
             var adjacentTileChanges = new List<Vector2Int>();
             int cleanedSpiderWebTileCount = 0;
 
@@ -48,13 +48,13 @@ namespace DefaultNamespace.UI
             return new MatchResolveResult(groupResults, clearedPetalTypes, activations, pendingSpawns, adjacentTileChanges, cleanedSpiderWebTileCount);
         }
 
-        private static MatchGroupResolveResult ProcessMatch(MatchGroup match, BoardCell[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget, List<SkillActivation> activations, List<Vector2Int> removedPositions, List<PetalType> clearedPetalTypes, List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns)
+        private static MatchGroupResolveResult ProcessMatch(MatchGroup match, BoardCell[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget, List<SkillActivation> activations, List<Vector2Int> removedPositions, List<PetalType> clearedPetalTypes, List<SkillPetalSpawn> pendingSpawns)
         {
             TryQueueSkillSpawn(match, grid, swapOrigin, swapTarget, pendingSpawns);
             return ClearMatchTiles(match, grid, activations, removedPositions, clearedPetalTypes);
         }
 
-        private static void TryQueueSkillSpawn(MatchGroup match, BoardCell[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget, List<(Vector2Int, PetalType, SpecialSkillType)> pendingSpawns)
+        private static void TryQueueSkillSpawn(MatchGroup match, BoardCell[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget, List<SkillPetalSpawn> pendingSpawns)
         {
             SpecialSkillType? spawnSkill = match.Shape switch
             {
@@ -80,7 +80,7 @@ namespace DefaultNamespace.UI
                 matchedType = PetalType.None;
             }
             Vector2Int spawnPos = DetermineSpawnPos(match, swapOrigin, swapTarget);
-            pendingSpawns.Add((spawnPos, matchedType, spawnSkill.Value));
+            pendingSpawns.Add(new SkillPetalSpawn(match.TilePositions, spawnPos, matchedType, spawnSkill.Value));
         }
 
         private static MatchGroupResolveResult ClearMatchTiles(MatchGroup match, BoardCell[,] grid, List<SkillActivation> activations, List<Vector2Int> removedPositions, List<PetalType> clearedPetalTypes)
@@ -111,10 +111,10 @@ namespace DefaultNamespace.UI
             return new MatchGroupResolveResult(match, impacts, triggeredSkillPositions);
         }
 
-        private static void ApplyPendingSpawns(BoardCell[,] grid, List<(Vector2Int pos, PetalType petalType, SpecialSkillType skill)> pendingSpawns)
+        private static void ApplyPendingSpawns(BoardCell[,] grid, List<SkillPetalSpawn> pendingSpawns)
         {
-            foreach (var (pos, petalType, skill) in pendingSpawns)
-                grid[pos.x, pos.y].Petal = PetalFactory.CreatePetal(petalType, skill);
+            foreach (SkillPetalSpawn spawn in pendingSpawns)
+                grid[spawn.SpawnPosition.x, spawn.SpawnPosition.y].Petal = PetalFactory.CreatePetal(spawn.PetalType, spawn.SkillType);
         }
 
         /// <summary>

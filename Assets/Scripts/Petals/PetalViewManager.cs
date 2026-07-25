@@ -147,24 +147,42 @@ public class PetalViewManager : MonoBehaviour
         return PetalViewAnimator.PlayFly(view, targetWorldPosition, duration);
     }
     
-    public async UniTask PlaySpawnedPetals(IReadOnlyList<(Vector2Int Position, PetalType PetalType, SpecialSkillType SkillType)> spawns, BoardLayout boardLayout)
+    public async UniTask PlaySkillPetalCreations(IReadOnlyList<SkillPetalSpawn> spawns, BoardLayout boardLayout)
     {
         var tasks = new List<UniTask>();
 
-        foreach (var (pos, petalType, skillType) in spawns)
+        foreach (SkillPetalSpawn spawn in spawns)
+            tasks.Add(PlaySkillPetalCreation(spawn, boardLayout));
+
+        await UniTask.WhenAll(tasks);
+    }
+
+    private async UniTask PlaySkillPetalCreation(SkillPetalSpawn spawn, BoardLayout boardLayout)
+    {
+        Vector2 spawnWorldPosition = boardLayout.GetCellWorldPos(spawn.SpawnPosition.x, spawn.SpawnPosition.y);
+        var contributorViews = new List<PetalView>(spawn.ContributorPositions.Count);
+        var tasks = new List<UniTask>(spawn.ContributorPositions.Count);
+
+        foreach (Vector2Int position in spawn.ContributorPositions)
         {
-            Vector2 worldPos = boardLayout.GetCellWorldPos(pos.x, pos.y);
-
-            PetalView view = pool.Get();
-            view.transform.position = worldPos;
-            view.Init(new Petal(petalType, skillType), boardLayout.CellSize);
-
-            petalViews[pos.x, pos.y] = view;
-
-            tasks.Add(PetalViewAnimator.PlaySpawn(view));
+            PetalView contributorView = petalViews[position.x, position.y];
+            petalViews[position.x, position.y] = null;
+            contributorViews.Add(contributorView);
+            tasks.Add(PetalViewAnimator.PlayGather(contributorView, spawnWorldPosition));
         }
 
         await UniTask.WhenAll(tasks);
+
+        foreach (PetalView contributorView in contributorViews)
+            pool.Release(contributorView);
+
+        PetalView skillPetalView = pool.Get();
+        skillPetalView.transform.position = spawnWorldPosition;
+        skillPetalView.Init(new Petal(spawn.PetalType, spawn.SkillType), boardLayout.CellSize);
+        Color color = skillPetalView.spriteRenderer.color;
+        color.a = 1f;
+        skillPetalView.spriteRenderer.color = color;
+        petalViews[spawn.SpawnPosition.x, spawn.SpawnPosition.y] = skillPetalView;
     }
 
     public UniTask PlayComboMerge(Vector2Int sourceA, Vector2Int sourceB)

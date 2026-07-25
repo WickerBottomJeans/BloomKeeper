@@ -89,6 +89,7 @@ GameObject:
   - component: {fileID: 2335980783627333457}
   - component: {fileID: 3306055520626384364}
   - component: {fileID: 3072941106413724101}
+  - component: {fileID: 5298127142792875418}
   m_Layer: 5
   m_Name: UICustomButton
   m_TagString: Untagged
@@ -133,7 +134,7 @@ MonoBehaviour:
   targetImage: {fileID: 6467289766725992323}
   label: {fileID: 5147385096349629307}
   styleConfig: {fileID: 11400000, guid: 17464a8806b707042afbacb2554f0933, type: 2}
-  variant: 2
+  variant: 1
   pressedScale: 0.92
   scaleDuration: 0.2
 --- !u!222 &2335980783627333457
@@ -218,6 +219,21 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5298127142792875418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7111589098431199243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bba0418bcf8803142a5b05ed8a503712, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.UIButtonAudioFeedback
+  button: {fileID: 3072941106413724101}
+  buttonDownCue: {fileID: 11400000, guid: fa4d43d8952c479897603eb45f8a218d, type: 2}
+  buttonReleaseCue: {fileID: 11400000, guid: 508397696d184f3ea3f10ff9bcccd31b, type: 2}
 --- !u!1 &8827129137856771762
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,7 +299,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Hello friends
+  m_text: Done
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 988f9c1a4fb7bfd4ea15d04635ada9e7, type: 2}
   m_sharedMaterial: {fileID: 8773637459940156084, guid: 988f9c1a4fb7bfd4ea15d04635ada9e7, type: 2}
@@ -310,7 +326,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 60.65
+  m_fontSize: 93.35
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -349,7 +365,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 50, y: 25, z: 50, w: 25}
+  m_margin: {x: 75, y: 50, z: 75, w: 50}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

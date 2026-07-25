@@ -96,11 +96,14 @@ namespace DefaultNamespace.VFX
             try
             {
                 Vector2 destinationWorldPosition = layout.GetCellWorldPos(destination.x, destination.y);
-                await stripe.transform.DOMove(destinationWorldPosition, duration).SetEase(Ease.Linear).ToUniTask();
+                await stripe.transform.DOMove(destinationWorldPosition, duration).SetEase(Ease.Linear)
+                    .SetLink(stripe.gameObject, LinkBehaviour.KillOnDestroy)
+                    .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, stripe.GetCancellationTokenOnDestroy());
             }
             finally
             {
-                stripedSkillPool.Release(stripe);
+                if (stripe != null)
+                    stripedSkillPool.Release(stripe);
             }
         }
 

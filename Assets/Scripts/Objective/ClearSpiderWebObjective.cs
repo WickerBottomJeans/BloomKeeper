@@ -32,7 +32,8 @@ namespace DefaultNamespace
                 new ObjectiveViewData
                 {
                     spriteKey = SpriteKeyHelper.GetObjectiveSpriteKey(ObjectiveType),
-                    objectiveText = spiderWebCount.ToString()
+                    objectiveText = spiderWebCount.ToString(),
+                    remainingAmount = spiderWebCount
                 }
             };
         }

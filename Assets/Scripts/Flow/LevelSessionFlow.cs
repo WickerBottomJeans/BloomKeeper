@@ -7,6 +7,7 @@ namespace DefaultNamespace
     {
         public event Action<LevelSessionResult> LevelFinished;
         public event Action QuitLevelRequested;
+        public event Action SettingsRequested;
 
         private bool isPaused;
 
@@ -70,6 +71,7 @@ namespace DefaultNamespace
             ApplicationInputController.Instance.SetGameBoardInputActive(false);
             LevelSessionManager.Instance.PauseCurrentLevelSession();
             UIManager.Instance.PauseMenuResumeRequested += HandleResumeRequested;
+            UIManager.Instance.PauseMenuSettingsRequested += HandleSettingsRequested;
             UIManager.Instance.PauseMenuQuitRequested += HandleQuitRequested;
             UIManager.Instance.ShowPauseMenu();
         }
@@ -92,10 +94,19 @@ namespace DefaultNamespace
             QuitLevelRequested?.Invoke();
         }
 
+        private void HandleSettingsRequested()
+        {
+            if (!isPaused)
+                throw new InvalidOperationException("Cannot open Settings through the pause menu while the level session is not paused.");
+
+            SettingsRequested?.Invoke();
+        }
+
         private void ExitPaused()
         {
             UIManager.Instance.HidePauseMenu();
             UIManager.Instance.PauseMenuResumeRequested -= HandleResumeRequested;
+            UIManager.Instance.PauseMenuSettingsRequested -= HandleSettingsRequested;
             UIManager.Instance.PauseMenuQuitRequested -= HandleQuitRequested;
             isPaused = false;
         }

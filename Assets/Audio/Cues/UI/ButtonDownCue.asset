@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb081a4581031de4ab17ede1c08e83a3, type: 3}
+  m_Name: ButtonDownCue
+  m_EditorClassIdentifier:
+  clips:
+  - {fileID: 8300000, guid: e66b53cab058c0d4bba3f1a48ab56cad, type: 3}
+  - {fileID: 8300000, guid: 7127a64912f6a47488f1dedf84263f2a, type: 3}
+  - {fileID: 8300000, guid: 5dca4aa6988e1524da9072b0fe0deafd, type: 3}
+  bus: 2
+  volume: 1
+  minimumPitch: 1
+  maximumPitch: 1

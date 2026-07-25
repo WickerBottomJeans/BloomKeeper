@@ -232,6 +232,7 @@ MonoBehaviour:
   label: {fileID: 5706726376292242503}
   retryButton: {fileID: 5356052349597807898}
   homeButton: {fileID: 4529591362098625411}
+  loseCue: {fileID: 11400000, guid: 2a3c01d4be2d4eb096b0754395c60077, type: 2}
 --- !u!1 &2819290747153295894
 GameObject:
   m_ObjectHideFlags: 0

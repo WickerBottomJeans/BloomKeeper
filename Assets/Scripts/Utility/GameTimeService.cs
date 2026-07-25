@@ -9,6 +9,8 @@ namespace DefaultNamespace.Utility
         private static readonly HashSet<object> pauseOwners = new();
         private static float timeScaleBeforePause;
 
+        public static event Action<bool> PauseStateChanged;
+
         public static bool IsPaused => pauseOwners.Count > 0;
 
         public static void RequestPause(object owner)
@@ -22,6 +24,7 @@ namespace DefaultNamespace.Utility
 
             timeScaleBeforePause = Time.timeScale;
             Time.timeScale = 0f;
+            PauseStateChanged?.Invoke(true);
         }
 
         public static void ReleasePause(object owner)
@@ -34,6 +37,7 @@ namespace DefaultNamespace.Utility
                 return;
 
             Time.timeScale = timeScaleBeforePause;
+            PauseStateChanged?.Invoke(false);
         }
     }
 }

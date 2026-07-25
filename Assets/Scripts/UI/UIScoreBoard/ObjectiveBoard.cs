@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DefaultNamespace;
+using DefaultNamespace.Audio;
 using UnityEngine;
 
 namespace DefaultNamespace.UI
@@ -10,6 +11,8 @@ namespace DefaultNamespace.UI
         [SerializeField] private RectTransform objectiveWidgetsRoot;
         [SerializeField] private ObjectiveWidget widgetPrefab;
         [SerializeField] private SeparatedChildrenView separatedChildrenView;
+        [SerializeField] private AudioCue objectiveProgressCue;
+        [SerializeField] private AudioCue objectiveCompleteCue;
 
         private readonly List<(ObjectiveWidget widget, Func<ObjectiveViewData> getData)> spawnedWidgets = new();
 
@@ -44,8 +47,22 @@ namespace DefaultNamespace.UI
 
         public void Refresh()
         {
+            bool hasProgress = false;
+            bool hasCompletion = false;
+
             foreach (var (widget, getData) in spawnedWidgets)
-                widget.Display(getData());
+            {
+                ObjectiveUpdateState updateState = widget.PresentUpdate(getData());
+                if (updateState == ObjectiveUpdateState.Completed)
+                    hasCompletion = true;
+                else if (updateState == ObjectiveUpdateState.Progressed)
+                    hasProgress = true;
+            }
+
+            if (hasCompletion)
+                AudioService.Instance.PlaySfx(objectiveCompleteCue);
+            else if (hasProgress)
+                AudioService.Instance.PlaySfx(objectiveProgressCue);
         }
 
         public void Clear()

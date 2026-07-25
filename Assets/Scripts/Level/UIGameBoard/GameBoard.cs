@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
+using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using Petals;
@@ -22,6 +23,7 @@ public class GameBoard : MonoBehaviour
     [SerializeField] private TileViewManager tileViewManager;
     [SerializeField] private BoardVFXManager boardVFXManager;
     [SerializeField] private SkillRepresentationOrchestrator skillRepresentationOrchestrator;
+    [SerializeField] private BoardAudioManager boardAudioManager;
 
     [SerializeField] private BoardInputHandler boardInputHandler;
 
@@ -40,7 +42,7 @@ public class GameBoard : MonoBehaviour
     private List<(Vector2Int from, Vector2Int to)> pendingMoves;
     private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
     private List<SkillUseResult> pendingSkillResults = new List<SkillUseResult>();
-    private MatchPresentationCoordinator matchPresentationCoordinator;
+    private BoardPresentationCoordinator boardPresentationCoordinator;
     private bool isResolvingPlayerMove;
     private int currentCascadeDepth;
 
@@ -72,8 +74,7 @@ public class GameBoard : MonoBehaviour
         boardVFXManager.Init(layout);
         skillRepresentationOrchestrator.Init(
             petalViewManager, tileViewManager, boardVFXManager, layout, grid);
-        matchPresentationCoordinator = new MatchPresentationCoordinator(
-            petalViewManager, tileViewManager, skillRepresentationOrchestrator, layout);
+        boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager, skillRepresentationOrchestrator, boardAudioManager, layout, grid);
 
         boardInputHandler.Init(layout, cam);
 
@@ -141,7 +142,7 @@ public class GameBoard : MonoBehaviour
         currentCascadeDepth = 0;
 
         PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
-        await petalViewManager.OnSwap(swapOrigin, swapTarget, layout.CellSize);
+        await boardPresentationCoordinator.PlaySwap(swapOrigin, swapTarget);
 
         pendingSkillActivations.AddRange(SkillDetector.DetectOnSwap(grid, swapOrigin, swapTarget));
 
@@ -170,7 +171,7 @@ public class GameBoard : MonoBehaviour
 
     private async UniTask EnterSwappingBack()
     {
-        await petalViewManager.OnSwap(swapTarget, swapOrigin, layout.CellSize);
+        await boardPresentationCoordinator.PlayInvalidSwapBack(swapTarget, swapOrigin);
         TransitionTo(BoardState.Idle);
     }
 
@@ -182,7 +183,7 @@ public class GameBoard : MonoBehaviour
         OnGameplayEvent?.Invoke(new BoardResolvedEvent(result, currentCascadeDepth, isResolvingPlayerMove));
         OnGameplayEvent?.Invoke(new PetalsClearedEvent(result.ClearedPetalTypes));
         if (result.CleanedSpiderWebTileCount > 0) OnGameplayEvent?.Invoke(new SpiderWebClearedEvent(result.CleanedSpiderWebTileCount));
-        await matchPresentationCoordinator.Play(result, pendingSkillResults, grid);
+        await boardPresentationCoordinator.PlayMatch(result, pendingSkillResults);
         pendingSkillResults.Clear();
         TransitionTo(BoardState.ActivatingSkills);
     }
@@ -210,14 +211,14 @@ public class GameBoard : MonoBehaviour
     private async UniTask EnterGravity()
     {
         pendingMoves = GravityController.Apply(grid);
-        await petalViewManager.OnGravityApplied(pendingMoves, layout);
+        await boardPresentationCoordinator.PlayGravity(pendingMoves);
         TransitionTo(BoardState.Filling);
     }
 
     private async UniTask EnterFilling()
     {
         List<Vector2Int> filled = PetalFiller.Fill(grid);
-        await petalViewManager.OnFilled(filled, layout, grid);
+        await boardPresentationCoordinator.PlayFill(filled);
         TransitionTo(BoardState.Cascade);
     }
 
@@ -252,7 +253,7 @@ public class GameBoard : MonoBehaviour
     {
         currentCascadeDepth = 0;
         List<Vector2Int> shuffled = BoardShuffler.Shuffle(grid);
-        await petalViewManager.OnShuffled(shuffled, layout, grid);
+        await boardPresentationCoordinator.PlayShuffle(shuffled);
         TransitionTo(BoardState.Cascade);
     }
 

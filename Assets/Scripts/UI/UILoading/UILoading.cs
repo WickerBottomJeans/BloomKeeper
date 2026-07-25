@@ -39,7 +39,8 @@ namespace DefaultNamespace.UI
             rotationTween = image.rectTransform.DOLocalRotate(baseImageEulerAngles + new Vector3(0f, 0f, -360f), secondsPerRotation, RotateMode.FastBeyond360)
                 .SetEase(Ease.Linear)
                 .SetLoops(-1, LoopType.Restart)
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
         }
 
         public void SetText(string text = DefaultText)
@@ -53,6 +54,7 @@ namespace DefaultNamespace.UI
             spriteChangeSequence?.Kill();
             spriteChangeSequence = DOTween.Sequence()
                 .SetUpdate(true)
+                .SetLink(gameObject, LinkBehaviour.KillOnDestroy)
                 .Append(image.rectTransform.DOScale(baseImageScale * collapsedScale, animationPhaseDuration).SetEase(Ease.InQuad))
                 .AppendCallback(AdvanceSprite)
                 .Append(image.rectTransform.DOScale(baseImageScale, animationPhaseDuration).SetEase(Ease.OutBack))

@@ -1,4 +1,5 @@
 using System;
+using DefaultNamespace.Audio;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,7 @@ namespace UI
         [SerializeField] private TextMeshProUGUI label;
         [SerializeField] private Button retryButton;
         [SerializeField] private Button homeButton;
+        [SerializeField] private AudioCue loseCue;
 
         public event Action RetryRequested;
         public event Action HomeRequested;
@@ -18,6 +20,11 @@ namespace UI
         {
             retryButton.onClick.AddListener(HandleRetryClicked);
             homeButton.onClick.AddListener(HandleHomeClicked);
+        }
+
+        private void OnEnable()
+        {
+            AudioService.Instance.PlayStinger(loseCue);
         }
 
         public void Display(string message)
