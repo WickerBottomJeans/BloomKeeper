@@ -40,15 +40,14 @@ public static class MatchDetector
         HashSet<Vector2Int> consumed = new HashSet<Vector2Int>();
         List<MatchGroup> results = new List<MatchGroup>();
 
-        //TODO: problem, why square < 3
-        // Detection priority: Five/Four > Cross > T/L > Three > Square.
+        // Detection priority: Five/Four > Cross > T/L > Square > Three.
         DetectLongRuns(horizontalRuns, consumed, results, minimumLength: 4);
         DetectLongRuns(verticalRuns, consumed, results, minimumLength: 4);
         DetectCross(horizontalRuns, verticalRuns, consumed, results);
         DetectTAndL(horizontalRuns, verticalRuns, consumed, results);
+        DetectSquare2x2(grid, cols, rows, consumed, results);
         DetectLongRuns(horizontalRuns, consumed, results);
         DetectLongRuns(verticalRuns, consumed, results);
-        DetectSquare2x2(grid, cols, rows, consumed, results);
         return results;
     }
     
