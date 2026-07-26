@@ -1,24 +1,45 @@
-using TMPro;
+using DefaultNamespace.Audio;
 using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public class UIMoveCounter : MonoBehaviour
+    public class UIMoveCounter : MonoBehaviour, IWarningView
     {
-        [SerializeField] private TextMeshProUGUI label;
+        [SerializeField] private UIJellyText label;
+        [SerializeField] private UIWarningRipple warningRipple;
+        [SerializeField] private UIShake warningShake;
+        [SerializeField] private AudioCue warningCue;
+
+        private bool isWarningActive;
 
         public void Display(ConstrainerViewData viewData)
         {
             gameObject.SetActive(true);
-            if (label == null) return;
-            label.text = viewData.constrainerText;
+            label.SetText(viewData.constrainerText);
+            SetWarningActive(viewData.isWarning);
+        }
+
+        public void SetWarningActive(bool isActive)
+        {
+            if (isWarningActive == isActive) return;
+
+            isWarningActive = isActive;
+            if (!isActive)
+            {
+                warningRipple.Stop();
+                return;
+            }
+
+            warningRipple.Play();
+            warningShake.Play();
+            AudioService.Instance.PlaySfx(warningCue);
         }
 
         public void Clear()
         {
+            label.Clear();
+            SetWarningActive(false);
             gameObject.SetActive(false);
-            if (label == null) return;
-            label.text = string.Empty;
         }
     }
 }

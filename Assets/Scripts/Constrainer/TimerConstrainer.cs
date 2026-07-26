@@ -6,6 +6,8 @@ namespace DefaultNamespace
     public class TimerConstrainer : IConstrainer, ITickableConstrainer
     {
         private readonly float initialSeconds;
+        private readonly int warningAtRemaining;
+        private readonly bool hasValidWarningConfiguration;
         private float remainingSeconds;
         private int lastDisplayedSeconds;
         private bool hasFailed;
@@ -14,6 +16,10 @@ namespace DefaultNamespace
         {
             initialSeconds = json.timeLimitSeconds;
             remainingSeconds = json.timeLimitSeconds;
+            warningAtRemaining = json.warningAtRemaining;
+            hasValidWarningConfiguration = warningAtRemaining > 0 && warningAtRemaining < initialSeconds;
+            if (!hasValidWarningConfiguration)
+                Debug.LogWarning($"Timer warning is disabled because warningAtRemaining must be greater than zero and lower than timeLimitSeconds. Received warningAtRemaining={warningAtRemaining}, timeLimitSeconds={initialSeconds}.");
             lastDisplayedSeconds = GetDisplayedSeconds();
         }
 
@@ -48,7 +54,8 @@ namespace DefaultNamespace
             return new ConstrainerViewData
             {
                 constrainerType = ConstrainerType.TimeLimit,
-                constrainerText = GetDisplayedSeconds().ToString()
+                constrainerText = GetDisplayedSeconds().ToString(),
+                isWarning = hasValidWarningConfiguration && GetDisplayedSeconds() > 0 && GetDisplayedSeconds() <= warningAtRemaining
             };
         }
 

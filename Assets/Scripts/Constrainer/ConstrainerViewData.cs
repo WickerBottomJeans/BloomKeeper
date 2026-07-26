@@ -4,5 +4,6 @@ namespace DefaultNamespace
     {
         public ConstrainerType constrainerType;
         public string constrainerText;
+        public bool isWarning;
     }
 }

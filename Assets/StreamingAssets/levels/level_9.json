@@ -23,7 +23,7 @@
     { "type": 3, "spiderWebsToClear": 10 }
   ],
   "constrainers": [
-    { "type": 1, "moveLimit": 38 },
-    { "type": 2, "timeLimitSeconds": 120 }
+    { "type": 1, "moveLimit": 38, "warningAtRemaining": 5 },
+    { "type": 2, "timeLimitSeconds": 120, "warningAtRemaining": 10 }
   ]
 }

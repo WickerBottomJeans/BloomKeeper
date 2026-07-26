@@ -1,10 +1,13 @@
 using System;
+using UnityEngine;
 
 namespace DefaultNamespace
 {
     public class MoveConstrainer : IConstrainer, IGameplayEventHandler
     {
         private readonly int initialMoveCount;
+        private readonly int warningAtRemaining;
+        private readonly bool hasValidWarningConfiguration;
         private int remainingMoveCount;
         private bool hasFailed;
 
@@ -12,6 +15,10 @@ namespace DefaultNamespace
         {
             initialMoveCount = json.moveLimit;
             remainingMoveCount = json.moveLimit;
+            warningAtRemaining = json.warningAtRemaining;
+            hasValidWarningConfiguration = warningAtRemaining > 0 && warningAtRemaining < initialMoveCount;
+            if (!hasValidWarningConfiguration)
+                Debug.LogWarning($"Move warning is disabled because warningAtRemaining must be greater than zero and lower than moveLimit. Received warningAtRemaining={warningAtRemaining}, moveLimit={initialMoveCount}.");
         }
 
         public event Action<ConstrainerFailureData> OnFailed;
@@ -41,7 +48,8 @@ namespace DefaultNamespace
             return new ConstrainerViewData
             {
                 constrainerType = ConstrainerType.MoveLimit,
-                constrainerText = remainingMoveCount.ToString()
+                constrainerText = remainingMoveCount.ToString(),
+                isWarning = hasValidWarningConfiguration && remainingMoveCount > 0 && remainingMoveCount <= warningAtRemaining
             };
         }
     }

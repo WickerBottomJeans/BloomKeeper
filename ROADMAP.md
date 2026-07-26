@@ -28,7 +28,7 @@ This roadmap deliberately prioritizes engineering depth over adding many similar
 - [x] Enforce `highestUnlockedLevel` in the level map and show an appropriate locked state.
 - [x] Connect the win-screen Next action and define behavior for the final available level.
 - [x] Verify home, retry, next, loss, and repeated-level paths cannot create duplicate subscriptions or input during transitions.
-- [ ] Fix Butterfly targeting so multiple Butterfly effects spread across eligible web tiles instead of repeatedly targeting one web tile, while preserving normal random-tile targeting behavior.
+- [x] Fix Butterfly targeting so multiple Butterfly effects spread across eligible web tiles instead of repeatedly targeting one web tile, while preserving normal random-tile targeting behavior.
 - [ ] Replace obsolete tests based on `Tile[,]` and removed petal values with tests for the current `BoardCell[,]` model.
 - [ ] Add regression coverage for important match shapes, skill combinations, chained skills, obstacles, gravity, deadlocks, scoring, and end-of-turn decisions.
 
@@ -131,7 +131,7 @@ Levels and important tuning can be changed without rebuilding the client, while 
 - [ ] Verify safe areas and layout on iPhone 11 and iPad Air 5.
 - [ ] Define and verify constrained or letterboxed portrait behavior on Windows.
 - [ ] Produce an Android build and perform emulator smoke testing; do not claim physical-device QA without a device.
-- [ ] Add music, gameplay SFX, UI audio, mixer groups, and persistent volume controls.
+- [x] Add music, gameplay SFX, UI audio, mixer groups, and persistent volume controls.
 - [ ] Add haptics with a persistent enable/disable setting.
 - [ ] Localize the complete player-facing UI into English and Vietnamese.
 - [ ] Verify translated text expansion and font coverage without layout overlap.

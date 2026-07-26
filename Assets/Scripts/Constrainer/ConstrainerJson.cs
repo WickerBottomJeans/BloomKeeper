@@ -5,5 +5,6 @@ namespace DefaultNamespace
         public ConstrainerType type;
         public int moveLimit;
         public float timeLimitSeconds;
+        public int warningAtRemaining;
     }
 }

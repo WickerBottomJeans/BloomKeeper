@@ -73,7 +73,7 @@ Goal: prevent the first thirty seconds from looking like an unfinished engineeri
 - [ ] Set intentional product identity, version, icon, window behavior, and portrait presentation for the Windows build.
 - [ ] Ensure the first-time player can understand mouse/touch interaction and the current objective without developer explanation.
 - [ ] Perform one focused visual-consistency pass on loading, authentication, map, gameplay HUD, dialogs, win, and loss screens.
-- [ ] Add a pause menu with Resume, Settings, and confirmed Quit Level actions. Pausing must stop level input and timer progress; quitting must abandon the attempt and return Home without submitting a result.
+- [x] Add a pause menu with Resume, Settings, and confirmed Quit Level actions. Pausing must stop level input and timer progress; quitting must abandon the attempt and return Home without submitting a result.
 - [ ] Add a Settings entry from Home and the pause menu with persistent music and SFX volume controls.
 - [ ] Add a minimal licensed audio pass if the current build is silent: one music loop plus clear swap, match, skill, win, loss, and button feedback routed through the persisted volume settings. Do not build a large audio feature set.
 - [ ] Give every showcased skill activation a coordinated presentation pass with intentional timing, distinctive VFX, and matching SFX; treat this as one presentation overhaul rather than attaching isolated sounds.
