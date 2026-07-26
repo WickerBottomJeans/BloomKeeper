@@ -60,7 +60,7 @@ public class GameBoard : MonoBehaviour
     }
 
     public event Action<IGameplayEvent> OnGameplayEvent;
-    public event Action OnTurnSettled;
+    public event Action OnBoardSettled;
 
     public void Init(BoardCell[,] grid, Rect playAreaScreenRect)
     {
@@ -227,13 +227,8 @@ public class GameBoard : MonoBehaviour
         List<MatchGroup> cascadeMatches = MatchDetector.Detect(grid);
         if (cascadeMatches.Count == 0)
         {
-            // Turn settles here after cascades end. The flag prevents shuffle or other board-only resolves from reporting a player turn.
-            if (isResolvingPlayerMove)
-            {
-                isResolvingPlayerMove = false;
-                currentCascadeDepth = 0;
-                OnTurnSettled?.Invoke();
-            }
+            isResolvingPlayerMove = false;
+            currentCascadeDepth = 0;
             TransitionTo(BoardState.Idle);
             return;
         }
@@ -246,7 +241,12 @@ public class GameBoard : MonoBehaviour
     private void EnterIdle()
     {
         if (!DeadlockDetector.HasValidMove(grid))
+        {
             TransitionTo(BoardState.Shuffling);
+            return;
+        }
+
+        OnBoardSettled?.Invoke();
     }
 
     private async UniTask EnterShuffling()

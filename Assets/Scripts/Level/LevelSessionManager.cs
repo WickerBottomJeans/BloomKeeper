@@ -59,7 +59,7 @@ namespace DefaultNamespace
             if (gameBoardInstance != null)
             {
                 gameBoardInstance.OnGameplayEvent -= HandleGameplayEvent;
-                gameBoardInstance.OnTurnSettled -= HandleTurnSettled;
+                gameBoardInstance.OnBoardSettled -= HandleBoardSettled;
                 Destroy(gameBoardInstance.gameObject);
                 gameBoardInstance = null;
             }
@@ -182,7 +182,7 @@ namespace DefaultNamespace
             gameBoardInstance = Instantiate(gameBoardPrefab);
             gameBoardInstance.Init(grid, playAreaScreenRect);
             gameBoardInstance.OnGameplayEvent += HandleGameplayEvent;
-            gameBoardInstance.OnTurnSettled += HandleTurnSettled;
+            gameBoardInstance.OnBoardSettled += HandleBoardSettled;
         }
         
         private void HandleLevelComplete()
@@ -282,7 +282,7 @@ namespace DefaultNamespace
             return starCap;
         }
 
-        private void HandleTurnSettled()
+        private void HandleBoardSettled()
         {
             if (isLevelEnded) return;
 
