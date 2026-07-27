@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using System;
+using DefaultNamespace.UI;
 
 namespace DefaultNamespace
 {
@@ -15,5 +16,10 @@ namespace DefaultNamespace
     {
         Type HandledEventType { get; }
         void Handle(IGameplayEvent e);
+    }
+
+    public interface IObjectiveBoardCellTargetProvider
+    {
+        IReadOnlyList<ObjectiveBoardCellTargetGroup> GetTargetGroups(BoardCell[,] grid);
     }
 }

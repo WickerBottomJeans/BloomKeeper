@@ -161,6 +161,7 @@ Goal: remove avoidable reasons for an interviewer to doubt the work.
 - [ ] Update `ARCHITECTURE.md` so it describes the implementation that is actually being released.
 - [ ] Mark `ROADMAP.md` clearly as long-term work so unchecked production features do not make the portfolio appear unfinished.
 - [ ] Review comments in representative gameplay, flow, authentication, and backend files; resolve, rewrite, or remove informal and stale TODO comments.
+- [ ] Remove Butterfly-specific objective data and target-assignment state from `SkillExecutionContext`; give Butterfly its own batch-scoped dependencies so unrelated skill executors receive only shared execution data.
 - [ ] Do not perform broad refactors merely to make code look different.
 - [ ] Replace or remove the machine-specific launch script as a public setup mechanism.
 - [ ] Audit tracked files for secrets, generated output, local IDE state, obsolete recovery files, and misleading documentation.

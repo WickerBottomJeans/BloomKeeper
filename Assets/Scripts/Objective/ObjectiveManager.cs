@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using DefaultNamespace.UI;
+
 namespace DefaultNamespace
 {
     public class ObjectiveManager
@@ -42,6 +44,27 @@ namespace DefaultNamespace
         }
 
         public bool AllComplete => objectives.All(o => o.CheckObjective());
+
+        public List<ObjectiveViewData> GetViewData()
+        {
+            List<ObjectiveViewData> viewData = new();
+            foreach (IObjective objective in objectives)
+                viewData.AddRange(objective.GetViewData());
+            return viewData;
+        }
+
+        public IReadOnlyList<ObjectiveBoardCellTargetGroup> GetTargetGroups(BoardCell[,] grid)
+        {
+            var targetGroups = new List<ObjectiveBoardCellTargetGroup>();
+
+            foreach (IObjective objective in objectives)
+            {
+                if (objective is not IObjectiveBoardCellTargetProvider targetProvider) continue;
+                targetGroups.AddRange(targetProvider.GetTargetGroups(grid));
+            }
+
+            return targetGroups;
+        }
 
         private void RegisterHandlers(IObjective objective)
         {

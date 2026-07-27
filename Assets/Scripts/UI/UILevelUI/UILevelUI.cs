@@ -17,15 +17,15 @@ namespace DefaultNamespace.UI
             remove => levelHud.PauseRequested -= value;
         }
 
-        public void Init(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
+        public void Init(List<ObjectiveViewData> objectiveViewData, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
         {
-            levelHud.Init(objectives, constrainerViewData, scoreTarget, scoreMilestones, starCap);
+            levelHud.Init(objectiveViewData, constrainerViewData, scoreTarget, scoreMilestones, starCap);
             boosterBoard.Show();
         }
 
-        public void RefreshObjectives()
+        public void RefreshObjectives(List<ObjectiveViewData> objectiveViewData)
         {
-            levelHud.RefreshObjectives();
+            levelHud.RefreshObjectives(objectiveViewData);
         }
 
         public void DisplayConstrainers(List<ConstrainerViewData> viewData)

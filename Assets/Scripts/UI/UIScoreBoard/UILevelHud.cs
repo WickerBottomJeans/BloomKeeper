@@ -20,17 +20,17 @@ public class UILevelHud : MonoBehaviour
         pauseButton.onClick.AddListener(HandlePauseClicked);
     }
 
-    public void Init(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
+    public void Init(List<ObjectiveViewData> objectiveViewData, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
     {
         ClearConstrainers();
-        objectiveBoard.Display(objectives);
+        objectiveBoard.Display(objectiveViewData);
         DisplayConstrainers(constrainerViewData);
         scoreBoard.Init(scoreTarget, scoreMilestones, starCap);
     }
 
-    public void RefreshObjectives()
+    public void RefreshObjectives(List<ObjectiveViewData> objectiveViewData)
     {
-        objectiveBoard.Refresh();
+        objectiveBoard.Refresh(objectiveViewData);
     }
 
     public void DisplayConstrainers(List<ConstrainerViewData> viewData)

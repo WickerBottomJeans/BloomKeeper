@@ -60,23 +60,12 @@ namespace DefaultNamespace
         {
             Petal petalA = new Petal(grid[cellA.x, cellA.y].Petal);
             Petal petalB = new Petal(grid[cellB.x, cellB.y].Petal);
-            Petal targetPetal = petalA.Skill == SpecialSkillType.Sunburst ? petalB : petalA;
-            SpecialSkillType targetSkill = targetPetal?.Skill ?? SpecialSkillType.None;
-            SpecialSkillType effectType = targetSkill switch
-            {
-                SpecialSkillType.None => SpecialSkillType.Sunburst,
-                SpecialSkillType.StripedHorizontal => SpecialSkillType.StripeSunburst,
-                SpecialSkillType.StripedVertical => SpecialSkillType.StripeSunburst,
-                SpecialSkillType.Bomb => SpecialSkillType.BouquetSunburst,
-                SpecialSkillType.Butterfly => SpecialSkillType.ButterflySunburst,
-                _ => throw new ArgumentOutOfRangeException(nameof(targetSkill), targetSkill, "Sunburst combo is not supported.")
-            };
             var participantA = new SkillParticipant(cellA, petalA);
             var participantB = new SkillParticipant(cellB, petalB);
 
             return new List<SkillActivation>
             {
-                new SkillActivation(effectType, participantA, participantB)
+                new SkillActivation(SpecialSkillType.Sunburst, participantA, participantB)
             };
         }
     }

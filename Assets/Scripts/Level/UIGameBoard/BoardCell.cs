@@ -20,8 +20,8 @@ namespace DefaultNamespace.UI
         public bool IsGravityAffected() => Tile != null && Tile.IsGravityAffected();
         public bool CanReceiveNewPetal() => !IsVoid && Tile != null && Tile.CanReceiveNewPetal(Petal);
         public bool CanSwapPetal() => !IsVoid && Tile != null && Tile.CanSwapPetal(Petal);
-        public bool HasClearableObstacle() => !IsVoid && Tile != null && Tile.HasClearableObstacle();
         public bool CanClearPetal() => !IsVoid && Tile != null && Tile.CanClearPetal(Petal);
+        public int GetClearEffectCapacity() => !IsVoid && Tile != null ? Tile.GetClearEffectCapacity(Petal) : 0;
 
         public TileImpactResult ApplyClearEffect()
         {

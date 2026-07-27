@@ -12,14 +12,14 @@ namespace DefaultNamespace.UI
 
         public event Action LevelPauseRequested;
 
-        public void ShowLevelUI(List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
+        public void ShowLevelUI(List<ObjectiveViewData> objectiveViewData, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
         {
             if (levelUIPrefab == null) return;
             if (levelUIInstance == null)
                 levelUIInstance = Instantiate(levelUIPrefab, uiRoot);
             levelUIInstance.PauseRequested -= HandleLevelPauseRequested;
             levelUIInstance.PauseRequested += HandleLevelPauseRequested;
-            levelUIInstance.Init(objectives, constrainerViewData, scoreTarget, scoreMilestones, starCap);
+            levelUIInstance.Init(objectiveViewData, constrainerViewData, scoreTarget, scoreMilestones, starCap);
             levelUIInstance.Show();
         }
 
@@ -30,9 +30,9 @@ namespace DefaultNamespace.UI
             levelUIInstance?.Hide();
         }
 
-        public void RefreshLevelObjectives()
+        public void RefreshLevelObjectives(List<ObjectiveViewData> objectiveViewData)
         {
-            levelUIInstance?.RefreshObjectives();
+            levelUIInstance?.RefreshObjectives(objectiveViewData);
         }
 
         public void RefreshLevelConstrainers(List<ConstrainerViewData> viewData)

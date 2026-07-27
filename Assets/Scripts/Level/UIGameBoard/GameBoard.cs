@@ -43,6 +43,7 @@ public class GameBoard : MonoBehaviour
     private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
     private List<SkillUseResult> pendingSkillResults = new List<SkillUseResult>();
     private BoardPresentationCoordinator boardPresentationCoordinator;
+    private ObjectiveManager objectiveManager;
     private bool isResolvingPlayerMove;
     private int currentCascadeDepth;
 
@@ -62,10 +63,11 @@ public class GameBoard : MonoBehaviour
     public event Action<IGameplayEvent> OnGameplayEvent;
     public event Action OnBoardSettled;
 
-    public void Init(BoardCell[,] grid, Rect playAreaScreenRect)
+    public void Init(BoardCell[,] grid, Rect playAreaScreenRect, ObjectiveManager objectiveManager)
     {
         cam = Camera.main;
         this.grid = grid;
+        this.objectiveManager = objectiveManager;
 
         layout = BoardLayoutCalculator.Calculate(grid.GetLength(0), grid.GetLength(1), cam, paddingX, paddingY, playAreaScreenRect);
 
@@ -181,9 +183,9 @@ public class GameBoard : MonoBehaviour
         pendingMatches.Clear();
         pendingSkillActivations.AddRange(result.SkillActivations);
         OnGameplayEvent?.Invoke(new BoardResolvedEvent(result, currentCascadeDepth, isResolvingPlayerMove));
+        await boardPresentationCoordinator.PlayMatch(result, pendingSkillResults);
         OnGameplayEvent?.Invoke(new PetalsClearedEvent(result.ClearedPetalTypes));
         if (result.CleanedSpiderWebTileCount > 0) OnGameplayEvent?.Invoke(new SpiderWebClearedEvent(result.CleanedSpiderWebTileCount));
-        await boardPresentationCoordinator.PlayMatch(result, pendingSkillResults);
         pendingSkillResults.Clear();
         TransitionTo(BoardState.ActivatingSkills);
     }
@@ -198,7 +200,8 @@ public class GameBoard : MonoBehaviour
 
         pendingMatches = new List<MatchGroup>();
         pendingSkillResults.Clear();
-        List<SkillUseResult> skillResults = SkillManager.UseSkills(grid, pendingSkillActivations);
+        IReadOnlyList<ObjectiveBoardCellTargetGroup> objectiveTargetGroups = objectiveManager.GetTargetGroups(grid);
+        List<SkillUseResult> skillResults = SkillManager.UseSkills(grid, pendingSkillActivations, objectiveTargetGroups);
         pendingSkillResults.AddRange(skillResults);
 
         foreach (SkillUseResult result in skillResults)

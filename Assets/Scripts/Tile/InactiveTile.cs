@@ -13,7 +13,6 @@ namespace DefaultNamespace
         public override bool IsGravityAffected() => false;
         public override bool CanReceiveNewPetal(Petal petal) => false;
         public override bool CanSwapPetal(Petal petal) => false;
-        public override bool HasClearableObstacle() => false;
         public override bool CanClearPetal(Petal petal) => false;
         public override TileImpactResult ApplyClearEffect(Petal petal) => new TileImpactResult(null, false);
     }

@@ -53,9 +53,6 @@
         Bomb = 3,
         Sunburst = 4,
         Butterfly = 5,
-        StripeSunburst = 6,
-        BouquetSunburst = 7,
-        ButterflySunburst = 8,
     }
     
     public enum MatchShape

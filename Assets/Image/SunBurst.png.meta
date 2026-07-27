@@ -1,82 +1,10 @@
 fileFormatVersion: 2
-guid: 0908483f100247f41a03660be1e001b9
+guid: 3d544a3b894803142a320627360b4af6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3843481520171083586
-    second: PetalSun_0
-  - first:
-      213: 4640435257433880991
-    second: PetalSun_1
-  - first:
-      213: -4201143180410038814
-    second: PetalSun_2
-  - first:
-      213: -7487334421110490825
-    second: PetalSun_3
-  - first:
-      213: -4036100810854750766
-    second: PetalSun_4
-  - first:
-      213: -5208602868360685565
-    second: PetalSun_5
-  - first:
-      213: 7979007778805088938
-    second: PetalSun_6
-  - first:
-      213: -2604105775507746347
-    second: PetalSun_7
-  - first:
-      213: -4465859121226019100
-    second: PetalSun_8
-  - first:
-      213: -6120391219216675967
-    second: PetalSun_9
-  - first:
-      213: 7309409135591032991
-    second: PetalSun_10
-  - first:
-      213: 5362881344760716180
-    second: PetalSun_11
-  - first:
-      213: -7727299444540236128
-    second: PetalSun_12
-  - first:
-      213: -9046276434227971611
-    second: PetalSun_13
-  - first:
-      213: 5909173233198784713
-    second: PetalSun_14
-  - first:
-      213: 7930779349511300796
-    second: PetalSun_15
-  - first:
-      213: 6994408437369738881
-    second: PetalSun_16
-  - first:
-      213: 4159002446082925706
-    second: PetalSun_17
-  - first:
-      213: -1411444940364250293
-    second: PetalSun_18
-  - first:
-      213: 4937262396715411367
-    second: PetalSun_19
-  - first:
-      213: -3284350569550023048
-    second: PetalSun_20
-  - first:
-      213: -7412641419295865195
-    second: PetalSun_21
-  - first:
-      213: 2156622689669295544
-    second: PetalSun_22
-  - first:
-      213: 8803650404664759638
-    second: PetalSun_23
-  - first:
-      213: -1480729972447336463
-    second: PetalSun_24
+      213: -2592139918712616579
+    second: SunBurst_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -169,7 +97,33 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
     buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -185,475 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PetalSun_0
-      rect:
-        serializedVersion: 2
-        x: 33
-        y: 33
-        width: 134
-        height: 134
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: eb89c69cbe539aac0800000000000000
-      internalID: -3843481520171083586
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_1
-      rect:
-        serializedVersion: 2
-        x: 44
-        y: 157
-        width: 25
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f997b82d743266040800000000000000
-      internalID: 4640435257433880991
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_2
-      rect:
-        serializedVersion: 2
-        x: 70
-        y: 164
-        width: 17
-        height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2e5da19398a82b5c0800000000000000
-      internalID: -4201143180410038814
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_3
-      rect:
-        serializedVersion: 2
-        x: 90
-        y: 167
-        width: 20
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 739772b7305a71890800000000000000
-      internalID: -7487334421110490825
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_4
-      rect:
-        serializedVersion: 2
-        x: 113
-        y: 164
-        width: 17
-        height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2d5265b52b3ecf7c0800000000000000
-      internalID: -4036100810854750766
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_5
-      rect:
-        serializedVersion: 2
-        x: 131
-        y: 157
-        width: 25
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 308d74f994357b7b0800000000000000
-      internalID: -5208602868360685565
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_6
-      rect:
-        serializedVersion: 2
-        x: 11
-        y: 129
-        width: 32
-        height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: aa281cbdc412bbe60800000000000000
-      internalID: 7979007778805088938
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_7
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 145
-        width: 22
-        height: 21
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5d15155289b5cdbd0800000000000000
-      internalID: -2604105775507746347
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_8
-      rect:
-        serializedVersion: 2
-        x: 146
-        y: 145
-        width: 22
-        height: 21
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4ee82665ac41602c0800000000000000
-      internalID: -4465859121226019100
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_9
-      rect:
-        serializedVersion: 2
-        x: 158
-        y: 129
-        width: 31
-        height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 18b8b240d90001ba0800000000000000
-      internalID: -6120391219216675967
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_10
-      rect:
-        serializedVersion: 2
-        x: 11
-        y: 111
-        width: 24
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f9806e4c1ec307560800000000000000
-      internalID: 7309409135591032991
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_11
-      rect:
-        serializedVersion: 2
-        x: 165
-        y: 112
-        width: 24
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 49b18075b28cc6a40800000000000000
-      internalID: 5362881344760716180
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_12
+      name: SunBurst_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 88
-        width: 33
-        height: 21
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0ae1b1f981e13c490800000000000000
-      internalID: -7727299444540236128
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_13
-      rect:
-        serializedVersion: 2
-        x: 167
-        y: 88
-        width: 33
-        height: 21
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5e9bad5238b257280800000000000000
-      internalID: -9046276434227971611
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_14
-      rect:
-        serializedVersion: 2
-        x: 11
-        y: 69
-        width: 25
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9c06f095fb9910250800000000000000
-      internalID: 5909173233198784713
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_15
-      rect:
-        serializedVersion: 2
-        x: 12
-        y: 43
-        width: 32
-        height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: cb6ef9f9cc9cf0e60800000000000000
-      internalID: 7930779349511300796
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_16
-      rect:
-        serializedVersion: 2
-        x: 156
-        y: 43
-        width: 32
-        height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1861b637a61211160800000000000000
-      internalID: 6994408437369738881
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_17
-      rect:
-        serializedVersion: 2
-        x: 164
-        y: 69
-        width: 25
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a84e0ca70beb7b930800000000000000
-      internalID: 4159002446082925706
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_18
-      rect:
-        serializedVersion: 2
-        x: 33
-        y: 31
-        width: 22
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b43019d0e4a896ce0800000000000000
-      internalID: -1411444940364250293
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_19
-      rect:
-        serializedVersion: 2
-        x: 46
-        y: 11
-        width: 24
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7a7ad17bdfda48440800000000000000
-      internalID: 4937262396715411367
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_20
-      rect:
-        serializedVersion: 2
-        x: 71
-        y: 10
-        width: 16
-        height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8767e18ee84ab62d0800000000000000
-      internalID: -3284350569550023048
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_21
-      rect:
-        serializedVersion: 2
-        x: 90
         y: 0
-        width: 20
-        height: 33
+        width: 300
+        height: 300
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -662,74 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 596c58b27e1012990800000000000000
-      internalID: -7412641419295865195
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_22
-      rect:
-        serializedVersion: 2
-        x: 113
-        y: 10
-        width: 16
-        height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8bd2944f8ecdded10800000000000000
-      internalID: 2156622689669295544
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_23
-      rect:
-        serializedVersion: 2
-        x: 130
-        y: 11
-        width: 25
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 65554c83669dc2a70800000000000000
-      internalID: 8803650404664759638
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PetalSun_24
-      rect:
-        serializedVersion: 2
-        x: 145
-        y: 31
-        width: 22
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1f7a0007fe3637be0800000000000000
-      internalID: -1480729972447336463
+      spriteID: d7946094a7ed60cd0800000000000000
+      internalID: -2592139918712616579
       vertices: []
       indices: 
       edges: []
@@ -748,31 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PetalSun_0: -3843481520171083586
-      PetalSun_1: 4640435257433880991
-      PetalSun_10: 7309409135591032991
-      PetalSun_11: 5362881344760716180
-      PetalSun_12: -7727299444540236128
-      PetalSun_13: -9046276434227971611
-      PetalSun_14: 5909173233198784713
-      PetalSun_15: 7930779349511300796
-      PetalSun_16: 6994408437369738881
-      PetalSun_17: 4159002446082925706
-      PetalSun_18: -1411444940364250293
-      PetalSun_19: 4937262396715411367
-      PetalSun_2: -4201143180410038814
-      PetalSun_20: -3284350569550023048
-      PetalSun_21: -7412641419295865195
-      PetalSun_22: 2156622689669295544
-      PetalSun_23: 8803650404664759638
-      PetalSun_24: -1480729972447336463
-      PetalSun_3: -7487334421110490825
-      PetalSun_4: -4036100810854750766
-      PetalSun_5: -5208602868360685565
-      PetalSun_6: 7979007778805088938
-      PetalSun_7: -2604105775507746347
-      PetalSun_8: -4465859121226019100
-      PetalSun_9: -6120391219216675967
+      SunBurst_0: -2592139918712616579
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

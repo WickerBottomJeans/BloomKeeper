@@ -20,9 +20,9 @@ namespace DefaultNamespace
 
         public abstract bool CanSwapPetal(Petal petal);
 
-        public abstract bool HasClearableObstacle();
-
         public abstract bool CanClearPetal(Petal petal);
+
+        public virtual int GetClearEffectCapacity(Petal petal) => CanClearPetal(petal) ? 1 : 0;
 
         /// <summary>
         /// Applies an effect that attempts to clear this tile's petal.

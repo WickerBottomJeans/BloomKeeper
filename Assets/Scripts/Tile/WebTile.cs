@@ -6,6 +6,7 @@ namespace DefaultNamespace
     public class WebTile : Tile
     {
         public override TileType TileType => TileType.Web;
+        public bool HasActiveWeb => webLevel > 0;
 
         private int _webLevel;
         private int webLevel
@@ -39,9 +40,9 @@ namespace DefaultNamespace
 
         public override bool CanSwapPetal(Petal petal) => webLevel == 0 && petal != null;
 
-        public override bool HasClearableObstacle() => webLevel > 0;
-
         public override bool CanClearPetal(Petal petal) => webLevel == 0 && petal != null;
+
+        public override int GetClearEffectCapacity(Petal petal) => webLevel > 0 ? webLevel : base.GetClearEffectCapacity(petal);
 
         public override TileImpactResult ApplyClearEffect(Petal petal)
         {

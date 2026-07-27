@@ -115,7 +115,7 @@ namespace DefaultNamespace
             constrainerManager.OnProgressUpdated += HandleConstrainerProgressUpdated;
             BoardCell[,] grid = BoardInitializer.Initialize(currentLevelData);
             
-            DisplayLevel(grid, objectives, constrainerManager.GetViewData(), currentLevelData.starScoreThresholds);
+            DisplayLevel(grid, constrainerManager.GetViewData(), currentLevelData.starScoreThresholds);
             isLevelSessionPrepared = true;
         }
 
@@ -159,13 +159,13 @@ namespace DefaultNamespace
             constrainerManager.StartLevel();
         }
 
-        private void DisplayLevel(BoardCell[,] grid, List<IObjective> objectives, List<ConstrainerViewData> constrainerViewData, IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
+        private void DisplayLevel(BoardCell[,] grid, List<ConstrainerViewData> constrainerViewData, IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
         {
             ShowWorldLevelBackground();
             int scoreTarget = GetScoreTarget(starScoreThresholds);
             List<int> scoreMilestones = GetScoreMilestones(starScoreThresholds);
             int starCap = GetStarCap(starScoreThresholds);
-            UIManager.Instance.ShowLevelUI(objectives, constrainerViewData, scoreTarget, scoreMilestones, starCap);
+            UIManager.Instance.ShowLevelUI(objectiveManager.GetViewData(), constrainerViewData, scoreTarget, scoreMilestones, starCap);
             SpawnGameBoard(grid, UIManager.Instance.GetLevelBoardPlayAreaScreenRect());
         }
 
@@ -180,7 +180,7 @@ namespace DefaultNamespace
         private void SpawnGameBoard(BoardCell[,] grid, Rect playAreaScreenRect)
         {
             gameBoardInstance = Instantiate(gameBoardPrefab);
-            gameBoardInstance.Init(grid, playAreaScreenRect);
+            gameBoardInstance.Init(grid, playAreaScreenRect, objectiveManager);
             gameBoardInstance.OnGameplayEvent += HandleGameplayEvent;
             gameBoardInstance.OnBoardSettled += HandleBoardSettled;
         }
@@ -194,7 +194,7 @@ namespace DefaultNamespace
 
         private void HandleObjectiveProgressUpdated()
         {
-            UIManager.Instance.RefreshLevelObjectives();
+            UIManager.Instance.RefreshLevelObjectives(objectiveManager.GetViewData());
         }
 
         private void HandleConstrainerProgressUpdated()
