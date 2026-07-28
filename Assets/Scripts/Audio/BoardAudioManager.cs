@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace DefaultNamespace.Audio
@@ -42,9 +43,15 @@ namespace DefaultNamespace.Audio
             AudioService.Instance.PlaySfx(boardShuffleCue);
         }
 
-        public void PlaySpiderWebClear()
+        public void PlayObstacleCleared(TileType tileType)
         {
-            AudioService.Instance.PlaySfx(spiderWebClearCue);
+            AudioCue cue = tileType switch
+            {
+                TileType.Web => spiderWebClearCue,
+                _ => throw new ArgumentOutOfRangeException(nameof(tileType), tileType, "Obstacle clear audio is not configured for this tile type.")
+            };
+
+            AudioService.Instance.PlaySfx(cue);
         }
     }
 }

@@ -29,12 +29,12 @@ public class GameBoard : MonoBehaviour
 
     private Camera cam;
     private BoardLayout layout;
-    private BoardCell[,] grid;
+    private Tile[,] grid;
     
     /// <summary>
     /// Use for tester's petal editor
     /// </summary>
-    private Vector2Int editingCell;
+    private Vector2Int editingTile;
     private BoardState currentState = BoardState.Idle;
     private Vector2Int swapOrigin;
     private Vector2Int swapTarget;
@@ -43,7 +43,7 @@ public class GameBoard : MonoBehaviour
     private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
     private List<SkillUseResult> pendingSkillResults = new List<SkillUseResult>();
     private BoardPresentationCoordinator boardPresentationCoordinator;
-    private ObjectiveManager objectiveManager;
+    private Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets;
     private bool isResolvingPlayerMove;
     private int currentCascadeDepth;
 
@@ -63,19 +63,18 @@ public class GameBoard : MonoBehaviour
     public event Action<IGameplayEvent> OnGameplayEvent;
     public event Action OnBoardSettled;
 
-    public void Init(BoardCell[,] grid, Rect playAreaScreenRect, ObjectiveManager objectiveManager)
+    public void Init(Tile[,] grid, Rect playAreaScreenRect, Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets)
     {
         cam = Camera.main;
         this.grid = grid;
-        this.objectiveManager = objectiveManager;
+        this.resolveObjectiveTargets = resolveObjectiveTargets;
 
         layout = BoardLayoutCalculator.Calculate(grid.GetLength(0), grid.GetLength(1), cam, paddingX, paddingY, playAreaScreenRect);
 
         petalViewManager.Init(grid, layout);
         tileViewManager.Init(grid, layout);
         boardVFXManager.Init(layout);
-        skillRepresentationOrchestrator.Init(
-            petalViewManager, tileViewManager, boardVFXManager, layout, grid);
+        skillRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, layout);
         boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager, skillRepresentationOrchestrator, boardAudioManager, layout, grid);
 
         boardInputHandler.Init(layout, cam);
@@ -86,24 +85,24 @@ public class GameBoard : MonoBehaviour
 
     }
 
-    private void HandleSwap(Vector2Int cellA, Vector2Int cellB)
+    private void HandleSwap(Vector2Int tileA, Vector2Int tileB)
     {
         if (currentState != BoardState.Idle) return;
-        if (!PetalSwapper.Validate(cellA, cellB, grid)) return;
+        if (!PetalSwapper.Validate(tileA, tileB, grid)) return;
 
-        swapOrigin = cellA;
-        swapTarget = cellB;
+        swapOrigin = tileA;
+        swapTarget = tileB;
         TransitionTo(BoardState.Swapping);
     }
     
-    private void HandleEditRequested(Vector2Int cell)
+    private void HandleEditRequested(Vector2Int tile)
     {
         if (currentState != BoardState.Idle) return;
-        if (grid[cell.x, cell.y].IsVoid) return;
+        if (grid[tile.x, tile.y] == null) return;
 
-        editingCell = cell;
+        editingTile = tile;
 
-        Vector2 worldPos = layout.GetCellWorldPos(cell.x, cell.y);
+        Vector2 worldPos = layout.GetTileWorldPos(tile.x, tile.y);
         Vector2 screenPos = cam.WorldToScreenPoint(worldPos);
 
         UIManager.Instance.ShowPetalEditorPopup(screenPos);
@@ -111,11 +110,11 @@ public class GameBoard : MonoBehaviour
 
     private void HandlePetalEditConfirmed(PetalType petalType, SpecialSkillType skillType)
     {
-        if (grid[editingCell.x, editingCell.y].IsVoid) return;
+        if (grid[editingTile.x, editingTile.y] == null) return;
 
         Petal petal = new Petal(petalType, skillType);
-        grid[editingCell.x, editingCell.y].Petal = petal;
-        petalViewManager.RefreshCell(editingCell, petal, layout);
+        grid[editingTile.x, editingTile.y].Petal = petal;
+        boardPresentationCoordinator.RefreshTile(editingTile, petal);
     }
 
     private void TransitionTo(BoardState newState)
@@ -179,13 +178,12 @@ public class GameBoard : MonoBehaviour
 
     private async UniTask EnterResolving()
     {
-        var result = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
+        MatchResolveResult result = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
         pendingMatches.Clear();
-        pendingSkillActivations.AddRange(result.SkillActivations);
-        OnGameplayEvent?.Invoke(new BoardResolvedEvent(result, currentCascadeDepth, isResolvingPlayerMove));
+        foreach (MatchGroupResolveResult groupResult in result.GroupResults)
+            pendingSkillActivations.AddRange(groupResult.SkillActivations);
         await boardPresentationCoordinator.PlayMatch(result, pendingSkillResults);
-        OnGameplayEvent?.Invoke(new PetalsClearedEvent(result.ClearedPetalTypes));
-        if (result.CleanedSpiderWebTileCount > 0) OnGameplayEvent?.Invoke(new SpiderWebClearedEvent(result.CleanedSpiderWebTileCount));
+        OnGameplayEvent?.Invoke(new BoardResolvedEvent(result, currentCascadeDepth, isResolvingPlayerMove));
         pendingSkillResults.Clear();
         TransitionTo(BoardState.ActivatingSkills);
     }
@@ -200,7 +198,7 @@ public class GameBoard : MonoBehaviour
 
         pendingMatches = new List<MatchGroup>();
         pendingSkillResults.Clear();
-        IReadOnlyList<ObjectiveBoardCellTargetGroup> objectiveTargetGroups = objectiveManager.GetTargetGroups(grid);
+        IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups = resolveObjectiveTargets(BoardSnapshotBuilder.Capture(grid));
         List<SkillUseResult> skillResults = SkillManager.UseSkills(grid, pendingSkillActivations, objectiveTargetGroups);
         pendingSkillResults.AddRange(skillResults);
 
@@ -280,11 +278,11 @@ public class GameBoard : MonoBehaviour
         {
             for (int y = 0; y < grid.GetLength(1); y++)
             {
-                BoardCell cell = grid[x, y];
-                if (cell.IsVoid) continue;
-                Vector2 center = layout.GetCellWorldPos(x, y);
+                Tile tile = grid[x, y];
+                if (tile == null) continue;
+                Vector2 center = layout.GetTileWorldPos(x, y);
 
-                Gizmos.color = cell.Tile switch
+                Gizmos.color = tile switch
                 {
                     InactiveTile => new Color(0.55f, 0.1f, 0.1f, 0.8f),
                     WebTile => new Color(0.6f, 0.6f, 0.6f, 0.8f),
@@ -292,7 +290,7 @@ public class GameBoard : MonoBehaviour
                     _ => Color.white
                 };
 
-                Gizmos.DrawWireCube(center, Vector3.one * layout.CellSize * 0.95f);
+                Gizmos.DrawWireCube(center, Vector3.one * layout.TileSize * 0.95f);
             }
         }
 
@@ -300,10 +298,10 @@ public class GameBoard : MonoBehaviour
         {
             for (int y = 0; y < grid.GetLength(1); y++)
             {
-                BoardCell cell = grid[x, y];
-                if (cell.Petal == null) continue;
-                Vector2 center = layout.GetCellWorldPos(x, y);
-                Handles.Label(center, cell.Petal.PetalType.ToString()[0].ToString());
+                Tile tile = grid[x, y];
+                if (tile == null || tile.Petal == null) continue;
+                Vector2 center = layout.GetTileWorldPos(x, y);
+                Handles.Label(center, tile.Petal.PetalType.ToString()[0].ToString());
             }
         }
 #endif

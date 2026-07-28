@@ -37,7 +37,10 @@ namespace DefaultNamespace.UI
             TriggerPetal = triggerPetal;
         }
     }
-
+    
+    /// <summary>
+    /// Some skill executor directly edit Tile[,]
+    /// </summary>
     public readonly struct PetalChange
     {
         public Vector2Int Position { get; }

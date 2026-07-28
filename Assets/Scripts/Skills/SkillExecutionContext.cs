@@ -7,11 +7,11 @@ namespace Skills
 {
     public sealed class SkillExecutionContext
     {
-        public BoardCell[,] Grid { get; }
-        public IReadOnlyList<ObjectiveBoardCellTargetGroup> ObjectiveTargetGroups { get; }
+        public Tile[,] Grid { get; }
+        public IReadOnlyList<ObjectiveTileTargetGroup> ObjectiveTargetGroups { get; }
         public Dictionary<Vector2Int, int> AssignedButterflyCounts { get; } = new Dictionary<Vector2Int, int>();
 
-        public SkillExecutionContext(BoardCell[,] grid, IReadOnlyList<ObjectiveBoardCellTargetGroup> objectiveTargetGroups)
+        public SkillExecutionContext(Tile[,] grid, IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups)
         {
             Grid = grid;
             ObjectiveTargetGroups = objectiveTargetGroups;

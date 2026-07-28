@@ -4,19 +4,16 @@ namespace DefaultNamespace
     {
         public override TileType TileType => TileType.Normal;
 
-        public override bool IsMatchable(Petal petal)
+        public override bool IsMatchable()
         {
-            return petal != null && petal.IsMatchable();
+            return Petal != null && Petal.IsMatchable();
         }
         
         public override bool IsGravityAffected() => true;
-        public override bool CanReceiveNewPetal(Petal petal) => petal == null;
-        public override bool CanSwapPetal(Petal petal) => petal != null;
-        public override bool CanClearPetal(Petal petal) => petal != null;
+        public override bool CanReceiveNewPetal() => Petal == null;
+        public override bool CanSwapPetal() => Petal != null;
+        public override bool CanClearPetal() => Petal != null;
         
-        public override TileImpactResult ApplyClearEffect(Petal petal)
-        {
-            return petal != null ? new TileImpactResult(petal, false) : new TileImpactResult(null, false);
-        }
+        public override void ApplyClearEffect() => Petal = null;
     }
 }

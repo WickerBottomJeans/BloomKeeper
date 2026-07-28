@@ -14,16 +14,16 @@ namespace Utility
             float availableWidth = (topRight.x - bottomLeft.x) * (1f - paddingX * 2f);
             float availableHeight = (topRight.y - bottomLeft.y) * (1f - paddingY * 2f);
 
-            float cellSize    = Mathf.Min(availableWidth / cols, availableHeight / rows);
-            float totalWidth  = cols * cellSize;
-            float totalHeight = rows * cellSize;
+            float tileSize    = Mathf.Min(availableWidth / cols, availableHeight / rows);
+            float totalWidth  = cols * tileSize;
+            float totalHeight = rows * tileSize;
 
             float centerX = (bottomLeft.x + topRight.x) * 0.5f;
             float centerY = (bottomLeft.y + topRight.y) * 0.5f;
-            float originX = centerX - totalWidth / 2f + cellSize / 2f;
-            float originY = centerY - totalHeight / 2f + cellSize / 2f;
+            float originX = centerX - totalWidth / 2f + tileSize / 2f;
+            float originY = centerY - totalHeight / 2f + tileSize / 2f;
 
-            return new BoardLayout(cellSize, new Vector2(originX, originY), cols, rows);
+            return new BoardLayout(tileSize, new Vector2(originX, originY), cols, rows);
         }
     }
 }

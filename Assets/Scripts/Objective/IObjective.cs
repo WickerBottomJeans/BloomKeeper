@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 
-using System;
 using DefaultNamespace.UI;
 
 namespace DefaultNamespace
@@ -9,17 +8,12 @@ namespace DefaultNamespace
     {
         ObjectiveType ObjectiveType { get; }
         bool CheckObjective();
+        void Apply(IReadOnlyList<TileChange> changes);
         List<ObjectiveViewData> GetViewData();
     }
 
-    public interface IGameplayEventHandler
+    public interface IObjectiveTileTargetProvider
     {
-        Type HandledEventType { get; }
-        void Handle(IGameplayEvent e);
-    }
-
-    public interface IObjectiveBoardCellTargetProvider
-    {
-        IReadOnlyList<ObjectiveBoardCellTargetGroup> GetTargetGroups(BoardCell[,] grid);
+        IReadOnlyList<ObjectiveTileTargetGroup> GetTargetGroups(IReadOnlyList<TileState> boardSnapshot);
     }
 }

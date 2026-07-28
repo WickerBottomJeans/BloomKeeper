@@ -5,7 +5,7 @@ namespace DefaultNamespace.UI
 {
     public static class GravityController
     {
-        public static List<(Vector2Int from, Vector2Int to)> Apply(BoardCell[,] grid)
+        public static List<(Vector2Int from, Vector2Int to)> Apply(Tile[,] grid)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -15,11 +15,11 @@ namespace DefaultNamespace.UI
             {
                 for (int y = 0; y < rows; y++)
                 {
-                    if (!grid[x, y].CanReceiveNewPetal()) continue;
+                    if (grid[x, y] == null || !grid[x, y].CanReceiveNewPetal()) continue;
 
                     for (int above = y + 1; above < rows; above++)
                     {
-                        if (!grid[x, above].IsGravityAffected()) break;
+                        if (grid[x, above] == null || !grid[x, above].IsGravityAffected()) break;
                         if (grid[x, above].Petal == null) continue;
 
                         grid[x, y].Petal = grid[x, above].Petal;

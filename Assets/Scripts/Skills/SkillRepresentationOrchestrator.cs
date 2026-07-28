@@ -28,30 +28,41 @@ namespace Skills
 
         private Dictionary<Type, ISkillRepresentationPresenter> presenters;
 
-        public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardLayout layout, BoardCell[,] grid)
+        public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardLayout layout)
         {
             presenters = new Dictionary<Type, ISkillRepresentationPresenter>();
-            Register(new BouquetSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, grid, bouquetDisappearDuration));
-            Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, grid, stripedPropagationDuration));
-            Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, layout, grid, butterflyFlightDuration, butterflyDisappearDuration));
-            Register(new SunburstSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, grid, stripeSunburstSpinDuration, stripeSunburstMutationDuration, stripeSunburstLaserDuration, stripeSunburstLaserChargeUpDuration));
+            Register(new BouquetSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, bouquetDisappearDuration));
+            Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, stripedPropagationDuration));
+            Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, layout, butterflyFlightDuration, butterflyDisappearDuration));
+            Register(new SunburstSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, stripeSunburstSpinDuration, stripeSunburstMutationDuration, stripeSunburstLaserDuration, stripeSunburstLaserChargeUpDuration));
         }
 
-        public UniTask Play(SkillUseResult skillResult, MatchGroupResolveResult resolution)
+        public void AcquireViews(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        {
+            SkillRepresentationData representation = skillResult.Representation;
+            if (representation == null) return;
+            GetPresenter(representation).AcquireViews(representation, resolution, accessKeys);
+        }
+
+        public UniTask Play(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
             SkillRepresentationData representation = skillResult.Representation;
             if (representation == null)
                 return UniTask.CompletedTask;
 
-            if (!presenters.TryGetValue(representation.GetType(), out ISkillRepresentationPresenter presenter))
-                throw new ArgumentOutOfRangeException(nameof(representation), representation.GetType(), "Skill representation is not supported.");
-
-            return presenter.Play(representation, resolution);
+            return GetPresenter(representation).Play(representation, resolution, accessKeys);
         }
 
         private void Register(ISkillRepresentationPresenter presenter)
         {
             presenters.Add(presenter.RepresentationType, presenter);
+        }
+
+        private ISkillRepresentationPresenter GetPresenter(SkillRepresentationData representation)
+        {
+            if (!presenters.TryGetValue(representation.GetType(), out ISkillRepresentationPresenter presenter))
+                throw new ArgumentOutOfRangeException(nameof(representation), representation.GetType(), "Skill representation is not supported.");
+            return presenter;
         }
     }
 }

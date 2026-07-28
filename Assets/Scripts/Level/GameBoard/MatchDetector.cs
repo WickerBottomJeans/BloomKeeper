@@ -29,7 +29,7 @@ public static class MatchDetector
     public const int MaxRunLength = 5;
     public static int GetMatchCheckRange() => MaxRunLength - 1;
     
-    public static List<MatchGroup> Detect(BoardCell[,] grid)
+    public static List<MatchGroup> Detect(Tile[,] grid)
     {
         int cols = grid.GetLength(0);
         int rows = grid.GetLength(1);
@@ -52,14 +52,14 @@ public static class MatchDetector
     }
     
     //TODO: optimize this later, detecting on the whole grid is waisteful
-    public static bool WouldCompleteMatch(BoardCell[,] grid, int x, int y)
+    public static bool WouldCompleteMatch(Tile[,] grid, int x, int y)
     {
         List<MatchGroup> matches = Detect(grid);
-        Vector2Int cell = new Vector2Int(x, y);
-        return matches.Exists(g => g.TilePositions.Contains(cell));
+        Vector2Int tile = new Vector2Int(x, y);
+        return matches.Exists(g => g.TilePositions.Contains(tile));
     }
     
-    private static List<List<Vector2Int>> FindRuns(BoardCell[,] grid, int cols, int rows, bool horizontal)
+    private static List<List<Vector2Int>> FindRuns(Tile[,] grid, int cols, int rows, bool horizontal)
     {
         List<List<Vector2Int>> runs = new List<List<Vector2Int>>();
 
@@ -76,11 +76,11 @@ public static class MatchDetector
                 int x = horizontal ? i : o;
                 int y = horizontal ? o : i;
 
-                BoardCell cell = grid[x, y];
+                Tile tile = grid[x, y];
 
-                if (cell.IsMatchable())
+                if (tile != null && tile.IsMatchable())
                 {
-                    PetalType type = cell.Petal.PetalType;
+                    PetalType type = tile.Petal.PetalType;
                     if (type == lastType)
                     {
                         current.Add(new Vector2Int(x, y));
@@ -162,13 +162,13 @@ public static class MatchDetector
         }
     }
 
-    private static void DetectSquare2x2(BoardCell[,] grid, int cols, int rows, HashSet<Vector2Int> consumed, List<MatchGroup> results)
+    private static void DetectSquare2x2(Tile[,] grid, int cols, int rows, HashSet<Vector2Int> consumed, List<MatchGroup> results)
     {
         for (int x = 0; x < cols - 1; x++)
         {
             for (int y = 0; y < rows - 1; y++)
             {
-                var cells = new List<Vector2Int>
+                var tiles = new List<Vector2Int>
                 {
                     new Vector2Int(x, y),
                     new Vector2Int(x + 1, y),
@@ -176,10 +176,10 @@ public static class MatchDetector
                     new Vector2Int(x + 1, y + 1)
                 };
 
-                if (cells.Exists(c => consumed.Contains(c))) continue;
-                if (!AllSameType(grid, cells)) continue;
+                if (tiles.Exists(c => consumed.Contains(c))) continue;
+                if (!AllSameType(grid, tiles)) continue;
 
-                AddGroup(cells, MatchShape.Square2x2, consumed, results);
+                AddGroup(tiles, MatchShape.Square2x2, consumed, results);
             }
         }
     }
@@ -216,15 +216,15 @@ public static class MatchDetector
         return overlap;
     }
 
-    private static bool AllSameType(BoardCell[,] grid, List<Vector2Int> cells)
+    private static bool AllSameType(Tile[,] grid, List<Vector2Int> tiles)
     {
         PetalType? type = null;
-        foreach (var c in cells)
+        foreach (var c in tiles)
         {
-            BoardCell cell = grid[c.x, c.y];
-            if (!cell.IsMatchable()) return false;
-            if (type == null) type = cell.Petal.PetalType;
-            else if (cell.Petal.PetalType != type) return false;
+            Tile tile = grid[c.x, c.y];
+            if (tile == null || !tile.IsMatchable()) return false;
+            if (type == null) type = tile.Petal.PetalType;
+            else if (tile.Petal.PetalType != type) return false;
         }
         return true;
     }

@@ -25,12 +25,12 @@ public class BoardInputHandler : MonoBehaviour
 
     private bool isDragging;
     private Vector2 touchStartScreenPos;
-    private Vector2Int selectedCell;
+    private Vector2Int selectedTile;
     private Vector3 lastResolvedWorldPos;
-    private Vector2Int lastResolvedCell;
+    private Vector2Int lastResolvedTile;
     
     private float lastTapTime = -1f;
-    private Vector2Int lastTappedCell;
+    private Vector2Int lastTappedTile;
     public void Init(BoardLayout boardLayout, Camera camera)
     {
         this.boardLayout = boardLayout;
@@ -57,26 +57,26 @@ public class BoardInputHandler : MonoBehaviour
 
     private void OnTouchBegan(Vector2 screenPos)
     {
-        if (!TryResolveCell(screenPos, out var cell)) return;
+        if (!TryResolveTile(screenPos, out var tile)) return;
 
         if (GlobalState.IsAdminMode)
         {
             float timeSinceLast = Time.time - lastTapTime;
-            if (timeSinceLast <= doubleTapInterval && cell == lastTappedCell)
+            if (timeSinceLast <= doubleTapInterval && tile == lastTappedTile)
             {
-                OnEditRequested?.Invoke(cell);
+                OnEditRequested?.Invoke(tile);
                 lastTapTime = -1f;
                 return;
             }
 
             lastTapTime = Time.time;
-            lastTappedCell = cell;
+            lastTappedTile = tile;
             return;
         }
 
         isDragging = true;
         touchStartScreenPos = screenPos;
-        selectedCell = cell;
+        selectedTile = tile;
     }
 
     private void OnTouchMoved(Vector2 screenPos)
@@ -85,15 +85,15 @@ public class BoardInputHandler : MonoBehaviour
         if (delta.magnitude < dragThresholdPx) return;
 
         Vector2Int direction = ResolveDirection(delta);
-        Vector2Int targetCell = selectedCell + direction;
+        Vector2Int targetTile = selectedTile + direction;
 
-        if (!IsInBounds(targetCell)) 
+        if (!IsInBounds(targetTile)) 
         {
             ClearDragState();
             return;
         }
 
-        OnSwapRequested?.Invoke(selectedCell, targetCell);
+        OnSwapRequested?.Invoke(selectedTile, targetTile);
         ClearDragState();
     }
 
@@ -103,23 +103,23 @@ public class BoardInputHandler : MonoBehaviour
     {
         isDragging = false;
         touchStartScreenPos = default;
-        selectedCell = default;
+        selectedTile = default;
     }
 
     private void OnDisable() => ClearDragState();
 
-    private bool TryResolveCell(Vector2 screenPos, out Vector2Int cell)
+    private bool TryResolveTile(Vector2 screenPos, out Vector2Int tile)
     {
-        cell = default;
+        tile = default;
         Vector3 worldPos = _camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Mathf.Abs(_camera.transform.position.z)));
         lastResolvedWorldPos = worldPos;
         
-        int col = Mathf.RoundToInt((worldPos.x - boardLayout.OriginWorldPos.x) / boardLayout.CellSize);
-        int row = Mathf.RoundToInt((worldPos.y - boardLayout.OriginWorldPos.y) / boardLayout.CellSize);
-        cell = new Vector2Int(col, row);
-        lastResolvedCell = cell;
+        int col = Mathf.RoundToInt((worldPos.x - boardLayout.OriginWorldPos.x) / boardLayout.TileSize);
+        int row = Mathf.RoundToInt((worldPos.y - boardLayout.OriginWorldPos.y) / boardLayout.TileSize);
+        tile = new Vector2Int(col, row);
+        lastResolvedTile = tile;
 
-        return IsInBounds(cell);
+        return IsInBounds(tile);
     }
 
     private void OnDrawGizmos()
@@ -129,22 +129,22 @@ public class BoardInputHandler : MonoBehaviour
         
         if (isDragging)
         {
-            Vector2 selected = boardLayout.OriginWorldPos + new Vector2(selectedCell.x * boardLayout.CellSize, selectedCell.y * boardLayout.CellSize);
+            Vector2 selected = boardLayout.OriginWorldPos + new Vector2(selectedTile.x * boardLayout.TileSize, selectedTile.y * boardLayout.TileSize);
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireCube(selected, Vector3.one * boardLayout.CellSize);
+            Gizmos.DrawWireCube(selected, Vector3.one * boardLayout.TileSize);
         }
 
         Gizmos.color = Color.red;
-        Gizmos.DrawSphere(lastResolvedWorldPos, boardLayout.CellSize * 0.05f);
+        Gizmos.DrawSphere(lastResolvedWorldPos, boardLayout.TileSize * 0.05f);
 
         Gizmos.color = Color.blue;
-        Vector2 resolvedCenter = boardLayout.OriginWorldPos + new Vector2(lastResolvedCell.x * boardLayout.CellSize, lastResolvedCell.y * boardLayout.CellSize);
-        Gizmos.DrawWireCube(resolvedCenter, Vector3.one * boardLayout.CellSize);
+        Vector2 resolvedCenter = boardLayout.OriginWorldPos + new Vector2(lastResolvedTile.x * boardLayout.TileSize, lastResolvedTile.y * boardLayout.TileSize);
+        Gizmos.DrawWireCube(resolvedCenter, Vector3.one * boardLayout.TileSize);
     }
 
-    private bool IsInBounds(Vector2Int cell) =>
-        cell.x >= 0 && cell.x < boardLayout.Cols &&
-        cell.y >= 0 && cell.y < boardLayout.Rows;
+    private bool IsInBounds(Vector2Int tile) =>
+        tile.x >= 0 && tile.x < boardLayout.Cols &&
+        tile.y >= 0 && tile.y < boardLayout.Rows;
 
     private static Vector2Int ResolveDirection(Vector2 delta)
     {

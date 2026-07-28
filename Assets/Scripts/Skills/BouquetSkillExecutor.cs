@@ -11,7 +11,7 @@ namespace Skills
 
         public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
         {
-            BoardCell[,] grid = context.Grid;
+            Tile[,] grid = context.Grid;
             Vector2Int center = activation.ParticipantA.Position;
             int columns = grid.GetLength(0);
             int rows = grid.GetLength(1);

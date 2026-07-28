@@ -386,7 +386,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UI.UIForTester.UIPetalEditor
   tableScrollRect: {fileID: 3716369712123975220}
   tableContent: {fileID: 1360398383034394886}
-  cellTemplate: {fileID: 4963631528831612171}
+  tileTemplate: {fileID: 4963631528831612171}
   headerTemplate: {fileID: 633389084601258509}
   dismissButton: {fileID: 8827983546989961152}
   selectableSkills: 000000000400000001000000020000000300000005000000
@@ -814,7 +814,7 @@ GameObject:
   - component: {fileID: 7342094708981921814}
   - component: {fileID: 5336558904997998410}
   m_Layer: 5
-  m_Name: CellTemplate
+  m_Name: PetalTemplate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

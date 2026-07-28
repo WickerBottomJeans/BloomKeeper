@@ -5,9 +5,9 @@ using UnityEngine;
 
 public static class PetalViewAnimator
 {
-    public static UniTask PlaySwap(PetalView view, Vector2 targetPos, float cellSize)
+    public static UniTask PlaySwap(PetalView view, Vector2 targetPos, float tileSize)
     {
-        return PlayJellyishMove(view, targetPos, cellSize, 0.2f, Ease.OutQuad);
+        return PlayJellyishMove(view, targetPos, tileSize, 0.2f, Ease.OutQuad);
     }
 
     public static UniTask PlayDestroy(PetalView view, float delay = 0f)
@@ -62,9 +62,9 @@ public static class PetalViewAnimator
         return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
-    public static UniTask PlayDrop(PetalView view, Vector2 targetPos, float cellSize)
+    public static UniTask PlayDrop(PetalView view, Vector2 targetPos, float tileSize)
     {
-        return PlayJellyishMove(view, targetPos, cellSize, 0.25f, Ease.InQuad);
+        return PlayJellyishMove(view, targetPos, tileSize, 0.25f, Ease.InQuad);
     }
 
     public static UniTask PlayGather(PetalView view, Vector2 targetPos, float duration = 0.3f)
@@ -79,16 +79,16 @@ public static class PetalViewAnimator
     /// </summary>
     /// <param name="view"></param>
     /// <param name="targetPos"></param>
-    /// <param name="cellSize"></param>
+    /// <param name="tileSize"></param>
     /// <param name="duration">Root movement time</param>
     /// <param name="moveEase"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public static UniTask PlayJellyishMove(PetalView view, Vector2 targetPos, float cellSize, float duration, Ease moveEase)
+    public static UniTask PlayJellyishMove(PetalView view, Vector2 targetPos, float tileSize, float duration, Ease moveEase)
     {
-        if (cellSize <= 0f)
-            throw new ArgumentOutOfRangeException(nameof(cellSize),
-                "Directional jelly movement requires a positive cell size.");
+        if (tileSize <= 0f)
+            throw new ArgumentOutOfRangeException(nameof(tileSize),
+                "Directional jelly movement requires a positive tile size.");
         if (duration <= 0f)
             throw new ArgumentOutOfRangeException(nameof(duration),
                 "Directional jelly movement requires a positive duration.");
@@ -105,7 +105,7 @@ public static class PetalViewAnimator
             return view.transform.DOMove(targetPos, duration).SetEase(moveEase).SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
                 .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
 
-        PrepareDirectionalJelly(view, displacement, cellSize, duration, out Vector3 stretchScale,
+        PrepareDirectionalJelly(view, displacement, tileSize, duration, out Vector3 stretchScale,
             out Vector3 squashScale);
 
         float squashDuration = duration * view.DirectionalJellySquashDurationRatio;
@@ -125,11 +125,11 @@ public static class PetalViewAnimator
         return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
-    private static void PrepareDirectionalJelly(PetalView view, Vector2 displacement, float cellSize, float duration, out Vector3 stretchScale, out Vector3 squashScale)
+    private static void PrepareDirectionalJelly(PetalView view, Vector2 displacement, float tileSize, float duration, out Vector3 stretchScale, out Vector3 squashScale)
     {
         float angle = Mathf.Atan2(displacement.y, displacement.x) * Mathf.Rad2Deg;
-        float speedCellsPerSecond = displacement.magnitude / cellSize / duration;
-        float stretchAmount = Mathf.Clamp(speedCellsPerSecond * view.DirectionalJellyStrength, 0f, view.MaxDirectionalJellyStretch);
+        float speedTilesPerSecond = displacement.magnitude / tileSize / duration;
+        float stretchAmount = Mathf.Clamp(speedTilesPerSecond * view.DirectionalJellyStrength, 0f, view.MaxDirectionalJellyStretch);
 
         view.StretchAxis.localRotation = Quaternion.Euler(0f, 0f, angle);
         view.VisualTransform.localRotation = Quaternion.Euler(0f, 0f, -angle);
@@ -165,7 +165,7 @@ public static class PetalViewAnimator
         }
     }
 
-    public static async UniTask PlayPetalChange(PetalView view, Petal petal, float cellSize, float duration)
+    public static async UniTask PlayPetalChange(PetalView view, Petal petal, float tileSize, float duration)
     {
         view.KillVisualAnimation();
         await view.VisualTransform.DOScale(Vector3.zero, duration * 0.4f)
@@ -173,7 +173,7 @@ public static class PetalViewAnimator
             .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
             .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
 
-        view.Init(petal, cellSize);
+        view.Init(petal, tileSize);
         view.VisualTransform.localScale = Vector3.zero;
 
         await view.VisualTransform.DOScale(view.TargetScale, duration * 0.6f)

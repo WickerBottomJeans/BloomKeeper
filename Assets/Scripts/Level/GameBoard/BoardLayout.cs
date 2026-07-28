@@ -5,22 +5,22 @@ namespace DefaultNamespace.UI
     public class BoardLayout
     {
         /// <summary>
-        /// Size of a single square cell in world units.
+        /// Size of a single square tile in world units.
         /// </summary>
-        public readonly float CellSize;
+        public readonly float TileSize;
         public readonly Vector2 OriginWorldPos;
         public readonly int Cols;
         public readonly int Rows;
 
-        public BoardLayout(float cellSize, Vector2 originWorldPos, int cols, int rows)
+        public BoardLayout(float tileSize, Vector2 originWorldPos, int cols, int rows)
         {
-            CellSize = cellSize;
+            TileSize = tileSize;
             OriginWorldPos = originWorldPos;
             Cols = cols;
             Rows = rows;
         }
 
-        public Vector2 GetCellWorldPos(int x, int y) =>
-            OriginWorldPos + new Vector2(x * CellSize, y * CellSize);
+        public Vector2 GetTileWorldPos(int x, int y) =>
+            OriginWorldPos + new Vector2(x * TileSize, y * TileSize);
     }
 }

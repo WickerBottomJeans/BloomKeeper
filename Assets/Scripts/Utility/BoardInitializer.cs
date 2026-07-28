@@ -11,20 +11,18 @@ namespace Utility
     {
         private static readonly System.Random rng = new();
 
-        public static BoardCell[,] Initialize(LevelData data)
+        public static Tile[,] Initialize(LevelData data)
         {
             int cols = data.boardWidth;
             int rows = data.boardHeight;
-            BoardCell[,] grid = new BoardCell[cols, rows];
+            Tile[,] grid = new Tile[cols, rows];
 
             for (int i = 0; i < data.tiles.Count; i++)
             {
                 int x = i % cols;
                 int y = rows - 1 - (i / cols);
                 TileData tileData = data.tiles[i];
-                grid[x, y] = tileData.isVoid
-                    ? new BoardCell(true, null)
-                    : new BoardCell(false, TileFactory.Create(tileData));
+                grid[x, y] = tileData.isVoid ? null : TileFactory.Create(tileData);
             }
 
             for (int y = rows - 1; y >= 0; y--)
@@ -33,11 +31,11 @@ namespace Utility
                 {
                     int index = (rows - 1 - y) * cols + x;
                     TileData tileData = index < data.tiles.Count ? data.tiles[index] : new TileData();
-                    BoardCell cell = grid[x, y];
+                    Tile tile = grid[x, y];
 
-                    if (cell.IsVoid || cell.Tile is InactiveTile) continue;
+                    if (tile == null || tile is InactiveTile) continue;
 
-                    cell.Petal = tileData.petalType != PetalType.None
+                    tile.Petal = tileData.petalType != PetalType.None
                         ? PetalFactory.CreateForTileMap(tileData)
                         : CreatePetalWithConstrained(grid, x, y);
                 }
@@ -46,7 +44,7 @@ namespace Utility
             return grid;
         }
 
-        private static Petal CreatePetalWithConstrained(BoardCell[,] grid, int x, int y)
+        private static Petal CreatePetalWithConstrained(Tile[,] grid, int x, int y)
         {
             PetalType[] allTypes = PetalFactory.RandomPetalTypes;
             List<PetalType> excluded = new List<PetalType>();

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DefaultNamespace;
 using DefaultNamespace.UI;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace Petals
 {
     public static class PetalFiller
     {
-        public static List<Vector2Int> Fill(BoardCell[,] grid)
+        public static List<Vector2Int> Fill(Tile[,] grid)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -18,18 +19,18 @@ namespace Petals
 
                 for (int y = rows - 1; y >= 0; y--)
                 {
-                    BoardCell cell = grid[x, y];
+                    Tile tile = grid[x, y];
 
                     if (!foundFillEntryCandidate)
                     {
-                        if (!cell.IsFillEntryCandidate()) continue;
+                        if (tile == null) continue;
                         foundFillEntryCandidate = true;
                     }
 
-                    if (!cell.IsGravityAffected()) break;
-                    if (!cell.CanReceiveNewPetal()) continue;
+                    if (tile == null || !tile.IsGravityAffected()) break;
+                    if (!tile.CanReceiveNewPetal()) continue;
 
-                    cell.Petal = PetalFactory.CreateRandom();
+                    tile.Petal = PetalFactory.CreateRandom();
                     filled.Add(new Vector2Int(x, y));
                 }
             }

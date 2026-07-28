@@ -113,7 +113,7 @@ namespace DefaultNamespace
             objectiveManager.OnProgressUpdated += HandleObjectiveProgressUpdated;
             constrainerManager.OnFailed += HandleConstrainerFailed;
             constrainerManager.OnProgressUpdated += HandleConstrainerProgressUpdated;
-            BoardCell[,] grid = BoardInitializer.Initialize(currentLevelData);
+            Tile[,] grid = BoardInitializer.Initialize(currentLevelData);
             
             DisplayLevel(grid, constrainerManager.GetViewData(), currentLevelData.starScoreThresholds);
             isLevelSessionPrepared = true;
@@ -159,7 +159,7 @@ namespace DefaultNamespace
             constrainerManager.StartLevel();
         }
 
-        private void DisplayLevel(BoardCell[,] grid, List<ConstrainerViewData> constrainerViewData, IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
+        private void DisplayLevel(Tile[,] grid, List<ConstrainerViewData> constrainerViewData, IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
         {
             ShowWorldLevelBackground();
             int scoreTarget = GetScoreTarget(starScoreThresholds);
@@ -177,12 +177,17 @@ namespace DefaultNamespace
             worldLevelBackgroundInstance.Show(Camera.main);
         }
         
-        private void SpawnGameBoard(BoardCell[,] grid, Rect playAreaScreenRect)
+        private void SpawnGameBoard(Tile[,] grid, Rect playAreaScreenRect)
         {
             gameBoardInstance = Instantiate(gameBoardPrefab);
-            gameBoardInstance.Init(grid, playAreaScreenRect, objectiveManager);
+            gameBoardInstance.Init(grid, playAreaScreenRect, ResolveObjectiveTargets);
             gameBoardInstance.OnGameplayEvent += HandleGameplayEvent;
             gameBoardInstance.OnBoardSettled += HandleBoardSettled;
+        }
+
+        private IReadOnlyList<ObjectiveTileTargetGroup> ResolveObjectiveTargets(IReadOnlyList<TileState> boardSnapshot)
+        {
+            return objectiveManager.GetTargetGroups(boardSnapshot);
         }
         
         private void HandleLevelComplete()
@@ -234,9 +239,11 @@ namespace DefaultNamespace
                 isTurnSettling = true;
 
             if (e is BoardResolvedEvent boardResolvedEvent)
+            {
                 scoreManager.Apply(boardResolvedEvent);
+                objectiveManager.Apply(boardResolvedEvent.Result.TileChanges);
+            }
 
-            objectiveManager.Report(e);
             constrainerManager.Apply(e);
         }
 

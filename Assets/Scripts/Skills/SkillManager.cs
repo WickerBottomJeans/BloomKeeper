@@ -16,7 +16,7 @@ namespace Skills
             { SpecialSkillType.Butterfly, new ButterflySkillExecutor() }
         };
 
-        public static List<SkillUseResult> UseSkills(BoardCell[,] grid, IReadOnlyList<SkillActivation> activations, IReadOnlyList<ObjectiveBoardCellTargetGroup> objectiveTargetGroups)
+        public static List<SkillUseResult> UseSkills(Tile[,] grid, IReadOnlyList<SkillActivation> activations, IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups)
         {
             var results = new List<SkillUseResult>(activations.Count);
             var context = new SkillExecutionContext(grid, objectiveTargetGroups);

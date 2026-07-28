@@ -14,14 +14,14 @@ namespace DefaultNamespace
         public SpriteRenderer OverlayRenderer => _overlayRenderer;
         public SpriteRenderer OverlayAnimationRenderer => _overlayAnimationRenderer;
 
-        private float _cellSize;
+        private float _tileSize;
 
-        public void Init(float cellSize)
+        public void Init(float tileSize)
         {
-            if (cellSize <= 0f)
-                throw new ArgumentOutOfRangeException(nameof(cellSize));
+            if (tileSize <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(tileSize));
 
-            _cellSize = cellSize;
+            _tileSize = tileSize;
             _overlayAnimationRenderer.gameObject.SetActive(false);
         }
 
@@ -31,7 +31,7 @@ namespace DefaultNamespace
                 throw new ArgumentNullException(nameof(sprite));
 
             _baseRenderer.sprite = sprite;
-            FitToCell(_baseRenderer, sprite);
+            FitToTile(_baseRenderer, sprite);
         }
 
         public void SetOverlay(Sprite sprite)
@@ -40,7 +40,7 @@ namespace DefaultNamespace
                 throw new ArgumentNullException(nameof(sprite));
 
             _overlayRenderer.sprite = sprite;
-            FitToCell(_overlayRenderer, sprite);
+            FitToTile(_overlayRenderer, sprite);
         }
 
         public void ClearOverlay()
@@ -51,7 +51,7 @@ namespace DefaultNamespace
         public void PrepareOverlayAnimation(Sprite outgoingSprite)
         {
             _overlayAnimationRenderer.sprite = outgoingSprite;
-            FitToCell(_overlayAnimationRenderer, outgoingSprite);
+            FitToTile(_overlayAnimationRenderer, outgoingSprite);
             _overlayAnimationRenderer.gameObject.SetActive(true);
         }
 
@@ -61,10 +61,10 @@ namespace DefaultNamespace
             _overlayAnimationRenderer.gameObject.SetActive(false);
         }
 
-        private void FitToCell(SpriteRenderer renderer, Sprite sprite)
+        private void FitToTile(SpriteRenderer renderer, Sprite sprite)
         {
             float spriteSize = Mathf.Max(sprite.bounds.size.x, sprite.bounds.size.y);
-            Vector3 scale = Vector3.one * (_cellSize / spriteSize);
+            Vector3 scale = Vector3.one * (_tileSize / spriteSize);
             renderer.transform.localScale = scale;
             _targetScales[renderer] = scale;
         }

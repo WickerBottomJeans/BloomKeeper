@@ -30,7 +30,7 @@ public class PetalView : MonoBehaviour
         CacheDefaultMaterial();
     }
 
-    public void Init(Petal petal, float cellSize)
+    public void Init(Petal petal, float tileSize)
     {
         CacheDefaultMaterial();
         RestoreDefaultMaterial();
@@ -45,8 +45,8 @@ public class PetalView : MonoBehaviour
 
         Vector2 spriteWorldSize = spriteRenderer.sprite.bounds.size;
 
-        float targetWidth = cellSize * (1f - paddingXRatio);
-        float targetHeight = cellSize * (1f - paddingYRatio);
+        float targetWidth = tileSize * (1f - paddingXRatio);
+        float targetHeight = tileSize * (1f - paddingYRatio);
 
         float scale = Mathf.Min(
             targetWidth / spriteWorldSize.x,

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace DefaultNamespace
 {
-    public class MatchObjective : IObjective, IGameplayEventHandler, IObjectiveBoardCellTargetProvider
+    public class MatchObjective : IObjective, IObjectiveTileTargetProvider
     {
         private List<PetalGoal> goals;
 
@@ -25,14 +25,13 @@ namespace DefaultNamespace
 
         public ObjectiveType ObjectiveType { get; } = ObjectiveType.Match;
         public bool CheckObjective() => goals.All(g => g.amount <= 0);
-        public Type HandledEventType => typeof(PetalsClearedEvent);
 
-        public void Handle(IGameplayEvent e)
+        public void Apply(IReadOnlyList<TileChange> changes)
         {
-            PetalsClearedEvent cleared = (PetalsClearedEvent)e;
-            foreach (PetalType petalType in cleared.ClearedPetals)
+            foreach (TileChange change in changes)
             {
-                PetalGoal goal = goals.FirstOrDefault(g => g.petalType == petalType);
+                if (!change.PetalWasRemoved) continue;
+                PetalGoal goal = goals.FirstOrDefault(g => g.petalType == change.RemovedPetalType);
                 if (goal != null) goal.amount--;
             }
         }
@@ -47,22 +46,20 @@ namespace DefaultNamespace
             });
         }
 
-        public IReadOnlyList<ObjectiveBoardCellTargetGroup> GetTargetGroups(BoardCell[,] grid)
+        public IReadOnlyList<ObjectiveTileTargetGroup> GetTargetGroups(IReadOnlyList<TileState> boardSnapshot)
         {
             var petalPositions = new List<Vector2Int>();
-            if (CheckObjective()) return Array.Empty<ObjectiveBoardCellTargetGroup>();
+            if (CheckObjective()) return Array.Empty<ObjectiveTileTargetGroup>();
 
-            for (int x = 0; x < grid.GetLength(0); x++)
-            for (int y = 0; y < grid.GetLength(1); y++)
+            foreach (TileState tile in boardSnapshot)
             {
-                BoardCell cell = grid[x, y];
-                if (!cell.CanClearPetal()) continue;
-                if (goals.Any(goal => goal.amount > 0 && goal.petalType == cell.Petal.PetalType))
-                    petalPositions.Add(new Vector2Int(x, y));
+                if (!tile.CanClearPetal || !tile.PetalType.HasValue) continue;
+                if (goals.Any(goal => goal.amount > 0 && goal.petalType == tile.PetalType.Value))
+                    petalPositions.Add(tile.Position);
             }
 
-            if (petalPositions.Count == 0) return Array.Empty<ObjectiveBoardCellTargetGroup>();
-            return new[] { new ObjectiveBoardCellTargetGroup(ObjectiveType, petalPositions) };
+            if (petalPositions.Count == 0) return Array.Empty<ObjectiveTileTargetGroup>();
+            return new[] { new ObjectiveTileTargetGroup(ObjectiveType, petalPositions) };
         }
     }
 }

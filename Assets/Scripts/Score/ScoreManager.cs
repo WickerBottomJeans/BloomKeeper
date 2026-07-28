@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DefaultNamespace.UI;
 
 namespace DefaultNamespace
 {
@@ -43,10 +44,19 @@ namespace DefaultNamespace
 
         private int CalculateScore(BoardResolvedEvent e)
         {
-            int clearedPetalCount = e.Result.ClearedPetalTypes.Count;
+            int clearedPetalCount = 0;
+            int clearedSpiderWebCount = 0;
+            foreach (TileChange change in e.Result.TileChanges)
+            {
+                if (change.PetalWasRemoved)
+                    clearedPetalCount++;
+                if (change.Before.TileType == TileType.Web && change.ObstacleWasCleared)
+                    clearedSpiderWebCount++;
+            }
+
             int score = clearedPetalCount * GetRuleScore(ScoreRuleType.PetalCleared);
             score += clearedPetalCount * e.CascadeDepth * GetRuleScore(ScoreRuleType.CascadeDepthPetalBonus);
-            score += e.Result.CleanedSpiderWebTileCount * GetRuleScore(ScoreRuleType.SpiderWebCleared);
+            score += clearedSpiderWebCount * GetRuleScore(ScoreRuleType.SpiderWebCleared);
 
             foreach (var groupResult in e.Result.GroupResults)
             {

@@ -25,7 +25,7 @@ namespace DefaultNamespace
             public override int GetHashCode() => HashCode.Combine(A, B);
         }
 
-        private static readonly Dictionary<SkillKey, Func<BoardCell[,], Vector2Int, Vector2Int, List<SkillActivation>>> _handlers =
+        private static readonly Dictionary<SkillKey, Func<Tile[,], Vector2Int, Vector2Int, List<SkillActivation>>> _handlers =
             new()
             {
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.None), HandleSunburst },
@@ -35,10 +35,10 @@ namespace DefaultNamespace
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Butterfly), HandleSunburst },
             };
 
-        public static List<SkillActivation> DetectOnSwap(BoardCell[,] grid, Vector2Int cellA, Vector2Int cellB)
+        public static List<SkillActivation> DetectOnSwap(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
         {
-            Petal petalA = grid[cellA.x, cellA.y].Petal;
-            Petal petalB = grid[cellB.x, cellB.y].Petal;
+            Petal petalA = grid[tileA.x, tileA.y].Petal;
+            Petal petalB = grid[tileB.x, tileB.y].Petal;
 
             SpecialSkillType skillA = petalA?.Skill ?? SpecialSkillType.None;
             SpecialSkillType skillB = petalB?.Skill ?? SpecialSkillType.None;
@@ -48,7 +48,7 @@ namespace DefaultNamespace
             if (!_handlers.TryGetValue(key, out var handler))
                 return new List<SkillActivation>();
 
-            return handler(grid, cellA, cellB);
+            return handler(grid, tileA, tileB);
         }
 
         public static bool HasActivationOnSwap(SpecialSkillType skillA, SpecialSkillType skillB)
@@ -56,12 +56,12 @@ namespace DefaultNamespace
             return _handlers.ContainsKey(new SkillKey(skillA, skillB));
         }
 
-        private static List<SkillActivation> HandleSunburst(BoardCell[,] grid, Vector2Int cellA, Vector2Int cellB)
+        private static List<SkillActivation> HandleSunburst(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
         {
-            Petal petalA = new Petal(grid[cellA.x, cellA.y].Petal);
-            Petal petalB = new Petal(grid[cellB.x, cellB.y].Petal);
-            var participantA = new SkillParticipant(cellA, petalA);
-            var participantB = new SkillParticipant(cellB, petalB);
+            Petal petalA = new Petal(grid[tileA.x, tileA.y].Petal);
+            Petal petalB = new Petal(grid[tileB.x, tileB.y].Petal);
+            var participantA = new SkillParticipant(tileA, petalA);
+            var participantB = new SkillParticipant(tileB, petalB);
 
             return new List<SkillActivation>
             {

@@ -12,7 +12,7 @@ namespace UI.UIForTester
     {
         [SerializeField] private ScrollRect tableScrollRect;
         [SerializeField] private RectTransform tableContent;
-        [SerializeField] private Button cellTemplate;
+        [SerializeField] private Button tileTemplate;
         [SerializeField] private TMP_Text headerTemplate;
         [SerializeField] private Button dismissButton;
         [SerializeField] private List<SpecialSkillType> selectableSkills;
@@ -38,7 +38,7 @@ namespace UI.UIForTester
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = selectableSkills.Count + 1;
 
-            cellTemplate.gameObject.SetActive(false);
+            tileTemplate.gameObject.SetActive(false);
             headerTemplate.gameObject.SetActive(false);
         }
 
@@ -57,7 +57,7 @@ namespace UI.UIForTester
                 CreateHeader(petalType.ToString(), $"Header_{petalType}");
 
                 foreach (SpecialSkillType skillType in selectableSkills)
-                    CreateSelectionCell(petalType, skillType);
+                    CreateSelectionTile(petalType, skillType);
             }
         }
 
@@ -69,9 +69,9 @@ namespace UI.UIForTester
             header.gameObject.SetActive(true);
         }
 
-        private void CreateSelectionCell(PetalType petalType, SpecialSkillType skillType)
+        private void CreateSelectionTile(PetalType petalType, SpecialSkillType skillType)
         {
-            Button button = Instantiate(cellTemplate, tableContent);
+            Button button = Instantiate(tileTemplate, tableContent);
             button.gameObject.name = $"{petalType}_{skillType}";
             button.gameObject.SetActive(true);
 

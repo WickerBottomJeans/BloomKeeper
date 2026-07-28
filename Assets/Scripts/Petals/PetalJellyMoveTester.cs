@@ -7,7 +7,7 @@ public class PetalJellyMoveTester : MonoBehaviour
 {
     [SerializeField] private PetalView target;
     [SerializeField] private Camera targetCamera;
-    [SerializeField] private float testCellSize = 1f;
+    [SerializeField] private float testTileSize = 1f;
     [SerializeField] private float moveDuration = 0.25f;
     [SerializeField] private Ease moveEase = Ease.OutQuad;
 
@@ -20,6 +20,6 @@ public class PetalJellyMoveTester : MonoBehaviour
         Vector2 screenPos = pointer.position.ReadValue();
         float cameraDistance = Mathf.Abs(targetCamera.transform.position.z - target.transform.position.z);
         Vector3 worldPos = targetCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, cameraDistance));
-        PetalViewAnimator.PlayJellyishMove(target, worldPos, testCellSize, moveDuration, moveEase).Forget();
+        PetalViewAnimator.PlayJellyishMove(target, worldPos, testTileSize, moveDuration, moveEase).Forget();
     }
 }

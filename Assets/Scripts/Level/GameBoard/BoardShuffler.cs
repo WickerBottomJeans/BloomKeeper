@@ -5,7 +5,7 @@ namespace DefaultNamespace.UI
 {
     public static class BoardShuffler
     {
-        public static List<Vector2Int> Shuffle(BoardCell[,] grid)
+        public static List<Vector2Int> Shuffle(Tile[,] grid)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -15,7 +15,7 @@ namespace DefaultNamespace.UI
             {
                 for (int y = 0; y < rows; y++)
                 {
-                    if (!grid[x, y].IsMatchable()) continue;
+                    if (grid[x, y] == null || !grid[x, y].IsMatchable()) continue;
                     grid[x, y].Petal = PetalFactory.CreateRandom();
                     affected.Add(new Vector2Int(x, y));
                 }

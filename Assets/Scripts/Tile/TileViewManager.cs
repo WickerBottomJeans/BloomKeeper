@@ -12,7 +12,7 @@ namespace DefaultNamespace
 
         private TileView[,] _views;
 
-        public void Init(BoardCell[,] grid, BoardLayout layout)
+        public void Init(Tile[,] grid, BoardLayout layout)
         {
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -22,34 +22,34 @@ namespace DefaultNamespace
             {
                 for (int row = 0; row < rows; row++)
                 {
-                    BoardCell cell = grid[col, row];
-                    if (cell.IsVoid) continue;
+                    Tile tile = grid[col, row];
+                    if (tile == null) continue;
 
-                    Vector3 worldPos = layout.GetCellWorldPos(col, row);
+                    Vector3 worldPos = layout.GetTileWorldPos(col, row);
                     TileView view = Instantiate(_tileViewPrefab, worldPos, Quaternion.identity, transform);
-                    view.Init(layout.CellSize);
+                    view.Init(layout.TileSize);
                     _views[col, row] = view;
-                    RefreshView(col, row, cell);
+                    RefreshView(col, row, tile);
                 }
             }
         }
 
-        public void RefreshOverlay(int col, int row, BoardCell cell)
+        public void RefreshOverlay(int col, int row, Tile tile)
         {
-            if (_views[col, row] == null || cell.IsVoid) return;
+            if (_views[col, row] == null || tile == null) return;
 
-            string overlayKey = cell.GetOverlaySpriteKey();
+            string overlayKey = SpriteKeyHelper.GetTileOverlayKey(tile.TileType, tile.ObstacleLayerCount);
             if (overlayKey != null)
                 _views[col, row].SetOverlay(SpriteLoader.Instance.GetSprite(overlayKey));
             else
                 _views[col, row].ClearOverlay();
         }
 
-        public void RefreshBase(int col, int row, BoardCell cell)
+        public void RefreshBase(int col, int row, Tile tile)
         {
-            if (_views[col, row] == null || cell.IsVoid) return;
+            if (_views[col, row] == null || tile == null) return;
 
-            string key = SpriteKeyHelper.GetTileSpriteKey(cell.Tile.TileType);
+            string key = SpriteKeyHelper.GetTileSpriteKey(tile.TileType);
             Sprite sprite = SpriteLoader.Instance.GetSprite(key);
             _views[col, row].SetBase(sprite);
         }
@@ -59,29 +59,28 @@ namespace DefaultNamespace
         /// </summary>
         /// <param name="col"></param>
         /// <param name="row"></param>
-        /// <param name="cell"></param>
-        private void RefreshView(int col, int row, BoardCell cell)
+        /// <param name="tile"></param>
+        private void RefreshView(int col, int row, Tile tile)
         {
-            RefreshBase(col, row, cell);
-            RefreshOverlay(col, row, cell);
+            RefreshBase(col, row, tile);
+            RefreshOverlay(col, row, tile);
         }
         
         /// <summary>
         /// Refreshes tile views for all tiles that changed state during match resolution
         /// </summary>
-        /// <param name="changedTiles"></param>
-        /// <param name="grid"></param>
-        public async UniTask PlayTileChanges(List<Vector2Int> changedTiles, BoardCell[,] grid)
+        /// <param name="changes"></param>
+        public async UniTask PlayTileChanges(IReadOnlyList<TileChange> changes)
         {
             var transitionTasks = new List<UniTask>();
 
-            foreach (Vector2Int pos in changedTiles)
+            foreach (TileChange change in changes)
             {
+                Vector2Int pos = change.Position;
                 TileView view = _views[pos.x, pos.y];
-                BoardCell cell = grid[pos.x, pos.y];
-                if (view == null || cell.IsVoid) continue;
+                if (view == null || change.After.IsVoid) continue;
 
-                string newOverlayKey = cell.GetOverlaySpriteKey();
+                string newOverlayKey = SpriteKeyHelper.GetTileOverlayKey(change.After.TileType.Value, change.After.ObstacleLayerCount);
 
                 if (view.OverlayRenderer.sprite != null && newOverlayKey != null)
                 {

@@ -72,10 +72,10 @@ namespace DefaultNamespace.VFX
             if (stripedSkillPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
 
-            int negativeSideLengthInCells = isVertical ? source.y : source.x;
-            int positiveSideLengthInCells = isVertical ? layout.Rows - source.y - 1 : layout.Cols - source.x - 1;
-            int longerSideLengthInCells = Mathf.Max(negativeSideLengthInCells, positiveSideLengthInCells);
-            float secondsPerCell = longerSideLengthInCells > 0 ? duration / longerSideLengthInCells : 0f;
+            int negativeSideLengthInTiles = isVertical ? source.y : source.x;
+            int positiveSideLengthInTiles = isVertical ? layout.Rows - source.y - 1 : layout.Cols - source.x - 1;
+            int longerSideLengthInTiles = Mathf.Max(negativeSideLengthInTiles, positiveSideLengthInTiles);
+            float secondsPerTile = longerSideLengthInTiles > 0 ? duration / longerSideLengthInTiles : 0f;
 
             Vector2Int negativeDestination = isVertical ? new Vector2Int(source.x, 0) : new Vector2Int(0, source.y);
             Vector2Int positiveDestination = isVertical ? new Vector2Int(source.x, layout.Rows - 1) : new Vector2Int(layout.Cols - 1, source.y);
@@ -83,19 +83,19 @@ namespace DefaultNamespace.VFX
             Vector2 positiveDirection = isVertical ? Vector2.up : Vector2.right;
 
             await UniTask.WhenAll(
-                PlayStripedSide(source, negativeDestination, negativeDirection, negativeSideLengthInCells * secondsPerCell),
-                PlayStripedSide(source, positiveDestination, positiveDirection, positiveSideLengthInCells * secondsPerCell));
+                PlayStripedSide(source, negativeDestination, negativeDirection, negativeSideLengthInTiles * secondsPerTile),
+                PlayStripedSide(source, positiveDestination, positiveDirection, positiveSideLengthInTiles * secondsPerTile));
         }
 
         private async UniTask PlayStripedSide(Vector2Int source, Vector2Int destination, Vector2 travelDirection, float duration)
         {
             VFXStripeSkill stripe = stripedSkillPool.Get();
-            stripe.transform.position = layout.GetCellWorldPos(source.x, source.y);
-            stripe.Prepare(travelDirection, layout.CellSize);
+            stripe.transform.position = layout.GetTileWorldPos(source.x, source.y);
+            stripe.Prepare(travelDirection, layout.TileSize);
 
             try
             {
-                Vector2 destinationWorldPosition = layout.GetCellWorldPos(destination.x, destination.y);
+                Vector2 destinationWorldPosition = layout.GetTileWorldPos(destination.x, destination.y);
                 await stripe.transform.DOMove(destinationWorldPosition, duration).SetEase(Ease.Linear)
                     .SetLink(stripe.gameObject, LinkBehaviour.KillOnDestroy)
                     .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, stripe.GetCancellationTokenOnDestroy());
@@ -117,7 +117,7 @@ namespace DefaultNamespace.VFX
 
             try
             {
-                bloom.transform.position = layout.GetCellWorldPos(center.x, center.y);
+                bloom.transform.position = layout.GetTileWorldPos(center.x, center.y);
 
                 foreach (ParticleSystem particles in particleSystems)
                 {
@@ -152,7 +152,7 @@ namespace DefaultNamespace.VFX
             if (mutationLaserPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
 
-            Vector2 origin = layout.OriginWorldPos + originPosition * layout.CellSize;
+            Vector2 origin = layout.OriginWorldPos + originPosition * layout.TileSize;
             PlayVortex(origin, duration).Forget();
 
             await UniTask.Delay(TimeSpan.FromSeconds(chargeUpDuration));
@@ -199,12 +199,12 @@ namespace DefaultNamespace.VFX
 
         private async UniTask PlayLasers(Vector2 origin, IReadOnlyList<Vector2Int> targetPositions, float duration)
         {
-            float width = layout.CellSize * mutationLaserWidthRatio;
+            float width = layout.TileSize * mutationLaserWidthRatio;
             var tasks = new List<UniTask>(targetPositions.Count);
 
             foreach (Vector2Int targetPosition in targetPositions)
             {
-                Vector2 target = layout.GetCellWorldPos(targetPosition.x, targetPosition.y);
+                Vector2 target = layout.GetTileWorldPos(targetPosition.x, targetPosition.y);
                 tasks.Add(PlayLaser(origin, target, width, duration));
             }
 

@@ -14,7 +14,9 @@ public class PetalViewManager : MonoBehaviour
 
     private PetalView[,] petalViews;
     private ObjectPool<PetalView> pool;
-    public void Init(BoardCell[,] grid, BoardLayout boardLayout)
+    private readonly Dictionary<PetalView, ViewAccessKey> activeUses = new Dictionary<PetalView, ViewAccessKey>();
+
+    public void Init(Tile[,] grid, BoardLayout boardLayout)
     {
         pool = new ObjectPool<PetalView>(
             createFunc: () => Instantiate(petalViewPrefab, transform),
@@ -31,256 +33,314 @@ public class PetalViewManager : MonoBehaviour
         {
             for (int y = 0; y < rows; y++)
             {
-                BoardCell cell = grid[x, y];
-                if (cell.IsVoid || cell.Petal == null) continue;
+                Tile tile = grid[x, y];
+                if (tile == null || tile.Petal == null) continue;
 
-                Vector2 pos = boardLayout.GetCellWorldPos(x, y);
+                Vector2 pos = boardLayout.GetTileWorldPos(x, y);
                 PetalView view = pool.Get();
                 view.transform.position = pos;
-                view.Init(cell.Petal, boardLayout.CellSize);
+                view.Init(tile.Petal, boardLayout.TileSize);
                 petalViews[x, y] = view;
             }
         }
     }
 
-    public PetalView GetView(int x, int y) => petalViews[x, y];
+    public bool TryAcquireView(Vector2Int position, string userName, out ViewAccessKey accessKey)
+    {
+        PetalView view = petalViews[position.x, position.y];
+        if (view == null || activeUses.ContainsKey(view))
+        {
+            accessKey = null;
+            return false;
+        }
 
-    public async UniTask OnPetalsChanged(IReadOnlyList<PetalChange> changes, BoardLayout boardLayout, float duration)
+        accessKey = new ViewAccessKey(view, position, userName);
+        activeUses.Add(view, accessKey);
+        return true;
+    }
+
+    public void ReleaseView(ViewAccessKey accessKey)
+    {
+        if (!activeUses.TryGetValue(accessKey.View, out ViewAccessKey currentAccessKey))
+            throw new InvalidOperationException($"Petal view access held by '{accessKey.UserName}' is not active.");
+        if (currentAccessKey != accessKey)
+            throw new InvalidOperationException($"Petal view access held by '{accessKey.UserName}' does not match the active access key.");
+        activeUses.Remove(accessKey.View);
+    }
+
+    public async UniTask OnPetalsChanged(IReadOnlyList<PetalChange> changes, BoardLayout boardLayout, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         var tasks = new List<UniTask>();
 
         foreach (PetalChange change in changes)
         {
-            PetalView view = petalViews[change.Position.x, change.Position.y];
-            if (view == null) continue;
-
-            tasks.Add(PetalViewAnimator.PlayPetalChange(view, change.After, boardLayout.CellSize, duration));
+            PetalView view = GetAccessibleView(accessKeys, change.Position);
+            tasks.Add(PetalViewAnimator.PlayPetalChange(view, change.After, boardLayout.TileSize, duration));
         }
 
         await UniTask.WhenAll(tasks);
     }
 
-    public async UniTask OnSwap(Vector2Int cellA, Vector2Int cellB, float cellSize)
+    public async UniTask OnSwap(Vector2Int tileA, Vector2Int tileB, float tileSize, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        PetalView viewA = petalViews[cellA.x, cellA.y];
-        PetalView viewB = petalViews[cellB.x, cellB.y];
+        PetalView viewA = GetAccessibleView(accessKeys, tileA);
+        PetalView viewB = GetAccessibleView(accessKeys, tileB);
 
         await UniTask.WhenAll(
-            PetalViewAnimator.PlaySwap(viewA, viewB.transform.position, cellSize),
-            PetalViewAnimator.PlaySwap(viewB, viewA.transform.position, cellSize)
+            PetalViewAnimator.PlaySwap(viewA, viewB.transform.position, tileSize),
+            PetalViewAnimator.PlaySwap(viewB, viewA.transform.position, tileSize)
         );
 
-        petalViews[cellA.x, cellA.y] = viewB;
-        petalViews[cellB.x, cellB.y] = viewA;
+        petalViews[tileA.x, tileA.y] = viewB;
+        petalViews[tileB.x, tileB.y] = viewA;
     }
 
-    public UniTask PlayNormalRemovals(IReadOnlyList<Vector2Int> positions, float duration = 0f)
+    public UniTask PlayNormalRemovals(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys, float duration = 0f)
     {
-        return ClearPetalViews(positions, duration);
+        return ClearPetalViews(positions, duration, accessKeys);
     }
 
-    private async UniTask ClearPetalViews(IReadOnlyList<Vector2Int> cleared, float duration)
+    private async UniTask ClearPetalViews(IReadOnlyList<Vector2Int> cleared, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         var tasks = new List<UniTask>();
-        foreach (Vector2Int cell in cleared)
+        foreach (Vector2Int tile in cleared)
         {
-            PetalView view = petalViews[cell.x, cell.y];
-            if (view == null) continue;
-            petalViews[cell.x, cell.y] = null;
-            tasks.Add(DestroyAndRelease(view, duration));
+            PetalView view = GetAccessibleView(accessKeys, tile);
+            ViewAccessKey accessKey = accessKeys[tile];
+            petalViews[tile.x, tile.y] = null;
+            tasks.Add(DestroyAndRelease(view, tile, duration, accessKey, accessKeys));
         }
         await UniTask.WhenAll(tasks);
     }
 
-    private async UniTask DestroyAndRelease(PetalView view, float duration)
+    private async UniTask DestroyAndRelease(PetalView view, Vector2Int position, float duration, ViewAccessKey accessKey, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         if (duration <= 0f)
             await PetalViewAnimator.PlayDestroy(view);
         else
             await PetalViewAnimator.PlayDisappear(view, duration);
+        ReleaseView(accessKey);
+        accessKeys.Remove(position);
         pool.Release(view);
     }
 
-    public async UniTask PlayDisappearAndRelease(IReadOnlyList<Vector2Int> positions, float duration)
+    public async UniTask PlayDisappearAndRelease(IReadOnlyList<Vector2Int> positions, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         var tasks = new List<UniTask>();
 
         foreach (Vector2Int position in positions)
         {
-            PetalView view = petalViews[position.x, position.y];
-            if (view == null) continue;
-
+            PetalView view = GetAccessibleView(accessKeys, position);
+            ViewAccessKey accessKey = accessKeys[position];
             petalViews[position.x, position.y] = null;
-            tasks.Add(DisappearAndRelease(view, duration));
+            tasks.Add(DisappearAndRelease(view, position, duration, accessKey, accessKeys));
         }
 
         await UniTask.WhenAll(tasks);
     }
 
-    public UniTask PlayAboutToExecuteShake(IReadOnlyList<Vector2Int> positions)
+    public UniTask PlayAboutToExecuteShake(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         foreach (Vector2Int position in positions)
         {
-            PetalView view = petalViews[position.x, position.y];
-            if (view == null) continue;
-
+            PetalView view = GetAccessibleView(accessKeys, position);
             PetalViewAnimator.PlayAboutToExecute(view);
         }
 
         return UniTask.CompletedTask;
     }
     
-    private async UniTask DisappearAndRelease(PetalView view, float duration)
+    private async UniTask DisappearAndRelease(PetalView view, Vector2Int position, float duration, ViewAccessKey accessKey, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         await PetalViewAnimator.PlayDisappear(view, duration);
         view.transform.localRotation = Quaternion.identity;
+        ReleaseView(accessKey);
+        accessKeys.Remove(position);
         pool.Release(view);
     }
 
-    // TODO: Fix Butterfly appearing under things. Use VFX layer or sth
-    public UniTask PlayFly(Vector2Int sourceCell, Vector2Int targetCell, BoardLayout boardLayout, float duration)
+    public UniTask PlayFly(Vector2Int sourceTile, Vector2Int targetTile, BoardLayout boardLayout, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        PetalView view = petalViews[sourceCell.x, sourceCell.y];
-        if (view == null) return UniTask.CompletedTask;
-
-        Vector2 targetWorldPosition = boardLayout.GetCellWorldPos(targetCell.x, targetCell.y);
+        PetalView view = GetAccessibleView(accessKeys, sourceTile);
+        Vector2 targetWorldPosition = boardLayout.GetTileWorldPos(targetTile.x, targetTile.y);
         return PetalViewAnimator.PlayFly(view, targetWorldPosition, duration);
     }
     
-    public async UniTask PlaySkillPetalCreations(IReadOnlyList<SkillPetalSpawn> spawns, BoardLayout boardLayout)
+    public async UniTask PlaySkillPetalCreations(IReadOnlyList<SkillPetalSpawn> spawns, BoardLayout boardLayout, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         var tasks = new List<UniTask>();
 
         foreach (SkillPetalSpawn spawn in spawns)
-            tasks.Add(PlaySkillPetalCreation(spawn, boardLayout));
+            tasks.Add(PlaySkillPetalCreation(spawn, boardLayout, accessKeys));
 
         await UniTask.WhenAll(tasks);
     }
 
-    private async UniTask PlaySkillPetalCreation(SkillPetalSpawn spawn, BoardLayout boardLayout)
+    private async UniTask PlaySkillPetalCreation(SkillPetalSpawn spawn, BoardLayout boardLayout, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        Vector2 spawnWorldPosition = boardLayout.GetCellWorldPos(spawn.SpawnPosition.x, spawn.SpawnPosition.y);
-        var contributorViews = new List<PetalView>(spawn.ContributorPositions.Count);
+        Vector2 spawnWorldPosition = boardLayout.GetTileWorldPos(spawn.SpawnPosition.x, spawn.SpawnPosition.y);
+        var contributors = new List<(Vector2Int position, PetalView view, ViewAccessKey accessKey)>(spawn.ContributorPositions.Count);
         var tasks = new List<UniTask>(spawn.ContributorPositions.Count);
 
         foreach (Vector2Int position in spawn.ContributorPositions)
         {
-            PetalView contributorView = petalViews[position.x, position.y];
+            PetalView contributorView = GetAccessibleView(accessKeys, position);
             petalViews[position.x, position.y] = null;
-            contributorViews.Add(contributorView);
+            contributors.Add((position, contributorView, accessKeys[position]));
             tasks.Add(PetalViewAnimator.PlayGather(contributorView, spawnWorldPosition));
         }
 
         await UniTask.WhenAll(tasks);
 
-        foreach (PetalView contributorView in contributorViews)
-            pool.Release(contributorView);
+        foreach (var contributor in contributors)
+        {
+            ReleaseView(contributor.accessKey);
+            accessKeys.Remove(contributor.position);
+            pool.Release(contributor.view);
+        }
 
         PetalView skillPetalView = pool.Get();
         skillPetalView.transform.position = spawnWorldPosition;
-        skillPetalView.Init(new Petal(spawn.PetalType, spawn.SkillType), boardLayout.CellSize);
+        skillPetalView.Init(new Petal(spawn.PetalType, spawn.SkillType), boardLayout.TileSize);
         Color color = skillPetalView.spriteRenderer.color;
         color.a = 1f;
         skillPetalView.spriteRenderer.color = color;
         petalViews[spawn.SpawnPosition.x, spawn.SpawnPosition.y] = skillPetalView;
     }
 
-    public UniTask PlayComboMerge(Vector2Int sourceA, Vector2Int sourceB)
+    public UniTask PlayComboMerge(Vector2Int sourceA, Vector2Int sourceB, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        PetalView viewA = petalViews[sourceA.x, sourceA.y];
-        PetalView viewB = petalViews[sourceB.x, sourceB.y];
+        PetalView viewA = GetAccessibleView(accessKeys, sourceA);
+        PetalView viewB = GetAccessibleView(accessKeys, sourceB);
         return PetalViewAnimator.PlayComboMerge(viewA, viewB);
     }
 
-    public async UniTask PlayComboSpinAndRelease(Vector2Int sourceA, Vector2Int sourceB, float duration)
+    public async UniTask PlayComboSpinAndRelease(Vector2Int sourceA, Vector2Int sourceB, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         //TODO: bug, when sun burst dont get executed from a swap, it wouldnt have 2 view. count for that case too
-        PetalView viewA = petalViews[sourceA.x, sourceA.y];
-        PetalView viewB = petalViews[sourceB.x, sourceB.y];
+        PetalView viewA = GetAccessibleView(accessKeys, sourceA);
+        PetalView viewB = GetAccessibleView(accessKeys, sourceB);
+        ViewAccessKey accessKeyA = accessKeys[sourceA];
+        ViewAccessKey accessKeyB = accessKeys[sourceB];
 
         await PetalViewAnimator.PlayComboSpinAndDisappear(viewA, viewB, duration);
 
         petalViews[sourceA.x, sourceA.y] = null;
         petalViews[sourceB.x, sourceB.y] = null;
+        ReleaseView(accessKeyA);
+        ReleaseView(accessKeyB);
+        accessKeys.Remove(sourceA);
+        accessKeys.Remove(sourceB);
         pool.Release(viewA);
         pool.Release(viewB);
     }
 
-    public async UniTask OnGravityApplied(List<(Vector2Int from, Vector2Int to)> moves, BoardLayout boardLayout)
+    public async UniTask OnGravityApplied(List<(Vector2Int from, Vector2Int to)> moves, BoardLayout boardLayout, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         var tasks = new List<UniTask>();
         foreach (var (from, to) in moves)
         {
-            PetalView view = petalViews[from.x, from.y];
-            if (view == null) continue;
-            Vector2 targetPos = boardLayout.GetCellWorldPos(to.x, to.y);
+            PetalView view = GetAccessibleView(accessKeys, from);
+            Vector2 targetPos = boardLayout.GetTileWorldPos(to.x, to.y);
             petalViews[to.x, to.y] = view;
             petalViews[from.x, from.y] = null;
-            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos, boardLayout.CellSize));
+            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos, boardLayout.TileSize));
         }
         await UniTask.WhenAll(tasks);
     }
     
-    public async UniTask OnFilled(List<Vector2Int> filledCells, BoardLayout boardLayout, BoardCell[,] grid)
+    public async UniTask OnFilled(List<Vector2Int> filledTiles, BoardLayout boardLayout, Tile[,] grid, string userName, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        filledCells.Sort((a, b) => a.y.CompareTo(b.y));
+        filledTiles.Sort((a, b) => a.y.CompareTo(b.y));
         var tasks = new List<UniTask>();
-        foreach (Vector2Int cell in filledCells)
+        foreach (Vector2Int tile in filledTiles)
         {
-            Vector2 targetPos = boardLayout.GetCellWorldPos(cell.x, cell.y);
-            Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.CellSize);
+            Vector2 targetPos = boardLayout.GetTileWorldPos(tile.x, tile.y);
+            Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.TileSize);
             PetalView view = pool.Get();
             view.transform.position = spawnPos;
-            view.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize);
-            petalViews[cell.x, cell.y] = view;
+            view.Init(grid[tile.x, tile.y].Petal, boardLayout.TileSize);
+            petalViews[tile.x, tile.y] = view;
+            RegisterViewAccess(view, tile, userName, accessKeys);
             PetalViewAnimator.PlaySpawn(view).Forget();
-            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos, boardLayout.CellSize));
+            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos, boardLayout.TileSize));
         }
         await UniTask.WhenAll(tasks);
     }
     
-    public async UniTask OnShuffled(List<Vector2Int> cells, BoardLayout boardLayout, BoardCell[,] grid)
+    public async UniTask OnShuffled(List<Vector2Int> tiles, BoardLayout boardLayout, Tile[,] grid, string userName, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         var tasks = new List<UniTask>();
-        foreach (Vector2Int cell in cells)
+        foreach (Vector2Int tile in tiles)
         {
-            PetalView view = petalViews[cell.x, cell.y];
-            if (view == null) continue;
-            tasks.Add(ShuffleCell(view, cell, cell.x * 0.05f, boardLayout, grid));
+            PetalView view = GetAccessibleView(accessKeys, tile);
+            tasks.Add(ShuffleTile(view, tile, tile.x * 0.05f, boardLayout, grid, userName, accessKeys));
         }
         await UniTask.WhenAll(tasks);
     }
     
-    private async UniTask ShuffleCell(PetalView view, Vector2Int cell, float delay, BoardLayout boardLayout, BoardCell[,] grid)
+    private async UniTask ShuffleTile(PetalView view, Vector2Int tile, float delay, BoardLayout boardLayout, Tile[,] grid, string userName, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         await PetalViewAnimator.PlayDestroy(view, delay);
+        ReleaseView(accessKeys[tile]);
+        accessKeys.Remove(tile);
         pool.Release(view);
 
-        Vector2 targetPos = boardLayout.GetCellWorldPos(cell.x, cell.y);
-        Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.CellSize);
+        Vector2 targetPos = boardLayout.GetTileWorldPos(tile.x, tile.y);
+        Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.TileSize);
         PetalView newView = pool.Get();
         newView.transform.position = spawnPos;
-        newView.Init(grid[cell.x, cell.y].Petal, boardLayout.CellSize);
-        petalViews[cell.x, cell.y] = newView;
+        newView.Init(grid[tile.x, tile.y].Petal, boardLayout.TileSize);
+        petalViews[tile.x, tile.y] = newView;
+        RegisterViewAccess(newView, tile, userName, accessKeys);
         await PetalViewAnimator.PlaySpawn(newView);
-        await PetalViewAnimator.PlayDrop(newView, targetPos, boardLayout.CellSize);
+        await PetalViewAnimator.PlayDrop(newView, targetPos, boardLayout.TileSize);
     }
     
-    public void RefreshCell(Vector2Int cell, Petal petal, BoardLayout boardLayout)
+    public void RefreshTile(Vector2Int tile, Petal petal, BoardLayout boardLayout, string userName, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        PetalView existing = petalViews[cell.x, cell.y];
+        PetalView existing = petalViews[tile.x, tile.y];
         if (existing != null)
         {
+            GetAccessibleView(accessKeys, tile);
+            ReleaseView(accessKeys[tile]);
+            accessKeys.Remove(tile);
             pool.Release(existing);
-            petalViews[cell.x, cell.y] = null;
+            petalViews[tile.x, tile.y] = null;
         }
 
         if (petal == null) return;
 
-        Vector2 pos = boardLayout.GetCellWorldPos(cell.x, cell.y);
+        Vector2 pos = boardLayout.GetTileWorldPos(tile.x, tile.y);
         PetalView view = pool.Get();
         view.transform.position = pos;
-        view.Init(petal, boardLayout.CellSize);
-        petalViews[cell.x, cell.y] = view;
+        view.Init(petal, boardLayout.TileSize);
+        petalViews[tile.x, tile.y] = view;
+        RegisterViewAccess(view, tile, userName, accessKeys);
+    }
+
+    private void RegisterViewAccess(PetalView view, Vector2Int position, string userName, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        if (activeUses.ContainsKey(view))
+            throw new InvalidOperationException($"Petal view at {position} is already being used.");
+        if (accessKeys.ContainsKey(position))
+            throw new InvalidOperationException($"Petal view access at {position} is already registered for '{accessKeys[position].UserName}'.");
+
+        var accessKey = new ViewAccessKey(view, position, userName);
+        activeUses.Add(view, accessKey);
+        accessKeys.Add(position, accessKey);
+    }
+
+    private PetalView GetAccessibleView(IDictionary<Vector2Int, ViewAccessKey> accessKeys, Vector2Int position)
+    {
+        if (!accessKeys.TryGetValue(position, out ViewAccessKey accessKey))
+            throw new InvalidOperationException($"Petal view at {position} has no access key.");
+        if (!activeUses.TryGetValue(accessKey.View, out ViewAccessKey currentAccessKey) || currentAccessKey != accessKey)
+            throw new InvalidOperationException($"Petal view access held by '{accessKey.UserName}' is not active.");
+        if (accessKey.Position != position)
+            throw new InvalidOperationException($"Petal view access held by '{accessKey.UserName}' belongs to {accessKey.Position}, not {position}.");
+        if (petalViews[position.x, position.y] != accessKey.View)
+            throw new InvalidOperationException($"Petal view at {position} no longer matches the view held by '{accessKey.UserName}'.");
+        return accessKey.View;
     }
 }

@@ -65,7 +65,7 @@ namespace Skills
             return new SkillUseResult(matchGroup, representation);
         }
 
-        private static MatchGroup CreateMatchGroup(BoardCell[,] grid, PetalType targetType, Petal causer)
+        private static MatchGroup CreateMatchGroup(Tile[,] grid, PetalType targetType, Petal causer)
         {
             int columns = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -74,14 +74,14 @@ namespace Skills
             for (int x = 0; x < columns; x++)
             for (int y = 0; y < rows; y++)
             {
-                if (grid[x, y].Petal?.PetalType == targetType)
+                if (grid[x, y]?.Petal?.PetalType == targetType)
                     positions.Add(new Vector2Int(x, y));
             }
 
             return new MatchGroup(positions, MatchShape.None, causer);
         }
 
-        private static List<PetalChange> GiveSkillToPetalsOfType(BoardCell[,] grid, PetalType targetType, SpecialSkillType newSkill)
+        private static List<PetalChange> GiveSkillToPetalsOfType(Tile[,] grid, PetalType targetType, SpecialSkillType newSkill)
         {
             int columns = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -90,7 +90,7 @@ namespace Skills
             for (int x = 0; x < columns; x++)
             for (int y = 0; y < rows; y++)
             {
-                if (grid[x, y].Petal?.PetalType != targetType) continue;
+                if (grid[x, y]?.Petal?.PetalType != targetType) continue;
 
                 Petal before = grid[x, y].Petal;
                 Petal after = new Petal(targetType, newSkill);

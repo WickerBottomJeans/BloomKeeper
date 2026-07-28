@@ -35,7 +35,7 @@ namespace Skills
             var objectiveWebTargets = new HashSet<Vector2Int>();
             var objectiveMatchTargets = new HashSet<Vector2Int>();
 
-            foreach (ObjectiveBoardCellTargetGroup targetGroup in context.ObjectiveTargetGroups)
+            foreach (ObjectiveTileTargetGroup targetGroup in context.ObjectiveTargetGroups)
             {
                 foreach (Vector2Int position in targetGroup.Positions)
                 {
@@ -60,7 +60,7 @@ namespace Skills
 
         private static Vector2Int? FindFallbackTarget(SkillExecutionContext context)
         {
-            BoardCell[,] grid = context.Grid;
+            Tile[,] grid = context.Grid;
             var obstacleTargets = new List<Vector2Int>();
             var petalTargets = new List<Vector2Int>();
 
@@ -93,7 +93,8 @@ namespace Skills
         private static bool CanAssignTarget(SkillExecutionContext context, Vector2Int position)
         {
             context.AssignedButterflyCounts.TryGetValue(position, out int assignedCount);
-            return assignedCount < context.Grid[position.x, position.y].GetClearEffectCapacity();
+            Tile tile = context.Grid[position.x, position.y];
+            return tile != null && assignedCount < tile.GetClearEffectCapacity();
         }
     }
 }

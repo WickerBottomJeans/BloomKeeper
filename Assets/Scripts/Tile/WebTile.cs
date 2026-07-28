@@ -1,12 +1,11 @@
 using System;
-using DefaultNamespace.Utility;
 
 namespace DefaultNamespace
 {
     public class WebTile : Tile
     {
         public override TileType TileType => TileType.Web;
-        public bool HasActiveWeb => webLevel > 0;
+        public override int ObstacleLayerCount => webLevel;
 
         private int _webLevel;
         private int webLevel
@@ -23,9 +22,9 @@ namespace DefaultNamespace
             this.webLevel = webLevel;
         }
 
-        public override bool IsMatchable(Petal petal)
+        public override bool IsMatchable()
         {
-            return webLevel == 0 && petal != null && petal.IsMatchable();
+            return webLevel == 0 && Petal != null && Petal.IsMatchable();
         }
 
         public override bool IsGravityAffected()
@@ -33,52 +32,39 @@ namespace DefaultNamespace
             return webLevel == 0;
         }
 
-        public override bool CanReceiveNewPetal(Petal petal)
+        public override bool CanReceiveNewPetal()
         {
-            return webLevel == 0 && petal == null;
+            return webLevel == 0 && Petal == null;
         }
 
-        public override bool CanSwapPetal(Petal petal) => webLevel == 0 && petal != null;
+        public override bool CanSwapPetal() => webLevel == 0 && Petal != null;
 
-        public override bool CanClearPetal(Petal petal) => webLevel == 0 && petal != null;
+        public override bool CanClearPetal() => webLevel == 0 && Petal != null;
 
-        public override int GetClearEffectCapacity(Petal petal) => webLevel > 0 ? webLevel : base.GetClearEffectCapacity(petal);
+        public override int GetClearEffectCapacity() => webLevel > 0 ? webLevel : base.GetClearEffectCapacity();
 
-        public override TileImpactResult ApplyClearEffect(Petal petal)
+        public override void ApplyClearEffect()
         {
-            TileImpactResult webImpactResult = TryReduceWebLevel();
-            
-            //Just reduced web level
-            if (webImpactResult.TileChanged)
-            {
-                return webImpactResult;
-            }
-            
+            if (TryReduceWebLevel())
+                return;
+
             //Have no web to reduce aka the web tile dont have web and free to do normal petal stuff
-            return petal != null ? new TileImpactResult(petal, false) : new TileImpactResult(null, false);
+            Petal = null;
         } 
         
         //TODO: this doesnt look right, not controlled by boardVFX when affected by a skill. FIX THIS later :)
-        public override TileImpactResult OnAdjacentTileMatched()
+        public override void OnAdjacentTileMatched()
         {
-            return TryReduceWebLevel();
+            TryReduceWebLevel();
         }
 
-        private TileImpactResult TryReduceWebLevel()
+        private bool TryReduceWebLevel()
         {
             if (webLevel <= 0)
-                return new TileImpactResult(null, false);
+                return false;
 
             webLevel--;
-            return new TileImpactResult(null, true, webLevel == 0);
-        }
-        
-        public override string GetOverlaySpriteKey()
-        {
-            if (webLevel <= 0)
-                return null;
-    
-            return SpriteKeyHelper.GetWebOverlayKey(webLevel);
+            return true;
         }
     }
 }
