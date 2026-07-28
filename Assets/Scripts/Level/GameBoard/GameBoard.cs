@@ -30,18 +30,18 @@ public class GameBoard : MonoBehaviour
     private Camera cam;
     private BoardLayout layout;
     private Tile[,] grid;
-    
+
     /// <summary>
     /// Use for tester's petal editor
     /// </summary>
     private Vector2Int editingTile;
+
     private BoardState currentState = BoardState.Idle;
     private Vector2Int swapOrigin;
     private Vector2Int swapTarget;
     private List<MatchGroup> pendingMatches;
     private List<(Vector2Int from, Vector2Int to)> pendingMoves;
     private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
-    private List<SkillUseResult> pendingSkillResults = new List<SkillUseResult>();
     private BoardPresentationCoordinator boardPresentationCoordinator;
     private Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets;
     private bool isResolvingPlayerMove;
@@ -53,7 +53,6 @@ public class GameBoard : MonoBehaviour
         Swapping,
         SwappingBack,
         Resolving,
-        ActivatingSkills,
         Gravity,
         Filling,
         Cascade,
@@ -63,19 +62,23 @@ public class GameBoard : MonoBehaviour
     public event Action<IGameplayEvent> OnGameplayEvent;
     public event Action OnBoardSettled;
 
-    public void Init(Tile[,] grid, Rect playAreaScreenRect, Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets)
+    public void Init(Tile[,] grid, Rect playAreaScreenRect,
+        Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets)
     {
         cam = Camera.main;
         this.grid = grid;
         this.resolveObjectiveTargets = resolveObjectiveTargets;
 
-        layout = BoardLayoutCalculator.Calculate(grid.GetLength(0), grid.GetLength(1), cam, paddingX, paddingY, playAreaScreenRect);
+        layout = BoardLayoutCalculator.Calculate(grid.GetLength(0), grid.GetLength(1), cam, paddingX, paddingY,
+            playAreaScreenRect);
 
         petalViewManager.Init(grid, layout);
         tileViewManager.Init(grid, layout);
         boardVFXManager.Init(layout);
-        skillRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, layout);
-        boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager, skillRepresentationOrchestrator, boardAudioManager, layout, grid);
+        skillRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager,
+            layout);
+        boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager,
+            skillRepresentationOrchestrator, boardAudioManager, layout, grid);
 
         boardInputHandler.Init(layout, cam);
 
@@ -94,7 +97,7 @@ public class GameBoard : MonoBehaviour
         swapTarget = tileB;
         TransitionTo(BoardState.Swapping);
     }
-    
+
     private void HandleEditRequested(Vector2Int tile)
     {
         if (currentState != BoardState.Idle) return;
@@ -125,7 +128,6 @@ public class GameBoard : MonoBehaviour
             case BoardState.Swapping: EnterSwapping().Forget(); break;
             case BoardState.SwappingBack: EnterSwappingBack().Forget(); break;
             case BoardState.Resolving: EnterResolving().Forget(); break;
-            case BoardState.ActivatingSkills: EnterActivatingSkills(); break;
             case BoardState.Gravity: EnterGravity().Forget(); break;
             case BoardState.Filling: EnterFilling().Forget(); break;
             case BoardState.Cascade: EnterCascade(); break;
@@ -134,11 +136,10 @@ public class GameBoard : MonoBehaviour
 
         }
     }
-    
+
     private async UniTask EnterSwapping()
     {
         pendingSkillActivations.Clear();
-        pendingSkillResults.Clear();
         pendingMatches = new List<MatchGroup>();
         currentCascadeDepth = 0;
 
@@ -149,7 +150,8 @@ public class GameBoard : MonoBehaviour
 
         if (pendingSkillActivations.Count > 0)
         {
-            pendingMatches.Add(new MatchGroup(new List<Vector2Int> { swapOrigin, swapTarget }, MatchShape.None, isFromSkillCombo: true));
+            pendingMatches.Add(new MatchGroup(new List<Vector2Int> { swapOrigin, swapTarget }, MatchShape.None,
+                isFromSkillCombo: true));
             isResolvingPlayerMove = true;
             OnGameplayEvent?.Invoke(new PlayerMoveCommittedEvent());
             TransitionTo(BoardState.Resolving);
@@ -178,35 +180,67 @@ public class GameBoard : MonoBehaviour
 
     private async UniTask EnterResolving()
     {
-        MatchResolveResult result = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
-        pendingMatches.Clear();
-        foreach (MatchGroupResolveResult groupResult in result.GroupResults)
-            pendingSkillActivations.AddRange(groupResult.SkillActivations);
-        await boardPresentationCoordinator.PlayMatch(result, pendingSkillResults);
-        OnGameplayEvent?.Invoke(new BoardResolvedEvent(result, currentCascadeDepth, isResolvingPlayerMove));
-        pendingSkillResults.Clear();
-        TransitionTo(BoardState.ActivatingSkills);
+        TurnResolution turnResolution = CalculateTurnResolution();
+        await PlayTurnResolution(turnResolution);
+        TransitionTo(BoardState.Gravity);
     }
 
-    private void EnterActivatingSkills()
+    private TurnResolution CalculateTurnResolution()
     {
-        if (pendingSkillActivations.Count == 0)
+        MatchResolveResult initialMatch = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
+        pendingMatches.Clear();
+        AddSkillActivations(initialMatch);
+        var skillWaves = new List<SkillResolutionWave>();
+
+        while (pendingSkillActivations.Count > 0)
         {
-            TransitionTo(BoardState.Gravity);
+            IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups =
+                resolveObjectiveTargets(BoardSnapshotBuilder.Capture(grid));
+            List<SkillUseResult> skillResults =
+                SkillManager.UseSkills(grid, pendingSkillActivations, objectiveTargetGroups);
+            pendingSkillActivations.Clear();
+
+            foreach (SkillUseResult skillResult in skillResults)
+                pendingMatches.Add(skillResult.MatchGroup);
+
+            MatchResolveResult resolution = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
+            pendingMatches.Clear();
+            skillWaves.Add(new SkillResolutionWave(resolution, skillResults));
+            AddSkillActivations(resolution);
+        }
+
+        return new TurnResolution(initialMatch, skillWaves);
+    }
+
+    private void AddSkillActivations(MatchResolveResult resolution)
+    {
+        foreach (MatchGroupResolveResult groupResult in resolution.GroupResults)
+            pendingSkillActivations.AddRange(groupResult.SkillActivations);
+    }
+
+    private async UniTask PlayTurnResolution(TurnResolution turnResolution)
+    {
+        if (turnResolution.SkillWaves.Count == 0)
+        {
+            await boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch);
+            OnGameplayEvent?.Invoke(new BoardResolvedEvent(turnResolution.InitialMatch, currentCascadeDepth,
+                isResolvingPlayerMove));
             return;
         }
 
-        pendingMatches = new List<MatchGroup>();
-        pendingSkillResults.Clear();
-        IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups = resolveObjectiveTargets(BoardSnapshotBuilder.Capture(grid));
-        List<SkillUseResult> skillResults = SkillManager.UseSkills(grid, pendingSkillActivations, objectiveTargetGroups);
-        pendingSkillResults.AddRange(skillResults);
+        SkillResolutionWave firstSkillWave = turnResolution.SkillWaves[0];
+        await UniTask.WhenAll(boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch),
+            boardPresentationCoordinator.PlaySkillWave(firstSkillWave));
+        OnGameplayEvent?.Invoke(new BoardResolvedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerMove));
+        OnGameplayEvent?.Invoke(new BoardResolvedEvent(firstSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerMove));
 
-        foreach (SkillUseResult result in skillResults)
-            pendingMatches.Add(result.MatchGroup);
-
-        pendingSkillActivations.Clear();
-        TransitionTo(BoardState.Resolving);
+        for (int i = 1; i < turnResolution.SkillWaves.Count; i++)
+        {
+            SkillResolutionWave skillWave = turnResolution.SkillWaves[i];
+            await boardPresentationCoordinator.PlaySkillWave(skillWave);
+            OnGameplayEvent?.Invoke(new BoardResolvedEvent(skillWave.Resolution, currentCascadeDepth,
+                isResolvingPlayerMove));
+        }
     }
 
     private async UniTask EnterGravity()
@@ -266,7 +300,7 @@ public class GameBoard : MonoBehaviour
         if (UIManager.Instance != null)
             UIManager.Instance.OnPetalEditConfirmed -= HandlePetalEditConfirmed;
     }
-    
+
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying) return;

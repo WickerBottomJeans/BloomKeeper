@@ -35,7 +35,6 @@ namespace DefaultNamespace.UI
         {
             var positions = new List<Vector2Int>();
             AddNormalRemovals(groupResult, positions);
-            positions.AddRange(groupResult.GetSkillTriggerPositions());
             foreach (Vector2Int position in positions)
             {
                 if (accessKeys.ContainsKey(position)) continue;
@@ -74,18 +73,8 @@ namespace DefaultNamespace.UI
 
             normalRemovals.RemoveAll(skillCreationPositions.Contains);
             normalRemovals.RemoveAll(position => !accessKeys.ContainsKey(position));
-            var ownedTriggeredSkillPositions = new List<Vector2Int>();
-            foreach (MatchGroupResolveResult groupResult in groupResults)
-            {
-                foreach (Vector2Int position in groupResult.GetSkillTriggerPositions())
-                {
-                    if (accessKeys.ContainsKey(position))
-                        ownedTriggeredSkillPositions.Add(position);
-                }
-            }
 
             tasks.Add(tileViewManager.PlayTileChanges(normalTileChanges));
-            tasks.Add(petalViewManager.PlayAboutToExecuteShake(ownedTriggeredSkillPositions, accessKeys));
             tasks.Add(petalViewManager.PlayNormalRemovals(normalRemovals, accessKeys));
             tasks.Add(petalViewManager.PlaySkillPetalCreations(skillPetalSpawns, boardLayout, accessKeys));
             await UniTask.WhenAll(tasks);

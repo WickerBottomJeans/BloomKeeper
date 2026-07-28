@@ -35,7 +35,17 @@ namespace DefaultNamespace.UI
             return boardActionCoordinator.PlayInvalidSwapBack(tileA, tileB);
         }
 
-        public async UniTask PlayMatch(MatchResolveResult result, IReadOnlyList<SkillUseResult> skillResults)
+        public UniTask PlayInitialMatch(MatchResolveResult result)
+        {
+            return PlayResolution(result, System.Array.Empty<SkillUseResult>());
+        }
+
+        public UniTask PlaySkillWave(SkillResolutionWave skillWave)
+        {
+            return PlayResolution(skillWave.Resolution, skillWave.SkillResults);
+        }
+
+        private async UniTask PlayResolution(MatchResolveResult result, IReadOnlyList<SkillUseResult> skillResults)
         {
             var skillResultsByMatch = new Dictionary<MatchGroup, SkillUseResult>(skillResults.Count);
             foreach (SkillUseResult skillResult in skillResults)
