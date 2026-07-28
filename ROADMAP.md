@@ -11,6 +11,7 @@ This roadmap deliberately prioritizes engineering depth over adding many similar
 - [x] Model-driven match-3 board with an explicit turn state machine.
 - [x] Swapping, match detection, cascades, gravity, refill, deadlock detection, and shuffling.
 - [x] Special petals, skill activation, and skill combinations.
+- [x] Coordinated Striped skill presentation with dedicated rainbow VFX and matching one-shot SFX.
 - [x] Match and clear-spider-web objectives.
 - [x] Move and timer constraints.
 - [x] Data-driven score rules, star thresholds, and level results.

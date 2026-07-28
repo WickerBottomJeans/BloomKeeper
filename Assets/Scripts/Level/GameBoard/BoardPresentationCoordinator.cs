@@ -50,22 +50,26 @@ namespace DefaultNamespace.UI
 
             try
             {
-                matchPresentationCoordinator.AcquireSkillPetalSpawnViews(result.SpawnedPetals, normalAccessKeys);
-
                 foreach (MatchGroupResolveResult groupResult in result.GroupResults)
                 {
                     if (skillResultsByMatch.TryGetValue(groupResult.SourceMatchGroup, out SkillUseResult skillResult))
                     {
                         var accessKeys = new Dictionary<Vector2Int, ViewAccessKey>();
                         accessKeySets.Add(accessKeys);
-                        skillRepresentationOrchestrator.AcquireVitalViews(skillResult, groupResult, accessKeys);
                         skillPresentations.Add((skillResult, groupResult, accessKeys));
                         continue;
                     }
 
                     normalGroups.Add(groupResult);
-                    matchPresentationCoordinator.AcquireViews(groupResult, normalAccessKeys);
                 }
+
+                foreach (var presentation in skillPresentations)
+                    skillRepresentationOrchestrator.AcquireVitalViews(presentation.skillResult, presentation.groupResult, presentation.accessKeys);
+
+                matchPresentationCoordinator.AcquireSkillPetalSpawnViews(result.SpawnedPetals, normalAccessKeys);
+
+                foreach (MatchGroupResolveResult normalGroup in normalGroups)
+                    matchPresentationCoordinator.AcquireViews(normalGroup, normalAccessKeys);
 
                 foreach (TileChange change in result.TileChanges)
                 {
