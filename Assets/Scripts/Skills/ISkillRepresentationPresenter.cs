@@ -9,7 +9,7 @@ namespace Skills
     public interface ISkillRepresentationPresenter
     {
         Type RepresentationType { get; }
-        void AcquireViews(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
+        void AcquireVitalViews(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
         UniTask Play(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
     }
 
@@ -17,9 +17,9 @@ namespace Skills
     {
         public Type RepresentationType => typeof(TRepresentation);
 
-        public void AcquireViews(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        public void AcquireVitalViews(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
-            AcquireViews((TRepresentation)representation, resolution, accessKeys);
+            AcquireVitalViews((TRepresentation)representation, resolution, accessKeys);
         }
 
         public UniTask Play(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -27,7 +27,7 @@ namespace Skills
             return Play((TRepresentation)representation, resolution, accessKeys);
         }
 
-        protected abstract void AcquireViews(TRepresentation representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
+        protected abstract void AcquireVitalViews(TRepresentation representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
         protected abstract UniTask Play(TRepresentation representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public static class SkillPresentationImpactQueries
+    public static class SkillPresentationQueries
     {
         /// <summary>
         /// Return tile positions where this matchgroup resolution 
@@ -22,7 +22,12 @@ namespace Skills
             return positions;
         }
 
-        public static HashSet<Vector2Int> GetCurrentSkillConsumedPositions(MatchGroupResolveResult resolution)
+        /// <summary>
+        /// Returns removed petal positions consumed by the current presentation, excluding triggered skills whose views must be preserved for their own presentation.
+        /// </summary>
+        /// <param name="resolution"></param>
+        /// <returns></returns>
+        public static HashSet<Vector2Int> GetRemovedPetalPositionsExcludingTriggeredSkills(MatchGroupResolveResult resolution)
         {
             var positions = new HashSet<Vector2Int>();
             foreach (var tileChange in resolution.TileChanges)

@@ -53,6 +53,9 @@ TagManager:
   - name: TileOverlay
     uniqueID: 376598121
     locked: 0
+  - name: BoardVFXUnderPetal
+    uniqueID: 3432797825
+    locked: 0
   - name: UI
     uniqueID: 2675642873
     locked: 0

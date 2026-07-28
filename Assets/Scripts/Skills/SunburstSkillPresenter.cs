@@ -31,15 +31,12 @@ namespace Skills
             this.laserChargeUpDuration = laserChargeUpDuration;
         }
 
-        protected override void AcquireViews(SunburstRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        protected override void AcquireVitalViews(SunburstRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
-            HashSet<Vector2Int> positions = SkillPresentationImpactQueries.GetCurrentSkillConsumedPositions(resolution);
+            var positions = new HashSet<Vector2Int>();
             positions.Add(representation.ParticipantA);
             if (representation.ParticipantB.HasValue)
                 positions.Add(representation.ParticipantB.Value);
-            positions.UnionWith(resolution.GetSkillTriggerPositions());
-            foreach (PetalChange change in representation.Changes)
-                positions.Add(change.Position);
             foreach (Vector2Int position in positions)
             {
                 if (accessKeys.ContainsKey(position)) continue;
@@ -71,19 +68,27 @@ namespace Skills
             List<Vector2Int> laserTargets;
             if (representation.ReplacementSkill == SpecialSkillType.None)
             {
-                HashSet<Vector2Int> laserTargetPositions = SkillPresentationImpactQueries.GetRemovedPositions(resolution);
+                HashSet<Vector2Int> laserTargetPositions = SkillPresentationQueries.GetRemovedPositions(resolution);
                 laserTargetPositions.Remove(representation.ParticipantA);
-                HashSet<Vector2Int> removedPositions = SkillPresentationImpactQueries.GetCurrentSkillConsumedPositions(resolution);
+                HashSet<Vector2Int> removedPositions = SkillPresentationQueries.GetRemovedPetalPositionsExcludingTriggeredSkills(resolution);
                 removedPositions.Remove(representation.ParticipantA);
                 if (representation.ParticipantB.HasValue)
                 {
                     laserTargetPositions.Remove(representation.ParticipantB.Value);
                     removedPositions.Remove(representation.ParticipantB.Value);
                 }
+                foreach (Vector2Int position in removedPositions)
+                {
+                    if (accessKeys.ContainsKey(position)) continue;
+                    if (petalViewManager.TryAcquireView(position, nameof(SunburstSkillPresenter), out ViewAccessKey accessKey))
+                        accessKeys.Add(position, accessKey);
+                }
                 removedPositions.RemoveWhere(position => !accessKeys.ContainsKey(position));
                 var triggeredSkillPositions = new List<Vector2Int>();
                 foreach (Vector2Int position in resolution.GetSkillTriggerPositions())
                 {
+                    if (!accessKeys.ContainsKey(position) && petalViewManager.TryAcquireView(position, nameof(SunburstSkillPresenter), out ViewAccessKey accessKey))
+                        accessKeys.Add(position, accessKey);
                     if (accessKeys.ContainsKey(position))
                         triggeredSkillPositions.Add(position);
                 }
@@ -98,6 +103,8 @@ namespace Skills
                 foreach (PetalChange change in representation.Changes)
                 {
                     laserTargets.Add(change.Position);
+                    if (!accessKeys.ContainsKey(change.Position) && petalViewManager.TryAcquireView(change.Position, nameof(SunburstSkillPresenter), out ViewAccessKey accessKey))
+                        accessKeys.Add(change.Position, accessKey);
                     if (accessKeys.ContainsKey(change.Position))
                         ownedChanges.Add(change);
                 }

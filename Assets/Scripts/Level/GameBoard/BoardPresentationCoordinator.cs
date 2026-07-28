@@ -58,7 +58,7 @@ namespace DefaultNamespace.UI
                     {
                         var accessKeys = new Dictionary<Vector2Int, ViewAccessKey>();
                         accessKeySets.Add(accessKeys);
-                        skillRepresentationOrchestrator.AcquireViews(skillResult, groupResult, accessKeys);
+                        skillRepresentationOrchestrator.AcquireVitalViews(skillResult, groupResult, accessKeys);
                         skillPresentations.Add((skillResult, groupResult, accessKeys));
                         continue;
                     }

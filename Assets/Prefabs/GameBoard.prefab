@@ -144,7 +144,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Skills.SkillRepresentationOrchestrator
   bouquetDisappearDuration: 0.2
-  stripedPropagationDuration: 0.5
   butterflyFlightDuration: 0.5
   butterflyDisappearDuration: 0.2
   stripeSunburstSpinDuration: 1
@@ -166,8 +165,8 @@ MonoBehaviour:
   petalSwapCue: {fileID: 11400000, guid: e0720fae6b974cd99344936c8dcd5c1e, type: 2}
   invalidSwapCue: {fileID: 11400000, guid: d914e03e981940eeb74f295177a9e643, type: 2}
   matchClearCue: {fileID: 11400000, guid: 1fe58212e42e4cfd93b297c7f3d2d054, type: 2}
-  petalFallingCue: {fileID: 11400000, guid: b765d0a3210744ddab767b4e47ac657f, type: 2}
   petalLandingCue: {fileID: 11400000, guid: 9a88b75969e34316acd3b31e66d1e9c1, type: 2}
   petalSpawningCue: {fileID: 11400000, guid: af295ab53eff4b599daff5ff3c28b8d4, type: 2}
   boardShuffleCue: {fileID: 11400000, guid: 83716a168b864d859420be4efcaad6a3, type: 2}
   spiderWebClearCue: {fileID: 11400000, guid: 5bb94dcb8e2e40bba0151ff848a91f33, type: 2}
+  stripedSkillCue: {fileID: 11400000, guid: 7649663161bf04644a21fb4c074b0c5a, type: 2}

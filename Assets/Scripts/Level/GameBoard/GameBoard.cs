@@ -74,7 +74,7 @@ public class GameBoard : MonoBehaviour
         petalViewManager.Init(grid, layout);
         tileViewManager.Init(grid, layout);
         boardVFXManager.Init(layout);
-        skillRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, layout);
+        skillRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, layout);
         boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager, skillRepresentationOrchestrator, boardAudioManager, layout, grid);
 
         boardInputHandler.Init(layout, cam);

@@ -12,6 +12,7 @@ namespace DefaultNamespace.Audio
         [SerializeField] private AudioCue petalSpawningCue;
         [SerializeField] private AudioCue boardShuffleCue;
         [SerializeField] private AudioCue spiderWebClearCue;
+        [SerializeField] private AudioCue stripedSkillCue;
 
         public void PlayPetalSwap()
         {
@@ -41,6 +42,11 @@ namespace DefaultNamespace.Audio
         public void PlayBoardShuffle()
         {
             AudioService.Instance.PlaySfx(boardShuffleCue);
+        }
+
+        public void PlayStripedSkill()
+        {
+            AudioService.Instance.PlaySfx(stripedSkillCue);
         }
 
         public void PlayObstacleCleared(TileType tileType)

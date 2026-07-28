@@ -22,27 +22,29 @@ namespace Skills
             this.disappearDuration = disappearDuration;
         }
 
-        protected override void AcquireViews(BouquetRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        protected override void AcquireVitalViews(BouquetRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
-            HashSet<Vector2Int> positions = SkillPresentationImpactQueries.GetCurrentSkillConsumedPositions(resolution);
-            positions.Add(representation.Center);
-            positions.UnionWith(resolution.GetSkillTriggerPositions());
-            foreach (Vector2Int position in positions)
+            if (accessKeys.ContainsKey(representation.Center)) return;
+            if (petalViewManager.TryAcquireView(representation.Center, nameof(BouquetSkillPresenter), out ViewAccessKey accessKey))
+                accessKeys.Add(representation.Center, accessKey);
+        }
+
+        protected override async UniTask Play(BouquetRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        {
+            HashSet<Vector2Int> removedPositions = SkillPresentationQueries.GetRemovedPetalPositionsExcludingTriggeredSkills(resolution);
+            removedPositions.Add(representation.Center);
+            foreach (Vector2Int position in removedPositions)
             {
                 if (accessKeys.ContainsKey(position)) continue;
                 if (petalViewManager.TryAcquireView(position, nameof(BouquetSkillPresenter), out ViewAccessKey accessKey))
                     accessKeys.Add(position, accessKey);
             }
-        }
-
-        protected override async UniTask Play(BouquetRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
-        {
-            HashSet<Vector2Int> removedPositions = SkillPresentationImpactQueries.GetCurrentSkillConsumedPositions(resolution);
-            removedPositions.Add(representation.Center);
             removedPositions.RemoveWhere(position => !accessKeys.ContainsKey(position));
             var triggeredSkillPositions = new List<Vector2Int>();
             foreach (Vector2Int position in resolution.GetSkillTriggerPositions())
             {
+                if (!accessKeys.ContainsKey(position) && petalViewManager.TryAcquireView(position, nameof(BouquetSkillPresenter), out ViewAccessKey accessKey))
+                    accessKeys.Add(position, accessKey);
                 if (accessKeys.ContainsKey(position))
                     triggeredSkillPositions.Add(position);
             }

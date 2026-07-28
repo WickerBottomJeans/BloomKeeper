@@ -23,17 +23,11 @@ namespace Skills
             this.disappearDuration = disappearDuration;
         }
 
-        protected override void AcquireViews(ButterflyRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        protected override void AcquireVitalViews(ButterflyRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
-            var positions = new List<Vector2Int> { representation.Source };
-            if (representation.Target.HasValue && (SkillPresentationImpactQueries.WasPetalRemovedAt(resolution, representation.Target.Value) || resolution.IsTriggeredSkillPosition(representation.Target.Value)))
-                positions.Add(representation.Target.Value);
-            foreach (Vector2Int position in positions)
-            {
-                if (accessKeys.ContainsKey(position)) continue;
-                if (petalViewManager.TryAcquireView(position, nameof(ButterflySkillPresenter), out ViewAccessKey accessKey))
-                    accessKeys.Add(position, accessKey);
-            }
+            if (accessKeys.ContainsKey(representation.Source)) return;
+            if (petalViewManager.TryAcquireView(representation.Source, nameof(ButterflySkillPresenter), out ViewAccessKey accessKey))
+                accessKeys.Add(representation.Source, accessKey);
         }
 
         protected override async UniTask Play(ButterflyRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -53,14 +47,18 @@ namespace Skills
 
             if (accessKeys.ContainsKey(representation.Source))
                 await petalViewManager.PlayFly(representation.Source, representation.Target.Value, layout, flightDuration, accessKeys);
+            Vector2Int target = representation.Target.Value;
+            bool targetNeedsView = target != representation.Source && (SkillPresentationQueries.WasPetalRemovedAt(resolution, target) || resolution.IsTriggeredSkillPosition(target));
+            if (targetNeedsView && !accessKeys.ContainsKey(target) && petalViewManager.TryAcquireView(target, nameof(ButterflySkillPresenter), out ViewAccessKey targetAccessKey))
+                accessKeys.Add(target, targetAccessKey);
             var disappearingPositions = new List<Vector2Int>();
             if (accessKeys.ContainsKey(representation.Source))
                 disappearingPositions.Add(representation.Source);
             var triggeredSkillPositions = new List<Vector2Int>();
-            if (SkillPresentationImpactQueries.WasPetalRemovedAt(resolution, representation.Target.Value) && representation.Target.Value != representation.Source && !resolution.IsTriggeredSkillPosition(representation.Target.Value) && accessKeys.ContainsKey(representation.Target.Value))
-                disappearingPositions.Add(representation.Target.Value);
-            if (resolution.IsTriggeredSkillPosition(representation.Target.Value) && representation.Target.Value != representation.Source && accessKeys.ContainsKey(representation.Target.Value))
-                triggeredSkillPositions.Add(representation.Target.Value);
+            if (SkillPresentationQueries.WasPetalRemovedAt(resolution, target) && target != representation.Source && !resolution.IsTriggeredSkillPosition(target) && accessKeys.ContainsKey(target))
+                disappearingPositions.Add(target);
+            if (resolution.IsTriggeredSkillPosition(target) && target != representation.Source && accessKeys.ContainsKey(target))
+                triggeredSkillPositions.Add(target);
 
             await UniTask.WhenAll(petalViewManager.PlayDisappearAndRelease(disappearingPositions, disappearDuration, accessKeys), petalViewManager.PlayAboutToExecuteShake(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(changes));
         }

@@ -10,21 +10,20 @@ public static class PetalViewAnimator
         return PlayJellyishMove(view, targetPos, tileSize, 0.2f, Ease.OutQuad);
     }
 
-    public static UniTask PlayDestroy(PetalView view, float delay = 0f)
+    public static UniTask PlayDisappear(PetalView view, float duration, Ease ease = Ease.InBack, float delay = 0f)
     {
         view.KillVisualAnimation();
-        Sequence seq = DOTween.Sequence().SetLink(view.gameObject, LinkBehaviour.KillOnDestroy);
-        seq.AppendInterval(delay);
-        seq.Append(view.VisualTransform.DOScale(Vector3.zero, 0.2f).SetEase(Ease.InBack));
-        seq.Join(view.spriteRenderer.DOFade(0f, 0.2f));
-        return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
+        Sequence sequence = DOTween.Sequence().SetLink(view.gameObject, LinkBehaviour.KillOnDestroy);
+        sequence.AppendInterval(delay);
+        sequence.Append(view.VisualTransform.DOScale(Vector3.zero, duration).SetEase(ease));
+        return sequence.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
-    public static UniTask PlayDisappear(PetalView view, float duration)
+    public static UniTask PlayScale(PetalView view, float scaleMultiplier, float duration, Ease ease = Ease.OutBack)
     {
         view.KillVisualAnimation();
-        return view.VisualTransform.DOScale(Vector3.zero, duration)
-            .SetEase(Ease.InBack)
+        return view.VisualTransform.DOScale(view.TargetScale * scaleMultiplier, duration)
+            .SetEase(ease)
             .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
             .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
+using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using UnityEngine;
@@ -12,9 +13,6 @@ namespace Skills
     {
         [Header("Bomb Timing")]
         [SerializeField] private float bouquetDisappearDuration = 0.2f;
-
-        [Header("Striped Timing")]
-        [SerializeField] private float stripedPropagationDuration = 0.2f;
 
         [Header("Butterfly Timing")]
         [SerializeField] private float butterflyFlightDuration = 0.5f;
@@ -28,20 +26,20 @@ namespace Skills
 
         private Dictionary<Type, ISkillRepresentationPresenter> presenters;
 
-        public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardLayout layout)
+        public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout)
         {
             presenters = new Dictionary<Type, ISkillRepresentationPresenter>();
             Register(new BouquetSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, bouquetDisappearDuration));
-            Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, stripedPropagationDuration));
+            Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager));
             Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, layout, butterflyFlightDuration, butterflyDisappearDuration));
             Register(new SunburstSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, stripeSunburstSpinDuration, stripeSunburstMutationDuration, stripeSunburstLaserDuration, stripeSunburstLaserChargeUpDuration));
         }
 
-        public void AcquireViews(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        public void AcquireVitalViews(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
             SkillRepresentationData representation = skillResult.Representation;
             if (representation == null) return;
-            GetPresenter(representation).AcquireViews(representation, resolution, accessKeys);
+            GetPresenter(representation).AcquireVitalViews(representation, resolution, accessKeys);
         }
 
         public UniTask Play(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)

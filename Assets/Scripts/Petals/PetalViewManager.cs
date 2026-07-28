@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
 using DefaultNamespace.UI;
+using DG.Tweening;
 using Petals;
 using UnityEngine;
 using UnityEngine.Pool;
 
 public class PetalViewManager : MonoBehaviour
 {
+    private const float DefaultDisappearDuration = 0.2f;
+
     //TODO: should this cache board layout, the layout dont really channge over time
     [SerializeField] private PetalView petalViewPrefab;
 
@@ -95,12 +98,25 @@ public class PetalViewManager : MonoBehaviour
         petalViews[tileB.x, tileB.y] = viewA;
     }
 
-    public UniTask PlayNormalRemovals(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys, float duration = 0f)
+    public UniTask PlayNormalRemovals(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys, float duration = DefaultDisappearDuration, Ease ease = Ease.InBack)
     {
-        return ClearPetalViews(positions, duration, accessKeys);
+        return ClearPetalViews(positions, duration, ease, accessKeys);
     }
 
-    private async UniTask ClearPetalViews(IReadOnlyList<Vector2Int> cleared, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    public void ReleasePetalViewsImmediately(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        foreach (Vector2Int position in positions)
+        {
+            PetalView view = GetAccessibleView(accessKeys, position);
+            ViewAccessKey accessKey = accessKeys[position];
+            petalViews[position.x, position.y] = null;
+            ReleaseView(accessKey);
+            accessKeys.Remove(position);
+            pool.Release(view);
+        }
+    }
+
+    private async UniTask ClearPetalViews(IReadOnlyList<Vector2Int> cleared, float duration, Ease ease, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         var tasks = new List<UniTask>();
         foreach (Vector2Int tile in cleared)
@@ -108,17 +124,14 @@ public class PetalViewManager : MonoBehaviour
             PetalView view = GetAccessibleView(accessKeys, tile);
             ViewAccessKey accessKey = accessKeys[tile];
             petalViews[tile.x, tile.y] = null;
-            tasks.Add(DestroyAndRelease(view, tile, duration, accessKey, accessKeys));
+            tasks.Add(DestroyAndRelease(view, tile, duration, ease, accessKey, accessKeys));
         }
         await UniTask.WhenAll(tasks);
     }
 
-    private async UniTask DestroyAndRelease(PetalView view, Vector2Int position, float duration, ViewAccessKey accessKey, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    private async UniTask DestroyAndRelease(PetalView view, Vector2Int position, float duration, Ease ease, ViewAccessKey accessKey, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        if (duration <= 0f)
-            await PetalViewAnimator.PlayDestroy(view);
-        else
-            await PetalViewAnimator.PlayDisappear(view, duration);
+        await PetalViewAnimator.PlayDisappear(view, duration, ease);
         ReleaseView(accessKey);
         accessKeys.Remove(position);
         pool.Release(view);
@@ -137,6 +150,12 @@ public class PetalViewManager : MonoBehaviour
         }
 
         await UniTask.WhenAll(tasks);
+    }
+
+    public UniTask PlayScale(Vector2Int position, float scaleMultiplier, float duration, Ease ease, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        PetalView view = GetAccessibleView(accessKeys, position);
+        return PetalViewAnimator.PlayScale(view, scaleMultiplier, duration, ease);
     }
 
     public UniTask PlayAboutToExecuteShake(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -281,7 +300,7 @@ public class PetalViewManager : MonoBehaviour
     
     private async UniTask ShuffleTile(PetalView view, Vector2Int tile, float delay, BoardLayout boardLayout, Tile[,] grid, string userName, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        await PetalViewAnimator.PlayDestroy(view, delay);
+        await PetalViewAnimator.PlayDisappear(view, DefaultDisappearDuration, Ease.InBack, delay);
         ReleaseView(accessKeys[tile]);
         accessKeys.Remove(tile);
         pool.Release(view);

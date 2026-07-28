@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -67,11 +66,19 @@ namespace DefaultNamespace.VFX
             );
         }
 
-        public async UniTask PlayStripedSkillVFX(Vector2Int source, bool isVertical, float duration)
+        public VFXStripeSkill RentStripedSkillVFX(Vector2Int source)
         {
             if (stripedSkillPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
 
+            VFXStripeSkill stripe = stripedSkillPool.Get();
+            stripe.transform.position = layout.GetTileWorldPos(source.x, source.y);
+            stripe.Configure(layout.TileSize);
+            return stripe;
+        }
+
+        public UniTask FireStripedSkillVFX(VFXStripeSkill stripe, Vector2Int source, bool isVertical, float duration)
+        {
             int negativeSideLengthInTiles = isVertical ? source.y : source.x;
             int positiveSideLengthInTiles = isVertical ? layout.Rows - source.y - 1 : layout.Cols - source.x - 1;
             int longerSideLengthInTiles = Mathf.Max(negativeSideLengthInTiles, positiveSideLengthInTiles);
@@ -79,32 +86,17 @@ namespace DefaultNamespace.VFX
 
             Vector2Int negativeDestination = isVertical ? new Vector2Int(source.x, 0) : new Vector2Int(0, source.y);
             Vector2Int positiveDestination = isVertical ? new Vector2Int(source.x, layout.Rows - 1) : new Vector2Int(layout.Cols - 1, source.y);
-            Vector2 negativeDirection = isVertical ? Vector2.down : Vector2.left;
-            Vector2 positiveDirection = isVertical ? Vector2.up : Vector2.right;
-
-            await UniTask.WhenAll(
-                PlayStripedSide(source, negativeDestination, negativeDirection, negativeSideLengthInTiles * secondsPerTile),
-                PlayStripedSide(source, positiveDestination, positiveDirection, positiveSideLengthInTiles * secondsPerTile));
+            Vector2 endpointOffset = (isVertical ? Vector2.up : Vector2.right) * layout.TileSize * 0.5f;
+            Vector2 negativeEndWorld = layout.GetTileWorldPos(negativeDestination.x, negativeDestination.y) - endpointOffset;
+            Vector2 positiveEndWorld = layout.GetTileWorldPos(positiveDestination.x, positiveDestination.y) + endpointOffset;
+            float negativeDuration = negativeSideLengthInTiles * secondsPerTile;
+            float positiveDuration = positiveSideLengthInTiles * secondsPerTile;
+            return stripe.Fire(negativeEndWorld, positiveEndWorld, negativeDuration, positiveDuration);
         }
 
-        private async UniTask PlayStripedSide(Vector2Int source, Vector2Int destination, Vector2 travelDirection, float duration)
+        public void ReleaseStripedSkillVFX(VFXStripeSkill stripe)
         {
-            VFXStripeSkill stripe = stripedSkillPool.Get();
-            stripe.transform.position = layout.GetTileWorldPos(source.x, source.y);
-            stripe.Prepare(travelDirection, layout.TileSize);
-
-            try
-            {
-                Vector2 destinationWorldPosition = layout.GetTileWorldPos(destination.x, destination.y);
-                await stripe.transform.DOMove(destinationWorldPosition, duration).SetEase(Ease.Linear)
-                    .SetLink(stripe.gameObject, LinkBehaviour.KillOnDestroy)
-                    .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, stripe.GetCancellationTokenOnDestroy());
-            }
-            finally
-            {
-                if (stripe != null)
-                    stripedSkillPool.Release(stripe);
-            }
+            stripedSkillPool.Release(stripe);
         }
 
         public async UniTask PlayBouquetBloomVFX(Vector2Int center)
