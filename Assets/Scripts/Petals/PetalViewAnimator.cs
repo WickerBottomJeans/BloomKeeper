@@ -28,6 +28,15 @@ public static class PetalViewAnimator
             .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
+    public static UniTask PlayRootScale(PetalView view, float scaleMultiplier, float duration)
+    {
+        view.KillRootAnimation();
+        return view.transform.DOScale(view.DefaultRootScale * scaleMultiplier, duration)
+            .SetEase(Ease.OutQuad)
+            .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
+            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
+    }
+
     public static UniTask PlayAboutToExecute(PetalView view)
     {
         view.KillVisualAnimation();
@@ -137,30 +146,46 @@ public static class PetalViewAnimator
         squashScale = new Vector3(1f - stretchAmount, 1f + stretchAmount, 1f);
     }   
 
-    public static async UniTask PlayFly(PetalView view, Vector2 targetWorldPosition, float duration)
+    public static async UniTask PlayFly(PetalView view, Vector2 targetWorldPosition, float tileSize, float duration, float curveAmplitudeInTiles)
     {
         view.KillActiveAnimation();
-        Vector2 flightDirection = targetWorldPosition - (Vector2)view.transform.position;
-        float targetAngle = Vector2.SignedAngle(Vector2.up, flightDirection);
+        Vector3 startControlPoint = view.transform.position + Vector3.up * tileSize * curveAmplitudeInTiles;
+        Vector3 endControlPoint = (Vector3)targetWorldPosition + Vector3.up * tileSize * curveAmplitudeInTiles;
+        Vector3[] flightPath = { targetWorldPosition, startControlPoint, endControlPoint };
+        Vector2 previousPosition = view.transform.position;
 
+        Tween scaleTween = view.transform.DOScale(view.DefaultRootScale, duration).SetEase(Ease.InQuad)
+            .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy);
         Tween flapTween = view.VisualTransform.DOScaleX(0f, 0.1f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo)
             .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy);
 
         try
         {
-            await UniTask.WhenAll(view.transform.DOMove(targetWorldPosition, duration).SetEase(Ease.Linear)
-                    .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
-                    .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy()),
-                view.VisualTransform.DORotate(new Vector3(0f, 0f, targetAngle), duration, RotateMode.Fast)
-                    .SetEase(Ease.OutQuad)
-                    .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
-                    .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy()));
+            await view.transform.DOPath(flightPath, duration, PathType.CubicBezier, PathMode.Sidescroller2D)
+                .OnUpdate(() =>
+                {
+                    Vector2 currentPosition = view.transform.position;
+                    Vector2 flightDirection = currentPosition - previousPosition;
+                    if (flightDirection.sqrMagnitude > 0f)
+                    {
+                        float angle = Vector2.SignedAngle(Vector2.up, flightDirection);
+                        view.VisualTransform.localRotation = Quaternion.Euler(0f, 0f, angle);
+                    }
+                    previousPosition = currentPosition;
+                })
+                .SetEase(Ease.InQuad)
+                .SetLink(view.gameObject, LinkBehaviour.KillOnDestroy)
+                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
         }
         finally
         {
+            scaleTween.Kill();
             flapTween.Kill();
             if (view != null)
+            {
+                view.transform.localScale = view.DefaultRootScale;
                 view.VisualTransform.localScale = view.TargetScale;
+            }
         }
     }
 

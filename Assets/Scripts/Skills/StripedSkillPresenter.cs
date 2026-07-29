@@ -11,22 +11,25 @@ namespace Skills
 {
     public sealed class StripedSkillPresenter : SkillRepresentationPresenter<StripedRepresentationData>
     {
-        private const float PrepareDuration = 0.15f;
-        private const float FireDuration = 0.2f;
-        private const float FinishDuration = 0.1f;
         private const float SourcePetalPrepareScale = 1.5f;
 
         private readonly PetalViewManager petalViewManager;
         private readonly TileViewManager tileViewManager;
         private readonly BoardVFXManager boardVFXManager;
         private readonly BoardAudioManager boardAudioManager;
+        private readonly float prepareDuration;
+        private readonly float fireDuration;
+        private readonly float finishDuration;
 
-        public StripedSkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager)
+        public StripedSkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, float prepareDuration, float fireDuration, float finishDuration)
         {
             this.petalViewManager = petalViewManager;
             this.tileViewManager = tileViewManager;
             this.boardVFXManager = boardVFXManager;
             this.boardAudioManager = boardAudioManager;
+            this.prepareDuration = prepareDuration;
+            this.fireDuration = fireDuration;
+            this.finishDuration = finishDuration;
         }
 
         protected override void AcquireVitalViews(StripedRepresentationData representation,
@@ -60,13 +63,13 @@ namespace Skills
         private UniTask Prepare(VFXStripeSkill stripe, Vector2Int source,
             IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
-            return UniTask.WhenAll(stripe.Prepare(PrepareDuration),
-                petalViewManager.PlayScale(source, SourcePetalPrepareScale, PrepareDuration, Ease.OutCubic, accessKeys));
+            return UniTask.WhenAll(stripe.Prepare(prepareDuration),
+                petalViewManager.PlayScale(source, SourcePetalPrepareScale, prepareDuration, Ease.OutCubic, accessKeys));
         }
 
         private UniTask Fire(VFXStripeSkill stripe, Vector2Int source, bool isVertical)
         {
-            return boardVFXManager.FireStripedSkillVFX(stripe, source, isVertical, FireDuration);
+            return boardVFXManager.FireStripedSkillVFX(stripe, source, isVertical, fireDuration);
         }
 
         private async UniTask Finish(VFXStripeSkill stripe, Vector2Int source, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -99,7 +102,7 @@ namespace Skills
             }
 
             petalViewManager.ReleasePetalViewsImmediately(ownedRemovedPositions, accessKeys);
-            await UniTask.WhenAll(stripe.Finish(FinishDuration), petalViewManager.PlayAboutToExecuteShake(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(obstacleChanges));
+            await UniTask.WhenAll(stripe.Finish(finishDuration), petalViewManager.PlayAboutToExecuteShake(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(obstacleChanges));
         }
     }
 }

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bb081a4581031de4ab17ede1c08e83a3, type: 3}
-  m_Name: StripeSkill
+  m_Name: ButterflySkillStarter
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.Audio.AudioCue
   clips:
-  - {fileID: 8300000, guid: 1d6de4593fd7c884581d09f759e67d49, type: 3}
+  - {fileID: 8300000, guid: 841bbecc417b87b44963d0a5c3d1d683, type: 3}
   bus: 1
   volume: 1
   minimumPitch: 1

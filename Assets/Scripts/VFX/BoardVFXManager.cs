@@ -14,13 +14,15 @@ namespace DefaultNamespace.VFX
         [SerializeField] private ParticleSystem mutationLaserOriginPrefab;
         [SerializeField] private GameObject bouquetBloomPrefab;
         [SerializeField] private VFXStripeSkill stripedSkillPrefab;
-        [SerializeField] private Transform laserRoot;
+        [SerializeField] private VFXButterflySkill butterflySkillPrefab;
+        [SerializeField] private Transform boardVFXRoot;
         [SerializeField] private float mutationLaserWidthRatio = 0.12f;
 
         private ObjectPool<MutationLaserView> mutationLaserPool;
         private ObjectPool<ParticleSystem> mutationLaserOriginPool;
         private ObjectPool<GameObject> bouquetBloomPool;
         private ObjectPool<VFXStripeSkill> stripedSkillPool;
+        private ObjectPool<VFXButterflySkill> butterflySkillPool;
         private BoardLayout layout;
 
         public void Init(BoardLayout boardLayout)
@@ -35,7 +37,7 @@ namespace DefaultNamespace.VFX
                 throw new InvalidOperationException("BoardVFXManager requires a striped skill prefab.");
 
             layout = boardLayout ?? throw new ArgumentNullException(nameof(boardLayout));
-            Transform root = laserRoot != null ? laserRoot : transform;
+            Transform root = boardVFXRoot != null ? boardVFXRoot : transform;
 
             mutationLaserPool = new ObjectPool<MutationLaserView>(
                 createFunc: () => Instantiate(mutationLaserPrefab, root),
@@ -63,6 +65,13 @@ namespace DefaultNamespace.VFX
                 actionOnGet: stripe => stripe.gameObject.SetActive(true),
                 actionOnRelease: stripe => stripe.gameObject.SetActive(false),
                 actionOnDestroy: stripe => Destroy(stripe.gameObject)
+            );
+
+            butterflySkillPool = new ObjectPool<VFXButterflySkill>(
+                createFunc: () => Instantiate(butterflySkillPrefab, root),
+                actionOnGet: butterfly => butterfly.gameObject.SetActive(true),
+                actionOnRelease: butterfly => butterfly.gameObject.SetActive(false),
+                actionOnDestroy: butterfly => Destroy(butterfly.gameObject)
             );
         }
 
@@ -97,6 +106,39 @@ namespace DefaultNamespace.VFX
         public void ReleaseStripedSkillVFX(VFXStripeSkill stripe)
         {
             stripedSkillPool.Release(stripe);
+        }
+
+        public VFXButterflySkill RentButterflySkillVFX(Transform parent)
+        {
+            if (butterflySkillPool == null)
+                throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+
+            VFXButterflySkill butterfly = butterflySkillPool.Get();
+            butterfly.transform.SetParent(parent, false);
+            butterfly.transform.localPosition = Vector3.zero;
+            butterfly.transform.localRotation = Quaternion.identity;
+            butterfly.transform.localScale = Vector3.one;
+            return butterfly;
+        }
+
+        public async UniTask FinishButterflySkillVFX(VFXButterflySkill butterfly, float duration)
+        {
+            Transform root = boardVFXRoot != null ? boardVFXRoot : transform;
+            butterfly.transform.SetParent(root, true);
+            ParticleSystem[] particleSystems = butterfly.GetComponentsInChildren<ParticleSystem>(true);
+
+            try
+            {
+                await butterfly.Finish(duration);
+                await UniTask.WaitUntil(() => !HasLivingParticles(particleSystems));
+            }
+            finally
+            {
+                foreach (ParticleSystem particles in particleSystems)
+                    particles.Clear(true);
+
+                butterflySkillPool.Release(butterfly);
+            }
         }
 
         public async UniTask PlayBouquetBloomVFX(Vector2Int center)
@@ -227,6 +269,7 @@ namespace DefaultNamespace.VFX
             mutationLaserOriginPool?.Clear();
             bouquetBloomPool?.Clear();
             stripedSkillPool?.Clear();
+            butterflySkillPool?.Clear();
         }
     }
 }

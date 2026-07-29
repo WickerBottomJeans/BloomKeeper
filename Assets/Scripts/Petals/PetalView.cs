@@ -23,10 +23,15 @@ public class PetalView : MonoBehaviour
     public float MaxDirectionalJellyStretch => maxDirectionalJellyStretch;
     public float DirectionalJellySquashDurationRatio => directionalJellySquashDurationRatio;
     public float DirectionalJellySettleDurationRatio => directionalJellySettleDurationRatio;
+    public Vector3 DefaultRootScale => defaultRootScale;
     private Material defaultMaterial;
+    private Color defaultColor;
+    private Vector3 defaultRootScale;
 
     private void Awake()
     {
+        defaultColor = spriteRenderer.color;
+        defaultRootScale = transform.localScale;
         CacheDefaultMaterial();
     }
 
@@ -53,7 +58,7 @@ public class PetalView : MonoBehaviour
             targetHeight / spriteWorldSize.y
         );
         TargetScale = Vector3.one * scale;
-        transform.localScale = Vector3.one;
+        transform.localScale = defaultRootScale;
         ResetDirectionalJelly();
         VisualTransform.localPosition = Vector3.zero;
         VisualTransform.localScale = TargetScale;
@@ -63,6 +68,14 @@ public class PetalView : MonoBehaviour
     {
         KillRootAnimation();
         KillVisualAnimation();
+    }
+
+    public void ResetForPool()
+    {
+        KillActiveAnimation();
+        transform.localScale = defaultRootScale;
+        spriteRenderer.color = defaultColor;
+        RestoreDefaultMaterial();
     }
 
     public void KillRootAnimation()

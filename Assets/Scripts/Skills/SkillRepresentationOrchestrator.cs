@@ -6,6 +6,7 @@ using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Skills
 {
@@ -15,8 +16,14 @@ namespace Skills
         [SerializeField] private float bouquetDisappearDuration = 0.2f;
 
         [Header("Butterfly Timing")]
-        [SerializeField] private float butterflyFlightDuration = 0.5f;
-        [SerializeField] private float butterflyDisappearDuration = 0.2f;
+        [SerializeField] private float butterflyPrepareDuration = 0.1f;
+        [SerializeField] private float butterflyFireDuration = 0.3f;
+        [SerializeField] private float butterflyFinishDuration = 0.1f;
+
+        [Header("Striped Timing")]
+        [SerializeField] private float stripedPrepareDuration = 0.15f;
+        [SerializeField] private float stripedFireDuration = 0.2f;
+        [SerializeField] private float stripedFinishDuration = 0.1f;
 
         [Header("Stripe Sunburst Timing")]
         [SerializeField] private float stripeSunburstSpinDuration = 2f;
@@ -30,8 +37,8 @@ namespace Skills
         {
             presenters = new Dictionary<Type, ISkillRepresentationPresenter>();
             Register(new BouquetSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, bouquetDisappearDuration));
-            Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager));
-            Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, layout, butterflyFlightDuration, butterflyDisappearDuration));
+            Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, stripedPrepareDuration, stripedFireDuration, stripedFinishDuration));
+            Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, layout, butterflyPrepareDuration, butterflyFireDuration, butterflyFinishDuration));
             Register(new SunburstSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, stripeSunburstSpinDuration, stripeSunburstMutationDuration, stripeSunburstLaserDuration, stripeSunburstLaserChargeUpDuration));
         }
 

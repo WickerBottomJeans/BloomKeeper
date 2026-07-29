@@ -24,7 +24,11 @@ public class PetalViewManager : MonoBehaviour
         pool = new ObjectPool<PetalView>(
             createFunc: () => Instantiate(petalViewPrefab, transform),
             actionOnGet: view => view.gameObject.SetActive(true),
-            actionOnRelease: view => view.gameObject.SetActive(false),
+            actionOnRelease: view =>
+            {
+                view.ResetForPool();
+                view.gameObject.SetActive(false);
+            },
             actionOnDestroy: view => Destroy(view.gameObject)
         );
         
@@ -158,6 +162,12 @@ public class PetalViewManager : MonoBehaviour
         return PetalViewAnimator.PlayScale(view, scaleMultiplier, duration, ease);
     }
 
+    public UniTask PlayRootScale(Vector2Int position, float scaleMultiplier, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        PetalView view = GetAccessibleView(accessKeys, position);
+        return PetalViewAnimator.PlayRootScale(view, scaleMultiplier, duration);
+    }
+
     public UniTask PlayAboutToExecuteShake(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         foreach (Vector2Int position in positions)
@@ -178,11 +188,16 @@ public class PetalViewManager : MonoBehaviour
         pool.Release(view);
     }
 
-    public UniTask PlayFly(Vector2Int sourceTile, Vector2Int targetTile, BoardLayout boardLayout, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    public UniTask PlayFly(Vector2Int sourceTile, Vector2Int targetTile, BoardLayout boardLayout, float duration, float curveAmplitudeInTiles, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         PetalView view = GetAccessibleView(accessKeys, sourceTile);
         Vector2 targetWorldPosition = boardLayout.GetTileWorldPos(targetTile.x, targetTile.y);
-        return PetalViewAnimator.PlayFly(view, targetWorldPosition, duration);
+        return PetalViewAnimator.PlayFly(view, targetWorldPosition, boardLayout.TileSize, duration, curveAmplitudeInTiles);
+    }
+
+    public Transform GetAccessibleVisualTransform(Vector2Int position, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        return GetAccessibleView(accessKeys, position).VisualTransform;
     }
     
     public async UniTask PlaySkillPetalCreations(IReadOnlyList<SkillPetalSpawn> spawns, BoardLayout boardLayout, IDictionary<Vector2Int, ViewAccessKey> accessKeys)

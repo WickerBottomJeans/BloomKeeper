@@ -20,13 +20,13 @@ namespace Skills
             {
                 Debug.LogWarning("ButterFly have no place to fly to");
                 var emptyMatch = new MatchGroup(new List<Vector2Int>(), MatchShape.None, causer);
-                var emptyRepresentation = new ButterflyRepresentationData(source, null);
+                var emptyRepresentation = new ButterflyRepresentationData(source, null, causer.PetalType);
                 return new SkillUseResult(emptyMatch, emptyRepresentation);
             }
 
             ReserveTarget(context, target.Value);
             var matchGroup = new MatchGroup(new List<Vector2Int> { target.Value }, MatchShape.None, causer);
-            var representation = new ButterflyRepresentationData(source, target.Value);
+            var representation = new ButterflyRepresentationData(source, target.Value, causer.PetalType);
             return new SkillUseResult(matchGroup, representation);
         }
 

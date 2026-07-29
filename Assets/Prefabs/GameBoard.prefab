@@ -129,7 +129,8 @@ MonoBehaviour:
   mutationLaserOriginPrefab: {fileID: 2445573516330377593, guid: b3220e6ac9bef1240805532206e38a17, type: 3}
   bouquetBloomPrefab: {fileID: 6101317438218409531, guid: 61f3069a1d426ef4cb3ccb102796e50d, type: 3}
   stripedSkillPrefab: {fileID: -1084145305644319253, guid: 50e5a9fe26adf834997a8212715a527d, type: 3}
-  laserRoot: {fileID: 950882905977853268}
+  butterflySkillPrefab: {fileID: 564335851267464242, guid: 245d3eb8f4b585342a4c9db43ed27867, type: 3}
+  boardVFXRoot: {fileID: 950882905977853268}
   mutationLaserWidthRatio: 0.12
 --- !u!114 &8200000000000000001
 MonoBehaviour:
@@ -144,8 +145,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Skills.SkillRepresentationOrchestrator
   bouquetDisappearDuration: 0.2
-  butterflyFlightDuration: 0.5
-  butterflyDisappearDuration: 0.2
+  butterflyPrepareDuration: 0.1
+  butterflyFireDuration: 0.7
+  butterflyFinishDuration: 0.1
+  stripedPrepareDuration: 0.15
+  stripedFireDuration: 0.2
+  stripedFinishDuration: 0.1
   stripeSunburstSpinDuration: 1
   stripeSunburstMutationDuration: 1
   stripeSunburstLaserDuration: 1
@@ -170,3 +175,5 @@ MonoBehaviour:
   boardShuffleCue: {fileID: 11400000, guid: 83716a168b864d859420be4efcaad6a3, type: 2}
   spiderWebClearCue: {fileID: 11400000, guid: 5bb94dcb8e2e40bba0151ff848a91f33, type: 2}
   stripedSkillCue: {fileID: 11400000, guid: 7649663161bf04644a21fb4c074b0c5a, type: 2}
+  butterflyPrepareCue: {fileID: 11400000, guid: 0614111f8eda8ea45a16a10fad0355a3, type: 2}
+  butterflyFinishCue: {fileID: 11400000, guid: e446a3ea5b4d4f148965dedfbc975d3d, type: 2}

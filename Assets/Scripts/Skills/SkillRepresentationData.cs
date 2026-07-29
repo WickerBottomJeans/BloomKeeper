@@ -47,11 +47,13 @@ namespace Skills
     {
         public Vector2Int Source { get; }
         public Vector2Int? Target { get; }
+        public PetalType SourcePetalType { get; }
 
-        public ButterflyRepresentationData(Vector2Int source, Vector2Int? target)
+        public ButterflyRepresentationData(Vector2Int source, Vector2Int? target, PetalType sourcePetalType)
         {
             Source = source;
             Target = target;
+            SourcePetalType = sourcePetalType;
         }
     }
 
