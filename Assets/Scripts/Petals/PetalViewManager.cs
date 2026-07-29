@@ -168,6 +168,16 @@ public class PetalViewManager : MonoBehaviour
         return PetalViewAnimator.PlayRootScale(view, scaleMultiplier, duration);
     }
 
+    public UniTask PlayBubbleInflate(Vector2Int position, float scaleMultiplier, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        return PetalViewAnimator.PlayBubbleInflate(GetAccessibleView(accessKeys, position), scaleMultiplier, duration);
+    }
+
+    public void HideBubbleForPop(Vector2Int position, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        GetAccessibleView(accessKeys, position).SetBubbleVisible(false);
+    }
+
     public UniTask PlayAboutToExecuteShake(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         foreach (Vector2Int position in positions)

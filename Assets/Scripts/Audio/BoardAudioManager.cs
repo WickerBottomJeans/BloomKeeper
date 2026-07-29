@@ -12,9 +12,7 @@ namespace DefaultNamespace.Audio
         [SerializeField] private AudioCue petalSpawningCue;
         [SerializeField] private AudioCue boardShuffleCue;
         [SerializeField] private AudioCue spiderWebClearCue;
-        [SerializeField] private AudioCue stripedSkillCue;
-        [SerializeField] private AudioCue butterflyPrepareCue;
-        [SerializeField] private AudioCue butterflyFinishCue;
+        [SerializeField] private AudioCue bubblePrepareCue;
 
         public void PlayPetalSwap()
         {
@@ -46,19 +44,9 @@ namespace DefaultNamespace.Audio
             AudioService.Instance.PlaySfx(boardShuffleCue);
         }
 
-        public void PlayStripedSkill()
+        public void PlayBubblePrepare()
         {
-            AudioService.Instance.PlaySfx(stripedSkillCue);
-        }
-
-        public void PlayButterflyPrepare()
-        {
-            AudioService.Instance.PlaySfx(butterflyPrepareCue);
-        }
-
-        public void PlayButterflyFinish()
-        {
-            AudioService.Instance.PlaySfx(butterflyFinishCue);
+            AudioService.Instance.PlaySfx(bubblePrepareCue);
         }
 
         public void PlayObstacleCleared(TileType tileType)

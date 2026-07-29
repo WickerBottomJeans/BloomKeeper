@@ -9,12 +9,12 @@ namespace Skills
     {
     }
 
-    public sealed class BouquetRepresentationData : SkillRepresentationData
+    public sealed class BubbleRepresentationData : SkillRepresentationData
     {
         public Vector2Int Center { get; }
         public IReadOnlyList<Vector2Int> AffectedPositions { get; }
 
-        public BouquetRepresentationData(
+        public BubbleRepresentationData(
             Vector2Int center,
             IReadOnlyList<Vector2Int> affectedPositions)
         {

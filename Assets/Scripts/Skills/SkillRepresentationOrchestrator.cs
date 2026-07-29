@@ -6,14 +6,15 @@ using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Skills
 {
     public class SkillRepresentationOrchestrator : MonoBehaviour
     {
-        [Header("Bomb Timing")]
-        [SerializeField] private float bouquetDisappearDuration = 0.2f;
+        [Header("Bubble Timing")]
+        [SerializeField] private float bubblePrepareDuration = 0.4f;
+        [SerializeField] private float bubbleFireDuration = 0.3f;
+        [SerializeField] private float bubbleFinishDuration = 0.2f;
 
         [Header("Butterfly Timing")]
         [SerializeField] private float butterflyPrepareDuration = 0.1f;
@@ -36,9 +37,9 @@ namespace Skills
         public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout)
         {
             presenters = new Dictionary<Type, ISkillRepresentationPresenter>();
-            Register(new BouquetSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, bouquetDisappearDuration));
-            Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, stripedPrepareDuration, stripedFireDuration, stripedFinishDuration));
-            Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, layout, butterflyPrepareDuration, butterflyFireDuration, butterflyFinishDuration));
+            Register(new BubbleSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, layout, bubblePrepareDuration, bubbleFireDuration, bubbleFinishDuration));
+            Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, stripedPrepareDuration, stripedFireDuration, stripedFinishDuration));
+            Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, butterflyPrepareDuration, butterflyFireDuration, butterflyFinishDuration));
             Register(new SunburstSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, stripeSunburstSpinDuration, stripeSunburstMutationDuration, stripeSunburstLaserDuration, stripeSunburstLaserChargeUpDuration));
         }
 

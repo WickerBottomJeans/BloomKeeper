@@ -127,9 +127,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.VFX.BoardVFXManager
   mutationLaserPrefab: {fileID: 985442930338887914, guid: 5caaf1731217f4f4990777f336c60df4, type: 3}
   mutationLaserOriginPrefab: {fileID: 2445573516330377593, guid: b3220e6ac9bef1240805532206e38a17, type: 3}
-  bouquetBloomPrefab: {fileID: 6101317438218409531, guid: 61f3069a1d426ef4cb3ccb102796e50d, type: 3}
   stripedSkillPrefab: {fileID: -1084145305644319253, guid: 50e5a9fe26adf834997a8212715a527d, type: 3}
   butterflySkillPrefab: {fileID: 564335851267464242, guid: 245d3eb8f4b585342a4c9db43ed27867, type: 3}
+  bubblePrefab: {fileID: 5904466950015035354, guid: d714b1a1f0aa1ef4fb8f3bf17c3402d6, type: 3}
+  bubblePopParticlesPrefab: {fileID: 3104921802242997286, guid: dab69877ebd5889489ec61e6e2c8ff7e, type: 3}
   boardVFXRoot: {fileID: 950882905977853268}
   mutationLaserWidthRatio: 0.12
 --- !u!114 &8200000000000000001
@@ -144,7 +145,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77c5198bd7b7472c80994024e74f3ae6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Skills.SkillRepresentationOrchestrator
-  bouquetDisappearDuration: 0.2
+  bubblePrepareDuration: 0.4
+  bubbleFireDuration: 0.3
+  bubbleFinishDuration: 0.2
   butterflyPrepareDuration: 0.1
   butterflyFireDuration: 0.7
   butterflyFinishDuration: 0.1
@@ -174,6 +177,4 @@ MonoBehaviour:
   petalSpawningCue: {fileID: 11400000, guid: af295ab53eff4b599daff5ff3c28b8d4, type: 2}
   boardShuffleCue: {fileID: 11400000, guid: 83716a168b864d859420be4efcaad6a3, type: 2}
   spiderWebClearCue: {fileID: 11400000, guid: 5bb94dcb8e2e40bba0151ff848a91f33, type: 2}
-  stripedSkillCue: {fileID: 11400000, guid: 7649663161bf04644a21fb4c074b0c5a, type: 2}
-  butterflyPrepareCue: {fileID: 11400000, guid: 0614111f8eda8ea45a16a10fad0355a3, type: 2}
-  butterflyFinishCue: {fileID: 11400000, guid: e446a3ea5b4d4f148965dedfbc975d3d, type: 2}
+  bubblePrepareCue: {fileID: 11400000, guid: 2920ea5be611b4d41b388ae28e05ac40, type: 2}

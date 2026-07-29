@@ -1,4 +1,5 @@
- using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using DefaultNamespace.Audio;
 using DG.Tweening;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ namespace DefaultNamespace.VFX
         [SerializeField] private SpriteRenderer negativeBeam;
         [SerializeField] private SpriteRenderer positiveBeam;
         [SerializeField] private SpriteRenderer sourceHalo;
+        [SerializeField] private AudioCue skillCue;
         [SerializeField, Min(0f)] private float sourceHaloSizeRelativeToBeam = 1.2f;
         [SerializeField, Range(0f, 1f)] private float sourceHaloStartScaleRatio = 0.6f;
         [SerializeField, Min(1f)] private float sourceHaloPulseScaleMultiplier = 1.08f;
@@ -27,6 +29,7 @@ namespace DefaultNamespace.VFX
 
         public async UniTask Prepare(float duration)
         {
+            AudioService.Instance.PlaySfx(skillCue);
             float negativeWidthScale = 1f / negativeBeam.sprite.bounds.size.x;
             float positiveWidthScale = 1f / positiveBeam.sprite.bounds.size.x;
             float sourceHaloScale = sourceHaloSizeRelativeToBeam / Mathf.Max(sourceHalo.sprite.bounds.size.x, sourceHalo.sprite.bounds.size.y);

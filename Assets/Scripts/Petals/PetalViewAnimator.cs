@@ -37,6 +37,13 @@ public static class PetalViewAnimator
             .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
     }
 
+    public static UniTask PlayBubbleInflate(PetalView view, float scaleMultiplier, float duration)
+    {
+        view.SetBubbleVisible(true);
+        view.BubbleTransform.DOKill();
+        return view.BubbleTransform.DOScale(view.DefaultBubbleScale * scaleMultiplier, duration).SetEase(Ease.InQuad).SetLink(view.gameObject, LinkBehaviour.KillOnDestroy).ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, view.GetCancellationTokenOnDestroy());
+    }
+
     public static UniTask PlayAboutToExecute(PetalView view)
     {
         view.KillVisualAnimation();

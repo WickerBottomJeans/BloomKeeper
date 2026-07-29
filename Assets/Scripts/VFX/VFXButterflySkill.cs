@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using DefaultNamespace.Audio;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -13,6 +14,8 @@ namespace DefaultNamespace.VFX
         [SerializeField] private TrailRenderer leftWingTrail;
         [SerializeField] private TrailRenderer rightWingTrail;
         [SerializeField] private ParticleSystem impactParticles;
+        [SerializeField] private AudioCue prepareCue;
+        [SerializeField] private AudioCue finishCue;
 
         private Color restingColor;
 
@@ -33,6 +36,7 @@ namespace DefaultNamespace.VFX
 
         public async UniTask Prepare(float duration)
         {
+            AudioService.Instance.PlaySfx(prepareCue);
             fireParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             impactParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             leftWingTrail.emitting = false;
@@ -53,6 +57,7 @@ namespace DefaultNamespace.VFX
 
         public async UniTask Finish(float duration)
         {
+            AudioService.Instance.PlaySfx(finishCue);
             fireParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             leftWingTrail.emitting = false;
             rightWingTrail.emitting = false;

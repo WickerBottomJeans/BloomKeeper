@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
-using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using DG.Tweening;
@@ -16,17 +15,15 @@ namespace Skills
         private readonly PetalViewManager petalViewManager;
         private readonly TileViewManager tileViewManager;
         private readonly BoardVFXManager boardVFXManager;
-        private readonly BoardAudioManager boardAudioManager;
         private readonly float prepareDuration;
         private readonly float fireDuration;
         private readonly float finishDuration;
 
-        public StripedSkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, float prepareDuration, float fireDuration, float finishDuration)
+        public StripedSkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, float prepareDuration, float fireDuration, float finishDuration)
         {
             this.petalViewManager = petalViewManager;
             this.tileViewManager = tileViewManager;
             this.boardVFXManager = boardVFXManager;
-            this.boardAudioManager = boardAudioManager;
             this.prepareDuration = prepareDuration;
             this.fireDuration = fireDuration;
             this.finishDuration = finishDuration;
@@ -49,7 +46,6 @@ namespace Skills
 
             try
             {
-                boardAudioManager.PlayStripedSkill();
                 await Prepare(stripe, representation.Source, accessKeys);
                 await Fire(stripe, representation.Source, isVertical);
                 await Finish(stripe, representation.Source, resolution, accessKeys);

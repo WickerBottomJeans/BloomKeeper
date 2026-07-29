@@ -50,7 +50,7 @@
         None = 0,
         StripedHorizontal = 1,
         StripedVertical = 2,
-        Bomb = 3,
+        Bubble = 3,
         Sunburst = 4,
         Butterfly = 5,
     }

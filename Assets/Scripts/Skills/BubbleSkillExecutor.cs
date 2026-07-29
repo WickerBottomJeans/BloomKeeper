@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class BouquetSkillExecutor : ISkillExecutor
+    public sealed class BubbleSkillExecutor : ISkillExecutor
     {
         private const int Range = 1;
 
@@ -25,7 +25,7 @@ namespace Skills
             }
 
             var matchGroup = new MatchGroup(positions, MatchShape.None, new Petal(activation.ParticipantA.Petal));
-            var representation = new BouquetRepresentationData(center, positions);
+            var representation = new BubbleRepresentationData(center, positions);
             return new SkillUseResult(matchGroup, representation);
         }
     }

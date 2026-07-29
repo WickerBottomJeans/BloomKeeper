@@ -31,7 +31,7 @@ namespace DefaultNamespace
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.None), HandleSunburst },
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.StripedHorizontal), HandleSunburst },
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.StripedVertical), HandleSunburst },
-                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Bomb), HandleSunburst },
+                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Bubble), HandleSunburst },
                 { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Butterfly), HandleSunburst },
             };
 

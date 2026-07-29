@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
-using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using UnityEngine;
@@ -25,18 +24,16 @@ namespace Skills
         private readonly PetalViewManager petalViewManager;
         private readonly TileViewManager tileViewManager;
         private readonly BoardVFXManager boardVFXManager;
-        private readonly BoardAudioManager boardAudioManager;
         private readonly BoardLayout layout;
         private readonly float prepareDuration;
         private readonly float fireDuration;
         private readonly float finishDuration;
 
-        public ButterflySkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout, float prepareDuration, float fireDuration, float finishDuration)
+        public ButterflySkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardLayout layout, float prepareDuration, float fireDuration, float finishDuration)
         {
             this.petalViewManager = petalViewManager;
             this.tileViewManager = tileViewManager;
             this.boardVFXManager = boardVFXManager;
-            this.boardAudioManager = boardAudioManager;
             this.layout = layout;
             this.prepareDuration = prepareDuration;
             this.fireDuration = fireDuration;
@@ -75,7 +72,6 @@ namespace Skills
             if (!accessKeys.ContainsKey(source))
                 return null;
 
-            boardAudioManager.PlayButterflyPrepare();
             Transform visualTransform = petalViewManager.GetAccessibleVisualTransform(source, accessKeys);
             VFXButterflySkill butterflyVFX = boardVFXManager.RentButterflySkillVFX(visualTransform);
             butterflyVFX.SetColor(ParticleColors[sourcePetalType]);
@@ -108,7 +104,6 @@ namespace Skills
 
             if (butterflyVFX != null)
             {
-                boardAudioManager.PlayButterflyFinish();
                 boardVFXManager.FinishButterflySkillVFX(butterflyVFX, finishDuration).Forget();
             }
 

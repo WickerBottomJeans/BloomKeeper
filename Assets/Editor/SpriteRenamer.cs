@@ -12,7 +12,7 @@ public class SpriteRenamer : Editor
         if (importer == null) return;
 
         string[] flowers = { "Rose", "Daisy", "Bluebell", "Sunflower", "Lavender", "Clover" };
-        string[] variants = { "_Default", "_StripedHorizontal", "_StripedVertical", "_Bouquet", "_Butterfly" };
+        string[] variants = { "_Default", "_StripedHorizontal", "_StripedVertical", "_Bubble", "_Butterfly" };
 
         SpriteMetaData[] metaData = importer.spritesheet;
 

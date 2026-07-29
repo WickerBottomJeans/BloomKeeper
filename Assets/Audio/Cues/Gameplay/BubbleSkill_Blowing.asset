@@ -10,10 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bb081a4581031de4ab17ede1c08e83a3, type: 3}
-  m_Name: ButterflySkillEnder
+  m_Name: BubbleSkill_Blowing
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.Audio.AudioCue
   clips:
-  - {fileID: 8300000, guid: 9d8a927f28550194c884129e8c68e370, type: 3}
+  - {fileID: 8300000, guid: 42b514b6c83d9704fbf3ac2b72f91991, type: 3}
+  - {fileID: 8300000, guid: fc4596ebebad66446ac041fca38b92cc, type: 3}
+  - {fileID: 8300000, guid: fe7a2909b043e08428c8bb3e059dba55, type: 3}
   bus: 1
   volume: 1
   minimumPitch: 1

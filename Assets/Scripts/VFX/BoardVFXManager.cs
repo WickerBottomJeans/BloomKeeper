@@ -12,17 +12,19 @@ namespace DefaultNamespace.VFX
     {
         [SerializeField] private MutationLaserView mutationLaserPrefab;
         [SerializeField] private ParticleSystem mutationLaserOriginPrefab;
-        [SerializeField] private GameObject bouquetBloomPrefab;
         [SerializeField] private VFXStripeSkill stripedSkillPrefab;
         [SerializeField] private VFXButterflySkill butterflySkillPrefab;
+        [SerializeField] private VFXBubble bubblePrefab;
+        [SerializeField] private VFXBubblePopParticles bubblePopParticlesPrefab;
         [SerializeField] private Transform boardVFXRoot;
         [SerializeField] private float mutationLaserWidthRatio = 0.12f;
 
         private ObjectPool<MutationLaserView> mutationLaserPool;
         private ObjectPool<ParticleSystem> mutationLaserOriginPool;
-        private ObjectPool<GameObject> bouquetBloomPool;
         private ObjectPool<VFXStripeSkill> stripedSkillPool;
         private ObjectPool<VFXButterflySkill> butterflySkillPool;
+        private ObjectPool<VFXBubble> bubblePool;
+        private ObjectPool<VFXBubblePopParticles> bubblePopParticlesPool;
         private BoardLayout layout;
 
         public void Init(BoardLayout boardLayout)
@@ -31,10 +33,12 @@ namespace DefaultNamespace.VFX
                 throw new InvalidOperationException("BoardVFXManager requires a MutationLaserView prefab.");
             if (mutationLaserOriginPrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a mutation laser origin ParticleSystem prefab.");
-            if (bouquetBloomPrefab == null)
-                throw new InvalidOperationException("BoardVFXManager requires a Bomb bloom prefab.");
             if (stripedSkillPrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a striped skill prefab.");
+            if (bubblePrefab == null)
+                throw new InvalidOperationException("BoardVFXManager requires a Bubble projectile prefab.");
+            if (bubblePopParticlesPrefab == null)
+                throw new InvalidOperationException("BoardVFXManager requires a Bubble pop-particles prefab.");
 
             layout = boardLayout ?? throw new ArgumentNullException(nameof(boardLayout));
             Transform root = boardVFXRoot != null ? boardVFXRoot : transform;
@@ -53,13 +57,6 @@ namespace DefaultNamespace.VFX
                 actionOnDestroy: particles => Destroy(particles.gameObject)
             );
 
-            bouquetBloomPool = new ObjectPool<GameObject>(
-                createFunc: () => Instantiate(bouquetBloomPrefab, root),
-                actionOnGet: bloom => bloom.SetActive(true),
-                actionOnRelease: bloom => bloom.SetActive(false),
-                actionOnDestroy: Destroy
-            );
-
             stripedSkillPool = new ObjectPool<VFXStripeSkill>(
                 createFunc: () => Instantiate(stripedSkillPrefab, root),
                 actionOnGet: stripe => stripe.gameObject.SetActive(true),
@@ -72,6 +69,36 @@ namespace DefaultNamespace.VFX
                 actionOnGet: butterfly => butterfly.gameObject.SetActive(true),
                 actionOnRelease: butterfly => butterfly.gameObject.SetActive(false),
                 actionOnDestroy: butterfly => Destroy(butterfly.gameObject)
+            );
+
+            bubblePool = new ObjectPool<VFXBubble>(
+                createFunc: () => Instantiate(bubblePrefab, root),
+                actionOnGet: bubble =>
+                {
+                    bubble.gameObject.SetActive(true);
+                    bubble.ResetForPool();
+                },
+                actionOnRelease: bubble =>
+                {
+                    bubble.ResetForPool();
+                    bubble.gameObject.SetActive(false);
+                },
+                actionOnDestroy: bubble => Destroy(bubble.gameObject)
+            );
+
+            bubblePopParticlesPool = new ObjectPool<VFXBubblePopParticles>(
+                createFunc: () => Instantiate(bubblePopParticlesPrefab, root),
+                actionOnGet: particles =>
+                {
+                    particles.gameObject.SetActive(true);
+                    particles.ResetForPool();
+                },
+                actionOnRelease: particles =>
+                {
+                    particles.ResetForPool();
+                    particles.gameObject.SetActive(false);
+                },
+                actionOnDestroy: particles => Destroy(particles.gameObject)
             );
         }
 
@@ -141,33 +168,68 @@ namespace DefaultNamespace.VFX
             }
         }
 
-        public async UniTask PlayBouquetBloomVFX(Vector2Int center)
+        public VFXBubble RentBubbleVFX()
         {
-            if (bouquetBloomPool == null)
+            if (bubblePool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
 
-            GameObject bloom = bouquetBloomPool.Get();
-            ParticleSystem[] particleSystems = bloom.GetComponentsInChildren<ParticleSystem>(true);
+            VFXBubble bubble = bubblePool.Get();
+            bubble.Configure(layout.TileSize);
+            return bubble;
+        }
 
+        public void ReleaseBubbleVFX(VFXBubble bubble)
+        {
+            bubblePool.Release(bubble);
+        }
+
+        public void PopBubbleVFX(VFXBubble bubble)
+        {
             try
             {
-                bloom.transform.position = layout.GetTileWorldPos(center.x, center.y);
+                bubble.Pop();
+            }
+            catch
+            {
+                bubblePool.Release(bubble);
+                throw;
+            }
 
-                foreach (ParticleSystem particles in particleSystems)
-                {
-                    particles.Clear(false);
-                    particles.Play(false);
-                }
+            ReleaseBubbleAfterParticles(bubble).Forget();
+        }
 
-                await UniTask.WaitUntil(() => !HasLivingParticles(particleSystems));
+        private async UniTask ReleaseBubbleAfterParticles(VFXBubble bubble)
+        {
+            try
+            {
+                await bubble.WaitForEnderParticles();
             }
             finally
             {
-                //TODO: test this again later, null error or sth idk
-                foreach (ParticleSystem particles in particleSystems)
-                    particles.Clear(false);
+                bubblePool.Release(bubble);
+            }
+        }
 
-                bouquetBloomPool.Release(bloom);
+        public void PlayBubblePopParticles(Vector2Int position, float inflatedScaleMultiplier)
+        {
+            PlayBubblePopParticlesAndRelease(position, inflatedScaleMultiplier).Forget();
+        }
+
+        private async UniTask PlayBubblePopParticlesAndRelease(Vector2Int position, float inflatedScaleMultiplier)
+        {
+            if (bubblePopParticlesPool == null)
+                throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+
+            VFXBubblePopParticles particles = bubblePopParticlesPool.Get();
+            try
+            {
+                particles.transform.position = layout.GetTileWorldPos(position.x, position.y);
+                particles.Configure(layout.TileSize, inflatedScaleMultiplier);
+                await particles.Play();
+            }
+            finally
+            {
+                bubblePopParticlesPool.Release(particles);
             }
         }
 
@@ -267,9 +329,10 @@ namespace DefaultNamespace.VFX
         {
             mutationLaserPool?.Clear();
             mutationLaserOriginPool?.Clear();
-            bouquetBloomPool?.Clear();
             stripedSkillPool?.Clear();
             butterflySkillPool?.Clear();
+            bubblePool?.Clear();
+            bubblePopParticlesPool?.Clear();
         }
     }
 }

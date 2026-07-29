@@ -232,6 +232,7 @@ MonoBehaviour:
   negativeBeam: {fileID: 710000000000000012}
   positiveBeam: {fileID: 710000000000000022}
   sourceHalo: {fileID: 710000000000000001}
+  skillCue: {fileID: 11400000, guid: 7649663161bf04644a21fb4c074b0c5a, type: 2}
   sourceHaloSizeRelativeToBeam: 2
   sourceHaloStartScaleRatio: 0.6
   sourceHaloPulseScaleMultiplier: 1.08

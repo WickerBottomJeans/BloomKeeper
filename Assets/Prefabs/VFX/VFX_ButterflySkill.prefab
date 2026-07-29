@@ -10028,6 +10028,8 @@ MonoBehaviour:
   leftWingTrail: {fileID: 4608393142184121320}
   rightWingTrail: {fileID: 1784243213779371418}
   impactParticles: {fileID: 3185154134571367972}
+  prepareCue: {fileID: 11400000, guid: 0614111f8eda8ea45a16a10fad0355a3, type: 2}
+  finishCue: {fileID: 11400000, guid: e446a3ea5b4d4f148965dedfbc975d3d, type: 2}
 --- !u!1 &8862523915184234635
 GameObject:
   m_ObjectHideFlags: 0

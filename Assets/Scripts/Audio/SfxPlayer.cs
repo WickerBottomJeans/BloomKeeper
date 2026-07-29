@@ -21,7 +21,17 @@ namespace DefaultNamespace.Audio
 
         public void Play(AudioCue cue, AudioMixerGroup mixerGroup)
         {
-            AudioClip clip = cue.PickClip();
+            AudioClip clip;
+            try
+            {
+                clip = cue.PickClip();
+            }
+            catch (InvalidOperationException exception)
+            {
+                Debug.LogException(exception, cue);
+                return;
+            }
+
             float pitch = cue.PickPitch();
             AudioVoice voice = voicePool.Get();
 

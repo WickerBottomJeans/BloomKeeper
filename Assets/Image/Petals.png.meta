@@ -67,25 +67,25 @@ TextureImporter:
     second: Daisy_StripedVertical
   - first:
       213: -7849477738210277183
-    second: Strawberry_Bouquet
+    second: Strawberry_Bubble
   - first:
       213: -64890738673955329
-    second: Mushroom_Bouquet
+    second: Mushroom_Bubble
   - first:
       213: 7847449880043966781
-    second: Starfruit_Bouquet
+    second: Starfruit_Bubble
   - first:
       213: -3561202144488316383
-    second: Clover_Bouquet
+    second: Clover_Bubble
   - first:
       213: 3875515384899716169
-    second: Dewdrop_Bouquet
+    second: Dewdrop_Bubble
   - first:
       213: -7932174138965884787
-    second: BerryCluster_Bouquet
+    second: BerryCluster_Bubble
   - first:
       213: -3842605357785805146
-    second: Daisy_Bouquet
+    second: Daisy_Bubble
   - first:
       213: -4461018958292000692
     second: Strawberry_Butterfly
@@ -677,7 +677,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Strawberry_Bomb
+      name: Strawberry_Bubble
       rect:
         serializedVersion: 2
         x: 40
@@ -699,7 +699,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Mushroom_Bomb
+      name: Mushroom_Bubble
       rect:
         serializedVersion: 2
         x: 253
@@ -721,7 +721,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Starfruit_Bomb
+      name: Starfruit_Bubble
       rect:
         serializedVersion: 2
         x: 459
@@ -743,7 +743,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Clover_Bomb
+      name: Clover_Bubble
       rect:
         serializedVersion: 2
         x: 666
@@ -765,7 +765,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Dewdrop_Bomb
+      name: Dewdrop_Bubble
       rect:
         serializedVersion: 2
         x: 884
@@ -787,7 +787,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BerryCluster_Bomb
+      name: BerryCluster_Bubble
       rect:
         serializedVersion: 2
         x: 1078
@@ -809,7 +809,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Daisy_Bomb
+      name: Daisy_Bubble
       rect:
         serializedVersion: 2
         x: 1268
@@ -998,37 +998,37 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      BerryCluster_Bomb: -7932174138965884787
+      BerryCluster_Bubble: -7932174138965884787
       BerryCluster_Butterfly: -8697376212223977200
       BerryCluster_Default: -7723644376667363023
       BerryCluster_StripedHorizontal: -9080989761530387810
       BerryCluster_StripedVertical: 4454478600426566855
-      Clover_Bomb: -3561202144488316383
+      Clover_Bubble: -3561202144488316383
       Clover_Butterfly: 2614345998196034759
       Clover_Default: 3234460474562127226
       Clover_StripedHorizontal: -8218993731297944233
       Clover_StripedVertical: 6576201314668573318
-      Daisy_Bomb: -3842605357785805146
+      Daisy_Bubble: -3842605357785805146
       Daisy_Butterfly: -929544841694520820
       Daisy_Default: -4508104085187513110
       Daisy_StripedHorizontal: -668967204189055197
       Daisy_StripedVertical: -6428829673468490688
-      Dewdrop_Bomb: 3875515384899716169
+      Dewdrop_Bubble: 3875515384899716169
       Dewdrop_Butterfly: -1593337987799913353
       Dewdrop_Default: 7974869367103266702
       Dewdrop_StripedHorizontal: 4150579344493707002
       Dewdrop_StripedVertical: 5002553187632062459
-      Mushroom_Bomb: -64890738673955329
+      Mushroom_Bubble: -64890738673955329
       Mushroom_Butterfly: 2785230211217196494
       Mushroom_Default: -5971529712519202139
       Mushroom_StripedHorizontal: 8416392122959248779
       Mushroom_StripedVertical: -6379812629350660343
-      Starfruit_Bomb: 7847449880043966781
+      Starfruit_Bubble: 7847449880043966781
       Starfruit_Butterfly: -834560787093049852
       Starfruit_Default: 138874962496516619
       Starfruit_StripedHorizontal: -5379179880594584770
       Starfruit_StripedVertical: -4643999379548046393
-      Strawberry_Bomb: -7849477738210277183
+      Strawberry_Bubble: -7849477738210277183
       Strawberry_Butterfly: -4461018958292000692
       Strawberry_Default: -4408906938756110447
       Strawberry_StripedHorizontal: 1896407088105901486

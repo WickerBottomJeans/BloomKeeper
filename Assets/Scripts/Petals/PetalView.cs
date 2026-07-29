@@ -9,7 +9,11 @@ public class PetalView : MonoBehaviour
     public SpriteRenderer spriteRenderer;
 
     [SerializeField] private Transform stretchAxis;
+    [SerializeField] private SpriteRenderer bubbleOverlay;
     [SerializeField] private Material aboutToExecuteMaterial;
+    [SerializeField] private float bubbleBounceDuration = 0.3f;
+    [SerializeField] private float bubbleBounceOvershoot = 2f;
+    [SerializeField] private float bubblePopScaleMultiplier = 1.7f;
     [SerializeField] [Range(0f, 1f)] private float paddingXRatio = 0.2f;
     [SerializeField] [Range(0f, 1f)] private float paddingYRatio = 0.2f;
     [SerializeField] [Range(0f, 0.25f)] private float directionalJellyStrength = 0.025f;
@@ -24,14 +28,22 @@ public class PetalView : MonoBehaviour
     public float DirectionalJellySquashDurationRatio => directionalJellySquashDurationRatio;
     public float DirectionalJellySettleDurationRatio => directionalJellySettleDurationRatio;
     public Vector3 DefaultRootScale => defaultRootScale;
+    public Transform BubbleTransform => bubbleOverlay.transform;
+    public SpriteRenderer BubbleRenderer => bubbleOverlay;
+    public Vector3 DefaultBubbleScale => defaultBubbleScale;
+    public float BubblePopScaleMultiplier => bubblePopScaleMultiplier;
     private Material defaultMaterial;
     private Color defaultColor;
     private Vector3 defaultRootScale;
+    private Vector3 defaultBubbleScale;
+    private Color defaultBubbleColor;
 
     private void Awake()
     {
         defaultColor = spriteRenderer.color;
         defaultRootScale = transform.localScale;
+        defaultBubbleScale = bubbleOverlay.transform.localScale;
+        defaultBubbleColor = bubbleOverlay.color;
         CacheDefaultMaterial();
     }
 
@@ -62,6 +74,7 @@ public class PetalView : MonoBehaviour
         ResetDirectionalJelly();
         VisualTransform.localPosition = Vector3.zero;
         VisualTransform.localScale = TargetScale;
+        ConfigureSkillDecorations(petal.Skill);
     }
 
     public void KillActiveAnimation()
@@ -75,7 +88,35 @@ public class PetalView : MonoBehaviour
         KillActiveAnimation();
         transform.localScale = defaultRootScale;
         spriteRenderer.color = defaultColor;
+        SetBubbleVisible(false);
         RestoreDefaultMaterial();
+    }
+
+    public void SetBubbleVisible(bool isVisible)
+    {
+        Transform bubbleTransform = bubbleOverlay.transform;
+
+        if (isVisible && bubbleOverlay.gameObject.activeSelf) return;
+
+        bubbleTransform.DOKill();
+
+        if (!isVisible)
+        {
+            bubbleTransform.localScale = defaultBubbleScale;
+            bubbleOverlay.color = defaultBubbleColor;
+            bubbleOverlay.gameObject.SetActive(false);
+            return;
+        }
+
+        bubbleOverlay.gameObject.SetActive(true);
+        bubbleOverlay.color = defaultBubbleColor;
+        bubbleTransform.localScale = Vector3.zero;
+        bubbleTransform.DOScale(defaultBubbleScale, bubbleBounceDuration).SetEase(Ease.OutBack, bubbleBounceOvershoot).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
+    }
+
+    private void ConfigureSkillDecorations(SpecialSkillType skillType)
+    {
+        SetBubbleVisible(skillType == SpecialSkillType.Bubble);
     }
 
     public void KillRootAnimation()

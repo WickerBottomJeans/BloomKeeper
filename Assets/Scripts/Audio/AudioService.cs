@@ -58,7 +58,10 @@ namespace DefaultNamespace.Audio
         public void PlaySfx(AudioCue cue)
         {
             if (cue == null)
-                throw new ArgumentNullException(nameof(cue));
+            {
+                Debug.LogError("Cannot play SFX because the AudioCue reference is missing.");
+                return;
+            }
             if (cue.Bus == AudioBus.Music)
                 throw new InvalidOperationException($"Audio cue '{cue.name}' is music and cannot be played as SFX.");
 
