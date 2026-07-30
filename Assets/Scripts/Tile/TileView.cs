@@ -16,12 +16,13 @@ namespace DefaultNamespace
 
         private float _tileSize;
 
-        public void Init(float tileSize)
+        public void Init(float tileSize, int baseSortingOrder)
         {
             if (tileSize <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(tileSize));
 
             _tileSize = tileSize;
+            _baseRenderer.sortingOrder = baseSortingOrder;
             _overlayAnimationRenderer.gameObject.SetActive(false);
         }
 
@@ -31,7 +32,9 @@ namespace DefaultNamespace
                 throw new ArgumentNullException(nameof(sprite));
 
             _baseRenderer.sprite = sprite;
-            FitToTile(_baseRenderer, sprite);
+            Vector3 scale = Vector3.one * (_tileSize / sprite.bounds.size.x);
+            _baseRenderer.transform.localScale = scale;
+            _targetScales[_baseRenderer] = scale;
         }
 
         public void SetOverlay(Sprite sprite)

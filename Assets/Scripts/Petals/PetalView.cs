@@ -9,10 +9,12 @@ using UnityEngine;
 public class PetalView : MonoBehaviour
 {
     private const int FlyingSortingOrderOffset = 1;
+    private const int ShadowSortingOrderOffset = -1;
 
     public SpriteRenderer spriteRenderer;
 
     [SerializeField] private Transform stretchAxis;
+    [SerializeField] private SpriteRenderer shadowRenderer;
     [SerializeField] private SpriteRenderer bubbleOverlay;
     [SerializeField] private Material aboutToExecuteMaterial;
     [SerializeField] private float bubbleBounceDuration = 0.3f;
@@ -31,6 +33,7 @@ public class PetalView : MonoBehaviour
     public Transform VisualTransform => spriteRenderer.transform;
     private Material defaultMaterial;
     private Color defaultColor;
+    private Color defaultShadowColor;
     private Vector3 defaultRootScale;
     private Vector3 defaultBubbleScale;
     private Color defaultBubbleColor;
@@ -39,10 +42,12 @@ public class PetalView : MonoBehaviour
     private void Awake()
     {
         defaultColor = spriteRenderer.color;
+        defaultShadowColor = shadowRenderer.color;
         defaultRootScale = transform.localScale;
         defaultBubbleScale = bubbleOverlay.transform.localScale;
         defaultBubbleColor = bubbleOverlay.color;
         defaultSortingOrder = spriteRenderer.sortingOrder;
+        SyncShadowSorting();
         CacheDefaultMaterial();
     }
 
@@ -57,9 +62,11 @@ public class PetalView : MonoBehaviour
             Debug.LogError($"Sprite {spriteKey} not found");
             return;
         }
-        spriteRenderer.sprite = SpriteLoader.Instance.GetSprite(spriteKey);
+        spriteRenderer.sprite = sprite;
+        shadowRenderer.sprite = sprite;
+        SyncShadowSorting();
 
-        Vector2 spriteWorldSize = spriteRenderer.sprite.bounds.size;
+        Vector2 spriteWorldSize = sprite.bounds.size;
 
         float targetWidth = tileSize * (1f - paddingXRatio);
         float targetHeight = tileSize * (1f - paddingYRatio);
@@ -152,10 +159,12 @@ public class PetalView : MonoBehaviour
         KillVisualAnimation();
         VisualTransform.localScale = Vector3.zero;
         spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 0f);
+        shadowRenderer.color = new Color(shadowRenderer.color.r, shadowRenderer.color.g, shadowRenderer.color.b, 0f);
 
         Sequence seq = DOTween.Sequence().SetLink(gameObject, LinkBehaviour.KillOnDestroy);
         seq.Append(VisualTransform.DOScale(TargetScale, 0.2f).SetEase(Ease.OutBack));
         seq.Join(spriteRenderer.DOFade(1f, 0.2f));
+        seq.Join(shadowRenderer.DOFade(defaultShadowColor.a, 0.2f));
         return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
     }
 
@@ -218,6 +227,7 @@ public class PetalView : MonoBehaviour
         Tween flapTween = VisualTransform.DOScaleX(0f, 0.1f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
         int previousSortingOrder = spriteRenderer.sortingOrder;
         spriteRenderer.sortingOrder = previousSortingOrder + FlyingSortingOrderOffset;
+        SyncShadowSorting();
 
         try
         {
@@ -246,6 +256,7 @@ public class PetalView : MonoBehaviour
                 transform.localScale = defaultRootScale;
                 VisualTransform.localScale = TargetScale;
                 spriteRenderer.sortingOrder = previousSortingOrder;
+                SyncShadowSorting();
             }
         }
     }
@@ -292,7 +303,9 @@ public class PetalView : MonoBehaviour
         KillActiveAnimation();
         transform.localScale = defaultRootScale;
         spriteRenderer.color = defaultColor;
+        shadowRenderer.color = defaultShadowColor;
         spriteRenderer.sortingOrder = defaultSortingOrder;
+        SyncShadowSorting();
         SetBubbleVisible(false);
         RestoreDefaultMaterial();
     }
@@ -341,6 +354,7 @@ public class PetalView : MonoBehaviour
         stretchAxis.DOKill();
         VisualTransform.DOKill();
         spriteRenderer.DOKill();
+        shadowRenderer.DOKill();
     }
 
     private void ResetDirectionalJelly()
@@ -367,6 +381,12 @@ public class PetalView : MonoBehaviour
     {
         if (defaultMaterial != null) return;
         defaultMaterial = spriteRenderer.sharedMaterial;
+    }
+
+    private void SyncShadowSorting()
+    {
+        shadowRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+        shadowRenderer.sortingOrder = spriteRenderer.sortingOrder + ShadowSortingOrderOffset;
     }
 
     private void PrepareDirectionalJelly(Vector2 displacement, float tileSize, float duration, out Vector3 stretchScale, out Vector3 squashScale)

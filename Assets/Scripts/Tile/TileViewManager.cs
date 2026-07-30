@@ -27,7 +27,7 @@ namespace DefaultNamespace
 
                     Vector3 worldPos = layout.GetTileWorldPos(col, row);
                     TileView view = Instantiate(_tileViewPrefab, worldPos, Quaternion.identity, transform);
-                    view.Init(layout.TileSize);
+                    view.Init(layout.TileSize, -row);
                     _views[col, row] = view;
                     RefreshView(col, row, tile);
                 }

@@ -4,6 +4,7 @@
 
 - The primary task is discussing and agreeing on architecture with the user.
 - When the user asks to edit only Markdown files, apply the requested Markdown changes directly without asking for file-scope confirmation. Continue to require explicit scope confirmation before editing code. All other project restrictions remain in effect.
+- When the user asks to create or edit code under `Assets/Editor`, apply the requested Editor-script changes directly without architecture or file-scope approval. All other project restrictions remain in effect, including the prohibition against editing Unity serialized assets.
 - Do not edit production code, tests, prefabs, scenes, packages, configuration, or other project files until the user explicitly accepts the proposed architecture.
 - Before implementation, explain the proposed responsibilities, ownership, boundaries, and data flow, including meaningful alternatives and tradeoffs.
 - Before editing, list every file that will be created, modified, or deleted and describe the exact class, method, API, and behavior changes planned for each file.
@@ -22,7 +23,7 @@
 
 ## User Review
 
-- The user must be able to review and approve every proposed change before it is made.
+- Except for the Markdown and `Assets/Editor` exemptions above, the user must be able to review and approve every proposed change before it is made.
 - Keep proposals concrete and concise to avoid wasting the user's time and token usage.
 - When the user asks for big steps, concepts, architecture pictures, strategy, or high-level planning, answer at that level only. Do not provide file lists, exact code, class names, method names, implementation steps, or other low-level details unless the user explicitly asks for implementation detail.
 - Preserve the user's sense of ownership and learning. Do not hand over large prebuilt implementations or hide design choices inside generated code; explain the next concept, let the user make the design decision, challenge tradeoffs, and implement only the smallest approved step.
