@@ -28,11 +28,11 @@ namespace DefaultNamespace
         private static readonly Dictionary<SkillKey, Func<Tile[,], Vector2Int, Vector2Int, List<SkillActivation>>> _handlers =
             new()
             {
-                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.None), HandleSunburst },
-                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.StripedHorizontal), HandleSunburst },
-                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.StripedVertical), HandleSunburst },
-                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Bubble), HandleSunburst },
-                { new SkillKey(SpecialSkillType.Sunburst, SpecialSkillType.Butterfly), HandleSunburst },
+                { new SkillKey(SpecialSkillType.PrismaticBloom, SpecialSkillType.None), HandlePrismaticBloom },
+                { new SkillKey(SpecialSkillType.PrismaticBloom, SpecialSkillType.StripedHorizontal), HandlePrismaticBloom },
+                { new SkillKey(SpecialSkillType.PrismaticBloom, SpecialSkillType.StripedVertical), HandlePrismaticBloom },
+                { new SkillKey(SpecialSkillType.PrismaticBloom, SpecialSkillType.Bubble), HandlePrismaticBloom },
+                { new SkillKey(SpecialSkillType.PrismaticBloom, SpecialSkillType.Butterfly), HandlePrismaticBloom },
             };
 
         public static List<SkillActivation> DetectOnSwap(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
@@ -56,7 +56,7 @@ namespace DefaultNamespace
             return _handlers.ContainsKey(new SkillKey(skillA, skillB));
         }
 
-        private static List<SkillActivation> HandleSunburst(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
+        private static List<SkillActivation> HandlePrismaticBloom(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
         {
             Petal petalA = new Petal(grid[tileA.x, tileA.y].Petal);
             Petal petalB = new Petal(grid[tileB.x, tileB.y].Petal);
@@ -65,7 +65,7 @@ namespace DefaultNamespace
 
             return new List<SkillActivation>
             {
-                new SkillActivation(SpecialSkillType.Sunburst, participantA, participantB)
+                new SkillActivation(SpecialSkillType.PrismaticBloom, new[] { participantA, participantB })
             };
         }
     }

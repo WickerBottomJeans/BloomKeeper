@@ -20,6 +20,6 @@ public class PetalJellyMoveTester : MonoBehaviour
         Vector2 screenPos = pointer.position.ReadValue();
         float cameraDistance = Mathf.Abs(targetCamera.transform.position.z - target.transform.position.z);
         Vector3 worldPos = targetCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, cameraDistance));
-        PetalViewAnimator.PlayJellyishMove(target, worldPos, testTileSize, moveDuration, moveEase).Forget();
+        target.PlayJellyishMove(worldPos, testTileSize, moveDuration, moveEase).Forget();
     }
 }

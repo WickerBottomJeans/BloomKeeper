@@ -12,21 +12,23 @@ namespace Skills
 
         public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
         {
-            Vector2Int source = activation.ParticipantA.Position;
-            Petal causer = new Petal(activation.ParticipantA.Petal);
+            SkillParticipant consumedInput = activation.GetOnlyConsumedInput();
+            Vector2Int source = consumedInput.Position;
+            Petal causer = new Petal(consumedInput.Petal);
+            IReadOnlyList<Vector2Int> consumedInputPositions = activation.GetConsumedInputPositions();
             Vector2Int? target = FindObjectiveTarget(context) ?? FindFallbackTarget(context);
 
             if (!target.HasValue)
             {
                 Debug.LogWarning("ButterFly have no place to fly to");
                 var emptyMatch = new MatchGroup(new List<Vector2Int>(), MatchShape.None, causer);
-                var emptyRepresentation = new ButterflyRepresentationData(source, null, causer.PetalType);
+                var emptyRepresentation = new ButterflyRepresentationData(source, null, causer.PetalType, consumedInputPositions);
                 return new SkillUseResult(emptyMatch, emptyRepresentation);
             }
 
             ReserveTarget(context, target.Value);
             var matchGroup = new MatchGroup(new List<Vector2Int> { target.Value }, MatchShape.None, causer);
-            var representation = new ButterflyRepresentationData(source, target.Value, causer.PetalType);
+            var representation = new ButterflyRepresentationData(source, target.Value, causer.PetalType, consumedInputPositions);
             return new SkillUseResult(matchGroup, representation);
         }
 

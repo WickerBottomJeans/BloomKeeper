@@ -126,11 +126,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.VFX.BoardVFXManager
   mutationLaserPrefab: {fileID: 985442930338887914, guid: 5caaf1731217f4f4990777f336c60df4, type: 3}
-  mutationLaserOriginPrefab: {fileID: 2445573516330377593, guid: b3220e6ac9bef1240805532206e38a17, type: 3}
   stripedSkillPrefab: {fileID: -1084145305644319253, guid: 50e5a9fe26adf834997a8212715a527d, type: 3}
   butterflySkillPrefab: {fileID: 564335851267464242, guid: 245d3eb8f4b585342a4c9db43ed27867, type: 3}
   bubblePrefab: {fileID: 5904466950015035354, guid: d714b1a1f0aa1ef4fb8f3bf17c3402d6, type: 3}
   bubblePopParticlesPrefab: {fileID: 3104921802242997286, guid: dab69877ebd5889489ec61e6e2c8ff7e, type: 3}
+  prismaticBloomProjectilePrefab: {fileID: 5029095881989668117, guid: 4b955032f71793449a527eb76083754b, type: 3}
+  prismaticBloomFinisherPrefab: {fileID: 8000000000000000001, guid: 0fd73b4ed122c2940abdf8c294d0dcf3, type: 3}
   boardVFXRoot: {fileID: 950882905977853268}
   mutationLaserWidthRatio: 0.12
 --- !u!114 &8200000000000000001
@@ -154,10 +155,9 @@ MonoBehaviour:
   stripedPrepareDuration: 0.15
   stripedFireDuration: 0.2
   stripedFinishDuration: 0.1
-  stripeSunburstSpinDuration: 1
-  stripeSunburstMutationDuration: 1
-  stripeSunburstLaserDuration: 1
-  stripeSunburstLaserChargeUpDuration: 0.2
+  prismaticBloomPrepareDuration: 0.6
+  prismaticBloomFireDuration: 1.2
+  prismaticBloomMaximumSpinSpeed: 720
 --- !u!114 &8623135926172344794
 MonoBehaviour:
   m_ObjectHideFlags: 0

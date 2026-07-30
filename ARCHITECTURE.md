@@ -217,7 +217,7 @@ flowchart LR
 - `MatchDetector` identifies line, T, L, cross, and square match shapes.
 - `MatchResolver` applies groups to the model and returns cleared petals, tile changes, spawned skills, and queued activations.
 - `SkillDetector` recognizes combinations caused directly by the two swapped petals.
-- `SkillManager` converts stripe, Bouquet, Sunburst, Butterfly, and combination activations into affected match groups.
+- `SkillManager` converts stripe, Bouquet, Prismatic Bloom, Butterfly, and combination activations into affected match groups.
 - `GravityController`, `PetalFiller`, `DeadlockDetector`, and `BoardShuffler` own their respective board operations.
 
 `pendingMatches` and `pendingSkillActivations` carry work between states. Skills discovered during resolution are converted back into match groups, so normal matches, chained skills, gravity, refill, and cascades use one repeated pipeline.

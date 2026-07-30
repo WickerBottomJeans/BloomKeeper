@@ -150,8 +150,6 @@ public class GameBoard : MonoBehaviour
 
         if (pendingSkillActivations.Count > 0)
         {
-            pendingMatches.Add(new MatchGroup(new List<Vector2Int> { swapOrigin, swapTarget }, MatchShape.None,
-                isFromSkillCombo: true));
             isResolvingPlayerMove = true;
             OnGameplayEvent?.Invoke(new PlayerMoveCommittedEvent());
             TransitionTo(BoardState.Resolving);
@@ -187,17 +185,29 @@ public class GameBoard : MonoBehaviour
 
     private TurnResolution CalculateTurnResolution()
     {
-        MatchResolveResult initialMatch = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
-        pendingMatches.Clear();
-        AddSkillActivations(initialMatch);
+        MatchResolveResult initialMatch = null;
         var skillWaves = new List<SkillResolutionWave>();
+
+        if (pendingSkillActivations.Count > 0)
+        {
+            IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups = resolveObjectiveTargets(BoardSnapshotBuilder.Capture(grid));
+            List<SkillUseResult> openingSkillResults = SkillManager.UseSkills(grid, pendingSkillActivations, objectiveTargetGroups);
+            pendingSkillActivations.Clear();
+            MatchResolveResult openingResolution = MatchResolver.Resolve(openingSkillResults, grid, swapOrigin, swapTarget);
+            skillWaves.Add(new SkillResolutionWave(openingResolution, openingSkillResults));
+            AddSkillActivations(openingResolution);
+        }
+        else
+        {
+            initialMatch = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
+            pendingMatches.Clear();
+            AddSkillActivations(initialMatch);
+        }
 
         while (pendingSkillActivations.Count > 0)
         {
-            IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups =
-                resolveObjectiveTargets(BoardSnapshotBuilder.Capture(grid));
-            List<SkillUseResult> skillResults =
-                SkillManager.UseSkills(grid, pendingSkillActivations, objectiveTargetGroups);
+            IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups = resolveObjectiveTargets(BoardSnapshotBuilder.Capture(grid));
+            List<SkillUseResult> skillResults = SkillManager.UseSkills(grid, pendingSkillActivations, objectiveTargetGroups);
             pendingSkillActivations.Clear();
 
             foreach (SkillUseResult skillResult in skillResults)
@@ -220,21 +230,34 @@ public class GameBoard : MonoBehaviour
 
     private async UniTask PlayTurnResolution(TurnResolution turnResolution)
     {
-        if (turnResolution.SkillWaves.Count == 0)
+        int nextSkillWaveIndex;
+        if (turnResolution.InitialMatch == null)
         {
-            await boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch);
-            OnGameplayEvent?.Invoke(new BoardResolvedEvent(turnResolution.InitialMatch, currentCascadeDepth,
-                isResolvingPlayerMove));
-            return;
+            if (turnResolution.SkillWaves.Count == 0)
+                throw new InvalidOperationException("Turn resolution requires an initial match or at least one skill wave.");
+
+            SkillResolutionWave openingSkillWave = turnResolution.SkillWaves[0];
+            await boardPresentationCoordinator.PlaySkillWave(openingSkillWave);
+            OnGameplayEvent?.Invoke(new BoardResolvedEvent(openingSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerMove));
+            nextSkillWaveIndex = 1;
+        }
+        else
+        {
+            if (turnResolution.SkillWaves.Count == 0)
+            {
+                await boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch);
+                OnGameplayEvent?.Invoke(new BoardResolvedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerMove));
+                return;
+            }
+
+            SkillResolutionWave firstSkillWave = turnResolution.SkillWaves[0];
+            await UniTask.WhenAll(boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch), boardPresentationCoordinator.PlaySkillWave(firstSkillWave));
+            OnGameplayEvent?.Invoke(new BoardResolvedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerMove));
+            OnGameplayEvent?.Invoke(new BoardResolvedEvent(firstSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerMove));
+            nextSkillWaveIndex = 1;
         }
 
-        SkillResolutionWave firstSkillWave = turnResolution.SkillWaves[0];
-        await UniTask.WhenAll(boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch),
-            boardPresentationCoordinator.PlaySkillWave(firstSkillWave));
-        OnGameplayEvent?.Invoke(new BoardResolvedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerMove));
-        OnGameplayEvent?.Invoke(new BoardResolvedEvent(firstSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerMove));
-
-        for (int i = 1; i < turnResolution.SkillWaves.Count; i++)
+        for (int i = nextSkillWaveIndex; i < turnResolution.SkillWaves.Count; i++)
         {
             SkillResolutionWave skillWave = turnResolution.SkillWaves[i];
             await boardPresentationCoordinator.PlaySkillWave(skillWave);

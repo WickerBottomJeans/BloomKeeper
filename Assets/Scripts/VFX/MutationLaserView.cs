@@ -8,6 +8,8 @@ namespace DefaultNamespace.VFX
     {
         [SerializeField] private LineRenderer lineRenderer;
 
+        private Vector3 defaultScale;
+
         private void Awake()
         {
             if (lineRenderer == null)
@@ -16,22 +18,30 @@ namespace DefaultNamespace.VFX
             if (lineRenderer == null)
                 throw new InvalidOperationException("MutationLaserView requires a LineRenderer reference.");
 
+            defaultScale = transform.localScale;
             lineRenderer.positionCount = 2;
-            lineRenderer.useWorldSpace = true;
+            lineRenderer.useWorldSpace = false;
             lineRenderer.enabled = false;
         }
 
-        public async UniTask Play(
-            Vector2 origin,
-            Vector2 target,
-            float width,
-            float duration)
+        public void Configure(float tileSize, float widthRatio)
+        {
+            if (tileSize <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(tileSize), tileSize, "Mutation laser VFX requires a positive tile size.");
+            if (widthRatio <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(widthRatio), widthRatio, "Mutation laser VFX requires a positive width ratio.");
+
+            transform.localScale = defaultScale * tileSize;
+            lineRenderer.startWidth = widthRatio;
+            lineRenderer.endWidth = widthRatio;
+        }
+
+        public async UniTask Play(Vector2 origin, Vector2 target, float duration)
         {
             lineRenderer.enabled = false;
-            lineRenderer.SetPosition(0, origin);
-            lineRenderer.SetPosition(1, target);
-            lineRenderer.startWidth = width;
-            lineRenderer.endWidth = width;
+            transform.position = origin;
+            lineRenderer.SetPosition(0, Vector3.zero);
+            lineRenderer.SetPosition(1, transform.InverseTransformPoint(target));
             lineRenderer.enabled = true;
 
             await UniTask.Delay(TimeSpan.FromSeconds(duration));

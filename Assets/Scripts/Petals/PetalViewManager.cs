@@ -10,8 +10,6 @@ using UnityEngine.Pool;
 
 public class PetalViewManager : MonoBehaviour
 {
-    private const float DefaultDisappearDuration = 0.2f;
-
     //TODO: should this cache board layout, the layout dont really channge over time
     [SerializeField] private PetalView petalViewPrefab;
 
@@ -46,7 +44,7 @@ public class PetalViewManager : MonoBehaviour
                 Vector2 pos = boardLayout.GetTileWorldPos(x, y);
                 PetalView view = pool.Get();
                 view.transform.position = pos;
-                view.Init(tile.Petal, boardLayout.TileSize);
+                view.Refresh(tile.Petal, boardLayout.TileSize);
                 petalViews[x, y] = view;
             }
         }
@@ -82,10 +80,22 @@ public class PetalViewManager : MonoBehaviour
         foreach (PetalChange change in changes)
         {
             PetalView view = GetAccessibleView(accessKeys, change.Position);
-            tasks.Add(PetalViewAnimator.PlayPetalChange(view, change.After, boardLayout.TileSize, duration));
+            tasks.Add(view.PlayPetalChange(change.After, boardLayout.TileSize, duration));
         }
 
         await UniTask.WhenAll(tasks);
+    }
+
+    public UniTask PlayPetalChange(PetalChange change, BoardLayout boardLayout, IDictionary<Vector2Int, ViewAccessKey> accessKeys, float duration = 0.1f)
+    {
+        PetalView view = GetAccessibleView(accessKeys, change.Position);
+        return view.PlayPetalChange(change.After, boardLayout.TileSize, duration);
+    }
+
+    public void ApplyPetalChangeImmediately(PetalChange change, BoardLayout boardLayout, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        PetalView view = GetAccessibleView(accessKeys, change.Position);
+        view.Refresh(change.After, boardLayout.TileSize);
     }
 
     public async UniTask OnSwap(Vector2Int tileA, Vector2Int tileB, float tileSize, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -94,15 +104,15 @@ public class PetalViewManager : MonoBehaviour
         PetalView viewB = GetAccessibleView(accessKeys, tileB);
 
         await UniTask.WhenAll(
-            PetalViewAnimator.PlaySwap(viewA, viewB.transform.position, tileSize),
-            PetalViewAnimator.PlaySwap(viewB, viewA.transform.position, tileSize)
+            viewA.PlaySwap(viewB.transform.position, tileSize),
+            viewB.PlaySwap(viewA.transform.position, tileSize)
         );
 
         petalViews[tileA.x, tileA.y] = viewB;
         petalViews[tileB.x, tileB.y] = viewA;
     }
 
-    public UniTask PlayNormalRemovals(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys, float duration = DefaultDisappearDuration, Ease ease = Ease.InBack)
+    public UniTask PlayNormalRemovals(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys, float duration = 0.15f, Ease ease = Ease.InBack)
     {
         return ClearPetalViews(positions, duration, ease, accessKeys);
     }
@@ -135,7 +145,7 @@ public class PetalViewManager : MonoBehaviour
 
     private async UniTask DestroyAndRelease(PetalView view, Vector2Int position, float duration, Ease ease, ViewAccessKey accessKey, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        await PetalViewAnimator.PlayDisappear(view, duration, ease);
+        await view.PlayDisappear(duration, ease);
         ReleaseView(accessKey);
         accessKeys.Remove(position);
         pool.Release(view);
@@ -159,18 +169,30 @@ public class PetalViewManager : MonoBehaviour
     public UniTask PlayScale(Vector2Int position, float scaleMultiplier, float duration, Ease ease, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         PetalView view = GetAccessibleView(accessKeys, position);
-        return PetalViewAnimator.PlayScale(view, scaleMultiplier, duration, ease);
+        return view.PlayScale(scaleMultiplier, duration, ease);
     }
 
     public UniTask PlayRootScale(Vector2Int position, float scaleMultiplier, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         PetalView view = GetAccessibleView(accessKeys, position);
-        return PetalViewAnimator.PlayRootScale(view, scaleMultiplier, duration);
+        return view.PlayRootScale(scaleMultiplier, duration);
+    }
+
+    public UniTask PlayPrismaticBloomPrepareSpin(Vector2Int position, float duration, float maximumSpinSpeed, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        PetalView view = GetAccessibleView(accessKeys, position);
+        return view.PlayPrismaticBloomPrepareSpin(duration, maximumSpinSpeed);
+    }
+
+    public UniTask PlayPrismaticBloomFireSpin(Vector2Int position, float duration, float maximumSpinSpeed, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        PetalView view = GetAccessibleView(accessKeys, position);
+        return view.PlayPrismaticBloomFireSpin(duration, maximumSpinSpeed);
     }
 
     public UniTask PlayBubbleInflate(Vector2Int position, float scaleMultiplier, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        return PetalViewAnimator.PlayBubbleInflate(GetAccessibleView(accessKeys, position), scaleMultiplier, duration);
+        return GetAccessibleView(accessKeys, position).PlayBubbleInflate(scaleMultiplier, duration);
     }
 
     public void HideBubbleForPop(Vector2Int position, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -178,12 +200,12 @@ public class PetalViewManager : MonoBehaviour
         GetAccessibleView(accessKeys, position).SetBubbleVisible(false);
     }
 
-    public UniTask PlayAboutToExecuteShake(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    public UniTask PlayAboutToExecute(IReadOnlyList<Vector2Int> positions, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         foreach (Vector2Int position in positions)
         {
             PetalView view = GetAccessibleView(accessKeys, position);
-            PetalViewAnimator.PlayAboutToExecute(view);
+            view.PlayAboutToExecute();
         }
 
         return UniTask.CompletedTask;
@@ -191,7 +213,7 @@ public class PetalViewManager : MonoBehaviour
     
     private async UniTask DisappearAndRelease(PetalView view, Vector2Int position, float duration, ViewAccessKey accessKey, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        await PetalViewAnimator.PlayDisappear(view, duration);
+        await view.PlayDisappear(duration);
         view.transform.localRotation = Quaternion.identity;
         ReleaseView(accessKey);
         accessKeys.Remove(position);
@@ -202,7 +224,7 @@ public class PetalViewManager : MonoBehaviour
     {
         PetalView view = GetAccessibleView(accessKeys, sourceTile);
         Vector2 targetWorldPosition = boardLayout.GetTileWorldPos(targetTile.x, targetTile.y);
-        return PetalViewAnimator.PlayFly(view, targetWorldPosition, boardLayout.TileSize, duration, curveAmplitudeInTiles);
+        return view.PlayFly(targetWorldPosition, boardLayout.TileSize, duration, curveAmplitudeInTiles);
     }
 
     public Transform GetAccessibleVisualTransform(Vector2Int position, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -231,7 +253,7 @@ public class PetalViewManager : MonoBehaviour
             PetalView contributorView = GetAccessibleView(accessKeys, position);
             petalViews[position.x, position.y] = null;
             contributors.Add((position, contributorView, accessKeys[position]));
-            tasks.Add(PetalViewAnimator.PlayGather(contributorView, spawnWorldPosition));
+            tasks.Add(contributorView.PlayGather(spawnWorldPosition));
         }
 
         await UniTask.WhenAll(tasks);
@@ -245,39 +267,13 @@ public class PetalViewManager : MonoBehaviour
 
         PetalView skillPetalView = pool.Get();
         skillPetalView.transform.position = spawnWorldPosition;
-        skillPetalView.Init(new Petal(spawn.PetalType, spawn.SkillType), boardLayout.TileSize);
+        skillPetalView.Refresh(new Petal(spawn.PetalType, spawn.SkillType), boardLayout.TileSize);
         Color color = skillPetalView.spriteRenderer.color;
         color.a = 1f;
         skillPetalView.spriteRenderer.color = color;
         petalViews[spawn.SpawnPosition.x, spawn.SpawnPosition.y] = skillPetalView;
     }
-
-    public UniTask PlayComboMerge(Vector2Int sourceA, Vector2Int sourceB, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
-    {
-        PetalView viewA = GetAccessibleView(accessKeys, sourceA);
-        PetalView viewB = GetAccessibleView(accessKeys, sourceB);
-        return PetalViewAnimator.PlayComboMerge(viewA, viewB);
-    }
-
-    public async UniTask PlayComboSpinAndRelease(Vector2Int sourceA, Vector2Int sourceB, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
-    {
-        //TODO: bug, when sun burst dont get executed from a swap, it wouldnt have 2 view. count for that case too
-        PetalView viewA = GetAccessibleView(accessKeys, sourceA);
-        PetalView viewB = GetAccessibleView(accessKeys, sourceB);
-        ViewAccessKey accessKeyA = accessKeys[sourceA];
-        ViewAccessKey accessKeyB = accessKeys[sourceB];
-
-        await PetalViewAnimator.PlayComboSpinAndDisappear(viewA, viewB, duration);
-
-        petalViews[sourceA.x, sourceA.y] = null;
-        petalViews[sourceB.x, sourceB.y] = null;
-        ReleaseView(accessKeyA);
-        ReleaseView(accessKeyB);
-        accessKeys.Remove(sourceA);
-        accessKeys.Remove(sourceB);
-        pool.Release(viewA);
-        pool.Release(viewB);
-    }
+    
 
     public async UniTask OnGravityApplied(List<(Vector2Int from, Vector2Int to)> moves, BoardLayout boardLayout, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
@@ -288,7 +284,7 @@ public class PetalViewManager : MonoBehaviour
             Vector2 targetPos = boardLayout.GetTileWorldPos(to.x, to.y);
             petalViews[to.x, to.y] = view;
             petalViews[from.x, from.y] = null;
-            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos, boardLayout.TileSize));
+            tasks.Add(view.PlayDrop(targetPos, boardLayout.TileSize));
         }
         await UniTask.WhenAll(tasks);
     }
@@ -303,11 +299,11 @@ public class PetalViewManager : MonoBehaviour
             Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.TileSize);
             PetalView view = pool.Get();
             view.transform.position = spawnPos;
-            view.Init(grid[tile.x, tile.y].Petal, boardLayout.TileSize);
+            view.Refresh(grid[tile.x, tile.y].Petal, boardLayout.TileSize);
             petalViews[tile.x, tile.y] = view;
             RegisterViewAccess(view, tile, userName, accessKeys);
-            PetalViewAnimator.PlaySpawn(view).Forget();
-            tasks.Add(PetalViewAnimator.PlayDrop(view, targetPos, boardLayout.TileSize));
+            view.PlaySpawn().Forget();
+            tasks.Add(view.PlayDrop(targetPos, boardLayout.TileSize));
         }
         await UniTask.WhenAll(tasks);
     }
@@ -325,7 +321,7 @@ public class PetalViewManager : MonoBehaviour
     
     private async UniTask ShuffleTile(PetalView view, Vector2Int tile, float delay, BoardLayout boardLayout, Tile[,] grid, string userName, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
-        await PetalViewAnimator.PlayDisappear(view, DefaultDisappearDuration, Ease.InBack, delay);
+        await view.PlayDisappear(0.1f, Ease.InBack, delay);
         ReleaseView(accessKeys[tile]);
         accessKeys.Remove(tile);
         pool.Release(view);
@@ -334,11 +330,11 @@ public class PetalViewManager : MonoBehaviour
         Vector2 spawnPos = new Vector2(targetPos.x, targetPos.y + boardLayout.Rows * boardLayout.TileSize);
         PetalView newView = pool.Get();
         newView.transform.position = spawnPos;
-        newView.Init(grid[tile.x, tile.y].Petal, boardLayout.TileSize);
+        newView.Refresh(grid[tile.x, tile.y].Petal, boardLayout.TileSize);
         petalViews[tile.x, tile.y] = newView;
         RegisterViewAccess(newView, tile, userName, accessKeys);
-        await PetalViewAnimator.PlaySpawn(newView);
-        await PetalViewAnimator.PlayDrop(newView, targetPos, boardLayout.TileSize);
+        await newView.PlaySpawn();
+        await newView.PlayDrop(targetPos, boardLayout.TileSize);
     }
     
     public void RefreshTile(Vector2Int tile, Petal petal, BoardLayout boardLayout, string userName, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -358,7 +354,7 @@ public class PetalViewManager : MonoBehaviour
         Vector2 pos = boardLayout.GetTileWorldPos(tile.x, tile.y);
         PetalView view = pool.Get();
         view.transform.position = pos;
-        view.Init(petal, boardLayout.TileSize);
+        view.Refresh(petal, boardLayout.TileSize);
         petalViews[tile.x, tile.y] = view;
         RegisterViewAccess(view, tile, userName, accessKeys);
     }

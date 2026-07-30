@@ -10,8 +10,9 @@ namespace Skills
     {
         public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
         {
+            SkillParticipant consumedInput = activation.GetOnlyConsumedInput();
             Tile[,] grid = context.Grid;
-            Vector2Int skillPosition = activation.ParticipantA.Position;
+            Vector2Int skillPosition = consumedInput.Position;
             int columns = grid.GetLength(0);
             int rows = grid.GetLength(1);
             var positions = new List<Vector2Int>();
@@ -31,8 +32,8 @@ namespace Skills
                 throw new ArgumentException("Not a striped skill type.", nameof(activation.EffectType));
             }
 
-            var matchGroup = new MatchGroup(positions, MatchShape.None, new Petal(activation.ParticipantA.Petal));
-            var representation = new StripedRepresentationData(skillPosition, activation.EffectType, positions);
+            var matchGroup = new MatchGroup(positions, MatchShape.None, new Petal(consumedInput.Petal));
+            var representation = new StripedRepresentationData(skillPosition, activation.EffectType, positions, activation.GetConsumedInputPositions());
             return new SkillUseResult(matchGroup, representation);
         }
     }

@@ -7,6 +7,12 @@ namespace Skills
 {
     public abstract class SkillRepresentationData
     {
+        public IReadOnlyList<Vector2Int> ConsumedInputPositions { get; }
+
+        protected SkillRepresentationData(IReadOnlyList<Vector2Int> consumedInputPositions)
+        {
+            ConsumedInputPositions = consumedInputPositions;
+        }
     }
 
     public sealed class BubbleRepresentationData : SkillRepresentationData
@@ -14,9 +20,7 @@ namespace Skills
         public Vector2Int Center { get; }
         public IReadOnlyList<Vector2Int> AffectedPositions { get; }
 
-        public BubbleRepresentationData(
-            Vector2Int center,
-            IReadOnlyList<Vector2Int> affectedPositions)
+        public BubbleRepresentationData(Vector2Int center, IReadOnlyList<Vector2Int> affectedPositions, IReadOnlyList<Vector2Int> consumedInputPositions) : base(consumedInputPositions)
         {
             Center = center;
             AffectedPositions = affectedPositions;
@@ -32,10 +36,7 @@ namespace Skills
         public SpecialSkillType Direction { get; }
         public IReadOnlyList<Vector2Int> AffectedPositions { get; }
 
-        public StripedRepresentationData(
-            Vector2Int source,
-            SpecialSkillType direction,
-            IReadOnlyList<Vector2Int> affectedPositions)
+        public StripedRepresentationData(Vector2Int source, SpecialSkillType direction, IReadOnlyList<Vector2Int> affectedPositions, IReadOnlyList<Vector2Int> consumedInputPositions) : base(consumedInputPositions)
         {
             Source = source;
             Direction = direction;
@@ -49,7 +50,7 @@ namespace Skills
         public Vector2Int? Target { get; }
         public PetalType SourcePetalType { get; }
 
-        public ButterflyRepresentationData(Vector2Int source, Vector2Int? target, PetalType sourcePetalType)
+        public ButterflyRepresentationData(Vector2Int source, Vector2Int? target, PetalType sourcePetalType, IReadOnlyList<Vector2Int> consumedInputPositions) : base(consumedInputPositions)
         {
             Source = source;
             Target = target;
@@ -57,17 +58,15 @@ namespace Skills
         }
     }
 
-    public sealed class SunburstRepresentationData : SkillRepresentationData
+    public sealed class PrismaticBloomRepresentationData : SkillRepresentationData
     {
-        public Vector2Int ParticipantA { get; }
-        public Vector2Int? ParticipantB { get; }
+        public Vector2Int Source { get; }
         public SpecialSkillType ReplacementSkill { get; }
         public IReadOnlyList<PetalChange> Changes { get; }
 
-        public SunburstRepresentationData(Vector2Int participantA, Vector2Int? participantB, SpecialSkillType replacementSkill, IReadOnlyList<PetalChange> changes)
+        public PrismaticBloomRepresentationData(Vector2Int source, SpecialSkillType replacementSkill, IReadOnlyList<PetalChange> changes, IReadOnlyList<Vector2Int> consumedInputPositions) : base(consumedInputPositions)
         {
-            ParticipantA = participantA;
-            ParticipantB = participantB;
+            Source = source;
             ReplacementSkill = replacementSkill;
             Changes = changes;
         }

@@ -29,15 +29,6 @@ namespace Skills
             this.finishDuration = finishDuration;
         }
 
-        protected override void AcquireVitalViews(StripedRepresentationData representation,
-            MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
-        {
-            if (accessKeys.ContainsKey(representation.Source)) return;
-            if (petalViewManager.TryAcquireView(representation.Source, nameof(StripedSkillPresenter),
-                    out ViewAccessKey accessKey))
-                accessKeys.Add(representation.Source, accessKey);
-        }
-
         protected override async UniTask Play(StripedRepresentationData representation,
             MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
@@ -82,7 +73,7 @@ namespace Skills
             }
 
             var triggeredSkillPositions = new List<Vector2Int>();
-            foreach (Vector2Int position in resolution.GetSkillTriggerPositions())
+            foreach (Vector2Int position in resolution.GetTriggeredSkillInputPositions())
             {
                 if (!accessKeys.ContainsKey(position) && petalViewManager.TryAcquireView(position, nameof(StripedSkillPresenter), out ViewAccessKey accessKey))
                     accessKeys.Add(position, accessKey);
@@ -98,7 +89,7 @@ namespace Skills
             }
 
             petalViewManager.ReleasePetalViewsImmediately(ownedRemovedPositions, accessKeys);
-            await UniTask.WhenAll(stripe.Finish(finishDuration), petalViewManager.PlayAboutToExecuteShake(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(obstacleChanges));
+            await UniTask.WhenAll(stripe.Finish(finishDuration), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(obstacleChanges));
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Skills
             { SpecialSkillType.StripedHorizontal, new StripedSkillExecutor() },
             { SpecialSkillType.StripedVertical, new StripedSkillExecutor() },
             { SpecialSkillType.Bubble, new BubbleSkillExecutor() },
-            { SpecialSkillType.Sunburst, new SunburstSkillExecutor() },
+            { SpecialSkillType.PrismaticBloom, new PrismaticBloomSkillExecutor() },
             { SpecialSkillType.Butterfly, new ButterflySkillExecutor() }
         };
 

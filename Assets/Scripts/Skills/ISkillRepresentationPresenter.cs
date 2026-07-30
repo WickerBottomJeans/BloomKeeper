@@ -9,7 +9,7 @@ namespace Skills
     public interface ISkillRepresentationPresenter
     {
         Type RepresentationType { get; }
-        void AcquireVitalViews(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
+        void AcquireAdditionalVitalViews(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
         UniTask Play(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
     }
 
@@ -17,9 +17,9 @@ namespace Skills
     {
         public Type RepresentationType => typeof(TRepresentation);
 
-        public void AcquireVitalViews(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        public void AcquireAdditionalVitalViews(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
-            AcquireVitalViews((TRepresentation)representation, resolution, accessKeys);
+            AcquireAdditionalVitalViews((TRepresentation)representation, resolution, accessKeys);
         }
 
         public UniTask Play(SkillRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -27,7 +27,9 @@ namespace Skills
             return Play((TRepresentation)representation, resolution, accessKeys);
         }
 
-        protected abstract void AcquireVitalViews(TRepresentation representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
+        protected virtual void AcquireAdditionalVitalViews(TRepresentation representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        {
+        }
         protected abstract UniTask Play(TRepresentation representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
     }
 }

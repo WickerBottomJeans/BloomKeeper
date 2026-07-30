@@ -20,21 +20,34 @@ namespace DefaultNamespace.UI
     public readonly struct SkillActivation
     {
         public SpecialSkillType EffectType { get; }
-
-        public SkillParticipant ParticipantA { get; }
-
-        // Only set when two swapped petals trigger a combo together.
-        public SkillParticipant? ParticipantB { get; }
+        public IReadOnlyList<SkillParticipant> ConsumedInputs { get; }
 
         // The petal whose effect triggered this skill in a chain.
         public Petal TriggerPetal { get; }
 
-        public SkillActivation(SpecialSkillType effectType, SkillParticipant participantA, SkillParticipant? participantB = null, Petal triggerPetal = null)
+        public SkillActivation(SpecialSkillType effectType, IReadOnlyList<SkillParticipant> consumedInputs, Petal triggerPetal = null)
         {
+            if (consumedInputs.Count == 0)
+                throw new ArgumentException("A skill activation requires at least one consumed input.", nameof(consumedInputs));
+
             EffectType = effectType;
-            ParticipantA = participantA;
-            ParticipantB = participantB;
+            ConsumedInputs = new List<SkillParticipant>(consumedInputs).AsReadOnly();
             TriggerPetal = triggerPetal;
+        }
+
+        public SkillParticipant GetOnlyConsumedInput()
+        {
+            if (ConsumedInputs.Count != 1)
+                throw new InvalidOperationException($"Skill activation requires exactly one consumed input but received {ConsumedInputs.Count}.");
+            return ConsumedInputs[0];
+        }
+
+        public IReadOnlyList<Vector2Int> GetConsumedInputPositions()
+        {
+            var positions = new List<Vector2Int>(ConsumedInputs.Count);
+            foreach (SkillParticipant input in ConsumedInputs)
+                positions.Add(input.Position);
+            return positions.AsReadOnly();
         }
     }
     
@@ -57,15 +70,22 @@ namespace DefaultNamespace.UI
 
     public sealed class SkillUseResult
     {
+        public MatchGroup InputMatchGroup { get; }
         public MatchGroup MatchGroup { get; }
         public SkillRepresentationData Representation { get; }
 
-        public SkillUseResult(
-            MatchGroup matchGroup,
-            SkillRepresentationData representation = null)
+        public SkillUseResult(MatchGroup matchGroup, SkillRepresentationData representation = null, MatchGroup inputMatchGroup = null)
         {
+            InputMatchGroup = inputMatchGroup;
             MatchGroup = matchGroup;
             Representation = representation;
+        }
+
+        public IEnumerable<MatchGroup> GetMatchGroups()
+        {
+            if (InputMatchGroup != null)
+                yield return InputMatchGroup;
+            yield return MatchGroup;
         }
     }
 

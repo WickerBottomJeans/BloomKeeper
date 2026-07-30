@@ -11,8 +11,9 @@ namespace Skills
 
         public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
         {
+            SkillParticipant consumedInput = activation.GetOnlyConsumedInput();
             Tile[,] grid = context.Grid;
-            Vector2Int center = activation.ParticipantA.Position;
+            Vector2Int center = consumedInput.Position;
             int columns = grid.GetLength(0);
             int rows = grid.GetLength(1);
             var positions = new List<Vector2Int>();
@@ -24,8 +25,8 @@ namespace Skills
                 positions.Add(new Vector2Int(x, y));
             }
 
-            var matchGroup = new MatchGroup(positions, MatchShape.None, new Petal(activation.ParticipantA.Petal));
-            var representation = new BubbleRepresentationData(center, positions);
+            var matchGroup = new MatchGroup(positions, MatchShape.None, new Petal(consumedInput.Petal));
+            var representation = new BubbleRepresentationData(center, positions, activation.GetConsumedInputPositions());
             return new SkillUseResult(matchGroup, representation);
         }
     }

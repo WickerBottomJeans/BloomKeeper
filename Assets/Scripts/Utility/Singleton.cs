@@ -11,7 +11,7 @@ namespace DefaultNamespace.Utility
             get
             {
                 if (instance == null)
-                    instance = FindObjectOfType<T>();
+                    instance = FindFirstObjectByType<T>();
                 return instance;
             }
         }

@@ -28,6 +28,6 @@ public class Petal
 
     public bool IsMatchable()
     {
-        return Skill != SpecialSkillType.Sunburst;
+        return Skill != SpecialSkillType.PrismaticBloom;
     }
 }

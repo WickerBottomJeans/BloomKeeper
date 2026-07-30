@@ -26,28 +26,36 @@ namespace Skills
         [SerializeField] private float stripedFireDuration = 0.2f;
         [SerializeField] private float stripedFinishDuration = 0.1f;
 
-        [Header("Stripe Sunburst Timing")]
-        [SerializeField] private float stripeSunburstSpinDuration = 2f;
-        [SerializeField] private float stripeSunburstMutationDuration = 1f;
-        [SerializeField] private float stripeSunburstLaserDuration = 1f;
-        [SerializeField] private float stripeSunburstLaserChargeUpDuration = 0.5f;
+        [Header("Prismatic Bloom Timing")]
+        [SerializeField, Min(0f)] private float prismaticBloomPrepareDuration = 0.6f;
+        [SerializeField, Min(0f)] private float prismaticBloomFireDuration = 1.2f;
+        [SerializeField, Min(0f)] private float prismaticBloomMaximumSpinSpeed = 720f;
 
         private Dictionary<Type, ISkillRepresentationPresenter> presenters;
+        private PetalViewManager petalViewManager;
 
         public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout)
         {
+            this.petalViewManager = petalViewManager;
             presenters = new Dictionary<Type, ISkillRepresentationPresenter>();
             Register(new BubbleSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, layout, bubblePrepareDuration, bubbleFireDuration, bubbleFinishDuration));
             Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, stripedPrepareDuration, stripedFireDuration, stripedFinishDuration));
             Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, butterflyPrepareDuration, butterflyFireDuration, butterflyFinishDuration));
-            Register(new SunburstSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, stripeSunburstSpinDuration, stripeSunburstMutationDuration, stripeSunburstLaserDuration, stripeSunburstLaserChargeUpDuration));
+            Register(new PrismaticBloomSkillPresenter(petalViewManager, boardVFXManager, layout, prismaticBloomPrepareDuration, prismaticBloomFireDuration, prismaticBloomMaximumSpinSpeed));
         }
 
         public void AcquireVitalViews(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
             SkillRepresentationData representation = skillResult.Representation;
             if (representation == null) return;
-            GetPresenter(representation).AcquireVitalViews(representation, resolution, accessKeys);
+            foreach (Vector2Int position in representation.ConsumedInputPositions)
+            {
+                if (accessKeys.ContainsKey(position)) continue;
+                if (!petalViewManager.TryAcquireView(position, nameof(SkillRepresentationOrchestrator), out ViewAccessKey accessKey))
+                    throw new InvalidOperationException($"Consumed skill input view at {position} cannot be acquired by {nameof(SkillRepresentationOrchestrator)}.");
+                accessKeys.Add(position, accessKey);
+            }
+            GetPresenter(representation).AcquireAdditionalVitalViews(representation, resolution, accessKeys);
         }
 
         public UniTask Play(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)

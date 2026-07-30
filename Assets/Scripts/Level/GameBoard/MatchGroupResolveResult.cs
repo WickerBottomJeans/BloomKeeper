@@ -16,17 +16,21 @@ namespace DefaultNamespace.UI
             SkillActivations = skillActivations;
         }
 
-        public IEnumerable<Vector2Int> GetSkillTriggerPositions()
+        public IEnumerable<Vector2Int> GetTriggeredSkillInputPositions()
         {
             foreach (SkillActivation activation in SkillActivations)
-                yield return activation.ParticipantA.Position;
+            foreach (SkillParticipant input in activation.ConsumedInputs)
+                yield return input.Position;
         }
 
-        public bool IsTriggeredSkillPosition(Vector2Int position)
+        public bool IsTriggeredSkillInputPosition(Vector2Int position)
         {
             foreach (SkillActivation activation in SkillActivations)
             {
-                if (activation.ParticipantA.Position == position) return true;
+                foreach (SkillParticipant input in activation.ConsumedInputs)
+                {
+                    if (input.Position == position) return true;
+                }
             }
 
             return false;

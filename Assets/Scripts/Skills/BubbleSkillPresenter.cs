@@ -34,13 +34,6 @@ namespace Skills
             this.finishDuration = finishDuration;
         }
 
-        protected override void AcquireVitalViews(BubbleRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
-        {
-            if (accessKeys.ContainsKey(representation.Center)) return;
-            if (petalViewManager.TryAcquireView(representation.Center, nameof(BubbleSkillPresenter), out ViewAccessKey accessKey))
-                accessKeys.Add(representation.Center, accessKey);
-        }
-
         protected override async UniTask Play(BubbleRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
             var bubbles = new Dictionary<Vector2Int, VFXBubble>();
@@ -75,7 +68,7 @@ namespace Skills
             Vector3 origin = layout.GetTileWorldPos(center.x, center.y);
             HashSet<Vector2Int> targetPositions = SkillPresentationQueries.GetRemovedPetalPositionsExcludingTriggeredSkills(resolution);
             targetPositions.Remove(center);
-            foreach (Vector2Int position in resolution.GetSkillTriggerPositions())
+            foreach (Vector2Int position in resolution.GetTriggeredSkillInputPositions())
             {
                 if (position != center)
                     targetPositions.Add(position);
@@ -114,7 +107,7 @@ namespace Skills
             }
             removedPositions.RemoveWhere(position => !accessKeys.ContainsKey(position));
             var triggeredSkillPositions = new List<Vector2Int>();
-            foreach (Vector2Int position in resolution.GetSkillTriggerPositions())
+            foreach (Vector2Int position in resolution.GetTriggeredSkillInputPositions())
             {
                 if (!accessKeys.ContainsKey(position) && petalViewManager.TryAcquireView(position, nameof(BubbleSkillPresenter), out ViewAccessKey accessKey))
                     accessKeys.Add(position, accessKey);
@@ -130,7 +123,7 @@ namespace Skills
 
             var tasks = new List<UniTask>(3);
             tasks.Add(PopBubblesOverDuration(bubbles, removedPositions, accessKeys));
-            tasks.Add(petalViewManager.PlayAboutToExecuteShake(triggeredSkillPositions, accessKeys));
+            tasks.Add(petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys));
             tasks.Add(tileViewManager.PlayTileChanges(changes));
             await UniTask.WhenAll(tasks);
         }

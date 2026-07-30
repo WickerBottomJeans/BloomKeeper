@@ -51,7 +51,7 @@
         StripedHorizontal = 1,
         StripedVertical = 2,
         Bubble = 3,
-        Sunburst = 4,
+        PrismaticBloom = 4,
         Butterfly = 5,
     }
     

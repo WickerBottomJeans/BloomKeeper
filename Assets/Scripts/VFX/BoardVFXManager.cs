@@ -7,38 +7,42 @@ using UnityEngine.Pool;
 
 namespace DefaultNamespace.VFX
 {
-    //TODO: we need to care for the case skill A destroy petal skill B. we need to leave B alone so it can run its own VFX next cascade
-    public sealed class BoardVFXManager : MonoBehaviour
-    {
-        [SerializeField] private MutationLaserView mutationLaserPrefab;
-        [SerializeField] private ParticleSystem mutationLaserOriginPrefab;
-        [SerializeField] private VFXStripeSkill stripedSkillPrefab;
-        [SerializeField] private VFXButterflySkill butterflySkillPrefab;
-        [SerializeField] private VFXBubble bubblePrefab;
-        [SerializeField] private VFXBubblePopParticles bubblePopParticlesPrefab;
+        //TODO: we need to care for the case skill A destroy petal skill B. we need to leave B alone so it can run its own VFX next cascade
+        public sealed class BoardVFXManager : MonoBehaviour
+        {
+            [SerializeField] private MutationLaserView mutationLaserPrefab;
+            [SerializeField] private VFXStripeSkill stripedSkillPrefab;
+            [SerializeField] private VFXButterflySkill butterflySkillPrefab;
+            [SerializeField] private VFXBubble bubblePrefab;
+            [SerializeField] private VFXBubblePopParticles bubblePopParticlesPrefab;
+            [SerializeField] private VFXPrismaticBloomProjectile prismaticBloomProjectilePrefab;
+            [SerializeField] private VFXPrismaticBloomFinisher prismaticBloomFinisherPrefab;
         [SerializeField] private Transform boardVFXRoot;
-        [SerializeField] private float mutationLaserWidthRatio = 0.12f;
+            [SerializeField] private float mutationLaserWidthRatio = 0.12f;
 
-        private ObjectPool<MutationLaserView> mutationLaserPool;
-        private ObjectPool<ParticleSystem> mutationLaserOriginPool;
-        private ObjectPool<VFXStripeSkill> stripedSkillPool;
+            private ObjectPool<MutationLaserView> mutationLaserPool;
+            private ObjectPool<VFXStripeSkill> stripedSkillPool;
         private ObjectPool<VFXButterflySkill> butterflySkillPool;
         private ObjectPool<VFXBubble> bubblePool;
-        private ObjectPool<VFXBubblePopParticles> bubblePopParticlesPool;
+            private ObjectPool<VFXBubblePopParticles> bubblePopParticlesPool;
+            private ObjectPool<VFXPrismaticBloomProjectile> prismaticBloomProjectilePool;
+            private ObjectPool<VFXPrismaticBloomFinisher> prismaticBloomFinisherPool;
         private BoardLayout layout;
 
         public void Init(BoardLayout boardLayout)
         {
             if (mutationLaserPrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a MutationLaserView prefab.");
-            if (mutationLaserOriginPrefab == null)
-                throw new InvalidOperationException("BoardVFXManager requires a mutation laser origin ParticleSystem prefab.");
             if (stripedSkillPrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a striped skill prefab.");
             if (bubblePrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a Bubble projectile prefab.");
             if (bubblePopParticlesPrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a Bubble pop-particles prefab.");
+            if (prismaticBloomProjectilePrefab == null)
+                throw new InvalidOperationException("BoardVFXManager requires a Prismatic Bloom projectile prefab.");
+            if (prismaticBloomFinisherPrefab == null)
+                throw new InvalidOperationException("BoardVFXManager requires a Prismatic Bloom finisher prefab.");
 
             layout = boardLayout ?? throw new ArgumentNullException(nameof(boardLayout));
             Transform root = boardVFXRoot != null ? boardVFXRoot : transform;
@@ -48,13 +52,6 @@ namespace DefaultNamespace.VFX
                 actionOnGet: laser => laser.gameObject.SetActive(true),
                 actionOnRelease: laser => laser.gameObject.SetActive(false),
                 actionOnDestroy: laser => Destroy(laser.gameObject)
-            );
-
-            mutationLaserOriginPool = new ObjectPool<ParticleSystem>(
-                createFunc: () => Instantiate(mutationLaserOriginPrefab, root),
-                actionOnGet: particles => particles.gameObject.SetActive(true),
-                actionOnRelease: particles => particles.gameObject.SetActive(false),
-                actionOnDestroy: particles => Destroy(particles.gameObject)
             );
 
             stripedSkillPool = new ObjectPool<VFXStripeSkill>(
@@ -99,6 +96,36 @@ namespace DefaultNamespace.VFX
                     particles.gameObject.SetActive(false);
                 },
                 actionOnDestroy: particles => Destroy(particles.gameObject)
+            );
+
+            prismaticBloomProjectilePool = new ObjectPool<VFXPrismaticBloomProjectile>(
+                createFunc: () => Instantiate(prismaticBloomProjectilePrefab, root),
+                actionOnGet: projectile =>
+                {
+                    projectile.gameObject.SetActive(true);
+                    projectile.ResetForPool();
+                },
+                actionOnRelease: projectile =>
+                {
+                    projectile.ResetForPool();
+                    projectile.gameObject.SetActive(false);
+                },
+                actionOnDestroy: projectile => Destroy(projectile.gameObject)
+            );
+
+            prismaticBloomFinisherPool = new ObjectPool<VFXPrismaticBloomFinisher>(
+                createFunc: () => Instantiate(prismaticBloomFinisherPrefab, root),
+                actionOnGet: finisher =>
+                {
+                    finisher.gameObject.SetActive(true);
+                    finisher.ResetForPool();
+                },
+                actionOnRelease: finisher =>
+                {
+                    finisher.ResetForPool();
+                    finisher.gameObject.SetActive(false);
+                },
+                actionOnDestroy: finisher => Destroy(finisher.gameObject)
             );
         }
 
@@ -215,6 +242,71 @@ namespace DefaultNamespace.VFX
             PlayBubblePopParticlesAndRelease(position, inflatedScaleMultiplier).Forget();
         }
 
+        public async UniTask ShootPrismaticBloomProjectile(Vector3 origin, Vector3 target, float duration)
+        {
+            if (prismaticBloomProjectilePool == null)
+                throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+
+            VFXPrismaticBloomProjectile projectile = RentPrismaticBloomProjectile();
+            try
+            {
+                projectile.Configure(layout.TileSize);
+                await projectile.Shoot(origin, target, duration);
+            }
+            catch
+            {
+                ReleasePrismaticBloomProjectile(projectile);
+                throw;
+            }
+
+            FinishPrismaticBloomProjectileAndRelease(projectile).Forget();
+        }
+
+        private VFXPrismaticBloomProjectile RentPrismaticBloomProjectile()
+        {
+            return prismaticBloomProjectilePool.Get();
+        }
+
+        private async UniTask FinishPrismaticBloomProjectileAndRelease(VFXPrismaticBloomProjectile projectile)
+        {
+            try
+            {
+                await projectile.Finish();
+            }
+            finally
+            {
+                ReleasePrismaticBloomProjectile(projectile);
+            }
+        }
+
+        private void ReleasePrismaticBloomProjectile(VFXPrismaticBloomProjectile projectile)
+        {
+            prismaticBloomProjectilePool.Release(projectile);
+        }
+
+        public void PlayPrismaticBloomFinisher(Vector3 position)
+        {
+            if (prismaticBloomFinisherPool == null)
+                throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+
+            PlayPrismaticBloomFinisherAndRelease(position).Forget();
+        }
+
+        private async UniTask PlayPrismaticBloomFinisherAndRelease(Vector3 position)
+        {
+            VFXPrismaticBloomFinisher finisher = prismaticBloomFinisherPool.Get();
+            try
+            {
+                finisher.transform.position = position;
+                finisher.Configure(layout.TileSize);
+                await finisher.Play();
+            }
+            finally
+            {
+                prismaticBloomFinisherPool.Release(finisher);
+            }
+        }
+
         private async UniTask PlayBubblePopParticlesAndRelease(Vector2Int position, float inflatedScaleMultiplier)
         {
             if (bubblePopParticlesPool == null)
@@ -249,75 +341,31 @@ namespace DefaultNamespace.VFX
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
 
             Vector2 origin = layout.OriginWorldPos + originPosition * layout.TileSize;
-            PlayVortex(origin, duration).Forget();
-
             await UniTask.Delay(TimeSpan.FromSeconds(chargeUpDuration));
             await PlayLasers(origin, targetPositions, duration - chargeUpDuration);
         }
 
-        private async UniTask PlayVortex(Vector2 origin, float duration)
-        {
-            ParticleSystem originParticles = mutationLaserOriginPool.Get();
-            originParticles.transform.position = origin;
-            originParticles.Clear(true);
-            originParticles.Play(true);
-
-            try
-            {
-                float tailDuration = GetLongestParticleLifetime(originParticles);
-                float emissionDuration = Mathf.Max(0f, duration - tailDuration);
-                await UniTask.Delay(TimeSpan.FromSeconds(emissionDuration));
-                originParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-                await UniTask.WaitUntil(() => !originParticles.IsAlive(true));
-            }
-            finally
-            {
-                originParticles.Clear(true);
-                mutationLaserOriginPool.Release(originParticles);
-            }
-        }
-
-        private static float GetLongestParticleLifetime(ParticleSystem prefab)
-        {
-            float longestLifetime = 0f;
-
-            foreach (ParticleSystem particles in prefab.GetComponentsInChildren<ParticleSystem>(true))
-            {
-                ParticleSystem.MainModule main = particles.main;
-                float simulationSpeed = Mathf.Max(main.simulationSpeed, Mathf.Epsilon);
-                longestLifetime = Mathf.Max(
-                    longestLifetime,
-                    main.startLifetime.constantMax / simulationSpeed);
-            }
-
-            return longestLifetime;
-        }
-
         private async UniTask PlayLasers(Vector2 origin, IReadOnlyList<Vector2Int> targetPositions, float duration)
         {
-            float width = layout.TileSize * mutationLaserWidthRatio;
             var tasks = new List<UniTask>(targetPositions.Count);
 
             foreach (Vector2Int targetPosition in targetPositions)
             {
                 Vector2 target = layout.GetTileWorldPos(targetPosition.x, targetPosition.y);
-                tasks.Add(PlayLaser(origin, target, width, duration));
+                tasks.Add(PlayLaser(origin, target, duration));
             }
 
             await UniTask.WhenAll(tasks);
         }
 
-        private async UniTask PlayLaser(
-            Vector2 origin,
-            Vector2 target,
-            float width,
-            float duration)
+        private async UniTask PlayLaser(Vector2 origin, Vector2 target, float duration)
         {
             MutationLaserView laser = mutationLaserPool.Get();
 
             try
             {
-                await laser.Play(origin, target, width, duration);
+                laser.Configure(layout.TileSize, mutationLaserWidthRatio);
+                await laser.Play(origin, target, duration);
             }
             finally
             {
@@ -328,11 +376,12 @@ namespace DefaultNamespace.VFX
         private void OnDestroy()
         {
             mutationLaserPool?.Clear();
-            mutationLaserOriginPool?.Clear();
             stripedSkillPool?.Clear();
             butterflySkillPool?.Clear();
             bubblePool?.Clear();
             bubblePopParticlesPool?.Clear();
+            prismaticBloomProjectilePool?.Clear();
+            prismaticBloomFinisherPool?.Clear();
         }
     }
 }

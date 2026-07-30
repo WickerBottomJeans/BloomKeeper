@@ -10,7 +10,7 @@ public class MatchGroup
     public Petal Causer;
     
     /// <summary>
-    /// From a skill combo swap. Resolver wont activate skill in this match
+    /// From a skill combo swap. Resolver wont activate skill in this match nor animation
     /// </summary>
     public bool IsFromSkillCombo;
     

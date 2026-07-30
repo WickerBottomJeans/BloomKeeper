@@ -17,14 +17,20 @@ namespace DefaultNamespace.VFX
         [SerializeField, Min(0f)] private float sourceHaloPulseHalfDuration = 0.25f;
 
         private float beamWorldWidth;
+        private Vector3 defaultScale;
         private Vector3 sourceHaloRestingScale;
         private Color sourceHaloRestingColor;
         private Tween sourceHaloPulse;
 
-        public void Configure(float width)
+        private void Awake()
         {
-            beamWorldWidth = width;
-            transform.localScale = Vector3.one * beamWorldWidth;
+            defaultScale = transform.localScale;
+        }
+
+        public void Configure(float tileSize)
+        {
+            beamWorldWidth = tileSize;
+            transform.localScale = defaultScale * tileSize;
         }
 
         public async UniTask Prepare(float duration)

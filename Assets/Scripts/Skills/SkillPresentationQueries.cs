@@ -32,7 +32,7 @@ namespace Skills
             var positions = new HashSet<Vector2Int>();
             foreach (var tileChange in resolution.TileChanges)
             {
-                if (tileChange.PetalWasRemoved && !resolution.IsTriggeredSkillPosition(tileChange.Position))
+                if (tileChange.PetalWasRemoved && !resolution.IsTriggeredSkillInputPosition(tileChange.Position))
                     positions.Add(tileChange.Position);
             }
             return positions;

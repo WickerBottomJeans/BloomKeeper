@@ -38,6 +38,30 @@ namespace DefaultNamespace.UI
             return new MatchResolveResult(groupResults, pendingSpawns, adjacenttileChanges);
         }
 
+        public static MatchResolveResult Resolve(IReadOnlyList<SkillUseResult> skillResults, Tile[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget)
+        {
+            var orderedMatches = new List<MatchGroup>();
+            foreach (SkillUseResult skillResult in skillResults)
+            {
+                foreach (MatchGroup match in skillResult.GetMatchGroups())
+                {
+                    if (match.IsFromSkillCombo)
+                        orderedMatches.Add(match);
+                }
+            }
+
+            foreach (SkillUseResult skillResult in skillResults)
+            {
+                foreach (MatchGroup match in skillResult.GetMatchGroups())
+                {
+                    if (!match.IsFromSkillCombo)
+                        orderedMatches.Add(match);
+                }
+            }
+
+            return Resolve(orderedMatches, grid, swapOrigin, swapTarget);
+        }
+
         private static MatchGroupResolveResult ProcessMatch(MatchGroup match, Tile[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget, List<Vector2Int> removedPositions, List<SkillPetalSpawn> pendingSpawns)
         {
             TryQueueSkillSpawn(match, grid, swapOrigin, swapTarget, pendingSpawns);
@@ -49,7 +73,7 @@ namespace DefaultNamespace.UI
             SpecialSkillType? spawnSkill = match.Shape switch
             {
                 MatchShape.Four => DetermineStripeSkill(match),
-                MatchShape.Five => SpecialSkillType.Sunburst,
+                MatchShape.Five => SpecialSkillType.PrismaticBloom,
                 MatchShape.TShape => SpecialSkillType.Bubble,
                 MatchShape.LShape => SpecialSkillType.Bubble,
                 MatchShape.Cross => SpecialSkillType.Bubble,
@@ -65,7 +89,7 @@ namespace DefaultNamespace.UI
 
             PetalType matchedType = grid[match.TilePositions[0].x, match.TilePositions[0].y].Petal?.PetalType
                                     ?? throw new InvalidOperationException("Match group contains tile with null petal.");
-            if (spawnSkill == SpecialSkillType.Sunburst)
+            if (spawnSkill == SpecialSkillType.PrismaticBloom)
             {
                 matchedType = PetalType.None;
             }
@@ -94,7 +118,7 @@ namespace DefaultNamespace.UI
                 if (petal.Skill != SpecialSkillType.None && !match.IsFromSkillCombo)
                 {
                     Petal triggerPetal = match.Causer != null ? new Petal(match.Causer) : null;
-                    skillActivations.Add(new SkillActivation(petal.Skill, new SkillParticipant(tilePosition, petal), triggerPetal: triggerPetal));
+                    skillActivations.Add(new SkillActivation(petal.Skill, new[] { new SkillParticipant(tilePosition, petal) }, triggerPetal));
                 }
 
                 removedPositions.Add(tilePosition);
