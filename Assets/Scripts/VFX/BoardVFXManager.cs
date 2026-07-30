@@ -11,7 +11,8 @@ namespace DefaultNamespace.VFX
         public sealed class BoardVFXManager : MonoBehaviour
         {
             [SerializeField] private MutationLaserView mutationLaserPrefab;
-            [SerializeField] private VFXStripeSkill stripedSkillPrefab;
+            [SerializeField] private VFXStripeBeamAxis stripedBeamAxisPrefab;
+            [SerializeField] private VFXStripeHalo stripedHaloPrefab;
             [SerializeField] private VFXButterflySkill butterflySkillPrefab;
             [SerializeField] private VFXBubble bubblePrefab;
             [SerializeField] private VFXBubblePopParticles bubblePopParticlesPrefab;
@@ -21,7 +22,8 @@ namespace DefaultNamespace.VFX
             [SerializeField] private float mutationLaserWidthRatio = 0.12f;
 
             private ObjectPool<MutationLaserView> mutationLaserPool;
-            private ObjectPool<VFXStripeSkill> stripedSkillPool;
+            private ObjectPool<VFXStripeBeamAxis> stripedBeamAxisPool;
+            private ObjectPool<VFXStripeHalo> stripedHaloPool;
         private ObjectPool<VFXButterflySkill> butterflySkillPool;
         private ObjectPool<VFXBubble> bubblePool;
             private ObjectPool<VFXBubblePopParticles> bubblePopParticlesPool;
@@ -33,8 +35,10 @@ namespace DefaultNamespace.VFX
         {
             if (mutationLaserPrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a MutationLaserView prefab.");
-            if (stripedSkillPrefab == null)
-                throw new InvalidOperationException("BoardVFXManager requires a striped skill prefab.");
+            if (stripedBeamAxisPrefab == null)
+                throw new InvalidOperationException("BoardVFXManager requires a striped beam-axis prefab.");
+            if (stripedHaloPrefab == null)
+                throw new InvalidOperationException("BoardVFXManager requires a striped halo prefab.");
             if (bubblePrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a Bubble projectile prefab.");
             if (bubblePopParticlesPrefab == null)
@@ -54,11 +58,34 @@ namespace DefaultNamespace.VFX
                 actionOnDestroy: laser => Destroy(laser.gameObject)
             );
 
-            stripedSkillPool = new ObjectPool<VFXStripeSkill>(
-                createFunc: () => Instantiate(stripedSkillPrefab, root),
-                actionOnGet: stripe => stripe.gameObject.SetActive(true),
-                actionOnRelease: stripe => stripe.gameObject.SetActive(false),
-                actionOnDestroy: stripe => Destroy(stripe.gameObject)
+            stripedBeamAxisPool = new ObjectPool<VFXStripeBeamAxis>(
+                createFunc: () => Instantiate(stripedBeamAxisPrefab, root),
+                actionOnGet: beamAxis =>
+                {
+                    beamAxis.gameObject.SetActive(true);
+                    beamAxis.ResetForPool();
+                },
+                actionOnRelease: beamAxis =>
+                {
+                    beamAxis.ResetForPool();
+                    beamAxis.gameObject.SetActive(false);
+                },
+                actionOnDestroy: beamAxis => Destroy(beamAxis.gameObject)
+            );
+
+            stripedHaloPool = new ObjectPool<VFXStripeHalo>(
+                createFunc: () => Instantiate(stripedHaloPrefab, root),
+                actionOnGet: halo =>
+                {
+                    halo.gameObject.SetActive(true);
+                    halo.ResetForPool();
+                },
+                actionOnRelease: halo =>
+                {
+                    halo.ResetForPool();
+                    halo.gameObject.SetActive(false);
+                },
+                actionOnDestroy: halo => Destroy(halo.gameObject)
             );
 
             butterflySkillPool = new ObjectPool<VFXButterflySkill>(
@@ -129,18 +156,29 @@ namespace DefaultNamespace.VFX
             );
         }
 
-        public VFXStripeSkill RentStripedSkillVFX(Vector2Int source)
+        public VFXStripeBeamAxis RentStripedBeamAxisVFX(Vector2Int source)
         {
-            if (stripedSkillPool == null)
+            if (stripedBeamAxisPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
 
-            VFXStripeSkill stripe = stripedSkillPool.Get();
-            stripe.transform.position = layout.GetTileWorldPos(source.x, source.y);
-            stripe.Configure(layout.TileSize);
-            return stripe;
+            VFXStripeBeamAxis beamAxis = stripedBeamAxisPool.Get();
+            beamAxis.transform.position = layout.GetTileWorldPos(source.x, source.y);
+            beamAxis.Configure(layout.TileSize);
+            return beamAxis;
         }
 
-        public UniTask FireStripedSkillVFX(VFXStripeSkill stripe, Vector2Int source, bool isVertical, float duration)
+        public VFXStripeHalo RentStripedHaloVFX(Vector2Int source)
+        {
+            if (stripedHaloPool == null)
+                throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+
+            VFXStripeHalo halo = stripedHaloPool.Get();
+            halo.transform.position = layout.GetTileWorldPos(source.x, source.y);
+            halo.Configure(layout.TileSize);
+            return halo;
+        }
+
+        public UniTask FireStripedBeamAxisVFX(VFXStripeBeamAxis beamAxis, Vector2Int source, bool isVertical, float duration)
         {
             int negativeSideLengthInTiles = isVertical ? source.y : source.x;
             int positiveSideLengthInTiles = isVertical ? layout.Rows - source.y - 1 : layout.Cols - source.x - 1;
@@ -154,12 +192,17 @@ namespace DefaultNamespace.VFX
             Vector2 positiveEndWorld = layout.GetTileWorldPos(positiveDestination.x, positiveDestination.y) + endpointOffset;
             float negativeDuration = negativeSideLengthInTiles * secondsPerTile;
             float positiveDuration = positiveSideLengthInTiles * secondsPerTile;
-            return stripe.Fire(negativeEndWorld, positiveEndWorld, negativeDuration, positiveDuration);
+            return beamAxis.Fire(negativeEndWorld, positiveEndWorld, negativeDuration, positiveDuration);
         }
 
-        public void ReleaseStripedSkillVFX(VFXStripeSkill stripe)
+        public void ReleaseStripedBeamAxisVFX(VFXStripeBeamAxis beamAxis)
         {
-            stripedSkillPool.Release(stripe);
+            stripedBeamAxisPool.Release(beamAxis);
+        }
+
+        public void ReleaseStripedHaloVFX(VFXStripeHalo halo)
+        {
+            stripedHaloPool.Release(halo);
         }
 
         public VFXButterflySkill RentButterflySkillVFX(Transform parent)
@@ -376,7 +419,8 @@ namespace DefaultNamespace.VFX
         private void OnDestroy()
         {
             mutationLaserPool?.Clear();
-            stripedSkillPool?.Clear();
+            stripedBeamAxisPool?.Clear();
+            stripedHaloPool?.Clear();
             butterflySkillPool?.Clear();
             bubblePool?.Clear();
             bubblePopParticlesPool?.Clear();

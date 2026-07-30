@@ -33,33 +33,35 @@ namespace Skills
             MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
             bool isVertical = representation.Direction == SpecialSkillType.StripedVertical;
-            VFXStripeSkill stripe = boardVFXManager.RentStripedSkillVFX(representation.Source);
+            VFXStripeBeamAxis beamAxis = boardVFXManager.RentStripedBeamAxisVFX(representation.Source);
+            VFXStripeHalo halo = boardVFXManager.RentStripedHaloVFX(representation.Source);
 
             try
             {
-                await Prepare(stripe, representation.Source, accessKeys);
-                await Fire(stripe, representation.Source, isVertical);
-                await Finish(stripe, representation.Source, resolution, accessKeys);
+                await Prepare(halo, representation.Source, accessKeys);
+                await Fire(beamAxis, representation.Source, isVertical);
+                await Finish(beamAxis, halo, representation.Source, resolution, accessKeys);
             }
             finally
             {
-                boardVFXManager.ReleaseStripedSkillVFX(stripe);
+                boardVFXManager.ReleaseStripedBeamAxisVFX(beamAxis);
+                boardVFXManager.ReleaseStripedHaloVFX(halo);
             }
         }
 
-        private UniTask Prepare(VFXStripeSkill stripe, Vector2Int source,
+        private UniTask Prepare(VFXStripeHalo halo, Vector2Int source,
             IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
-            return UniTask.WhenAll(stripe.Prepare(prepareDuration),
+            return UniTask.WhenAll(halo.Prepare(prepareDuration),
                 petalViewManager.PlayScale(source, SourcePetalPrepareScale, prepareDuration, Ease.OutCubic, accessKeys));
         }
 
-        private UniTask Fire(VFXStripeSkill stripe, Vector2Int source, bool isVertical)
+        private UniTask Fire(VFXStripeBeamAxis beamAxis, Vector2Int source, bool isVertical)
         {
-            return boardVFXManager.FireStripedSkillVFX(stripe, source, isVertical, fireDuration);
+            return boardVFXManager.FireStripedBeamAxisVFX(beamAxis, source, isVertical, fireDuration);
         }
 
-        private async UniTask Finish(VFXStripeSkill stripe, Vector2Int source, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        private async UniTask Finish(VFXStripeBeamAxis beamAxis, VFXStripeHalo halo, Vector2Int source, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
         {
             HashSet<Vector2Int> removedPositions = SkillPresentationQueries.GetRemovedPetalPositionsExcludingTriggeredSkills(resolution);
             removedPositions.Add(source);
@@ -89,7 +91,7 @@ namespace Skills
             }
 
             petalViewManager.ReleasePetalViewsImmediately(ownedRemovedPositions, accessKeys);
-            await UniTask.WhenAll(stripe.Finish(finishDuration), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(obstacleChanges));
+            await UniTask.WhenAll(beamAxis.Finish(finishDuration), halo.Finish(finishDuration), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(obstacleChanges));
         }
     }
 }

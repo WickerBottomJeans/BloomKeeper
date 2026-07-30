@@ -44,6 +44,18 @@ namespace Skills
         }
     }
 
+    public sealed class StripeStripeFusionRepresentationData : SkillRepresentationData
+    {
+        public Vector2Int Anchor { get; }
+        public IReadOnlyList<Vector2Int> AffectedPositions { get; }
+
+        public StripeStripeFusionRepresentationData(Vector2Int anchor, IReadOnlyList<Vector2Int> affectedPositions, IReadOnlyList<Vector2Int> consumedInputPositions) : base(consumedInputPositions)
+        {
+            Anchor = anchor;
+            AffectedPositions = affectedPositions;
+        }
+    }
+
     public sealed class ButterflyRepresentationData : SkillRepresentationData
     {
         public Vector2Int Source { get; }

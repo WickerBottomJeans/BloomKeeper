@@ -33,6 +33,9 @@ namespace DefaultNamespace
                 { new SkillKey(SpecialSkillType.PrismaticBloom, SpecialSkillType.StripedVertical), HandlePrismaticBloom },
                 { new SkillKey(SpecialSkillType.PrismaticBloom, SpecialSkillType.Bubble), HandlePrismaticBloom },
                 { new SkillKey(SpecialSkillType.PrismaticBloom, SpecialSkillType.Butterfly), HandlePrismaticBloom },
+                { new SkillKey(SpecialSkillType.StripedHorizontal, SpecialSkillType.StripedHorizontal), HandleStripeStripeFusion },
+                { new SkillKey(SpecialSkillType.StripedHorizontal, SpecialSkillType.StripedVertical), HandleStripeStripeFusion },
+                { new SkillKey(SpecialSkillType.StripedVertical, SpecialSkillType.StripedVertical), HandleStripeStripeFusion },
             };
 
         public static List<SkillActivation> DetectOnSwap(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
@@ -58,14 +61,23 @@ namespace DefaultNamespace
 
         private static List<SkillActivation> HandlePrismaticBloom(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
         {
-            Petal petalA = new Petal(grid[tileA.x, tileA.y].Petal);
-            Petal petalB = new Petal(grid[tileB.x, tileB.y].Petal);
-            var participantA = new SkillParticipant(tileA, petalA);
-            var participantB = new SkillParticipant(tileB, petalB);
+            var swapInitiator = new SkillParticipant(tileB, new Petal(grid[tileB.x, tileB.y].Petal));
+            var swapPartner = new SkillParticipant(tileA, new Petal(grid[tileA.x, tileA.y].Petal));
 
             return new List<SkillActivation>
             {
-                new SkillActivation(SpecialSkillType.PrismaticBloom, new[] { participantA, participantB })
+                SkillActivation.FromSwap(SkillExecutionType.PrismaticBloom, swapInitiator, swapPartner)
+            };
+        }
+
+        private static List<SkillActivation> HandleStripeStripeFusion(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
+        {
+            var swapInitiator = new SkillParticipant(tileB, new Petal(grid[tileB.x, tileB.y].Petal));
+            var swapPartner = new SkillParticipant(tileA, new Petal(grid[tileA.x, tileA.y].Petal));
+
+            return new List<SkillActivation>
+            {
+                SkillActivation.FromSwap(SkillExecutionType.StripeStripeFusion, swapInitiator, swapPartner)
             };
         }
     }

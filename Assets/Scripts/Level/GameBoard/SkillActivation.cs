@@ -19,13 +19,15 @@ namespace DefaultNamespace.UI
     
     public readonly struct SkillActivation
     {
-        public SpecialSkillType EffectType { get; }
+        public SkillExecutionType EffectType { get; }
         public IReadOnlyList<SkillParticipant> ConsumedInputs { get; }
+        public SkillParticipant? SwapInitiator { get; }
+        public SkillParticipant? SwapPartner { get; }
 
         // The petal whose effect triggered this skill in a chain.
         public Petal TriggerPetal { get; }
 
-        public SkillActivation(SpecialSkillType effectType, IReadOnlyList<SkillParticipant> consumedInputs, Petal triggerPetal = null)
+        private SkillActivation(SkillExecutionType effectType, IReadOnlyList<SkillParticipant> consumedInputs, Petal triggerPetal, SkillParticipant? swapInitiator, SkillParticipant? swapPartner)
         {
             if (consumedInputs.Count == 0)
                 throw new ArgumentException("A skill activation requires at least one consumed input.", nameof(consumedInputs));
@@ -33,6 +35,28 @@ namespace DefaultNamespace.UI
             EffectType = effectType;
             ConsumedInputs = new List<SkillParticipant>(consumedInputs).AsReadOnly();
             TriggerPetal = triggerPetal;
+            SwapInitiator = swapInitiator;
+            SwapPartner = swapPartner;
+        }
+
+        public static SkillActivation FromPetalSkill(SkillParticipant consumedInput, Petal triggerPetal = null)
+        {
+            SkillExecutionType effectType = consumedInput.Petal.Skill switch
+            {
+                SpecialSkillType.StripedHorizontal => SkillExecutionType.StripedHorizontal,
+                SpecialSkillType.StripedVertical => SkillExecutionType.StripedVertical,
+                SpecialSkillType.Bubble => SkillExecutionType.Bubble,
+                SpecialSkillType.PrismaticBloom => SkillExecutionType.PrismaticBloom,
+                SpecialSkillType.Butterfly => SkillExecutionType.Butterfly,
+                _ => throw new ArgumentOutOfRangeException(nameof(consumedInput), consumedInput.Petal.Skill, "Petal skill has no executable behavior.")
+            };
+
+            return new SkillActivation(effectType, new[] { consumedInput }, triggerPetal, null, null);
+        }
+
+        public static SkillActivation FromSwap(SkillExecutionType effectType, SkillParticipant swapInitiator, SkillParticipant swapPartner)
+        {
+            return new SkillActivation(effectType, new[] { swapInitiator, swapPartner }, null, swapInitiator, swapPartner);
         }
 
         public SkillParticipant GetOnlyConsumedInput()

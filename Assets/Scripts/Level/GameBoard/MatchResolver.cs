@@ -118,7 +118,7 @@ namespace DefaultNamespace.UI
                 if (petal.Skill != SpecialSkillType.None && !match.IsFromSkillCombo)
                 {
                     Petal triggerPetal = match.Causer != null ? new Petal(match.Causer) : null;
-                    skillActivations.Add(new SkillActivation(petal.Skill, new[] { new SkillParticipant(tilePosition, petal) }, triggerPetal));
+                    skillActivations.Add(SkillActivation.FromPetalSkill(new SkillParticipant(tilePosition, petal), triggerPetal));
                 }
 
                 removedPositions.Add(tilePosition);

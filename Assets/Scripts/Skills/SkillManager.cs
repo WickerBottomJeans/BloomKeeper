@@ -7,13 +7,14 @@ namespace Skills
 {
     public static class SkillManager
     {
-        private static readonly IReadOnlyDictionary<SpecialSkillType, ISkillExecutor> Executors = new Dictionary<SpecialSkillType, ISkillExecutor>
+        private static readonly IReadOnlyDictionary<SkillExecutionType, ISkillExecutor> Executors = new Dictionary<SkillExecutionType, ISkillExecutor>
         {
-            { SpecialSkillType.StripedHorizontal, new StripedSkillExecutor() },
-            { SpecialSkillType.StripedVertical, new StripedSkillExecutor() },
-            { SpecialSkillType.Bubble, new BubbleSkillExecutor() },
-            { SpecialSkillType.PrismaticBloom, new PrismaticBloomSkillExecutor() },
-            { SpecialSkillType.Butterfly, new ButterflySkillExecutor() }
+            { SkillExecutionType.StripedHorizontal, new StripedSkillExecutor() },
+            { SkillExecutionType.StripedVertical, new StripedSkillExecutor() },
+            { SkillExecutionType.Bubble, new BubbleSkillExecutor() },
+            { SkillExecutionType.PrismaticBloom, new PrismaticBloomSkillExecutor() },
+            { SkillExecutionType.Butterfly, new ButterflySkillExecutor() },
+            { SkillExecutionType.StripeStripeFusion, new StripeStripeFusionExecutor() }
         };
 
         public static List<SkillUseResult> UseSkills(Tile[,] grid, IReadOnlyList<SkillActivation> activations, IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups)

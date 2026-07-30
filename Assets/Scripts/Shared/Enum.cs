@@ -54,6 +54,16 @@
         PrismaticBloom = 4,
         Butterfly = 5,
     }
+
+    public enum SkillExecutionType
+    {
+        StripedHorizontal = 1,
+        StripedVertical = 2,
+        Bubble = 3,
+        PrismaticBloom = 4,
+        Butterfly = 5,
+        StripeStripeFusion = 6
+    }
     
     public enum MatchShape
     {

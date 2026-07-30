@@ -16,13 +16,14 @@ namespace Skills
             int columns = grid.GetLength(0);
             int rows = grid.GetLength(1);
             var positions = new List<Vector2Int>();
+            SpecialSkillType direction = consumedInput.Petal.Skill;
 
-            if (activation.EffectType == SpecialSkillType.StripedHorizontal)
+            if (direction == SpecialSkillType.StripedHorizontal)
             {
                 for (int x = 0; x < columns; x++)
                     positions.Add(new Vector2Int(x, skillPosition.y));
             }
-            else if (activation.EffectType == SpecialSkillType.StripedVertical)
+            else if (direction == SpecialSkillType.StripedVertical)
             {
                 for (int y = 0; y < rows; y++)
                     positions.Add(new Vector2Int(skillPosition.x, y));
@@ -33,7 +34,7 @@ namespace Skills
             }
 
             var matchGroup = new MatchGroup(positions, MatchShape.None, new Petal(consumedInput.Petal));
-            var representation = new StripedRepresentationData(skillPosition, activation.EffectType, positions, activation.GetConsumedInputPositions());
+            var representation = new StripedRepresentationData(skillPosition, direction, positions, activation.GetConsumedInputPositions());
             return new SkillUseResult(matchGroup, representation);
         }
     }

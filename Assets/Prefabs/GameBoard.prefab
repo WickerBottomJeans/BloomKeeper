@@ -126,7 +126,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.VFX.BoardVFXManager
   mutationLaserPrefab: {fileID: 985442930338887914, guid: 5caaf1731217f4f4990777f336c60df4, type: 3}
-  stripedSkillPrefab: {fileID: -1084145305644319253, guid: 50e5a9fe26adf834997a8212715a527d, type: 3}
+  stripedBeamAxisPrefab: {fileID: 4177974506570054529, guid: 2a9f6799c54c61040b9b3efa3486fff0, type: 3}
+  stripedHaloPrefab: {fileID: 3649927918587146014, guid: 3192556ca2fdf3a4bbb31a5ba42b1439, type: 3}
   butterflySkillPrefab: {fileID: 564335851267464242, guid: 245d3eb8f4b585342a4c9db43ed27867, type: 3}
   bubblePrefab: {fileID: 5904466950015035354, guid: d714b1a1f0aa1ef4fb8f3bf17c3402d6, type: 3}
   bubblePopParticlesPrefab: {fileID: 3104921802242997286, guid: dab69877ebd5889489ec61e6e2c8ff7e, type: 3}

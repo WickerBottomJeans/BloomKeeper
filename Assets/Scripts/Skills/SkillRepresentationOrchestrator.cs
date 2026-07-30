@@ -40,6 +40,7 @@ namespace Skills
             presenters = new Dictionary<Type, ISkillRepresentationPresenter>();
             Register(new BubbleSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, layout, bubblePrepareDuration, bubbleFireDuration, bubbleFinishDuration));
             Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, stripedPrepareDuration, stripedFireDuration, stripedFinishDuration));
+            Register(new StripeStripeFusionPresenter(petalViewManager, tileViewManager, boardVFXManager, stripedPrepareDuration, stripedFireDuration, stripedFinishDuration));
             Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, butterflyPrepareDuration, butterflyFireDuration, butterflyFinishDuration));
             Register(new PrismaticBloomSkillPresenter(petalViewManager, boardVFXManager, layout, prismaticBloomPrepareDuration, prismaticBloomFireDuration, prismaticBloomMaximumSpinSpeed));
         }
