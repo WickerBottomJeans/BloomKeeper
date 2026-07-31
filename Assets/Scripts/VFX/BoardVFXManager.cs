@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -218,7 +219,7 @@ namespace DefaultNamespace.VFX
             return butterfly;
         }
 
-        public async UniTask FinishButterflySkillVFX(VFXButterflySkill butterfly, float duration)
+        public async UniTask FinishButterflySkillVFX(VFXButterflySkill butterfly, float duration, AudioPlaybackScope audioScope)
         {
             Transform root = boardVFXRoot != null ? boardVFXRoot : transform;
             butterfly.transform.SetParent(root, true);
@@ -226,7 +227,7 @@ namespace DefaultNamespace.VFX
 
             try
             {
-                await butterfly.Finish(duration);
+                await butterfly.Finish(duration, audioScope);
                 await UniTask.WaitUntil(() => !HasLivingParticles(particleSystems));
             }
             finally
@@ -253,11 +254,11 @@ namespace DefaultNamespace.VFX
             bubblePool.Release(bubble);
         }
 
-        public void PopBubbleVFX(VFXBubble bubble)
+        public void PopBubbleVFX(VFXBubble bubble, AudioPlaybackScope audioScope)
         {
             try
             {
-                bubble.Pop();
+                bubble.Pop(audioScope);
             }
             catch
             {
@@ -280,9 +281,9 @@ namespace DefaultNamespace.VFX
             }
         }
 
-        public void PlayBubblePopParticles(Vector2Int position, float inflatedScaleMultiplier)
+        public void PlayBubblePopParticles(Vector2Int position, float inflatedScaleMultiplier, AudioPlaybackScope audioScope)
         {
-            PlayBubblePopParticlesAndRelease(position, inflatedScaleMultiplier).Forget();
+            PlayBubblePopParticlesAndRelease(position, inflatedScaleMultiplier, audioScope).Forget();
         }
 
         public async UniTask ShootPrismaticBloomProjectile(Vector3 origin, Vector3 target, float duration)
@@ -350,7 +351,7 @@ namespace DefaultNamespace.VFX
             }
         }
 
-        private async UniTask PlayBubblePopParticlesAndRelease(Vector2Int position, float inflatedScaleMultiplier)
+        private async UniTask PlayBubblePopParticlesAndRelease(Vector2Int position, float inflatedScaleMultiplier, AudioPlaybackScope audioScope)
         {
             if (bubblePopParticlesPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
@@ -360,7 +361,7 @@ namespace DefaultNamespace.VFX
             {
                 particles.transform.position = layout.GetTileWorldPos(position.x, position.y);
                 particles.Configure(layout.TileSize, inflatedScaleMultiplier);
-                await particles.Play();
+                await particles.Play(audioScope);
             }
             finally
             {

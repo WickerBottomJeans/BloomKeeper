@@ -40,12 +40,13 @@ namespace DefaultNamespace.UI
             return PlayResolution(result, System.Array.Empty<SkillUseResult>());
         }
 
-        public UniTask PlaySkillWave(SkillResolutionWave skillWave)
+        public async UniTask PlaySkillWave(SkillResolutionWave skillWave)
         {
-            return PlayResolution(skillWave.Resolution, skillWave.SkillResults);
+            using var audioScope = new AudioPlaybackScope();
+            await PlayResolution(skillWave.Resolution, skillWave.SkillResults, audioScope);
         }
 
-        private async UniTask PlayResolution(MatchResolveResult result, IReadOnlyList<SkillUseResult> skillResults)
+        private async UniTask PlayResolution(MatchResolveResult result, IReadOnlyList<SkillUseResult> skillResults, AudioPlaybackScope audioScope = null)
         {
             var skillResultsByMatch = new Dictionary<MatchGroup, SkillUseResult>(skillResults.Count);
             foreach (SkillUseResult skillResult in skillResults)
@@ -89,7 +90,7 @@ namespace DefaultNamespace.UI
                 }
 
                 foreach (var presentation in skillPresentations)
-                    tasks.Add(skillRepresentationOrchestrator.Play(presentation.skillResult, presentation.groupResult, presentation.accessKeys));
+                    tasks.Add(skillRepresentationOrchestrator.Play(presentation.skillResult, presentation.groupResult, presentation.accessKeys, audioScope));
                 tasks.Add(matchPresentationCoordinator.Play(normalGroups, result.SpawnedPetals, result.AdjacenttileChanges, layout, normalAccessKeys));
                 await UniTask.WhenAll(tasks);
             }

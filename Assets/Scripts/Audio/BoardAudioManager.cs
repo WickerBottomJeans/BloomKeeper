@@ -44,9 +44,9 @@ namespace DefaultNamespace.Audio
             AudioService.Instance.PlaySfx(boardShuffleCue);
         }
 
-        public void PlayBubblePrepare()
+        public void PlayBubblePrepare(AudioPlaybackScope audioScope)
         {
-            AudioService.Instance.PlaySfx(bubblePrepareCue);
+            AudioService.Instance.PlaySfx(bubblePrepareCue, audioScope);
         }
 
         public void PlayObstacleCleared(TileType tileType)

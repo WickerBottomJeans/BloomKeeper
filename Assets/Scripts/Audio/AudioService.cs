@@ -57,6 +57,19 @@ namespace DefaultNamespace.Audio
 
         public void PlaySfx(AudioCue cue)
         {
+            PlaySfx(cue, null, false);
+        }
+
+        public void PlaySfx(AudioCue cue, AudioPlaybackScope scope)
+        {
+            if (scope == null)
+                throw new ArgumentNullException(nameof(scope));
+
+            PlaySfx(cue, scope, true);
+        }
+
+        private void PlaySfx(AudioCue cue, AudioPlaybackScope scope, bool isScoped)
+        {
             if (cue == null)
             {
                 Debug.LogError("Cannot play SFX because the AudioCue reference is missing.");
@@ -64,6 +77,8 @@ namespace DefaultNamespace.Audio
             }
             if (cue.Bus == AudioBus.Music)
                 throw new InvalidOperationException($"Audio cue '{cue.name}' is music and cannot be played as SFX.");
+            if (isScoped && !scope.TryConsume(cue))
+                return;
 
             AudioMixerGroup mixerGroup = GetSfxMixerGroup(cue.Bus);
             sfxPlayer.Play(cue, mixerGroup);

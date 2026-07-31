@@ -34,9 +34,9 @@ namespace DefaultNamespace.VFX
             SetTrailColor(rightWingTrail, color);
         }
 
-        public async UniTask Prepare(float duration)
+        public async UniTask Prepare(float duration, AudioPlaybackScope audioScope)
         {
-            AudioService.Instance.PlaySfx(prepareCue);
+            AudioService.Instance.PlaySfx(prepareCue, audioScope);
             fireParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             impactParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             leftWingTrail.emitting = false;
@@ -55,9 +55,9 @@ namespace DefaultNamespace.VFX
             rightWingTrail.emitting = true;
         }
 
-        public async UniTask Finish(float duration)
+        public async UniTask Finish(float duration, AudioPlaybackScope audioScope)
         {
-            AudioService.Instance.PlaySfx(finishCue);
+            AudioService.Instance.PlaySfx(finishCue, audioScope);
             fireParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             leftWingTrail.emitting = false;
             rightWingTrail.emitting = false;

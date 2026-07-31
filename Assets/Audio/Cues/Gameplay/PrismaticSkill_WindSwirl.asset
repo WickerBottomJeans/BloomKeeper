@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bb081a4581031de4ab17ede1c08e83a3, type: 3}
-  m_Name: ButterflySkillEnder
+  m_Name: PrismaticSkill_WindSwirl
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.Audio.AudioCue
   clips:
-  - {fileID: 8300000, guid: 9d8a927f28550194c884129e8c68e370, type: 3}
+  - {fileID: 8300000, guid: 169feafc57027634797ca6ee8c6a46dc, type: 3}
   bus: 1
   volume: 1
   minimumPitch: 1

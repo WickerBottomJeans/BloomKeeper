@@ -11,9 +11,11 @@ namespace DefaultNamespace.Audio
         [SerializeField, Range(0f, 1f)] private float volume = 1f;
         [SerializeField] private float minimumPitch = 1f;
         [SerializeField] private float maximumPitch = 1f;
+        [SerializeField, Min(0)] private int maximumPlaysPerScope;
 
         public AudioBus Bus => bus;
         public float Volume => volume;
+        public int MaximumPlaysPerScope => maximumPlaysPerScope;
 
         public AudioClip PickClip()
         {

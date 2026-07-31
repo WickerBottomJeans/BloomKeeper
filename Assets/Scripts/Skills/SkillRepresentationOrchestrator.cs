@@ -27,8 +27,10 @@ namespace Skills
         [SerializeField] private float stripedFinishDuration = 0.1f;
 
         [Header("Prismatic Bloom Timing")]
-        [SerializeField, Min(0f)] private float prismaticBloomPrepareDuration = 0.6f;
-        [SerializeField, Min(0f)] private float prismaticBloomFireDuration = 1.2f;
+        [SerializeField] private AudioCue prismaticBloomCue;
+        [SerializeField] private AudioCue prismaticBloomFinishCue;
+        [SerializeField, Min(0f)] private float prismaticBloomPrepareDuration = 0.2f;
+        [SerializeField, Min(0f)] private float prismaticBloomFireDuration = 0.3f;
         [SerializeField, Min(0f)] private float prismaticBloomMaximumSpinSpeed = 720f;
 
         private Dictionary<Type, ISkillRepresentationPresenter> presenters;
@@ -42,7 +44,7 @@ namespace Skills
             Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, stripedPrepareDuration, stripedFireDuration, stripedFinishDuration));
             Register(new StripeStripeFusionPresenter(petalViewManager, tileViewManager, boardVFXManager, stripedPrepareDuration, stripedFireDuration, stripedFinishDuration));
             Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, butterflyPrepareDuration, butterflyFireDuration, butterflyFinishDuration));
-            Register(new PrismaticBloomSkillPresenter(petalViewManager, boardVFXManager, layout, prismaticBloomPrepareDuration, prismaticBloomFireDuration, prismaticBloomMaximumSpinSpeed));
+            Register(new PrismaticBloomSkillPresenter(petalViewManager, boardVFXManager, layout, prismaticBloomCue, prismaticBloomFinishCue, prismaticBloomPrepareDuration, prismaticBloomFireDuration, prismaticBloomMaximumSpinSpeed));
         }
 
         public void AcquireVitalViews(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -59,13 +61,15 @@ namespace Skills
             GetPresenter(representation).AcquireAdditionalVitalViews(representation, resolution, accessKeys);
         }
 
-        public UniTask Play(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        public UniTask Play(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
             SkillRepresentationData representation = skillResult.Representation;
             if (representation == null)
                 return UniTask.CompletedTask;
+            if (audioScope == null)
+                throw new ArgumentNullException(nameof(audioScope));
 
-            return GetPresenter(representation).Play(representation, resolution, accessKeys);
+            return GetPresenter(representation).Play(representation, resolution, accessKeys, audioScope);
         }
 
         private void Register(ISkillRepresentationPresenter presenter)

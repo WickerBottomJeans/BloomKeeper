@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
+using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using UnityEngine;
@@ -10,21 +11,22 @@ namespace Skills
 {
     public sealed class PrismaticBloomSkillPresenter : SkillRepresentationPresenter<PrismaticBloomRepresentationData>
     {
-        private const float LaunchWindowRatio = 0.3f;
-        private const float ProjectileTravelDurationRatio = 0.7f;
-
         private readonly PetalViewManager petalViewManager;
         private readonly BoardVFXManager boardVFXManager;
         private readonly BoardLayout layout;
+        private readonly AudioCue audioCue;
+        private readonly AudioCue finishCue;
         private readonly float prepareDuration;
         private readonly float fireDuration;
         private readonly float maximumSpinSpeed;
 
-        public PrismaticBloomSkillPresenter(PetalViewManager petalViewManager, BoardVFXManager boardVFXManager, BoardLayout layout, float prepareDuration, float fireDuration, float maximumSpinSpeed)
+        public PrismaticBloomSkillPresenter(PetalViewManager petalViewManager, BoardVFXManager boardVFXManager, BoardLayout layout, AudioCue audioCue, AudioCue finishCue, float prepareDuration, float fireDuration, float maximumSpinSpeed)
         {
             this.petalViewManager = petalViewManager;
             this.boardVFXManager = boardVFXManager;
             this.layout = layout;
+            this.audioCue = audioCue;
+            this.finishCue = finishCue;
             this.prepareDuration = prepareDuration;
             this.fireDuration = fireDuration;
             this.maximumSpinSpeed = maximumSpinSpeed;
@@ -42,40 +44,34 @@ namespace Skills
             }
         }
 
-        protected override async UniTask Play(PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        protected override async UniTask Play(PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
             List<Vector2Int> targets = GetTargets(representation, resolution);
-            Shuffle(targets);
-            await Prepare(representation.Source, accessKeys);
-            await Fire(representation, resolution, targets, accessKeys);
+            await Prepare(representation.Source, accessKeys, audioScope);
+            await Fire(representation, resolution, targets, accessKeys, audioScope);
         }
 
-        private UniTask Prepare(Vector2Int source, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        private UniTask Prepare(Vector2Int source, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
+            AudioService.Instance.PlaySfx(audioCue, audioScope);
             return petalViewManager.PlayPrismaticBloomPrepareSpin(source, prepareDuration, maximumSpinSpeed, accessKeys);
         }
 
-        private async UniTask Fire(PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution, IReadOnlyList<Vector2Int> targets, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        private async UniTask Fire(PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution, IReadOnlyList<Vector2Int> targets, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
             Vector2Int source = representation.Source;
             Vector3 origin = layout.GetTileWorldPos(source.x, source.y);
-            float projectileTravelDuration = fireDuration * ProjectileTravelDurationRatio;
-            float launchWindowDuration = fireDuration * LaunchWindowRatio;
-            float launchInterval = targets.Count > 1 ? launchWindowDuration / (targets.Count - 1) : 0f;
-            UniTask fireTimer = UniTask.Delay(TimeSpan.FromSeconds(fireDuration));
             UniTask spinTask = petalViewManager.PlayPrismaticBloomFireSpin(source, fireDuration, maximumSpinSpeed, accessKeys);
             var projectileTasks = new List<UniTask>(targets.Count);
 
-            for (int i = 0; i < targets.Count; i++)
+            foreach (Vector2Int target in targets)
             {
-                Vector2Int target = targets[i];
                 Vector3 targetWorldPosition = layout.GetTileWorldPos(target.x, target.y);
-                projectileTasks.Add(PlayProjectile(origin, targetWorldPosition, target, projectileTravelDuration, representation, resolution, accessKeys));
-                if (i < targets.Count - 1)
-                    await UniTask.Delay(TimeSpan.FromSeconds(launchInterval));
+                projectileTasks.Add(PlayProjectile(origin, targetWorldPosition, target, fireDuration, representation, resolution, accessKeys));
             }
 
-            await UniTask.WhenAll(fireTimer, spinTask);
+            await spinTask;
+            AudioService.Instance.PlaySfx(finishCue, audioScope);
             boardVFXManager.PlayPrismaticBloomFinisher(origin);
             UniTask sourceDisappearTask = petalViewManager.PlayNormalRemovals(new[] { source }, accessKeys);
             projectileTasks.Add(sourceDisappearTask);
@@ -133,13 +129,5 @@ namespace Skills
             return targets;
         }
 
-        private static void Shuffle(IList<Vector2Int> positions)
-        {
-            for (int i = positions.Count - 1; i > 0; i--)
-            {
-                int randomIndex = UnityEngine.Random.Range(0, i + 1);
-                (positions[i], positions[randomIndex]) = (positions[randomIndex], positions[i]);
-            }
-        }
     }
 }

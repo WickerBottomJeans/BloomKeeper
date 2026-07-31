@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
+using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using DG.Tweening;
@@ -29,8 +30,7 @@ namespace Skills
             this.finishDuration = finishDuration;
         }
 
-        protected override async UniTask Play(StripedRepresentationData representation,
-            MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        protected override async UniTask Play(StripedRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
             bool isVertical = representation.Direction == SpecialSkillType.StripedVertical;
             VFXStripeBeamAxis beamAxis = boardVFXManager.RentStripedBeamAxisVFX(representation.Source);
@@ -38,7 +38,7 @@ namespace Skills
 
             try
             {
-                await Prepare(halo, representation.Source, accessKeys);
+                await Prepare(halo, representation.Source, accessKeys, audioScope);
                 await Fire(beamAxis, representation.Source, isVertical);
                 await Finish(beamAxis, halo, representation.Source, resolution, accessKeys);
             }
@@ -49,10 +49,9 @@ namespace Skills
             }
         }
 
-        private UniTask Prepare(VFXStripeHalo halo, Vector2Int source,
-            IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        private UniTask Prepare(VFXStripeHalo halo, Vector2Int source, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
-            return UniTask.WhenAll(halo.Prepare(prepareDuration),
+            return UniTask.WhenAll(halo.Prepare(prepareDuration, audioScope),
                 petalViewManager.PlayScale(source, SourcePetalPrepareScale, prepareDuration, Ease.OutCubic, accessKeys));
         }
 

@@ -18,3 +18,4 @@ MonoBehaviour:
   volume: 1
   minimumPitch: 1
   maximumPitch: 1
+  maximumPlaysPerScope: 3

@@ -9880,4 +9880,5 @@ MonoBehaviour:
   - {fileID: 5984348331431481814, guid: 27bbadc80861ca94a85f51e21ebb30a4, type: 3}
   flyingParticle: {fileID: 6880087363956782027}
   enderParticle: {fileID: 1757679575536735230}
+  finishCue: {fileID: 11400000, guid: fe37e4f520a72a7478330c99b1cd0367, type: 2}
   localHeadDirection: {x: 0, y: 1}

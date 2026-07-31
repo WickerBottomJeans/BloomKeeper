@@ -34,9 +34,9 @@ namespace DefaultNamespace.VFX
             sourceHaloRestingScale = new Vector3(sourceHaloScale, sourceHaloScale, 1f);
         }
 
-        public async UniTask Prepare(float duration)
+        public async UniTask Prepare(float duration, AudioPlaybackScope audioScope)
         {
-            AudioService.Instance.PlaySfx(skillCue);
+            AudioService.Instance.PlaySfx(skillCue, audioScope);
             sourceHalo.transform.localScale = sourceHaloRestingScale * sourceHaloStartScaleRatio;
             sourceHalo.color = new Color(defaultHaloColor.r, defaultHaloColor.g, defaultHaloColor.b, 0f);
 

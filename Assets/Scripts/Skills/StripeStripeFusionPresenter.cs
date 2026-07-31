@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
+using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using UnityEngine;
@@ -26,7 +27,7 @@ namespace Skills
             this.finishDuration = finishDuration;
         }
 
-        protected override async UniTask Play(StripeStripeFusionRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        protected override async UniTask Play(StripeStripeFusionRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
             VFXStripeHalo halo = boardVFXManager.RentStripedHaloVFX(representation.Anchor);
             VFXStripeBeamAxis horizontalBeam = boardVFXManager.RentStripedBeamAxisVFX(representation.Anchor);
@@ -34,7 +35,7 @@ namespace Skills
 
             try
             {
-                await Prepare(halo, representation.ConsumedInputPositions, accessKeys);
+                await Prepare(halo, representation.ConsumedInputPositions, accessKeys, audioScope);
                 await Fire(horizontalBeam, verticalBeam, representation.Anchor);
                 await Finish(horizontalBeam, verticalBeam, halo, representation, resolution, accessKeys);
             }
@@ -46,9 +47,9 @@ namespace Skills
             }
         }
 
-        private UniTask Prepare(VFXStripeHalo halo, IReadOnlyList<Vector2Int> consumedInputPositions, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        private UniTask Prepare(VFXStripeHalo halo, IReadOnlyList<Vector2Int> consumedInputPositions, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
-            return UniTask.WhenAll(halo.Prepare(prepareDuration), petalViewManager.PlayNormalRemovals(consumedInputPositions, accessKeys));
+            return UniTask.WhenAll(halo.Prepare(prepareDuration, audioScope), petalViewManager.PlayNormalRemovals(consumedInputPositions, accessKeys));
         }
 
         private UniTask Fire(VFXStripeBeamAxis horizontalBeam, VFXStripeBeamAxis verticalBeam, Vector2Int anchor)

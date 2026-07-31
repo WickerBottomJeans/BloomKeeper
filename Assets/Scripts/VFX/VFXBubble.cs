@@ -46,11 +46,11 @@ namespace DefaultNamespace.VFX
             return transform.DOMove(target, duration).SetEase(Ease.OutQuad).SetLink(gameObject, LinkBehaviour.KillOnDestroy).ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
         }
 
-        public void Pop()
+        public void Pop(AudioPlaybackScope audioScope)
         {
             bubbleRenderer.enabled = false;
             enderParticle.Play(true);
-            AudioService.Instance.PlaySfx(popCue);
+            AudioService.Instance.PlaySfx(popCue, audioScope);
         }
 
         public UniTask WaitForEnderParticles()

@@ -27,10 +27,10 @@ namespace DefaultNamespace.VFX
             transform.localScale = defaultScale * tileSize * inflatedScaleMultiplier;
         }
 
-        public async UniTask Play()
+        public async UniTask Play(AudioPlaybackScope audioScope)
         {
             particles.Play(true);
-            AudioService.Instance.PlaySfx(popCue);
+            AudioService.Instance.PlaySfx(popCue, audioScope);
             await UniTask.WaitUntil(() => !particles.IsAlive(true), cancellationToken: this.GetCancellationTokenOnDestroy());
         }
 

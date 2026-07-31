@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: StripeSkill
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.Audio.AudioCue
   clips:
-  - {fileID: 8300000, guid: 1d6de4593fd7c884581d09f759e67d49, type: 3}
+  - {fileID: 8300000, guid: 1353d68ff358ded4fb940c88ae5def54, type: 3}
   bus: 1
   volume: 1
   minimumPitch: 1
   maximumPitch: 1
+  maximumPlaysPerScope: 3

@@ -156,9 +156,11 @@ MonoBehaviour:
   stripedPrepareDuration: 0.15
   stripedFireDuration: 0.2
   stripedFinishDuration: 0.1
-  prismaticBloomPrepareDuration: 0.6
-  prismaticBloomFireDuration: 1.2
-  prismaticBloomMaximumSpinSpeed: 720
+  prismaticBloomCue: {fileID: 11400000, guid: 11deffe4104416a42bd1c8ff1ed3e3ed, type: 2}
+  prismaticBloomFinishCue: {fileID: 11400000, guid: fe37e4f520a72a7478330c99b1cd0367, type: 2}
+  prismaticBloomPrepareDuration: 0.2
+  prismaticBloomFireDuration: 0.3
+  prismaticBloomMaximumSpinSpeed: 1200
 --- !u!114 &8623135926172344794
 MonoBehaviour:
   m_ObjectHideFlags: 0

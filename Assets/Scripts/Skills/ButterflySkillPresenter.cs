@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
+using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using UnityEngine;
@@ -40,7 +41,7 @@ namespace Skills
             this.finishDuration = finishDuration;
         }
 
-        protected override async UniTask Play(ButterflyRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        protected override async UniTask Play(ButterflyRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
             var changes = new List<TileChange>();
             foreach (TileChange change in resolution.TileChanges)
@@ -55,12 +56,12 @@ namespace Skills
                 return;
             }
 
-            VFXButterflySkill butterflyVFX = await Prepare(representation.Source, representation.SourcePetalType, accessKeys);
+            VFXButterflySkill butterflyVFX = await Prepare(representation.Source, representation.SourcePetalType, accessKeys, audioScope);
             await Fire(butterflyVFX, representation.Source, representation.Target.Value, accessKeys);
-            await Finish(butterflyVFX, representation.Source, representation.Target.Value, resolution, changes, accessKeys);
+            await Finish(butterflyVFX, representation.Source, representation.Target.Value, resolution, changes, accessKeys, audioScope);
         }
 
-        private async UniTask<VFXButterflySkill> Prepare(Vector2Int source, PetalType sourcePetalType, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        private async UniTask<VFXButterflySkill> Prepare(Vector2Int source, PetalType sourcePetalType, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
             if (!accessKeys.ContainsKey(source))
                 return null;
@@ -68,7 +69,7 @@ namespace Skills
             Transform visualTransform = petalViewManager.GetAccessibleVisualTransform(source, accessKeys);
             VFXButterflySkill butterflyVFX = boardVFXManager.RentButterflySkillVFX(visualTransform);
             butterflyVFX.SetColor(ParticleColors[sourcePetalType]);
-            await UniTask.WhenAll(butterflyVFX.Prepare(prepareDuration), petalViewManager.PlayRootScale(source, 1.5f, prepareDuration, accessKeys));
+            await UniTask.WhenAll(butterflyVFX.Prepare(prepareDuration, audioScope), petalViewManager.PlayRootScale(source, 1.5f, prepareDuration, accessKeys));
             return butterflyVFX;
         }
 
@@ -81,7 +82,7 @@ namespace Skills
             await petalViewManager.PlayFly(source, target, layout, fireDuration, FlightCurveAmplitudeInTiles, accessKeys);
         }
 
-        private async UniTask Finish(VFXButterflySkill butterflyVFX, Vector2Int source, Vector2Int target, MatchGroupResolveResult resolution, IReadOnlyList<TileChange> changes, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        private async UniTask Finish(VFXButterflySkill butterflyVFX, Vector2Int source, Vector2Int target, MatchGroupResolveResult resolution, IReadOnlyList<TileChange> changes, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
             bool targetNeedsView = target != source && (SkillPresentationQueries.WasPetalRemovedAt(resolution, target) || resolution.IsTriggeredSkillInputPosition(target));
             if (targetNeedsView && !accessKeys.ContainsKey(target) && petalViewManager.TryAcquireView(target, nameof(ButterflySkillPresenter), out ViewAccessKey targetAccessKey))
@@ -97,7 +98,7 @@ namespace Skills
 
             if (butterflyVFX != null)
             {
-                boardVFXManager.FinishButterflySkillVFX(butterflyVFX, finishDuration).Forget();
+                boardVFXManager.FinishButterflySkillVFX(butterflyVFX, finishDuration, audioScope).Forget();
             }
 
             await UniTask.WhenAll(petalViewManager.PlayDisappearAndRelease(disappearingPositions, finishDuration, accessKeys), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(changes));
