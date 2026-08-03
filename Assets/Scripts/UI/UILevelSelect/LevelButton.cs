@@ -8,20 +8,20 @@ namespace DefaultNamespace.UI
     public class LevelButton : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI levelNameText;
-        [SerializeField] private Image starsImage;
-        [SerializeField] private Sprite[] starSprites;
+        [SerializeField] private StarBoard starBoard;
         [SerializeField] private Button button;
 
         private int levelId;
         private Action<int> onSelected;
 
-        public void Init(LevelMeta meta, int earnedStars, bool isUnlocked, Action<int> onSelected)
+        public void Init(ChapterLevelDisplayData meta, int earnedStars, int starCap, bool isUnlocked, Action<int> onSelected)
         {
             levelId = meta.levelId;
             this.onSelected = onSelected;
             levelNameText.text = meta.levelName;
-            starsImage.sprite = starSprites[earnedStars];
-            starsImage.gameObject.SetActive(isUnlocked);
+            starBoard.SetStarCap(starCap);
+            starBoard.DisplayImmediate(earnedStars);
+            starBoard.gameObject.SetActive(isUnlocked);
             button.interactable = isUnlocked;
             button.onClick.RemoveAllListeners();
             if (isUnlocked)

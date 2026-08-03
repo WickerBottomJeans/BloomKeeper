@@ -79,6 +79,8 @@ Goal: prevent the first thirty seconds from looking like an unfinished engineeri
 - [ ] Give every showcased skill activation a coordinated presentation pass with intentional timing, distinctive VFX, and matching SFX; treat this as one presentation overhaul rather than attaching isolated sounds.
 - [x] Complete the Striped skill presentation pass with coordinated rainbow VFX and matching one-shot SFX.
 - [ ] Add clear visual warnings when a move or timer constrainer is approaching failure.
+- [ ] Investigate and fix the Curtain rect and text mismatch when the display aspect ratio changes toward a square.
+- [ ] Investigate and fix `UILevel` disappearing when the display aspect ratio changes toward a square.
 - [ ] Fix only highly visible animation, layering, text, or transition defects encountered during the showcase.
 
 Exit condition: a reviewer can play the showcase without guidance and the recording does not look or sound obviously unfinished.

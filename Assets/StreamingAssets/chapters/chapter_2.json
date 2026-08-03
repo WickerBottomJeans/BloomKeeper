@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "chapterId": 2,
+  "chapterName": "MaxBlacksGarden",
+  "downloadLabel": "chapter_2",
+  "topperPrefabAddress": "chapter/2/ui/topper",
+  "bottomNavigationPrefabAddress": "chapter/2/ui/bottom-navigation",
+  "levelButtonPrefabAddress": "chapter/2/ui/level-button",
+  "levels": [
+    {
+      "levelId": 5,
+      "levelName": "5",
+      "pixelX": 3.91878557,
+      "pixelY": 670.956055
+    },
+    {
+      "levelId": 6,
+      "levelName": "6",
+      "pixelX": 3.91878557,
+      "pixelY": 1830.90613
+    },
+    {
+      "levelId": 7,
+      "levelName": "7",
+      "pixelX": 6.53136539,
+      "pixelY": 3382.7312
+    }
+  ],
+  "backgroundChunks": [
+    {
+      "address": "chapter/2/background/MaxBlack_1",
+      "previewAddress": "chapter/2/background-preview/MaxBlack_LowResolution_1",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/2/background/MaxBlack_2",
+      "previewAddress": "chapter/2/background-preview/MaxBlack_LowResolution_2",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/2/background/MaxBlack_3",
+      "previewAddress": "chapter/2/background-preview/MaxBlack_LowResolution_3",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/2/background/MaxBlack_4",
+      "previewAddress": "chapter/2/background-preview/MaxBlack_LowResolution_4",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/2/background/MaxBlack_5",
+      "previewAddress": "chapter/2/background-preview/MaxBlack_LowResolution_5",
+      "width": 1254,
+      "height": 281
+    }
+  ]
+}

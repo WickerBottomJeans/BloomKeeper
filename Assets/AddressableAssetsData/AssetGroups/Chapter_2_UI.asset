@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Chapter_2_UI
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Chapter_2_UI
+  m_GUID: 022db95130670ef49aa8a5ebb663cc1d
+  m_SerializeEntries:
+  - m_GUID: 1e267b344577ca24cbb9a63d004e2000
+    m_Address: chapter/2/ui/topper
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_2
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b4c5ffedde1a3034393ea7a7ddf643a8
+    m_Address: chapter/2/ui/bottom-navigation
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_2
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd07ba1f09edac44ba0103976a445bc8
+    m_Address: chapter/2/ui/level-button
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_2
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 14670934b649da043b447627c769272f, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 815c247e0c8e3a149bee48d37b217660, type: 2}
+    - {fileID: 11400000, guid: df5de5b3e48a73a488984aaebf1e1c52, type: 2}

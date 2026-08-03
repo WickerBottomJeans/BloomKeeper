@@ -12,7 +12,7 @@ namespace DefaultNamespace.UI
     /// </summary>
     public class LevelMapChunkTextureCache
     {
-        private readonly IReadOnlyList<AssetMetadata> assets;
+        private readonly IReadOnlyList<ChapterBackgroundChunkData> assets;
         private readonly Dictionary<int, AsyncOperationHandle<Texture2D>> chunkHandles = new Dictionary<int, AsyncOperationHandle<Texture2D>>();
         private readonly Dictionary<RawImage, int> visibleChunkIndexesByImage = new Dictionary<RawImage, int>();
         
@@ -23,7 +23,7 @@ namespace DefaultNamespace.UI
         private readonly HashSet<int> pendingReleaseChunkIndexes = new HashSet<int>();
         private bool isCapturingInitialChunks;
 
-        public LevelMapChunkTextureCache(IReadOnlyList<AssetMetadata> assets)
+        public LevelMapChunkTextureCache(IReadOnlyList<ChapterBackgroundChunkData> assets)
         {
             this.assets = assets;
         }
@@ -42,6 +42,8 @@ namespace DefaultNamespace.UI
 
         public void ShowChunk(RawImage image, int index)
         {
+            image.texture = null;
+            image.enabled = false;
             visibleChunkIndexesByImage[image] = index;
 
             if (isCapturingInitialChunks)
@@ -66,6 +68,7 @@ namespace DefaultNamespace.UI
         {
             int index = visibleChunkIndexesByImage[image];
             visibleChunkIndexesByImage.Remove(image);
+            image.enabled = false;
             image.texture = null;
             TryReleaseUnusedChunk(index);
         }
@@ -107,6 +110,7 @@ namespace DefaultNamespace.UI
                 return;
 
             image.texture = completedHandle.Result;
+            image.enabled = true;
         }
 
         private void TryReleaseUnusedChunk(int index)

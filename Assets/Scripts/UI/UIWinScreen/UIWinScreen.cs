@@ -50,7 +50,7 @@ namespace UI
 
         public void Display(int stars, int starCap, bool showNext)
         {
-            starBoard.Init(starCap);
+            starBoard.SetStarCap(starCap);
             pendingStarCount = stars;
             nextButton.gameObject.SetActive(showNext);
         }
@@ -69,7 +69,7 @@ namespace UI
                 return;
             }
 
-            starBoard.DisplayStars(pendingStarCount, starRevealDuration);
+            starBoard.DisplayAnimated(pendingStarCount, starRevealDuration);
             await PlayEntranceVfx(cancellationToken);
         }
 

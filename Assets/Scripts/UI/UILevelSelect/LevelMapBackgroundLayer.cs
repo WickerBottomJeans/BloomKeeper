@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
@@ -13,32 +16,50 @@ namespace DefaultNamespace.UI
         [SerializeField] private RawImage chunkPrefab;
         [SerializeField] private int defaultPoolCapacity = 3;
         [SerializeField] private int maxPoolCapacity = 5;
+        [SerializeField] private int bufferViewport = 2;
         private List<float> chunkHalfHeights = new List<float>();
         private VerticalScrollPool<RawImage> chunkPool;
         private List<Vector2> chunkPositions = new List<Vector2>();
+        private readonly List<AsyncOperationHandle<Texture2D>> previewHandles = new List<AsyncOperationHandle<Texture2D>>();
+        private readonly List<RawImage> previewImages = new List<RawImage>();
         private LevelMapChunkTextureCache _chunkTextureCache;
-        private AssetManifest manifest;
-    
-        public void Init()
+        private IReadOnlyList<ChapterBackgroundChunkData> chunks;
+     
+        public async UniTask ShowChapterAsync(IReadOnlyList<ChapterBackgroundChunkData> chunks)
         {
-            manifest = AssetManifestLoader.LoadChunkManifest();
-            _chunkTextureCache = new LevelMapChunkTextureCache(manifest.assets);
+            if (chunks == null) throw new ArgumentNullException(nameof(chunks));
+            if (chunks.Count == 0) throw new ArgumentException("A chapter must contain at least one background chunk.", nameof(chunks));
+
+            DisposeChapter();
+            this.chunks = chunks;
+            _chunkTextureCache = new LevelMapChunkTextureCache(chunks);
             var contentHeight = CalculateChunkPositions();
             content.sizeDelta = new Vector2(0, contentHeight);
+            scrollRect.verticalNormalizedPosition = 0f;
 
-            _chunkTextureCache.BeginInitialCapture();
             try
             {
-                chunkPool = new VerticalScrollPool<RawImage>(content, viewport, scrollRect, chunkPrefab, manifest.assets.Count, i => chunkPositions[i], i => chunkHalfHeights[i], image => image.transform.SetAsFirstSibling(), (image, i) => ShowChunk(image, i), image => HideChunk(image), defaultPoolCapacity, maxPoolCapacity);
+                await LoadPreviewsAsync();
+                _chunkTextureCache.BeginInitialCapture();
+                try
+                {
+                    chunkPool = new VerticalScrollPool<RawImage>(content, viewport, scrollRect, chunkPrefab, chunks.Count, i => chunkPositions[i], i => chunkHalfHeights[i], image => image.transform.SetSiblingIndex(previewImages.Count), (image, i) => ShowChunk(image, i), image => HideChunk(image), defaultPoolCapacity, maxPoolCapacity, bufferViewport);
+                }
+                finally
+                {
+                    _chunkTextureCache.EndInitialCapture();
+                }
             }
-            finally
+            catch
             {
-                _chunkTextureCache.EndInitialCapture();
+                DisposeChapter();
+                throw;
             }
         }
 
         public UniTask WaitForInitialChunksLoaded()
         {
+            if (_chunkTextureCache == null) throw new InvalidOperationException("No chapter background has been shown.");
             return _chunkTextureCache.WaitForInitialChunksLoaded();
         }
 
@@ -49,9 +70,9 @@ namespace DefaultNamespace.UI
 
             float currentY = 0f;
 
-            for (int i = 0; i < manifest.assets.Count; i++)
+            for (int i = 0; i < chunks.Count; i++)
             {
-                AssetMetadata meta = manifest.assets[i];
+                ChapterBackgroundChunkData meta = chunks[i];
                 float chunkHeight = content.rect.width * (meta.height / (float)meta.width);
                 float halfHeight = chunkHeight / 2f;
 
@@ -62,6 +83,26 @@ namespace DefaultNamespace.UI
             }
 
             return currentY;
+        }
+
+        private async UniTask LoadPreviewsAsync()
+        {
+            foreach (ChapterBackgroundChunkData chunk in chunks)
+                previewHandles.Add(Addressables.LoadAssetAsync<Texture2D>(chunk.previewAddress));
+
+            foreach (AsyncOperationHandle<Texture2D> handle in previewHandles)
+                await handle.ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
+
+            for (int index = 0; index < chunks.Count; index++)
+            {
+                RawImage previewImage = Instantiate(chunkPrefab, content);
+                previewImage.rectTransform.localPosition = chunkPositions[index];
+                previewImage.rectTransform.sizeDelta = new Vector2(content.rect.width, chunkHalfHeights[index] * 2f);
+                previewImage.texture = previewHandles[index].Result;
+                previewImage.transform.SetAsFirstSibling();
+                previewImage.gameObject.SetActive(true);
+                previewImages.Add(previewImage);
+            }
         }
 
         private void ShowChunk(RawImage image, int index)
@@ -78,8 +119,34 @@ namespace DefaultNamespace.UI
 
         private void OnDestroy()
         {
-            chunkPool.Dispose();
-            _chunkTextureCache.Dispose();
+            DisposeChapter();
+        }
+
+        private void DisposeChapter()
+        {
+            if (chunkPool != null)
+            {
+                chunkPool.Dispose();
+                chunkPool = null;
+            }
+
+            if (_chunkTextureCache != null)
+            {
+                _chunkTextureCache.Dispose();
+                _chunkTextureCache = null;
+            }
+
+            foreach (RawImage previewImage in previewImages)
+                if (previewImage != null)
+                    Destroy(previewImage.gameObject);
+            previewImages.Clear();
+
+            foreach (AsyncOperationHandle<Texture2D> handle in previewHandles)
+                if (handle.IsValid())
+                    Addressables.Release(handle);
+            previewHandles.Clear();
+
+            chunks = null;
         }
     }
 }

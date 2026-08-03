@@ -14,42 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: LevelPath
   m_GUID: 55775723b379fd942aaef0294446caa9
-  m_SerializeEntries:
-  - m_GUID: 2014780efa91944498dbc52248c34b50
-    m_Address: LevelPath_5
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 63ec3ca7b8b90d84f9bdcf81e57799f2
-    m_Address: LevelPath_7
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 92a510b6f3fa17e46af688ec907c76f3
-    m_Address: LevelPath_4
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 95fb84d8059760247b99c001b7e43738
-    m_Address: LevelPath_1
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d969f6e2e50a6064ab62c038d0125e80
-    m_Address: LevelPath_2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e9e6a52d0044c9246b9e8e82532d6023
-    m_Address: LevelPath_3
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: eab729f1e8555114b833a12ec2f46935
-    m_Address: LevelPath_6
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 14670934b649da043b447627c769272f, type: 2}
   m_SchemaSet:

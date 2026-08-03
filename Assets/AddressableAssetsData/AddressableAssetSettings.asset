@@ -15,10 +15,10 @@ MonoBehaviour:
   m_DefaultGroup: 577a4e9dcbc7251429f0bf481d12a64b
   m_currentHash:
     serializedVersion: 2
-    Hash: caa22f6ecc07db4bcaa9771f10d78eee
+    Hash: c2779495365709b7b64776bab9e8588d
   m_DisableWriteTypeTree: 0
   m_OptimizeCatalogSize: 0
-  m_BuildRemoteCatalog: 0
+  m_BuildRemoteCatalog: 1
   m_CatalogRequestsTimeout: 0
   m_DisableCatalogUpdateOnStart: 0
   m_InternalIdNamingMode: 0
@@ -54,18 +54,24 @@ MonoBehaviour:
   m_CheckForContentUpdateRestrictionsOption: 0
   m_MonoScriptBundleCustomNaming: 
   m_RemoteCatalogBuildPath:
-    m_Id: 
+    m_Id: 7541f7401767ad145ab6efa3dbc66b38
   m_RemoteCatalogLoadPath:
-    m_Id: 
-  m_ContentStateBuildPathProfileVariableName: 
+    m_Id: 3d10ffd73b0aa1a488b1aad01da48bf6
+  m_ContentStateBuildPathProfileVariableName: <default settings path>
   m_CustomContentStateBuildPath: 
   m_ContentStateBuildPath: 
   m_BuildAddressablesWithPlayerBuild: 0
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
+  - {fileID: 11400000, guid: 624b909253d5fc944b6f439895933da7, type: 2}
+  - {fileID: 11400000, guid: 2d61a969d15513846be558fc3e78e41a, type: 2}
+  - {fileID: 11400000, guid: 56f7313312587b548b55bd2a25a3e22b, type: 2}
+  - {fileID: 11400000, guid: 58e278e773548d54da5250682f76bba1, type: 2}
   - {fileID: 11400000, guid: 2a15b3e3ca7edb2498f5fcffaba7f1fd, type: 2}
   - {fileID: 11400000, guid: b96dc25a4ddea144090fb1eae1fb84fc, type: 2}
+  - {fileID: 11400000, guid: 4174476f36c4de744b0fbf50be76fb4f, type: 2}
   - {fileID: 11400000, guid: 3ad70bbafd5733b478574a72cc3ae47f, type: 2}
+  - {fileID: 11400000, guid: 0cbe12af551a3a044b75983fbd8c5937, type: 2}
   m_BuildSettings:
     m_LogResourceManagerExceptions: 1
     m_ContentDirectoryBuildPath: Temp/com.unity.addressables/ContentDirectories
@@ -81,9 +87,9 @@ MonoBehaviour:
       - m_Id: 2ee9e9e0dc8c953409d73d58be99cf34
         m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
       - m_Id: 3d10ffd73b0aa1a488b1aad01da48bf6
-        m_Value: <undefined>
+        m_Value: 'https://pub-600516f978894a4ba6eeac168a341d46.r2.dev/addressables/[BuildTarget]'
       - m_Id: 7541f7401767ad145ab6efa3dbc66b38
-        m_Value: 'ServerData/[BuildTarget]'
+        m_Value: 'ServerData/[BuildTarget] '
       - m_Id: c88f3bc3030fe9145a2a8586b3cab230
         m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
     m_ProfileEntryNames:
@@ -106,6 +112,8 @@ MonoBehaviour:
   m_LabelTable:
     m_LabelNames:
     - default
+    - Chapter_1
+    - chapter_2
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: bbea8a563fdfb3c4cafc44a204a2653e, type: 2}

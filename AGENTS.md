@@ -5,6 +5,7 @@
 - The primary task is discussing and agreeing on architecture with the user.
 - When the user asks to edit only Markdown files, apply the requested Markdown changes directly without asking for file-scope confirmation. Continue to require explicit scope confirmation before editing code. All other project restrictions remain in effect.
 - When the user asks to create or edit code under `Assets/Editor`, apply the requested Editor-script changes directly without architecture or file-scope approval. All other project restrictions remain in effect, including the prohibition against editing Unity serialized assets.
+- When the user explicitly requests a comment-only code edit, including adding, changing, or removing a TODO, apply it directly without architecture or file-scope approval.
 - When the user explicitly says `skip scope`, treat it as approval to implement the requested change immediately without presenting an implementation scope or asking for confirmation. All other project restrictions remain in effect.
 - Do not edit production code, tests, prefabs, scenes, packages, configuration, or other project files until the user explicitly accepts the proposed architecture.
 - Before implementation, explain the proposed responsibilities, ownership, boundaries, and data flow, including meaningful alternatives and tradeoffs.
@@ -21,6 +22,7 @@
 - If the architecture changes during implementation, stop editing and return to architecture discussion for renewed approval.
 - Do not edit Unity serialized assets or editor-authored setup files, including `.unity`, `.prefab`, `.asset`, `.mat`, `.controller`, `.anim`, `.meta`, project settings, package files, or generated Unity files.
 - Implementation work is code-only unless the user explicitly changes this rule. When Unity setup is required, explain the exact manual Editor steps instead of modifying serialized Unity files.
+- Never preserve a misleading name, weak responsibility boundary, or inferior architecture merely to avoid breaking serialized Unity references. Make the clean code change, allow the references to break, and give the user exact manual Editor steps to reassign the affected scripts, prefabs, or fields.
 
 ## User Review
 
@@ -29,6 +31,8 @@
 - When the user asks for big steps, concepts, architecture pictures, strategy, or high-level planning, answer at that level only. Do not provide file lists, exact code, class names, method names, implementation steps, or other low-level details unless the user explicitly asks for implementation detail.
 - Preserve the user's sense of ownership and learning. Do not hand over large prebuilt implementations or hide design choices inside generated code; explain the next concept, let the user make the design decision, challenge tradeoffs, and implement only the smallest approved step.
 - Whenever describing current code behavior, always link every behavioral claim to the exact code that implements it. Do not describe behavior without a direct file-and-line link to its implementation.
+- Explain code mechanically and concretely. Name the exact fields read or written, the exact object or component affected, who calls each relevant method and when, whether the operation mutates state immediately or only stores/schedules work, and the exact math or transformation performed. Do not substitute vague intention-level phrases such as "handles layout" for these details. Assume the user already has two years of Unity experience and omit basic Unity explanations unless requested.
+- Always distinguish compiler-enforced or framework-enforced behavior from documentation, naming, and behavioral convention. For callbacks, abstract methods, interfaces, and overrides, state exactly what the signature enforces (arguments, return value, required implementation), what the caller actually does, and what side effects are merely expected from the implementation. Never describe an expected convention as though the type system or framework guarantees that fields or objects are mutated.
 - When providing code snippets, always state the exact owning class and function or method they belong to; do not give loose snippets detached from implementation context.
 - Do not hide implementation decisions behind broad summaries such as "wiring," "supporting changes," or "affected files."
 - After editing code, check whether any touched class, method, function, field, file, or serialized API name no longer matches its current responsibility or behavior. If a name has become stale or misleading, explicitly call it out and propose the rename before continuing.
@@ -37,6 +41,10 @@
 ## Production-Grade Quality
 
 - Do not implement hacks, throwaway code, temporary workarounds, quick fixes, cheap fixes, or knowingly brittle solutions.
+- UI view components must keep buttons behavior-free: they translate Unity `Button` clicks into semantic C# events, and the caller subscribes to those events and owns the resulting action or flow decision.
+- Do not expose UI `Button` components so callers can attach behavior directly. Do not use delegate properties or callback parameters instead of events unless a concrete ownership, lifetime, return-value, or composition requirement makes a delegate materially better; explain that advantage before proposing it.
+- A parent or composite UI component owns the creation, parenting, switching, visibility, and cleanup of UI children displayed inside its hierarchy. Application flows and non-UI callers must never instantiate a UI view and pass its `GameObject`, `Component`, `Transform`, or `RectTransform` into another UI component for display.
+- Callers interact with composite UI through semantic methods using data, identifiers, or asset addresses, and subscribe to semantic events. Do not expose child slots or accept externally created UI instances merely to let callers compose the UI hierarchy.
 - Do not hard-code feature-specific behavior inside generic managers, orchestrators, state machines, or shared systems.
 - Do not introduce magic values or presentation tuning directly in orchestration or gameplay logic; place approved tuning in the appropriate configuration or owning view system.
 - For responsive UI, do not hard-code screen/layout-dependent numbers such as pixel offsets, margins, breakpoints, widths, heights, or scale constants in code.
@@ -63,6 +71,7 @@
 - Declare every project enum in `Assets/Scripts/Shared/Enum.cs`. Do not create standalone enum files or declare enums inside other project types.
 - Do not explicitly use the `internal` keyword in project-owned code until the project defines its own assembly boundaries with `.asmdef` files. Leave third-party and vendor code unchanged.
 - `GameFlowController` is always an application-level orchestrator. It may order flow transitions and make semantic calls to the systems that own work, but it must not own feature configuration, presentation assets or tuning, domain logic, or subsystem implementation. Put those responsibilities in their dedicated owning flow, service, director, or presentation component.
+- Follow the established `UIManager` panel convention: serialize a prefab field named `<panel>Prefab`, keep the spawned runtime component in a separate non-serialized field named `<panel>Instance`, instantiate it once under `uiRoot` (or `overlayRoot` for overlays) when first shown, and perform event binding, display, hiding, and cleanup against the runtime instance only. Never treat a serialized prefab asset reference as the live UI instance or parent runtime objects beneath it.
 
 ## Verification
 

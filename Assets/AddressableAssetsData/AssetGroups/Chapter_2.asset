@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Chapter_2
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Chapter_2
+  m_GUID: bf72cfac2eaa5104889f0eb5f9cdf2b7
+  m_SerializeEntries:
+  - m_GUID: 3a293ca9766f00744b1e0dd3f1ba5212
+    m_Address: chapter/2/background/MaxBlack_5
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_2
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3bd3850292bb1294fa074ad46a5bdd3e
+    m_Address: chapter/2/background/MaxBlack_2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_2
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3eceb7c427c85d348a54e4a5e908e6ab
+    m_Address: chapter/2/background/MaxBlack_4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_2
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 79047d85bd033e0488d6fb91dea292f0
+    m_Address: chapter/2/background/MaxBlack_3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_2
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ba0269cbda9eabf4ea0e85e1ff7bd007
+    m_Address: chapter/2/background/MaxBlack_1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_2
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 14670934b649da043b447627c769272f, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 47c9f39d323a6ea4cb8acd48590582a7, type: 2}
+    - {fileID: 11400000, guid: 35bcb470ad18bc348b71827997a5d6ff, type: 2}

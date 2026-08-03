@@ -107,12 +107,25 @@
         Retry = 6
     }
 
-    public enum UIButtonVariant
+    public enum DialogButtonVariant
     {
         Green = 1,
         Blue = 2,
         Orange = 3,
         Purple = 4
+    }
+
+    public enum UIButtonPressFeedbackType
+    {
+        Scale = 1,
+        Jelly = 2
+    }
+
+    public enum ArcLayoutAlignment
+    {
+        Start = 1,
+        Center = 2,
+        End = 3
     }
 
     public enum AudioBus

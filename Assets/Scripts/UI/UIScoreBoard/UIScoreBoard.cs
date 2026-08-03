@@ -12,14 +12,14 @@ public class UIScoreBoard : MonoBehaviour
     public void Init(int targetScore, IReadOnlyList<int> milestoneScores, int starCap)
     {
         progressionBar?.Init(targetScore, milestoneScores);
-        starBoard?.Init(starCap);
+        starBoard?.SetStarCap(starCap);
         DisplayScore(0, 0);
     }
 
     public void DisplayScore(int score, int stars)
     {
         progressionBar?.DisplayValue(score);
-        starBoard?.DisplayStars(stars);
+        starBoard?.DisplayAnimated(stars);
         scoreLabel.text = score.ToString();
     }
 }

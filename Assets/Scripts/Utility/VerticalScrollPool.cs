@@ -119,6 +119,13 @@ namespace DefaultNamespace.UI
         public void Dispose()
         {
             scrollRect.onValueChanged.RemoveListener(OnScroll);
+            foreach (T item in visibleItems.Values)
+            {
+                onHide(item);
+                pool.Release(item);
+            }
+            visibleItems.Clear();
+            pool.Clear();
         }
     }
 }

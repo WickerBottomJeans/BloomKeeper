@@ -115,7 +115,7 @@ namespace DefaultNamespace
             constrainerManager.OnProgressUpdated += HandleConstrainerProgressUpdated;
             Tile[,] grid = BoardInitializer.Initialize(currentLevelData);
             
-            DisplayLevel(grid, constrainerManager.GetViewData(), currentLevelData.starScoreThresholds);
+            DisplayLevel(grid, constrainerManager.GetViewData(), currentLevelData);
             isLevelSessionPrepared = true;
         }
 
@@ -159,13 +159,12 @@ namespace DefaultNamespace
             constrainerManager.StartLevel();
         }
 
-        private void DisplayLevel(Tile[,] grid, List<ConstrainerViewData> constrainerViewData, IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
+        private void DisplayLevel(Tile[,] grid, List<ConstrainerViewData> constrainerViewData, LevelData levelData)
         {
             ShowWorldLevelBackground();
-            int scoreTarget = GetScoreTarget(starScoreThresholds);
-            List<int> scoreMilestones = GetScoreMilestones(starScoreThresholds);
-            int starCap = GetStarCap(starScoreThresholds);
-            UIManager.Instance.ShowLevelUI(objectiveManager.GetViewData(), constrainerViewData, scoreTarget, scoreMilestones, starCap);
+            int scoreTarget = GetScoreTarget(levelData.starScoreThresholds);
+            List<int> scoreMilestones = GetScoreMilestones(levelData.starScoreThresholds);
+            UIManager.Instance.ShowLevelUI(objectiveManager.GetViewData(), constrainerViewData, scoreTarget, scoreMilestones, levelData.StarCap);
             SpawnGameBoard(grid, UIManager.Instance.GetLevelBoardPlayAreaScreenRect());
         }
 
@@ -230,7 +229,7 @@ namespace DefaultNamespace
                 throw new InvalidOperationException("Cannot show lose screen without constrainer failure data.");
             //TODO: maybe add a way to make multireason failure sound more fun
             string message = failureData[0].failureText;
-            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentAttemptId, false, scoreManager.CurrentScore, scoreManager.CalculateStars(), GetStarCap(currentLevelData.starScoreThresholds), message));
+            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentAttemptId, false, scoreManager.CurrentScore, scoreManager.CalculateStars(), currentLevelData.StarCap, message));
         }
 
         private void HandleGameplayEvent(IGameplayEvent e)
@@ -277,18 +276,6 @@ namespace DefaultNamespace
             return milestones;
         }
 
-        private static int GetStarCap(IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
-        {
-            int starCap = 0;
-            foreach (StarScoreThresholdJson threshold in starScoreThresholds)
-            {
-                if (threshold.starCount > starCap)
-                    starCap = threshold.starCount;
-            }
-
-            return starCap;
-        }
-
         private void HandleBoardSettled()
         {
             if (isLevelEnded) return;
@@ -315,7 +302,7 @@ namespace DefaultNamespace
             isLevelEnded = true;
             constrainerManager?.StopLevel();
             int earnedStars = scoreManager.CalculateStars();
-            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentAttemptId, true, scoreManager.CurrentScore, earnedStars, GetStarCap(currentLevelData.starScoreThresholds), string.Empty));
+            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentAttemptId, true, scoreManager.CurrentScore, earnedStars, currentLevelData.StarCap, string.Empty));
         }
     }
 }

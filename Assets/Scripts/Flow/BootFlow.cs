@@ -7,11 +7,20 @@ namespace DefaultNamespace
 {
     public class BootFlow
     {
+        private readonly AddressableContentService addressableContentService;
+
         public event Action BootCompleted;
+
+        public BootFlow(AddressableContentService addressableContentService)
+        {
+            this.addressableContentService = addressableContentService ?? throw new ArgumentNullException(nameof(addressableContentService));
+        }
 
         public async UniTask Enter()
         {
             ConfigureFrameRate();
+            await addressableContentService.InitializeAsync();
+            // TODO: Move the shared sprite atlases to remote Addressables.
             await SpriteLoader.Instance.LoadAll();
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR

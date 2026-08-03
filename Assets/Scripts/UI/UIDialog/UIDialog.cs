@@ -9,10 +9,10 @@ namespace DefaultNamespace.UI
     {
         [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private TextMeshProUGUI messageText;
-        [SerializeField] private UIButtonView buttonPrefab;
+        [SerializeField] private DialogButtonView buttonPrefab;
         [SerializeField] private RectTransform buttonRoot;
 
-        private readonly List<UIButtonView> activeButtons = new();
+        private readonly List<DialogButtonView> activeButtons = new();
         
         public event Action<int> ButtonClicked;
 
@@ -66,7 +66,7 @@ namespace DefaultNamespace.UI
 
         private void SpawnButton(DialogOptionButton optionButton)
         {
-            UIButtonView button = Instantiate(buttonPrefab, buttonRoot);
+            DialogButtonView button = Instantiate(buttonPrefab, buttonRoot);
             int buttonId = optionButton.Id;
             button.Configure(optionButton.Label, optionButton.Variant);
             button.Clicked += () => HandleButtonClicked(buttonId);

@@ -9,27 +9,31 @@ namespace DefaultNamespace.UI
         [SerializeField] private LevelMapBackgroundLayer backgroundLayer;
         [SerializeField] private LevelMapButtonLayer mapButtonLayer;
 
-        private bool isMapButtonLayerInitialized;
+        private int? displayedChapterId;
 
         public event Action<int> OnLevelSelected;
 
         private void Awake()
         {
-            backgroundLayer.Init();
             mapButtonLayer.OnLevelSelected += HandleLevelSelected;
         }
 
-        public void Show(PlayerProgressionData progression)
+        public async UniTask Show(ChapterContent chapterContent, PlayerProgressionData progression)
         {
+            if (chapterContent == null) throw new ArgumentNullException(nameof(chapterContent));
+            if (progression == null) throw new ArgumentNullException(nameof(progression));
+            ChapterDefinition chapter = chapterContent.Definition;
+
             gameObject.SetActive(true);
-            if (!isMapButtonLayerInitialized)
+            if (displayedChapterId == chapter.chapterId)
             {
-                mapButtonLayer.Init(progression);
-                isMapButtonLayerInitialized = true;
+                mapButtonLayer.Refresh(progression);
                 return;
             }
 
-            mapButtonLayer.Refresh(progression);
+            await backgroundLayer.ShowChapterAsync(chapter.backgroundChunks);
+            await mapButtonLayer.ShowChapterAsync(chapterContent, chapter.backgroundChunks[0].width, progression);
+            displayedChapterId = chapter.chapterId;
         }
 
         public UniTask WaitForInitialBackgroundLoaded()

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f025d3aef1cf274e8c1db717d290da4, type: 3}
+  m_Name: DialogButtonStyleConfig
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.DialogButtonStyleConfig
+  styles:
+  - variant: 1
+    sprite: {fileID: 8894201953851282084, guid: a52b38464ede3a24dbfddb09c2646258, type: 3}
+  - variant: 2
+    sprite: {fileID: -5402412272178277761, guid: a52b38464ede3a24dbfddb09c2646258, type: 3}
+  - variant: 3
+    sprite: {fileID: 2013261503205373015, guid: a52b38464ede3a24dbfddb09c2646258, type: 3}
+  - variant: 4
+    sprite: {fileID: 7664807735657788756, guid: a52b38464ede3a24dbfddb09c2646258, type: 3}

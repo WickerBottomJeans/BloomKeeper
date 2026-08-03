@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,10 +11,15 @@ namespace DefaultNamespace.UI
 
         private readonly List<StarToggle> stars = new();
         private int currentStars = -1;
+        private int starCap = -1;
 
-        public void Init(int starCap)
+        public void SetStarCap(int starCap)
         {
+            if (starCap < 0) throw new ArgumentOutOfRangeException(nameof(starCap), starCap, "Star cap cannot be negative.");
+            if (this.starCap == starCap) return;
+
             ClearStars();
+            this.starCap = starCap;
             currentStars = -1;
             starTemplate.gameObject.SetActive(false);
 
@@ -27,8 +33,16 @@ namespace DefaultNamespace.UI
             }
         }
 
-        public void DisplayStars(int currentStars, float duration = 0f)
+        public void DisplayImmediate(int currentStars)
         {
+            ValidateStarCount(currentStars);
+            this.currentStars = currentStars;
+            for (int i = 0; i < stars.Count; i++) stars[i].SetImmediate(i < currentStars);
+        }
+
+        public void DisplayAnimated(int currentStars, float duration = 0f)
+        {
+            ValidateStarCount(currentStars);
             if (this.currentStars == currentStars) return;
 
             int previousStars = this.currentStars;
@@ -46,6 +60,12 @@ namespace DefaultNamespace.UI
                 stars[i].SetOn(isOn, delay);
                 changedStarIndex++;
             }
+        }
+
+        private void ValidateStarCount(int currentStars)
+        {
+            if (starCap < 0) throw new InvalidOperationException("Set the star cap before displaying stars.");
+            if (currentStars < 0 || currentStars > starCap) throw new ArgumentOutOfRangeException(nameof(currentStars), currentStars, $"Displayed stars must be between 0 and the configured cap of {starCap}.");
         }
 
         private int CountChangedStars(int previousStars, int currentStars)

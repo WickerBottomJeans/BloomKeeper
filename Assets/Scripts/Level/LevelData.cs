@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace DefaultNamespace
 {
@@ -12,5 +14,20 @@ namespace DefaultNamespace
         public List<StarScoreThresholdJson> starScoreThresholds;
         public List<ObjectiveJson> objectives;
         public List<ConstrainerJson> constrainers = new();
+
+        [JsonIgnore]
+        public int StarCap
+        {
+            get
+            {
+                if (starScoreThresholds == null)
+                    throw new InvalidOperationException($"Level {levelId} has no star score thresholds.");
+
+                int starCap = 0;
+                foreach (StarScoreThresholdJson threshold in starScoreThresholds)
+                    if (threshold.starCount > starCap) starCap = threshold.starCount;
+                return starCap;
+            }
+        }
     }
 }

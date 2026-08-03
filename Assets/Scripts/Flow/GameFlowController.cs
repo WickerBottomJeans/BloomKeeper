@@ -37,11 +37,12 @@ namespace DefaultNamespace
             var guestCustomIdStore = new GuestCustomIdStore();
             var guestLoginService = new PlayFabGuestLoginService(guestCustomIdStore);
             var progressionService = new PlayFabProgressionService();
-            bootFlow = new BootFlow();
+            var addressableContentService = new AddressableContentService();
+            bootFlow = new BootFlow(addressableContentService);
             authFlow = new AuthFlow(guestLoginService);
             accountLoadFlow = new AccountLoadFlow(progressionService);
             levelCompletionFlow = new LevelCompletionFlow(progressionService);
-            homeFlow = new HomeFlow();
+            homeFlow = new HomeFlow(new LocalChapterContentProvider());
             levelSessionFlow = new LevelSessionFlow();
             settingsFlow = new SettingsFlow();
             resultFlow = new ResultFlow(new LevelCatalog(LevelLoader.LoadLevelMetas()));
@@ -198,7 +199,7 @@ namespace DefaultNamespace
 
         private async UniTask RunQuitLevelDialogAsync()
         {
-            var quitButton = new DialogOptionButton(DialogButtonType.Yes, "Quit", UIButtonVariant.Orange);
+            var quitButton = new DialogOptionButton(DialogButtonType.Yes, "Quit", DialogButtonVariant.Orange);
             DialogOptionButton[] options = { DialogOptionButton.Cancel, quitButton };
             bool quitConfirmed = false;
             await DialogManager.Instance.RunDialogWorkflow("Quit level?", "Your progress in this level will be lost.", async session =>

@@ -880,7 +880,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.UIDialog
   titleText: {fileID: 3770621351699343566}
   messageText: {fileID: 5233293045291567664}
-  buttonPrefab: {fileID: 1520649286425652237}
+  buttonPrefab: {fileID: 5039056754900868663}
   buttonRoot: {fileID: 2409662766441639855}
 --- !u!1 &9007751003068366775
 GameObject:
@@ -1184,17 +1184,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4952211721808711183, guid: 7dfd66bb50fe03b47ae1a36d4e01e37c, type: 3}
   m_PrefabInstance: {fileID: 5632291301800053345}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1520649286425652237 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6571742933627348588, guid: 7dfd66bb50fe03b47ae1a36d4e01e37c, type: 3}
-  m_PrefabInstance: {fileID: 5632291301800053345}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3213489317780959850}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e871721edbb166459fdcfff43cd3035, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.UIButtonView
 --- !u!1 &3213489317780959850 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7111589098431199243, guid: 7dfd66bb50fe03b47ae1a36d4e01e37c, type: 3}
@@ -1220,3 +1209,14 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &5039056754900868663 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 848849857462834262, guid: 7dfd66bb50fe03b47ae1a36d4e01e37c, type: 3}
+  m_PrefabInstance: {fileID: 5632291301800053345}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3213489317780959850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9de8aaa8e37654d957119991efc3e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.DialogButtonView

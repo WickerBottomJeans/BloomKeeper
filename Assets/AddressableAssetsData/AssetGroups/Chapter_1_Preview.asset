@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Chapter_1_Preview
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Chapter_1_Preview
+  m_GUID: 2386f406e765c0b46a30a16c250b2ec0
+  m_SerializeEntries:
+  - m_GUID: 4793cc0e66760f740b6256d9b63d7b6d
+    m_Address: chapter/1/background-preview/DuongsGarden_LowResolution_1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Chapter_1
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 51e76cdc00cbb424e8b5f9d3e7128e79
+    m_Address: chapter/1/background-preview/DuongsGarden_LowResolution_2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Chapter_1
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 97267cfaa87814546adfe14f0bbf803e
+    m_Address: chapter/1/background-preview/DuongsGarden_LowResolution_3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Chapter_1
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aa8aedc3e10b3bb4f952655d654598bb
+    m_Address: chapter/1/background-preview/DuongsGarden_LowResolution_4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Chapter_1
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 14670934b649da043b447627c769272f, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: b60ff269740896d4d958686c4a87c635, type: 2}
+    - {fileID: 11400000, guid: 630d655b6e5cd5c4b8dcaaf0df99f888, type: 2}

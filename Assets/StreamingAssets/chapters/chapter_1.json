@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "chapterId": 1,
+  "chapterName": "DuongsGarden",
+  "downloadLabel": "Chapter_1",
+  "topperPrefabAddress": "chapter/1/ui/topper",
+  "bottomNavigationPrefabAddress": "chapter/1/ui/bottom-navigation",
+  "levelButtonPrefabAddress": "chapter/1/ui/level-button",
+  "levels": [
+    {
+      "levelId": 1,
+      "levelName": "1",
+      "pixelX": 127.25502,
+      "pixelY": 392.2982
+    },
+    {
+      "levelId": 2,
+      "levelName": "2",
+      "pixelX": 5.56510925,
+      "pixelY": 1178.089
+    },
+    {
+      "levelId": 3,
+      "levelName": "3",
+      "pixelX": 179.937836,
+      "pixelY": 1954.97522
+    },
+    {
+      "levelId": 4,
+      "levelName": "4",
+      "pixelX": 30.7934647,
+      "pixelY": 2701.81
+    }
+  ],
+  "backgroundChunks": [
+    {
+      "address": "chapter/1/background/DuongsGarden_1",
+      "previewAddress": "chapter/1/background-preview/DuongsGarden_LowResolution_1",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/1/background/DuongsGarden_2",
+      "previewAddress": "chapter/1/background-preview/DuongsGarden_LowResolution_2",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/1/background/DuongsGarden_3",
+      "previewAddress": "chapter/1/background-preview/DuongsGarden_LowResolution_3",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/1/background/DuongsGarden_4",
+      "previewAddress": "chapter/1/background-preview/DuongsGarden_LowResolution_4",
+      "width": 1254,
+      "height": 386
+    }
+  ]
+}

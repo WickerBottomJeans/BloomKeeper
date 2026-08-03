@@ -14,12 +14,18 @@ namespace DefaultNamespace
 
         public async UniTask LoadAll()
         {
+            List<string> pendingKeys = new();
+            List<UniTask<SpriteAtlas>> pendingLoads = new();
+
             foreach (string key in atlasKeys)
             {
                 if (atlases.ContainsKey(key)) continue;
-                SpriteAtlas atlas = await Addressables.LoadAssetAsync<SpriteAtlas>(key).ToUniTask();
-                atlases[key] = atlas;
+                pendingKeys.Add(key);
+                pendingLoads.Add(Addressables.LoadAssetAsync<SpriteAtlas>(key).ToUniTask());
             }
+
+            SpriteAtlas[] loadedAtlases = await UniTask.WhenAll(pendingLoads);
+            for (int index = 0; index < pendingKeys.Count; index++) atlases[pendingKeys[index]] = loadedAtlases[index];
         }
 
         public Sprite GetSprite(string spriteKey)
