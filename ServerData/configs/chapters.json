@@ -1,0 +1,22 @@
+{
+  "chapters": [
+    {
+      "chapterId": 1,
+      "displayName": "Duong's Garden",
+      "description": "Hey, welcome! Stick with me and I’ll show you the basics—planting, harvesting, and everything you need to get your hands dirty.",
+      "configPath": "chapters/chapter_1.json",
+      "chooserImageAddress": "chapter/1/ui/chooser-image",
+      "downloadLabel": "Chapter_1",
+      "unlockLevelId": 1
+    },
+    {
+      "chapterId": 2,
+      "displayName": "Max Black's Garden",
+      "description": "Welcome to my bug farm. The spiders work for free, the bees never shut up, and somehow you’re my new employee.",
+      "configPath": "chapters/chapter_2.json",
+      "chooserImageAddress": "chapter/2/ui/chooser-image",
+      "downloadLabel": "chapter_2",
+      "unlockLevelId": 5
+    }
+  ]
+}

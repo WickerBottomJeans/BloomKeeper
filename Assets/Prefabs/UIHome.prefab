@@ -188,3 +188,5 @@ MonoBehaviour:
   content: {fileID: 2198985372200575162}
   middleSlot: {fileID: 5503381985341757983}
   levelSelectPrefab: {fileID: 4418083477373149365, guid: aa48054d7c54a8c4788b890aa21117af, type: 3}
+  friendsPrefab: {fileID: 7307147422983359625, guid: 5554cc03170d1cc408b47b3a12158f5f, type: 3}
+  shopPrefab: {fileID: 4686386306441966847, guid: 0c069c377a9a50243bb92b1405b44ffb, type: 3}

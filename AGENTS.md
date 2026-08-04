@@ -4,7 +4,7 @@
 
 - The primary task is discussing and agreeing on architecture with the user.
 - When the user asks to edit only Markdown files, apply the requested Markdown changes directly without asking for file-scope confirmation. Continue to require explicit scope confirmation before editing code. All other project restrictions remain in effect.
-- When the user asks to create or edit code under `Assets/Editor`, apply the requested Editor-script changes directly without architecture or file-scope approval. All other project restrictions remain in effect, including the prohibition against editing Unity serialized assets.
+- When the user asks to create or edit code under `Assets/Editor`, apply the requested Editor-script changes directly without architecture or file-scope approval. All other project restrictions remain in effect.
 - When the user explicitly requests a comment-only code edit, including adding, changing, or removing a TODO, apply it directly without architecture or file-scope approval.
 - When the user explicitly says `skip scope`, treat it as approval to implement the requested change immediately without presenting an implementation scope or asking for confirmation. All other project restrictions remain in effect.
 - Do not edit production code, tests, prefabs, scenes, packages, configuration, or other project files until the user explicitly accepts the proposed architecture.
@@ -20,8 +20,8 @@
 - A request to explore, review, or discuss an idea is not approval to edit code.
 - Only begin editing after the user clearly approves the architecture and asks for implementation.
 - If the architecture changes during implementation, stop editing and return to architecture discussion for renewed approval.
-- Do not edit Unity serialized assets or editor-authored setup files, including `.unity`, `.prefab`, `.asset`, `.mat`, `.controller`, `.anim`, `.meta`, project settings, package files, or generated Unity files.
-- Implementation work is code-only unless the user explicitly changes this rule. When Unity setup is required, explain the exact manual Editor steps instead of modifying serialized Unity files.
+- Unity serialized assets, editor-authored setup files, project settings, package files, generated Unity files, and `.meta` files may be created, edited, moved, or deleted when they are inside the explicitly approved implementation scope.
+- Never assign or reassign Inspector fields for the user, whether through Unity automation or by directly editing serialized references. When Inspector assignment is required, give the user the exact manual field-assignment steps.
 - Never preserve a misleading name, weak responsibility boundary, or inferior architecture merely to avoid breaking serialized Unity references. Make the clean code change, allow the references to break, and give the user exact manual Editor steps to reassign the affected scripts, prefabs, or fields.
 
 ## User Review
@@ -54,6 +54,7 @@
 - Never soften an error or missing required data by silently providing a fallback, default, placeholder, or alternate path.
 - Error states must be loud and visible. If a fallback is being considered, stop and ask the user for explicit approval, making the fallback question highly visible.
 - Serialized fields and scene/prefab setup references are non-null by contract. Do not write runtime null checks, `?.` guards, fallback lookup, custom `Debug.LogError`, or recovery paths for missing serialized setup.
+- Component dependencies must be explicit serialized fields unless the exact component type is enforced on the same GameObject by `[RequireComponent(typeof(T))]`; in that case, assigning it with `GetComponent<T>()` is allowed. Never use `GetComponentInChildren`, `GetComponentInParent`, or an unenforced `GetComponent` lookup for required dependencies.
 - Use serialized fields directly. If setup is broken, let Unity/C# surface the failure naturally.
 - Null checks are allowed only for real nullable runtime state or data, such as optional method arguments, cached instances, active tweens, lookup results, or intentionally absent content.
 - Require clear ownership, maintainable boundaries, explicit data flow, and an appropriate extension path for foreseeable production use.

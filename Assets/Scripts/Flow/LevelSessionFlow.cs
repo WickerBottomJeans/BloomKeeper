@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
 
 namespace DefaultNamespace
@@ -11,9 +12,10 @@ namespace DefaultNamespace
 
         private bool isPaused;
 
-        public void PrepareLevel(int levelId)
+        public async UniTask PrepareLevel(int levelId)
         {
-            EnterPreparing(levelId);
+            LevelData levelData = await ConfigManager.Instance.GetLevelDataAsync(levelId);
+            EnterPreparing(levelData);
         }
 
         public void StartPreparedLevel()
@@ -26,12 +28,12 @@ namespace DefaultNamespace
             EnterExiting();
         }
 
-        private void EnterPreparing(int levelId)
+        private void EnterPreparing(LevelData levelData)
         {
             ApplicationInputController.Instance.SetGameBoardInputActive(false);
             isPaused = false;
             LevelSessionManager.Instance.OnLevelFinished += HandleLevelFinished;
-            LevelSessionManager.Instance.PrepareLevelSession(levelId);
+            LevelSessionManager.Instance.PrepareLevelSession(levelData);
         }
 
         private void EnterPlaying()

@@ -17,6 +17,21 @@ namespace DefaultNamespace
         {
         }
 
+        public async UniTask RunWithLoading(Func<UniTask> operation)
+        {
+            if (operation == null) throw new ArgumentNullException(nameof(operation));
+
+            BeginLoadingOperation();
+            try
+            {
+                await operation();
+            }
+            finally
+            {
+                EndLoadingOperation();
+            }
+        }
+
         public async UniTask<T> RunWithLoading<T>(Func<Task<T>> operation)
         {
             if (operation == null) throw new ArgumentNullException(nameof(operation));

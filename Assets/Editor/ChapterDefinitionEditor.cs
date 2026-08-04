@@ -12,21 +12,26 @@ using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEngine;
 
-namespace DefaultNamespace.Editor
+namespace DefaultNamespace.Editor   
 {
     public class ChapterDefinitionEditor : EditorWindow
     {
+        private const string ChapterIndexPath = "ServerData/configs/chapters.json";
+        private const string ChapterDirectoryPath = "ServerData/configs/chapters";
+        private const string ConfigOutputRootPath = "ServerData/configs/";
         private readonly List<Texture2D> backgroundChunks = new List<Texture2D>();
         private readonly List<Texture2D> backgroundChunkPreviews = new List<Texture2D>();
         private readonly List<ChapterLevelDisplayData> levelButtons = new List<ChapterLevelDisplayData>();
         private ChapterTopperView topperPrefab;
         private ChapterBottomView _bottomPrefab;
         private LevelButton levelButtonPrefab;
+        private Sprite chooserImage;
         private int draggedLevelIndex = -1;
         private bool isPlacingLevel;
         private Vector2 mapPreviewScroll;
         private int newChapterId = 1;
         private string newChapterName = "";
+        private string chapterDescription = "";
         private string chapterDownloadLabel = "chapter_1";
         private int pendingLevelId = 1;
         private string pendingLevelName = "1";
@@ -73,9 +78,15 @@ namespace DefaultNamespace.Editor
                 int previousChapterId = newChapterId;
                 newChapterId = EditorGUILayout.IntField("Chapter ID", newChapterId);
                 if (newChapterId != previousChapterId && chapterDownloadLabel == $"chapter_{previousChapterId}") chapterDownloadLabel = $"chapter_{newChapterId}";
-                newChapterName = EditorGUILayout.TextField("Chapter Name", newChapterName);
             }
+            newChapterName = EditorGUILayout.TextField("Chapter Name", newChapterName);
             chapterDownloadLabel = EditorGUILayout.TextField("Label", chapterDownloadLabel);
+            EditorGUILayout.LabelField("Description");
+            chapterDescription = EditorGUILayout.TextArea(chapterDescription, GUILayout.MinHeight(54f));
+
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Chapter Chooser Image", EditorStyles.boldLabel);
+            chooserImage = (Sprite)EditorGUILayout.ObjectField(chooserImage, typeof(Sprite), false);
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Background Chunks (bottom to top)", EditorStyles.boldLabel);
@@ -147,7 +158,7 @@ namespace DefaultNamespace.Editor
 
         private void BrowseForChapterFile()
         {
-            string selectedPath = EditorUtility.OpenFilePanel("Select Chapter JSON", Path.GetFullPath("Assets/StreamingAssets/chapters"), "json");
+            string selectedPath = EditorUtility.OpenFilePanel("Select Chapter JSON", Path.GetFullPath(ChapterDirectoryPath), "json");
             if (string.IsNullOrWhiteSpace(selectedPath)) return;
 
             try
@@ -162,14 +173,14 @@ namespace DefaultNamespace.Editor
 
         private void AssignChapterPath(string path)
         {
-            string assetPath = Path.IsPathRooted(path) ? FileUtil.GetProjectRelativePath(path) : path.Replace('\\', '/');
-            if (string.IsNullOrWhiteSpace(assetPath) || !assetPath.StartsWith("Assets/StreamingAssets/chapters/", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException("Chapter JSON files must be inside 'Assets/StreamingAssets/chapters'.");
-            if (!string.Equals(Path.GetExtension(assetPath), ".json", StringComparison.OrdinalIgnoreCase) || !File.Exists(assetPath))
-                throw new InvalidOperationException($"'{assetPath}' is not an existing JSON file.");
+            string chapterPath = Path.IsPathRooted(path) ? FileUtil.GetProjectRelativePath(path) : path.Replace('\\', '/');
+            if (string.IsNullOrWhiteSpace(chapterPath) || !chapterPath.StartsWith($"{ChapterDirectoryPath}/", StringComparison.Ordinal))
+                throw new InvalidOperationException($"Chapter JSON files must be inside '{ChapterDirectoryPath}'.");
+            if (!string.Equals(Path.GetExtension(chapterPath), ".json", StringComparison.Ordinal) || !File.Exists(chapterPath))
+                throw new InvalidOperationException($"'{chapterPath}' is not an existing JSON file.");
 
-            LoadChapterForEditing(assetPath);
-            existingChapterPath = assetPath;
+            LoadChapterForEditing(chapterPath);
+            existingChapterPath = chapterPath;
         }
 
         private void LoadChapterForEditing(string chapterPath)
@@ -261,6 +272,7 @@ namespace DefaultNamespace.Editor
                         throw new InvalidDataException($"Addressables entry '{chapter.levelButtonPrefabAddress}' points to a prefab without a LevelButton component on its root.");
                 }
             }
+            LoadChooserImage(chapter.chapterId, settings);
             levelButtons.Clear();
             if (chapter.levels != null) levelButtons.AddRange(chapter.levels);
             newChapterId = chapter.chapterId;
@@ -531,13 +543,12 @@ namespace DefaultNamespace.Editor
                 ChapterDefinition chapter;
                 if (isCreating)
                 {
-                    chapterPath = $"Assets/StreamingAssets/chapters/chapter_{newChapterId}.json";
+                    chapterPath = $"{ChapterDirectoryPath}/chapter_{newChapterId}.json";
                     if (File.Exists(chapterPath))
                         throw new InvalidOperationException($"Chapter file '{chapterPath}' already exists. Select it as the existing chapter instead of overwriting it.");
 
                     chapter = new ChapterDefinition
                     {
-                        schemaVersion = 1,
                         chapterId = newChapterId,
                         chapterName = newChapterName,
                         downloadLabel = chapterDownloadLabel,
@@ -559,12 +570,12 @@ namespace DefaultNamespace.Editor
                         throw new InvalidDataException($"'{chapterPath}' does not contain a chapter definition.");
                 }
 
+                chapter.chapterName = newChapterName;
                 if (chapter.chapterId <= 0)
                     throw new InvalidDataException("Chapter identity must be positive.");
                 if (string.IsNullOrWhiteSpace(chapter.chapterName))
                     throw new InvalidDataException($"Chapter {chapter.chapterId} must have a name.");
 
-                chapter.schemaVersion = 1;
                 chapter.downloadLabel = chapterDownloadLabel;
                 ValidateChapterDownloadLabel(chapter);
                 chapter.levels = levelButtons.OrderBy(level => level.levelId).ToList();
@@ -572,8 +583,11 @@ namespace DefaultNamespace.Editor
                 chapter.backgroundChunks = BuildChunkData(chapter.chapterId);
                 string directory = Path.GetDirectoryName(chapterPath);
                 if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+                string chooserImageAddress = RegisterChooserImage(chapter);
                 File.WriteAllText(chapterPath, JsonConvert.SerializeObject(chapter, Formatting.Indented));
+                UpdateChapterIndex(chapter, chapterPath, chooserImageAddress, chapterDescription);
                 ApplyChapterLabelToExistingEntries(chapter.downloadLabel);
+                AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
                 if (isCreating) existingChapterPath = chapterPath;
                 Debug.Log($"{(isCreating ? "Created" : "Updated")} chapter {chapter.chapterId} with {chapter.backgroundChunks.Count} background chunks and {chapter.levels.Count} level buttons at '{chapterPath}'.");
@@ -588,8 +602,92 @@ namespace DefaultNamespace.Editor
             }
         }
 
+        private void LoadChooserImage(int chapterId, AddressableAssetSettings settings)
+        {
+            chooserImage = null;
+            chapterDescription = "";
+            if (!File.Exists(ChapterIndexPath)) return;
+
+            ChapterIndex index = JsonConvert.DeserializeObject<ChapterIndex>(File.ReadAllText(ChapterIndexPath));
+            if (index == null || index.chapters == null) throw new InvalidDataException($"'{ChapterIndexPath}' does not contain a chapter index.");
+            ChapterIndexEntry indexEntry = index.chapters.SingleOrDefault(entry => entry.chapterId == chapterId);
+            if (indexEntry == null) return;
+            chapterDescription = indexEntry.description ?? "";
+            if (string.IsNullOrWhiteSpace(indexEntry.chooserImageAddress)) return;
+
+            AddressableAssetEntry addressableEntry = FindEntryByAddress(settings, indexEntry.chooserImageAddress);
+            if (addressableEntry == null)
+                throw new InvalidDataException($"Chapter {chapterId} references missing chooser image Addressables entry '{indexEntry.chooserImageAddress}'.");
+            chooserImage = AssetDatabase.LoadAssetAtPath<Sprite>(addressableEntry.AssetPath);
+            if (chooserImage == null)
+                throw new InvalidDataException($"Addressables entry '{indexEntry.chooserImageAddress}' does not point to a Sprite asset.");
+        }
+
+        private string RegisterChooserImage(ChapterDefinition chapter)
+        {
+            if (chooserImage == null) throw new InvalidOperationException("Assign a chapter chooser image before saving the chapter.");
+            string imagePath = AssetDatabase.GetAssetPath(chooserImage);
+            if (string.IsNullOrWhiteSpace(imagePath)) throw new InvalidOperationException("The assigned chapter chooser image must be a project asset.");
+
+            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null) throw new InvalidOperationException("The project does not have active Addressables settings.");
+
+            string imageGuid = AssetDatabase.AssetPathToGUID(imagePath);
+            string address = $"chapter/{chapter.chapterId}/ui/chooser-image";
+            AddressableAssetEntry addressOwner = FindEntryByAddress(settings, address);
+            if (addressOwner != null && addressOwner.guid != imageGuid && !EditorUtility.DisplayDialog("Replace Addressable Asset", $"Address '{address}' is currently assigned to '{addressOwner.AssetPath}'.\n\nReplace it with '{imagePath}'?", "Replace", "Cancel"))
+                throw new OperationCanceledException("Chapter chooser image Addressables update was cancelled without making changes.");
+
+            ChapterIndex index = LoadOrCreateChapterIndex();
+            ChapterIndexEntry previousIndexEntry = index.chapters.SingleOrDefault(entry => entry.chapterId == chapter.chapterId);
+            AddressableAssetEntry previousAddressableEntry = previousIndexEntry == null || string.IsNullOrWhiteSpace(previousIndexEntry.chooserImageAddress) ? null : FindEntryByAddress(settings, previousIndexEntry.chooserImageAddress);
+            if (addressOwner != null && addressOwner.guid != imageGuid) settings.RemoveAssetEntry(addressOwner.guid);
+            if (previousAddressableEntry != null && previousAddressableEntry.guid != imageGuid && previousAddressableEntry != addressOwner) settings.RemoveAssetEntry(previousAddressableEntry.guid);
+
+            AddressableAssetGroup uiGroup = GetOrCreateChapterUiGroup(settings, chapter.chapterId);
+            AddressableAssetEntry imageEntry = settings.CreateOrMoveEntry(imageGuid, uiGroup);
+            imageEntry.address = address;
+            ApplyChapterDownloadLabel(imageEntry, chapter.downloadLabel);
+            EditorUtility.SetDirty(settings);
+            return address;
+        }
+
+        private static void UpdateChapterIndex(ChapterDefinition chapter, string chapterPath, string chooserImageAddress, string description)
+        {
+            ChapterIndex index = LoadOrCreateChapterIndex();
+            ChapterIndexEntry entry = index.chapters.SingleOrDefault(candidate => candidate.chapterId == chapter.chapterId);
+            if (entry == null)
+            {
+                entry = new ChapterIndexEntry { chapterId = chapter.chapterId };
+                index.chapters.Add(entry);
+            }
+
+            if (!chapterPath.StartsWith(ConfigOutputRootPath, StringComparison.Ordinal))
+                throw new InvalidOperationException($"Chapter file '{chapterPath}' must be inside '{ConfigOutputRootPath}'.");
+            entry.displayName = chapter.chapterName;
+            entry.description = description;
+            entry.configPath = chapterPath.Substring(ConfigOutputRootPath.Length).Replace('\\', '/');
+            entry.chooserImageAddress = chooserImageAddress;
+            entry.downloadLabel = chapter.downloadLabel;
+            entry.unlockLevelId = chapter.levels.Min(level => level.levelId);
+            Directory.CreateDirectory(Path.GetDirectoryName(ChapterIndexPath));
+            File.WriteAllText(ChapterIndexPath, JsonConvert.SerializeObject(index, Formatting.Indented));
+        }
+
+        private static ChapterIndex LoadOrCreateChapterIndex()
+        {
+            if (!File.Exists(ChapterIndexPath)) return new ChapterIndex { chapters = new List<ChapterIndexEntry>() };
+            ChapterIndex index = JsonConvert.DeserializeObject<ChapterIndex>(File.ReadAllText(ChapterIndexPath));
+            if (index == null) throw new InvalidDataException($"'{ChapterIndexPath}' does not contain a chapter index.");
+            if (index.chapters == null) index.chapters = new List<ChapterIndexEntry>();
+            return index;
+        }
+
         private static void ValidateLevelButtons(ChapterDefinition chapter)
         {
+            if (chapter.levels.Count == 0)
+                throw new InvalidDataException($"Chapter {chapter.chapterId} must contain at least one level.");
+
             var levelIds = new HashSet<int>();
             foreach (ChapterLevelDisplayData level in chapter.levels)
             {

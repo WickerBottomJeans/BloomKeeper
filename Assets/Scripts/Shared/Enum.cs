@@ -94,6 +94,13 @@
         ReturnHome = 3
     }
 
+    public enum HomeMiddleTab
+    {
+        Map = 1,
+        Friends = 2,
+        Shop = 3
+    }
+
     /// <summary>
     /// Convenient IDs for common dialog buttons, with no attached logic.
     /// </summary>

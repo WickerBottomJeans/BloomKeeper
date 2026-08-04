@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 577a4e9dcbc7251429f0bf481d12a64b
   m_currentHash:
     serializedVersion: 2
-    Hash: c2779495365709b7b64776bab9e8588d
+    Hash: a44e2ab14d9c00bbeb472715daf7bbf5
   m_DisableWriteTypeTree: 0
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 1
@@ -67,7 +67,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2d61a969d15513846be558fc3e78e41a, type: 2}
   - {fileID: 11400000, guid: 56f7313312587b548b55bd2a25a3e22b, type: 2}
   - {fileID: 11400000, guid: 58e278e773548d54da5250682f76bba1, type: 2}
-  - {fileID: 11400000, guid: 2a15b3e3ca7edb2498f5fcffaba7f1fd, type: 2}
   - {fileID: 11400000, guid: b96dc25a4ddea144090fb1eae1fb84fc, type: 2}
   - {fileID: 11400000, guid: 4174476f36c4de744b0fbf50be76fb4f, type: 2}
   - {fileID: 11400000, guid: 3ad70bbafd5733b478574a72cc3ae47f, type: 2}
@@ -89,7 +88,7 @@ MonoBehaviour:
       - m_Id: 3d10ffd73b0aa1a488b1aad01da48bf6
         m_Value: 'https://pub-600516f978894a4ba6eeac168a341d46.r2.dev/addressables/[BuildTarget]'
       - m_Id: 7541f7401767ad145ab6efa3dbc66b38
-        m_Value: 'ServerData/[BuildTarget] '
+        m_Value: 'ServerData/addressables/[BuildTarget] '
       - m_Id: c88f3bc3030fe9145a2a8586b3cab230
         m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
     m_ProfileEntryNames:

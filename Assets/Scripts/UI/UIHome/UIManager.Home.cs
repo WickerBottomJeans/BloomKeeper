@@ -10,6 +10,7 @@ namespace DefaultNamespace.UI
         private UIHome homeInstance;
 
         public event Action<int> LevelSelected;
+        public event Action<HomeMiddleTab> HomeTabRequested;
         public event Action SettingsRequested;
         public event Action AddLifeRequested;
         public event Action AddCurrencyRequested;
@@ -24,6 +25,12 @@ namespace DefaultNamespace.UI
             await homeInstance.ShowAsync(chapter, progression);
         }
 
+        public async UniTask DisplayHomeTabAsync(HomeMiddleTab tab)
+        {
+            if (homeInstance == null) throw new InvalidOperationException("Cannot display a Home tab before UIHome has been shown.");
+            await homeInstance.DisplayMiddleTabAsync(tab);
+        }
+
         public void HideHome()
         {
             UnbindHome();
@@ -33,6 +40,7 @@ namespace DefaultNamespace.UI
         private void BindHome()
         {
             homeInstance.LevelSelected += HandleHomeLevelSelected;
+            homeInstance.TabRequested += HandleHomeTabRequested;
             homeInstance.SettingsRequested += HandleHomeSettingsRequested;
             homeInstance.AddLifeRequested += HandleHomeAddLifeRequested;
             homeInstance.AddCurrencyRequested += HandleHomeAddCurrencyRequested;
@@ -43,6 +51,7 @@ namespace DefaultNamespace.UI
             if (homeInstance == null) return;
 
             homeInstance.LevelSelected -= HandleHomeLevelSelected;
+            homeInstance.TabRequested -= HandleHomeTabRequested;
             homeInstance.SettingsRequested -= HandleHomeSettingsRequested;
             homeInstance.AddLifeRequested -= HandleHomeAddLifeRequested;
             homeInstance.AddCurrencyRequested -= HandleHomeAddCurrencyRequested;
@@ -51,6 +60,11 @@ namespace DefaultNamespace.UI
         private void HandleHomeLevelSelected(int levelId)
         {
             LevelSelected?.Invoke(levelId);
+        }
+
+        private void HandleHomeTabRequested(HomeMiddleTab tab)
+        {
+            HomeTabRequested?.Invoke(tab);
         }
 
         private void HandleHomeSettingsRequested()

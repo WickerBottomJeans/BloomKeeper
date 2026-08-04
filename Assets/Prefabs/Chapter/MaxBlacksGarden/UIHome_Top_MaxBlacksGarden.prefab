@@ -100,6 +100,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: UIHome_Top_MaxBlacksGarden
       objectReference: {fileID: 0}
+    - target: {fileID: 2861206522615605866, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: livesText
+      value: 
+      objectReference: {fileID: 1115878000393373660}
+    - target: {fileID: 2861206522615605866, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: avatarImage
+      value: 
+      objectReference: {fileID: 4261562149883104483}
+    - target: {fileID: 2861206522615605866, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: currencyText
+      value: 
+      objectReference: {fileID: 7144515223146015449}
+    - target: {fileID: 2861206522615605866, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: addLifeButton
+      value: 
+      objectReference: {fileID: 6125497545073176060}
+    - target: {fileID: 2861206522615605866, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: addCurrencyButton
+      value: 
+      objectReference: {fileID: 2626924297653565970}
     - target: {fileID: 3386987816750701225, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 0.7
@@ -161,3 +181,58 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+--- !u!114 &1115878000393373660 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4689008979029355339, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+  m_PrefabInstance: {fileID: 5651685427186740375}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &2626924297653565970 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7645533580781426309, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+  m_PrefabInstance: {fileID: 5651685427186740375}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!114 &4261562149883104483 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8451793883448205428, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+  m_PrefabInstance: {fileID: 5651685427186740375}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &6125497545073176060 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1976220846261961067, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+  m_PrefabInstance: {fileID: 5651685427186740375}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!114 &7144515223146015449 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3263063874823947854, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+  m_PrefabInstance: {fileID: 5651685427186740375}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI

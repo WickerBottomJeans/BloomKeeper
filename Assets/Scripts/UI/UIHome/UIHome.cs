@@ -11,12 +11,16 @@ namespace DefaultNamespace.UI
         [SerializeField] private RectTransform content;
         [SerializeField] private RectTransform middleSlot;
         [SerializeField] private UILevelSelect levelSelectPrefab;
+        [SerializeField] private UIFriendsView friendsPrefab;
+        [SerializeField] private UIShopView shopPrefab;
 
         private AsyncOperationHandle<GameObject> topperInstanceHandle;
         private AsyncOperationHandle<GameObject> bottomInstanceHandle;
         private ChapterTopperView topperView;
         private ChapterBottomView bottomView;
         private UILevelSelect levelSelectInstance;
+        private UIFriendsView friendsInstance;
+        private UIShopView shopInstance;
         private ChapterContent displayedChapter;
         private PlayerProgressionData displayedProgression;
         private string displayedTopperAddress;
@@ -24,6 +28,7 @@ namespace DefaultNamespace.UI
         private int chapterDisplayRequestId;
 
         public event Action<int> LevelSelected;
+        public event Action<HomeMiddleTab> TabRequested;
         public event Action SettingsRequested;
         public event Action AddLifeRequested;
         public event Action AddCurrencyRequested;
@@ -40,7 +45,32 @@ namespace DefaultNamespace.UI
 
             displayedChapter = chapter;
             displayedProgression = progression;
-            await ShowMapAsync();
+        }
+
+        public async UniTask DisplayMiddleTabAsync(HomeMiddleTab tab)
+        {
+            switch (tab)
+            {
+                case HomeMiddleTab.Map:
+                    friendsInstance?.Hide();
+                    shopInstance?.Hide();
+                    await ShowMapAsync();
+                    break;
+                case HomeMiddleTab.Friends:
+                    levelSelectInstance?.Hide();
+                    shopInstance?.Hide();
+                    if (friendsInstance == null) friendsInstance = Instantiate(friendsPrefab, middleSlot, false);
+                    friendsInstance.Show();
+                    break;
+                case HomeMiddleTab.Shop:
+                    levelSelectInstance?.Hide();
+                    friendsInstance?.Hide();
+                    if (shopInstance == null) shopInstance = Instantiate(shopPrefab, middleSlot, false);
+                    shopInstance.Show();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(tab), tab, "Unknown Home middle tab.");
+            }
         }
 
         public void Hide()
@@ -131,7 +161,7 @@ namespace DefaultNamespace.UI
         {
             topperView.AddLifeRequested += HandleAddLifeRequested;
             topperView.AddCurrencyRequested += HandleAddCurrencyRequested;
-            bottomView.MapRequested += HandleMapRequested;
+            bottomView.TabRequested += HandleTabRequested;
             bottomView.SettingsRequested += HandleSettingsRequested;
         }
 
@@ -144,14 +174,14 @@ namespace DefaultNamespace.UI
             }
             if (bottomView != null)
             {
-                bottomView.MapRequested -= HandleMapRequested;
+                bottomView.TabRequested -= HandleTabRequested;
                 bottomView.SettingsRequested -= HandleSettingsRequested;
             }
         }
 
-        private void HandleMapRequested()
+        private void HandleTabRequested(HomeMiddleTab tab)
         {
-            ShowMapAsync().Forget();
+            TabRequested?.Invoke(tab);
         }
 
         private void HandleLevelSelected(int levelId)

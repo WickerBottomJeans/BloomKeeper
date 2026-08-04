@@ -1,0 +1,27 @@
+{
+  "levelId": 8,
+  "starScoreThresholds": [
+    { "starCount": 1, "score": 8800 },
+    { "starCount": 2, "score": 12500 },
+    { "starCount": 3, "score": 16500 }
+  ],
+  "boardWidth": 8,
+  "boardHeight": 8,
+  "tiles": [
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 2 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 3 }, { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1 },
+    { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
+  ],
+  "objectives": [
+    { "type": 1, "petals": [{ "petalType": 3, "amount": 20 }] },
+    { "type": 3, "spiderWebsToClear": 8 }
+  ],
+  "constrainers": [
+    { "type": 2, "timeLimitSeconds": 100, "warningAtRemaining": 10 }
+  ]
+}

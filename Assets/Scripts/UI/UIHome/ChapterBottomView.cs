@@ -11,9 +11,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private Button shopButton;
         [SerializeField] private Button settingsButton;
 
-        public event Action MapRequested;
-        public event Action SocialRequested;
-        public event Action ShopRequested;
+        public event Action<HomeMiddleTab> TabRequested;
         public event Action SettingsRequested;
 
         private void Awake()
@@ -34,17 +32,17 @@ namespace DefaultNamespace.UI
 
         private void HandleMapClicked()
         {
-            MapRequested?.Invoke();
+            TabRequested?.Invoke(HomeMiddleTab.Map);
         }
 
         private void HandleSocialClicked()
         {
-            SocialRequested?.Invoke();
+            TabRequested?.Invoke(HomeMiddleTab.Friends);
         }
 
         private void HandleShopClicked()
         {
-            ShopRequested?.Invoke();
+            TabRequested?.Invoke(HomeMiddleTab.Shop);
         }
 
         private void HandleSettingsClicked()

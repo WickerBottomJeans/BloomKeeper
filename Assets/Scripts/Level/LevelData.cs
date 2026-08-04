@@ -8,6 +8,8 @@ namespace DefaultNamespace
     public class LevelData
     {
         public int levelId;
+        public int chapterId;
+        public int? nextLevelId;
         public int boardWidth;
         public int boardHeight;
         public List<TileData> tiles;

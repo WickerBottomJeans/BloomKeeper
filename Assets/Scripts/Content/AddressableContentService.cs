@@ -20,20 +20,6 @@ namespace DefaultNamespace
             }
         }
 
-        public async UniTask<long> GetDownloadSizeAsync(string label)
-        {
-            ValidateLabel(label);
-            AsyncOperationHandle<long> sizeHandle = Addressables.GetDownloadSizeAsync(label);
-            try
-            {
-                return await sizeHandle.ToUniTask();
-            }
-            finally
-            {
-                Addressables.Release(sizeHandle);
-            }
-        }
-
         public async UniTask EnsureDownloadedAsync(string label)
         {
             ValidateLabel(label);

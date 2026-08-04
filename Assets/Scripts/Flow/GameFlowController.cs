@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using System;
+using System.IO;
 using UnityEngine;
 
 namespace DefaultNamespace
@@ -17,7 +18,6 @@ namespace DefaultNamespace
         private SettingsFlow settingsFlow;
         private ResultFlow resultFlow;
         private LevelSessionResult currentResult;
-        private bool isInFatalState;
         [SerializeField] private MusicStateController musicStateController;
 
         private void Awake()
@@ -42,17 +42,17 @@ namespace DefaultNamespace
             authFlow = new AuthFlow(guestLoginService);
             accountLoadFlow = new AccountLoadFlow(progressionService);
             levelCompletionFlow = new LevelCompletionFlow(progressionService);
-            homeFlow = new HomeFlow(new LocalChapterContentProvider());
+            homeFlow = new HomeFlow(addressableContentService);
             levelSessionFlow = new LevelSessionFlow();
             settingsFlow = new SettingsFlow();
-            resultFlow = new ResultFlow(new LevelCatalog(LevelLoader.LoadLevelMetas()));
+            resultFlow = new ResultFlow(ConfigManager.Instance);
             levelSessionFlow.SettingsRequested += HandleSettingsRequested;
         }
 
         private void EnterBootFlow()
         {
             bootFlow.BootCompleted += HandleBootCompleted;
-            RunFlowOperation(bootFlow.Enter);
+            ApplicationOperationRunner.Instance.Run(bootFlow.Enter);
         }
 
         private void HandleBootCompleted()
@@ -70,7 +70,7 @@ namespace DefaultNamespace
 
         private void HandleAuthCompleted(PlayFabAuthSession authSession)
         {
-            RunFlowOperation(() => ProcessAuthCompletedAsync(authSession));
+            ApplicationOperationRunner.Instance.Run(() => ProcessAuthCompletedAsync(authSession));
         }
 
         private async UniTask ProcessAuthCompletedAsync(PlayFabAuthSession authSession)
@@ -139,7 +139,7 @@ namespace DefaultNamespace
         private void HandleAuthFailed(Exception exception)
         {
             Debug.LogWarning(exception);
-            RunFlowOperation(RunAuthFailureDialogAsync);
+            ApplicationOperationRunner.Instance.Run(RunAuthFailureDialogAsync);
         }
 
         private async UniTask RunAuthFailureDialogAsync()
@@ -165,12 +165,13 @@ namespace DefaultNamespace
         {
             musicStateController.EnterHome();
             homeFlow.StartLevelRequested += HandleStartLevelRequested;
+            homeFlow.SettingsRequested += HandleSettingsRequested;
             await homeFlow.Enter();
         }
 
         private void HandleStartLevelRequested(int levelId)
         {
-            RunFlowOperation(() => StartLevelAsync(levelId));
+            ApplicationOperationRunner.Instance.Run(() => StartLevelAsync(levelId));
         }
 
         private void HandleSettingsRequested()
@@ -180,21 +181,21 @@ namespace DefaultNamespace
 
         private async UniTask StartLevelAsync(int levelId)
         {
-            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.LevelStart, () =>
+            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.LevelStart, async () =>
             {
                 homeFlow.StartLevelRequested -= HandleStartLevelRequested;
+                homeFlow.SettingsRequested -= HandleSettingsRequested;
                 homeFlow.Exit();
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
                 levelSessionFlow.QuitLevelRequested += HandleQuitLevelRequested;
-                levelSessionFlow.PrepareLevel(levelId);
+                await levelSessionFlow.PrepareLevel(levelId);
                 musicStateController.EnterGameplay();
-                return UniTask.CompletedTask;
             }, levelSessionFlow.StartPreparedLevel);
         }
 
         private void HandleQuitLevelRequested()
         {
-            RunFlowOperation(RunQuitLevelDialogAsync);
+            ApplicationOperationRunner.Instance.Run(RunQuitLevelDialogAsync);
         }
 
         private async UniTask RunQuitLevelDialogAsync()
@@ -235,7 +236,7 @@ namespace DefaultNamespace
 
         private void HandleLevelFinished(LevelSessionResult result)
         {
-            RunFlowOperation(() => ProcessLevelFinishedAsync(result));
+            ApplicationOperationRunner.Instance.Run(() => ProcessLevelFinishedAsync(result));
         }
 
         private async UniTask ProcessLevelFinishedAsync(LevelSessionResult result)
@@ -356,7 +357,7 @@ namespace DefaultNamespace
 
         private void HandleResultHomeRequested()
         {
-            RunFlowOperation(ReturnHomeFromResultAsync);
+            ApplicationOperationRunner.Instance.Run(ReturnHomeFromResultAsync);
         }
 
         private async UniTask ReturnHomeFromResultAsync()
@@ -371,101 +372,58 @@ namespace DefaultNamespace
 
         private void HandleResultRetryRequested()
         {
-            RunFlowOperation(RetryLevelFromResultAsync);
+            ApplicationOperationRunner.Instance.Run(RetryLevelFromResultAsync);
         }
 
         private async UniTask RetryLevelFromResultAsync()
         {
             int levelId = currentResult.LevelId;
-            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.Retry, () =>
+            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.Retry, async () =>
             {
                 ExitResultFlow();
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
                 levelSessionFlow.QuitLevelRequested += HandleQuitLevelRequested;
                 levelSessionFlow.LeaveLevel();
-                levelSessionFlow.PrepareLevel(levelId);
+                await levelSessionFlow.PrepareLevel(levelId);
                 musicStateController.EnterGameplay();
-                return UniTask.CompletedTask;
             }, levelSessionFlow.StartPreparedLevel);
         }
 
         private void HandleNextLevelRequested(int levelId)
         {
-            RunFlowOperation(() => StartNextLevelFromResultAsync(levelId));
+            ApplicationOperationRunner.Instance.Run(() => StartNextLevelFromResultAsync(levelId));
         }
 
         private async UniTask StartNextLevelFromResultAsync(int levelId)
         {
-            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.LevelStart, () =>
+            LevelData nextLevelData;
+            try
+            {
+                nextLevelData = await ApplicationPresentationService.Instance.RunWithLoading(() => ConfigManager.Instance.GetLevelDataAsync(levelId).AsTask());
+            }
+            catch (IOException exception)
+            {
+                Debug.LogError(exception);
+                DialogOptionButton[] options = { DialogOptionButton.Ok };
+                await DialogManager.Instance.RunDialogWorkflow("Next level unavailable", "This level is currently unavailable. Please try again later.", async session =>
+                {
+                    int buttonId = await session.WaitForButtonClick();
+                    if ((DialogButtonType)buttonId != DialogButtonType.Ok)
+                        throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported next-level unavailable dialog button.");
+                }, options);
+                return;
+            }
+
+            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.LevelStart, async () =>
             {
                 ExitResultFlow();
                 levelSessionFlow.LevelFinished += HandleLevelFinished;
                 levelSessionFlow.QuitLevelRequested += HandleQuitLevelRequested;
                 levelSessionFlow.LeaveLevel();
-                levelSessionFlow.PrepareLevel(levelId);
+                await levelSessionFlow.PrepareLevel(levelId);
+                homeFlow.SetCurrentChapter(nextLevelData.chapterId);
                 musicStateController.EnterGameplay();
-                return UniTask.CompletedTask;
             }, levelSessionFlow.StartPreparedLevel);
-        }
-
-        /// <summary>
-        /// This one runs async work from a flow event
-        /// U must handle expected failures inside the delegate or they’ll be treated as fatal.
-        /// Must use on every flow event handler that starts async work.
-        /// </summary>
-        /// <param name="operation"></param>
-        private void RunFlowOperation(Func<UniTask> operation)
-        {
-            if (isInFatalState) return;
-            ObserveFlowOperationAsync(operation).Forget();
-        }
-
-        private async UniTask ObserveFlowOperationAsync(Func<UniTask> operation)
-        {
-            try
-            {
-                await operation();
-            }
-            catch (Exception exception)
-            {
-                try
-                {
-                    await EnterFatalStateAsync(exception);
-                }
-                catch (Exception fatalStateException)
-                {
-                    Debug.LogException(fatalStateException);
-                    QuitApplication();
-                }
-            }
-        }
-
-        private async UniTask EnterFatalStateAsync(Exception exception)
-        {
-            if (isInFatalState) return;
-
-            isInFatalState = true;
-            Debug.LogException(exception);
-            ApplicationInputController.Instance.SetGameBoardInputActive(false);
-
-            DialogOptionButton[] options = { DialogOptionButton.Ok };
-            await DialogManager.Instance.RunDialogWorkflow("Unexpected error", "BloomKeeper encountered an unexpected error and cannot continue safely. The game will close.", async session =>
-            {
-                int buttonId = await session.WaitForButtonClick();
-                if ((DialogButtonType)buttonId != DialogButtonType.Ok)
-                    throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported fatal error dialog button.");
-            }, options);
-
-            QuitApplication();
-        }
-
-        private static void QuitApplication()
-        {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
         }
 
         private void ExitResultFlow()

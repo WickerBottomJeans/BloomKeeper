@@ -11,7 +11,10 @@ namespace DefaultNamespace
     {
         public int chapterId;
         public string displayName;
+        public string description;
         public string configPath;
-        public string chooserButtonPrefabAddress;
+        public string chooserImageAddress;
+        public string downloadLabel;
+        public int unlockLevelId;
     }
 }

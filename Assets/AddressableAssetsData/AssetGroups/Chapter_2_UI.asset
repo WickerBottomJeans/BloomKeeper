@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - chapter_2
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 78284a87d2aa4b34888b5f95be68423c
+    m_Address: chapter/2/ui/chooser-image
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_2
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b4c5ffedde1a3034393ea7a7ddf643a8
     m_Address: chapter/2/ui/bottom-navigation
     m_ReadOnly: 0

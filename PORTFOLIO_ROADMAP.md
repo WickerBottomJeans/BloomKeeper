@@ -73,6 +73,7 @@ Goal: prevent the first thirty seconds from looking like an unfinished engineeri
 - [ ] Set intentional product identity, version, icon, window behavior, and portrait presentation for the Windows build.
 - [ ] Ensure the first-time player can understand mouse/touch interaction and the current objective without developer explanation.
 - [ ] Perform one focused visual-consistency pass on loading, authentication, map, gameplay HUD, dialogs, win, and loss screens.
+- [ ] Audit every dimmer and modal overlay before release; verify that it blocks pointer interaction with all UI beneath it and prevents click-through for its entire visible lifetime.
 - [x] Add a pause menu with Resume, Settings, and confirmed Quit Level actions. Pausing must stop level input and timer progress; quitting must abandon the attempt and return Home without submitting a result.
 - [ ] Add a Settings entry from Home and the pause menu with persistent music and SFX volume controls.
 - [ ] Add a minimal licensed audio pass if the current build is silent: one music loop plus clear swap, match, skill, win, loss, and button feedback routed through the persisted volume settings. Do not build a large audio feature set.
@@ -198,6 +199,7 @@ These features may deepen the project later, but they are not required to make t
 - Full account merging when a Google or Apple identity is already linked to another PlayFab account.
 - Currency, inventory, boosters, shop, advertising, and purchases.
 - Remote content publishing and rollback infrastructure.
+- Admin publishing validation that rejects staged content when a non-null `nextLevelId` has no corresponding level JSON, a level's `chapterId` has no corresponding chapter, chapter presentation references disagree with level ownership, or referenced Addressables addresses and labels are missing.
 - Large level counts or additional match-3 mechanics.
 - Full localization and accessibility systems.
 - Android and iOS portfolio releases beyond the provider-verification builds required above.

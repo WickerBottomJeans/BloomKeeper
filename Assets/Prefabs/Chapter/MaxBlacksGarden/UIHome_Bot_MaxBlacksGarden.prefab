@@ -372,6 +372,10 @@ PrefabInstance:
       propertyPath: m_PixelsPerUnitMultiplier
       value: 1.78
       objectReference: {fileID: 0}
+    - target: {fileID: 8073662865143322332, guid: 96449b6430e651a4d8120eec874aa2dd, type: 3}
+      propertyPath: visualRoot
+      value: 
+      objectReference: {fileID: 3026854774150883114}
     - target: {fileID: 8439731938779234433, guid: 96449b6430e651a4d8120eec874aa2dd, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -401,6 +405,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 96449b6430e651a4d8120eec874aa2dd, type: 3}
+--- !u!224 &3026854774150883114 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 6443799031900464643, guid: 96449b6430e651a4d8120eec874aa2dd, type: 3}
+  m_PrefabInstance: {fileID: 8317433233865933097}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &3188586001960907762 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6858233904448549595, guid: 96449b6430e651a4d8120eec874aa2dd, type: 3}

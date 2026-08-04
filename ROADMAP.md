@@ -106,6 +106,7 @@ Currency, rewards, spending, boosters, inventory, and one real-money purchase fo
 
 ## P4: Live Content And Operations
 
+- [ ] Extract live-content authoring and deployment into a dedicated project separate from the player client. It must author chapter, level, and index JSON; manage Addressable chapter assets and labels; build platform-specific catalogs and bundles; validate the complete staged content set; and publish the resulting `configs/` and `addressables/` trees to R2 through one versioned release workflow.
 - [ ] Move level and other live configuration ownership to a versioned backend content catalog managed through an admin-facing content workflow; remove bundled local configuration as the runtime source of truth.
 - [ ] Build a focused admin level-authoring and publishing tool for board dimensions, tile and void layouts, preplaced petals and skills, objectives, constraints, score thresholds, and export to the backend-owned level format.
 - [ ] Make the authoring tool use shared automated catalog validation for JSON/schema parsing, IDs, advertised content, dimensions, tile counts, objectives, constraints, score thresholds, and referenced assets; enforce the same validation during publishing and in CI.

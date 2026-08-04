@@ -27,6 +27,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Chapter_1
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dca77b33012974c449646219461a5d45
+    m_Address: chapter/1/ui/chooser-image
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Chapter_1
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e1590e7ab8376c64bb1bb7006e774229
     m_Address: chapter/1/ui/level-button
     m_ReadOnly: 0

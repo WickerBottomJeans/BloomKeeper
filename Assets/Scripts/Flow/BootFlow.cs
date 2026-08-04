@@ -20,6 +20,7 @@ namespace DefaultNamespace
         {
             ConfigureFrameRate();
             await addressableContentService.InitializeAsync();
+            await ConfigManager.Instance.InitializeAsync();
             // TODO: Move the shared sprite atlases to remote Addressables.
             await SpriteLoader.Instance.LoadAll();
 

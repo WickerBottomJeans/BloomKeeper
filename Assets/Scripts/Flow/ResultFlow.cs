@@ -5,16 +5,16 @@ namespace DefaultNamespace
 {
     public class ResultFlow
     {
-        private readonly LevelCatalog levelCatalog;
+        private readonly ConfigManager configManager;
         private int? currentLevelId;
 
         public event Action HomeRequested;
         public event Action RetryRequested;
         public event Action<int> NextLevelRequested;
 
-        public ResultFlow(LevelCatalog levelCatalog)
+        public ResultFlow(ConfigManager configManager)
         {
-            this.levelCatalog = levelCatalog ?? throw new ArgumentNullException(nameof(levelCatalog));
+            this.configManager = configManager ?? throw new ArgumentNullException(nameof(configManager));
         }
 
         public void Enter(LevelSessionResult result)
@@ -49,7 +49,7 @@ namespace DefaultNamespace
 
         private bool TryResolveNextLevel(int levelId, out int nextLevelId)
         {
-            if (!levelCatalog.TryGetNextLevelId(levelId, out nextLevelId)) return false;
+            if (!configManager.TryGetNextLevelId(levelId, out nextLevelId)) return false;
 
             if (nextLevelId > PlayerAccountContext.Instance.GetCurrentProgression().highestUnlockedLevel)
                 throw new InvalidOperationException($"Level {nextLevelId} follows completed level {levelId} but is not unlocked by confirmed progression.");

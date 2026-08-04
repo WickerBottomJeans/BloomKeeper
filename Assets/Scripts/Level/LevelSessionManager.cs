@@ -84,12 +84,12 @@ namespace DefaultNamespace
             currentAttemptId = null;
         }
 
-        public void PrepareLevelSession(int levelId)
+        public void PrepareLevelSession(LevelData levelData)
         {
             ClearCurrentLevelSession();
 
-            currentLevelData = LevelLoader.LoadLevel(levelId);
-            currentLevelId = levelId;
+            currentLevelData = levelData;
+            currentLevelId = levelData.levelId;
             currentAttemptId = Guid.NewGuid().ToString("N");
             scoreManager = new ScoreManager(currentLevelData.starScoreThresholds);
             scoreManager.OnScoreChanged += HandleScoreChanged;

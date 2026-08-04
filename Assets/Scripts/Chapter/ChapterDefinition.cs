@@ -4,7 +4,6 @@ namespace DefaultNamespace
 {
     public class ChapterDefinition
     {
-        public int schemaVersion;
         public int chapterId;
         public string chapterName;
         public string downloadLabel;
