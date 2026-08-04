@@ -140,6 +140,7 @@ Levels and important tuning can be changed without rebuilding the client, while 
 - [ ] Distinguish petals through shape or iconography in addition to color.
 - [ ] Add reduced-motion and appropriate contrast/accessibility settings.
 - [ ] Verify touch and mouse interactions across supported layouts.
+- [ ] Before release, inspect the Addressables Build Layout Report for duplicated dependencies across bundles; move genuinely shared heavy sprites, atlases, fonts, materials, audio, and other assets into shared Addressables groups, while avoiding bundle fragmentation for trivial duplicate assets.
 - [ ] Profile loading time, memory, garbage collection, and frame pacing.
 - [ ] Hold a measured 60 FPS target on the owned iPhone, iPad, and representative Windows hardware.
 

@@ -7,6 +7,7 @@
 - When the user asks to create or edit code under `Assets/Editor`, apply the requested Editor-script changes directly without architecture or file-scope approval. All other project restrictions remain in effect.
 - When the user explicitly requests a comment-only code edit, including adding, changing, or removing a TODO, apply it directly without architecture or file-scope approval.
 - When the user explicitly says `skip scope`, treat it as approval to implement the requested change immediately without presenting an implementation scope or asking for confirmation. All other project restrictions remain in effect.
+- When the user has explicitly authorized an ongoing redesign or iterative improvement of a named prefab or serialized UI asset, treat subsequent requests in the same conversation to apply, continue, simplify, tune, or redo that design as approval to edit that same asset. Do not repeat architecture or file-scope checkpoints for each iteration. Stop for renewed approval only if the work expands to another file, code, scenes, behavior, a new type, or a materially different feature goal.
 - Do not edit production code, tests, prefabs, scenes, packages, configuration, or other project files until the user explicitly accepts the proposed architecture.
 - Before implementation, explain the proposed responsibilities, ownership, boundaries, and data flow, including meaningful alternatives and tradeoffs.
 - Before editing, list every file that will be created, modified, or deleted and describe the exact class, method, API, and behavior changes planned for each file.
@@ -26,7 +27,7 @@
 
 ## User Review
 
-- Except for the Markdown and `Assets/Editor` exemptions above, the user must be able to review and approve every proposed change before it is made.
+- Except for the Markdown, `Assets/Editor`, and ongoing named-prefab/serialized-UI redesign exemptions above, the user must be able to review and approve every proposed change before it is made.
 - Keep proposals concrete and concise to avoid wasting the user's time and token usage.
 - When the user asks for big steps, concepts, architecture pictures, strategy, or high-level planning, answer at that level only. Do not provide file lists, exact code, class names, method names, implementation steps, or other low-level details unless the user explicitly asks for implementation detail.
 - Preserve the user's sense of ownership and learning. Do not hand over large prebuilt implementations or hide design choices inside generated code; explain the next concept, let the user make the design decision, challenge tradeoffs, and implement only the smallest approved step.
