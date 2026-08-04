@@ -18,20 +18,11 @@ namespace DefaultNamespace.Editor
 
         static AddressablesCatalogUrlWorkaround()
         {
-            EditorApplication.delayCall += RegisterBuildCallback;
+            BuildScript.buildCompleted -= HandleAddressablesBuildCompleted;
+            BuildScript.buildCompleted += HandleAddressablesBuildCompleted;
         }
 
-        private static void RegisterBuildCallback()
-        {
-            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
-            if (settings == null)
-                return;
-
-            settings.OnDataBuilderComplete -= HandleAddressablesBuildCompleted;
-            settings.OnDataBuilderComplete += HandleAddressablesBuildCompleted;
-        }
-
-        private static void HandleAddressablesBuildCompleted(AddressableAssetSettings settings, IDataBuilder builder, IDataBuilderResult result)
+        private static void HandleAddressablesBuildCompleted(AddressableAssetBuildResult result)
         {
             if (result is not AddressablesPlayerBuildResult || !string.IsNullOrEmpty(result.Error))
                 return;
