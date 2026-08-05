@@ -135,7 +135,7 @@ namespace DefaultNamespace.Editor
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Browse")) BrowseForChapterFile();
             EditorGUI.BeginDisabledGroup(string.IsNullOrWhiteSpace(existingChapterPath));
-            if (GUILayout.Button("Clear")) existingChapterPath = "";
+            if (GUILayout.Button("ClearPoolAndConfig")) existingChapterPath = "";
             EditorGUI.EndDisabledGroup();
             EditorGUILayout.EndHorizontal();
         }

@@ -37,7 +37,13 @@ namespace DefaultNamespace.Editor
                 fakeChapterStates.Add(new ChapterChooserItemState(fakeChapter, index == 0, true));
             }
 
-            UIManager.Instance.ShowChapterChooserAsync(fakeChapterStates).Forget();
+            ApplicationOperationRunner.Instance.Run(() => ShowFakeChaptersAsync(fakeChapterStates));
+        }
+
+        private static async UniTask ShowFakeChaptersAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)
+        {
+            await ApplicationPresentationService.Instance.RunWithLoading(() => UIManager.Instance.PrepareChapterChooserAsync(chapterStates));
+            UIManager.Instance.ShowChapterChooser();
         }
     }
 }

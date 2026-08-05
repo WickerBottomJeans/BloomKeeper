@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.UI;
@@ -12,47 +11,31 @@ namespace DefaultNamespace.UI
         private readonly RectTransform content;
         private readonly RectTransform viewport;
         private readonly ScrollRect scrollRect;
-        private readonly Func<int, Vector2> getPosition;
+        private readonly IScrollPoolGeometrySource geometrySource;
         private readonly Action<T> onCreate;
         private readonly Action<T, int> onShow;
         private readonly Action<T> onHide;
-        private readonly Func<int, float> getHalfHeight;
         private readonly IObjectPool<T> pool;
         private readonly Dictionary<int, T> visibleItems = new Dictionary<int, T>();
-        private readonly float viewportHeight;
-        
+        private readonly int[] orderedIndices;
         /// <summary>
         /// Number of extra viewports to pre-load.
         /// </summary>
         private readonly int bufferViewport;
 
-        private int itemCount;
+        private int visibleStartRank;
+        private int visibleEndRankExclusive;
 
-        public VerticalScrollPool(
-            RectTransform content,
-            RectTransform viewport,
-            ScrollRect scrollRect,
-            T prefab,
-            int itemCount,
-            Func<int, Vector2> getPosition,
-            Func<int, float> getHalfHeight,
-            Action<T> onCreate,
-            Action<T, int> onShow,
-            Action<T> onHide,
-            int defaultCapacity = 10,
-            int maxSize = 50,
-            int bufferViewport = 1)
+        public VerticalScrollPool(RectTransform content, RectTransform viewport, ScrollRect scrollRect, T prefab, IScrollPoolGeometrySource geometrySource, Action<T> onCreate, Action<T, int> onShow, Action<T> onHide, int defaultCapacity = 10, int maxSize = 50, int bufferViewport = 1)
         {
             this.content = content;
             this.viewport = viewport;
             this.scrollRect = scrollRect;
-            this.getPosition = getPosition;
-            this.getHalfHeight = getHalfHeight;
+            this.geometrySource = geometrySource;
             this.onShow = onShow;
             this.onHide = onHide;
-            this.itemCount = itemCount;
-            this.viewportHeight = viewport.rect.height;
             this.bufferViewport = bufferViewport;
+            orderedIndices = BuildOrderedIndices();
             pool = new ObjectPool<T>(
                 () =>
                 {
@@ -70,42 +53,101 @@ namespace DefaultNamespace.UI
             OnScroll(scrollRect.normalizedPosition);
         }
 
+        private int[] BuildOrderedIndices()
+        {
+            int[] indices = new int[geometrySource.Count];
+            for (int index = 0; index < indices.Length; index++) indices[index] = index;
+            Array.Sort(indices, CompareItemStarts);
+
+            for (int rank = 1; rank < indices.Length; rank++)
+            {
+                if (GetItemEnd(indices[rank - 1]) > GetItemEnd(indices[rank])) throw new ArgumentException("Scroll pool item end edges must be nondecreasing after sorting by start edge.", nameof(geometrySource));
+            }
+
+            return indices;
+        }
+
+        private int CompareItemStarts(int leftIndex, int rightIndex)
+        {
+            int startComparison = GetItemStart(leftIndex).CompareTo(GetItemStart(rightIndex));
+            if (startComparison != 0) return startComparison;
+            int endComparison = GetItemEnd(leftIndex).CompareTo(GetItemEnd(rightIndex));
+            return endComparison != 0 ? endComparison : leftIndex.CompareTo(rightIndex);
+        }
+
+        private float GetItemStart(int index)
+        {
+            ScrollPoolItemGeometry geometry = geometrySource.GetGeometry(index);
+            return geometry.Position.y - geometry.HalfExtent;
+        }
+
+        private float GetItemEnd(int index)
+        {
+            ScrollPoolItemGeometry geometry = geometrySource.GetGeometry(index);
+            return geometry.Position.y + geometry.HalfExtent;
+        }
+
         private void OnScroll(Vector2 scrollPos)
         {
+            float viewportHeight = viewport.rect.height;
             float scrolledY = scrollPos.y * (content.rect.height - viewportHeight);
-            HashSet<int> shouldBeVisible = new HashSet<int>();
+            float buffer = viewportHeight * bufferViewport;
+            int newStartRank = FindFirstRankWithEndAtOrAfter(scrolledY - buffer);
+            int newEndRankExclusive = FindFirstRankWithStartAfter(scrolledY + viewportHeight + buffer);
+            UpdateVisibleRange(newStartRank, newEndRankExclusive);
+        }
 
-            for (int i = 0; i < itemCount; i++)
+        private int FindFirstRankWithEndAtOrAfter(float viewportStart)
+        {
+            int low = 0;
+            int high = orderedIndices.Length;
+            while (low < high)
             {
-                float itemY = getPosition(i).y;
-                float halfHeight = getHalfHeight(i);
-                float buffer = viewportHeight * bufferViewport;
+                int middleRank = low + (high - low) / 2;
+                if (GetItemEnd(orderedIndices[middleRank]) < viewportStart) low = middleRank + 1;
+                else high = middleRank;
+            }
+            return low;
+        }
 
-                bool isVisible = (itemY + halfHeight) >= scrolledY - buffer &&
-                                 (itemY - halfHeight) <= scrolledY + viewportHeight + buffer;
-                if (isVisible) shouldBeVisible.Add(i);
+        private int FindFirstRankWithStartAfter(float viewportEnd)
+        {
+            int low = 0;
+            int high = orderedIndices.Length;
+            while (low < high)
+            {
+                int middleRank = low + (high - low) / 2;
+                if (GetItemStart(orderedIndices[middleRank]) <= viewportEnd) low = middleRank + 1;
+                else high = middleRank;
+            }
+            return low;
+        }
+
+        private void UpdateVisibleRange(int newStartRank, int newEndRankExclusive)
+        {
+            for (int rank = visibleStartRank; rank < visibleEndRankExclusive; rank++)
+            {
+                if (rank >= newStartRank && rank < newEndRankExclusive) continue;
+                int index = orderedIndices[rank];
+                T item = visibleItems[index];
+                onHide(item);
+                pool.Release(item);
+                visibleItems.Remove(index);
             }
 
-            foreach (int i in visibleItems.Keys.ToList())
+            for (int rank = newStartRank; rank < newEndRankExclusive; rank++)
             {
-                if (!shouldBeVisible.Contains(i))
-                {
-                    onHide(visibleItems[i]);
-                    pool.Release(visibleItems[i]);
-                    visibleItems.Remove(i);
-                }
+                int index = orderedIndices[rank];
+                if (visibleItems.ContainsKey(index)) continue;
+                T item = pool.Get();
+                ScrollPoolItemGeometry geometry = geometrySource.GetGeometry(index);
+                item.GetComponent<RectTransform>().localPosition = geometry.Position;
+                onShow(item, index);
+                visibleItems[index] = item;
             }
 
-            foreach (int i in shouldBeVisible)
-            {
-                if (!visibleItems.ContainsKey(i))
-                {
-                    T item = pool.Get();
-                    item.GetComponent<RectTransform>().localPosition = getPosition(i);
-                    onShow(item, i);
-                    visibleItems[i] = item;
-                }
-            }
+            visibleStartRank = newStartRank;
+            visibleEndRankExclusive = newEndRankExclusive;
         }
 
         public void Refresh()

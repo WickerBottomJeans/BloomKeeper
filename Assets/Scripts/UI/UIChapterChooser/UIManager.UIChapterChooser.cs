@@ -13,14 +13,20 @@ namespace DefaultNamespace.UI
         public event Action<int> ChapterVisitRequested;
         public event Action ChapterChooserCloseRequested;
 
-        public async UniTask ShowChapterChooserAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)
+        public async UniTask PrepareChapterChooserAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)
         {
             if (chapterChooserInstance == null)
                 chapterChooserInstance = Instantiate(chapterChooserPrefab, uiRoot);
 
             UnbindChapterChooser();
+            chapterChooserInstance.HideForPreparation();
+            await chapterChooserInstance.PrepareAsync(chapterStates);
+        }
+
+        public void ShowChapterChooser()
+        {
+            chapterChooserInstance.Show();
             BindChapterChooser();
-            await chapterChooserInstance.ShowAsync(chapterStates);
         }
 
         public void HideChapterChooser()

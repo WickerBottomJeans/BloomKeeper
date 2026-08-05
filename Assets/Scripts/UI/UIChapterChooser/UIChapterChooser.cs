@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,15 +9,26 @@ namespace DefaultNamespace.UI
 {
     public sealed class UIChapterChooser : MonoBehaviour
     {
-        [SerializeField] private HorizontalPagedScrollView pagedScrollView;
+        [SerializeField] private HorizontalSnapPool snapPool;
+        [SerializeField] private RectTransform scrollRectTransform;
         [SerializeField] private UIChapterView chapterViewTemplate;
-        [SerializeField] private Button dimmerButton;
+        [SerializeField] private Button closeButton;
+        [SerializeField] private CanvasGroup visibilityGroup;
+        [SerializeField] private UIPopupEntranceAnimator entranceAnimator;
+        [SerializeField, Min(0f)] private float edgeGap;
         [SerializeField] private int defaultPoolCapacity = 3;
         [SerializeField] private int maxPoolSize = 5;
+        [SerializeField] private int preloadItemCount = 1;
 
         private IReadOnlyList<ChapterChooserItemState> chapterStates;
-        private HorizontalScrollPool<UIChapterView> chapterViewPool;
-        private UniTask? currentChapterInitialization;
+        private CancellationTokenSource lifecycleCancellation;
+        private List<UniTask> preparationTasks;
+        private Vector3 preparedViewScale;
+        private float centerStep;
+        private int? preparedCurrentChapterIndex;
+        private bool isPreparing;
+        private bool isPrepared;
+        private bool isHiddenForPreparation;
 
         public event Action<int> ChapterVisitRequested;
         public event Action CloseRequested;
@@ -24,60 +36,115 @@ namespace DefaultNamespace.UI
         private void Awake()
         {
             chapterViewTemplate.gameObject.SetActive(false);
-            dimmerButton.onClick.AddListener(HandleDimmerClicked);
+            closeButton.onClick.AddListener(HandleCloseClicked);
         }
 
-        public async UniTask ShowAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)
+        public async UniTask PrepareAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)
         {
-            gameObject.SetActive(true);
-            DisposeDisplayedChapters();
-            this.chapterStates = chapterStates;
+            if (!isHiddenForPreparation) throw new InvalidOperationException("Chapter chooser must be hidden for preparation before preparation begins.");
+            if (isPreparing) throw new InvalidOperationException("Chapter chooser preparation is already running.");
+            if (chapterStates == null) throw new ArgumentNullException(nameof(chapterStates));
 
-            int currentChapterIndex = -1;
-            for (int index = 0; index < chapterStates.Count; index++)
-            {
-                if (!chapterStates[index].IsCurrent) continue;
-                currentChapterIndex = index;
-                break;
-            }
-
-            if (currentChapterIndex < 0)
-                throw new InvalidOperationException("Chapter chooser requires one current chapter.");
-
-            pagedScrollView.RefreshPages(chapterStates.Count);
-            pagedScrollView.SetPage(currentChapterIndex, false);
-            currentChapterInitialization = null;
-            chapterViewPool = new HorizontalScrollPool<UIChapterView>(pagedScrollView.Pages, pagedScrollView.Viewport, pagedScrollView.ScrollRect, chapterViewTemplate, chapterStates.Count, pagedScrollView.GetPagePosition, _ => pagedScrollView.PageWidth * 0.5f, index => pagedScrollView.GetPageSlot(index), BindViewEvents, ShowView, HideView, defaultPoolCapacity, maxPoolSize);
-            if (!currentChapterInitialization.HasValue)
-                throw new InvalidOperationException("Chapter chooser pool did not create the current chapter view.");
+            isPreparing = true;
 
             try
             {
-                await currentChapterInitialization.Value;
+                ClearPoolAndPreparedState();
+                this.chapterStates = chapterStates;
+
+                int? currentChapterIndex = null;
+                for (int index = 0; index < chapterStates.Count; index++)
+                {
+                    if (!chapterStates[index].IsCurrent) continue;
+                    if (currentChapterIndex.HasValue) throw new InvalidOperationException("Chapter chooser requires exactly one current chapter.");
+                    currentChapterIndex = index;
+                }
+
+                if (!currentChapterIndex.HasValue) throw new InvalidOperationException("Chapter chooser requires exactly one current chapter.");
+                preparedCurrentChapterIndex = currentChapterIndex;
+
+                lifecycleCancellation = new CancellationTokenSource();
+                CancellationToken preparationCancellationToken = lifecycleCancellation.Token;
+                preparationTasks = new List<UniTask>();
+                PrepareLayout();
+                snapPool.Configure(chapterViewTemplate, chapterStates.Count, centerStep, PrepareView, ShowView, HideView, currentChapterIndex.Value, defaultPoolCapacity, maxPoolSize, preloadItemCount);
+                List<UniTask> initialViewTasks = preparationTasks;
+                preparationTasks = null;
+                await UniTask.WhenAll(initialViewTasks);
+                preparationCancellationToken.ThrowIfCancellationRequested();
+                isPrepared = true;
+            }
+            catch
+            {
+                ClearPoolAndPreparedState();
+                throw;
             }
             finally
             {
-                currentChapterInitialization = null;
+                preparationTasks = null;
+                isPreparing = false;
             }
+        }
+
+        public void Show()
+        {
+            if (!isPrepared) throw new InvalidOperationException("Chapter chooser must finish preparation before it can be shown.");
+            LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)scrollRectTransform.parent);
+            scrollRectTransform.ForceUpdateRectTransforms();
+            snapPool.RefreshViewport();
+            snapPool.JumpToIndex(preparedCurrentChapterIndex.Value);
+            isHiddenForPreparation = false;
+            SetVisibility(true);
+            entranceAnimator.enabled = true;
         }
 
         public void Hide()
         {
-            DisposeDisplayedChapters();
+            isHiddenForPreparation = false;
+            entranceAnimator.enabled = false;
+            SetVisibility(false);
+            ClearPoolAndPreparedState();
             gameObject.SetActive(false);
         }
 
-        private void BindViewEvents(UIChapterView view)
+        public void HideForPreparation()
         {
-            view.VisitRequested += chapterId => ChapterVisitRequested?.Invoke(chapterId);
+            ClearPoolAndPreparedState();
+            isHiddenForPreparation = true;
+            entranceAnimator.enabled = false;
+            SetVisibility(false);
+            gameObject.SetActive(true);
+        }
+
+        private void PrepareView(UIChapterView view)
+        {
+            view.transform.localScale = preparedViewScale;
+            view.VisitRequested += HandleChapterVisitRequested;
+        }
+
+        private void PrepareLayout()
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)scrollRectTransform.parent);
+            scrollRectTransform.ForceUpdateRectTransforms();
+            RectTransform templateTransform = (RectTransform)chapterViewTemplate.transform;
+            Vector3 templateScale = templateTransform.localScale;
+            float templateWidth = templateTransform.rect.width * Mathf.Abs(templateScale.x);
+            float templateHeight = templateTransform.rect.height * Mathf.Abs(templateScale.y);
+            if (scrollRectTransform.rect.width <= 0f || scrollRectTransform.rect.height <= 0f) throw new InvalidOperationException("Chapter chooser scroll rect requires positive dimensions.");
+            if (templateWidth <= 0f || templateHeight <= 0f) throw new InvalidOperationException("Chapter chooser view template requires positive dimensions.");
+
+            float fitScale = Mathf.Min(1f, scrollRectTransform.rect.width / templateWidth, scrollRectTransform.rect.height / templateHeight);
+            preparedViewScale = templateScale * fitScale;
+            float scaledViewWidth = templateWidth * fitScale;
+            centerStep = scaledViewWidth + edgeGap;
         }
 
         private void ShowView(UIChapterView view, int index)
         {
-            UniTask initialization = view.Init(chapterStates[index]);
-            if (chapterStates[index].IsCurrent)
+            UniTask initialization = view.Init(chapterStates[index], lifecycleCancellation.Token);
+            if (preparationTasks != null)
             {
-                currentChapterInitialization = initialization;
+                preparationTasks.Add(initialization);
                 return;
             }
 
@@ -89,24 +156,39 @@ namespace DefaultNamespace.UI
             view.ResetForPool();
         }
 
-        private void DisposeDisplayedChapters()
+        private void ClearPoolAndPreparedState()
         {
-            chapterViewPool?.Dispose();
-            chapterViewPool = null;
-            currentChapterInitialization = null;
-            pagedScrollView.RefreshPages(0);
+            isPrepared = false;
+            preparationTasks = null;
+            lifecycleCancellation?.Cancel();
+            snapPool.ClearPoolAndConfig();
+            lifecycleCancellation?.Dispose();
+            lifecycleCancellation = null;
             chapterStates = null;
+            preparedCurrentChapterIndex = null;
         }
 
-        private void HandleDimmerClicked()
+        private void HandleChapterVisitRequested(int chapterId)
+        {
+            ChapterVisitRequested?.Invoke(chapterId);
+        }
+
+        private void HandleCloseClicked()
         {
             CloseRequested?.Invoke();
         }
 
+        private void SetVisibility(bool isVisible)
+        {
+            visibilityGroup.alpha = isVisible ? 1f : 0f;
+            visibilityGroup.interactable = isVisible;
+            visibilityGroup.blocksRaycasts = isVisible;
+        }
+
         private void OnDestroy()
         {
-            dimmerButton.onClick.RemoveListener(HandleDimmerClicked);
-            DisposeDisplayedChapters();
+            closeButton.onClick.RemoveListener(HandleCloseClicked);
+            ClearPoolAndPreparedState();
         }
     }
 }

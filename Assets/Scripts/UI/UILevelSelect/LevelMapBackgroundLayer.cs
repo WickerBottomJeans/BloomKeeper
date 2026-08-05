@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public class LevelMapBackgroundLayer : MonoBehaviour
+    public class LevelMapBackgroundLayer : MonoBehaviour, IScrollPoolGeometrySource
     {
         [SerializeField] private RectTransform content;
         [SerializeField] private ScrollRect scrollRect;
@@ -43,7 +43,7 @@ namespace DefaultNamespace.UI
                 _chunkTextureCache.BeginInitialCapture();
                 try
                 {
-                    chunkPool = new VerticalScrollPool<RawImage>(content, viewport, scrollRect, chunkPrefab, chunks.Count, i => chunkPositions[i], i => chunkHalfHeights[i], image => image.transform.SetSiblingIndex(previewImages.Count), (image, i) => ShowChunk(image, i), image => HideChunk(image), defaultPoolCapacity, maxPoolCapacity, bufferViewport);
+                    chunkPool = new VerticalScrollPool<RawImage>(content, viewport, scrollRect, chunkPrefab, this, image => image.transform.SetSiblingIndex(previewImages.Count), (image, i) => ShowChunk(image, i), image => HideChunk(image), defaultPoolCapacity, maxPoolCapacity, bufferViewport);
                 }
                 finally
                 {
@@ -115,6 +115,13 @@ namespace DefaultNamespace.UI
         private void HideChunk(RawImage image)
         {
             _chunkTextureCache.HideChunk(image);
+        }
+
+        int IScrollPoolGeometrySource.Count => chunks.Count;
+
+        ScrollPoolItemGeometry IScrollPoolGeometrySource.GetGeometry(int index)
+        {
+            return new ScrollPoolItemGeometry(chunkPositions[index], chunkHalfHeights[index]);
         }
 
         private void OnDestroy()

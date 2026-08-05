@@ -1,19 +1,10 @@
 fileFormatVersion: 2
-guid: 331cc1446ff62b0438a8864b5c1764a7
+guid: 4092bb689e1f80049832828e50fc73aa
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -537109775571909830
-    second: MaxBlack_3_0
-  - first:
-      213: -748647425393771056
-    second: MaxBlack_3_1
-  - first:
-      213: 1383047461973551315
-    second: MaxBlack_3_2
-  - first:
-      213: -7030093572502811644
-    second: MaxBlack_3_3
+      213: -8424494650172620716
+    second: TomsGardenUI_4_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -148,89 +139,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: MaxBlack_3_0
+      name: TomsGardenUI_4_0
       rect:
         serializedVersion: 2
-        x: 52
-        y: 576
-        width: 1436
-        height: 373
+        x: 60
+        y: 208
+        width: 1328
+        height: 670
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 72, y: 72, z: 72, w: 72}
+      border: {x: 70, y: 70, z: 70, w: 70}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a3385ad318dcb88f0800000000000000
-      internalID: -537109775571909830
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MaxBlack_3_1
-      rect:
-        serializedVersion: 2
-        x: 97
-        y: 87
-        width: 461
-        height: 429
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0ddb46312254c95f0800000000000000
-      internalID: -748647425393771056
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MaxBlack_3_2
-      rect:
-        serializedVersion: 2
-        x: 640
-        y: 184
-        width: 527
-        height: 189
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 107, y: 90, z: 107, w: 90}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3d86076c652913310800000000000000
-      internalID: 1383047461973551315
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MaxBlack_3_3
-      rect:
-        serializedVersion: 2
-        x: 1238
-        y: 175
-        width: 220
-        height: 218
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 40c86319427107e90800000000000000
-      internalID: -7030093572502811644
+      spriteID: 450484420ce261b80800000000000000
+      internalID: -8424494650172620716
       vertices: []
       indices: 
       edges: []
@@ -239,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 7be99c5a578ab944093a795fb9fb3f03
+    spriteID: 3b993d8c0668c8c41996836d06d88932
     internalID: 0
     vertices: []
     indices: 
@@ -249,10 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      MaxBlack_3_0: -537109775571909830
-      MaxBlack_3_1: -748647425393771056
-      MaxBlack_3_2: 1383047461973551315
-      MaxBlack_3_3: -7030093572502811644
+      TomsGardenUI_4_0: -8424494650172620716
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

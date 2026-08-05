@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DefaultNamespace.Settings;
 using DefaultNamespace.UI;
 
 namespace DefaultNamespace
@@ -32,14 +33,17 @@ namespace DefaultNamespace
             UIManager.Instance.AddCurrencyRequested += HandleAddCurrencyRequested;
 
             PlayerProgressionData progression = PlayerAccountContext.Instance.GetCurrentProgression();
+            if (!currentChapterId.HasValue) currentChapterId = PlayerPrefsStore.LoadLastSelectedChapterId();
             ChapterIndexEntry chapterEntry = currentChapterId.HasValue
                 ? GetChapterEntry(ConfigManager.Instance.ChapterIndex, currentChapterId.Value)
                 : ResolveLatestUnlockedChapter(ConfigManager.Instance.ChapterIndex, progression.highestUnlockedLevel);
+            if (chapterEntry.unlockLevelId > progression.highestUnlockedLevel)
+                throw new InvalidOperationException($"Stored chapter {chapterEntry.chapterId} requires level {chapterEntry.unlockLevelId}, but the highest unlocked level is {progression.highestUnlockedLevel}.");
             await addressableContentService.EnsureDownloadedAsync(chapterEntry.downloadLabel);
             ChapterContent chapterContent = await ConfigManager.Instance.GetChapterContentAsync(chapterEntry.chapterId);
             await UIManager.Instance.ShowHome(chapterContent, progression);
             await ChangeTabAsync(HomeMiddleTab.Map);
-            currentChapterId = chapterEntry.chapterId;
+            SetCurrentChapter(chapterEntry.chapterId);
         }
 
         public void Exit()
@@ -58,6 +62,7 @@ namespace DefaultNamespace
 
         public void SetCurrentChapter(int chapterId)
         {
+            PlayerPrefsStore.SaveLastSelectedChapterId(chapterId);
             currentChapterId = chapterId;
         }
 
@@ -85,7 +90,8 @@ namespace DefaultNamespace
             foreach (ChapterIndexEntry chapter in ConfigManager.Instance.ChapterIndex.chapters)
                 chapterStates.Add(new ChapterChooserItemState(chapter, chapter.chapterId == currentChapterId.Value, chapter.unlockLevelId <= progression.highestUnlockedLevel));
 
-            await ApplicationPresentationService.Instance.RunWithLoading(() => UIManager.Instance.ShowChapterChooserAsync(chapterStates));
+            await ApplicationPresentationService.Instance.RunWithLoading(() => UIManager.Instance.PrepareChapterChooserAsync(chapterStates));
+            UIManager.Instance.ShowChapterChooser();
         }
 
         private void HandleChapterVisitRequested(int chapterId)
@@ -121,7 +127,7 @@ namespace DefaultNamespace
                 await UIManager.Instance.ShowHome(chapterContent, progression);
                 await ChangeTabAsync(HomeMiddleTab.Map);
                 UIManager.Instance.HideChapterChooser();
-                currentChapterId = chapterId;
+                SetCurrentChapter(chapterId);
             });
         }
 

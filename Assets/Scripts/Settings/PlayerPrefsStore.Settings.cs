@@ -3,22 +3,22 @@ using UnityEngine;
 
 namespace DefaultNamespace.Settings
 {
-    sealed class PlayerPrefsUserSettingsStore
+    public static partial class PlayerPrefsStore
     {
         private const string MusicVolumeKey = "Settings.Audio.MusicVolume";
         private const string SfxVolumeKey = "Settings.Audio.SfxVolume";
 
-        public float LoadMusicVolume()
+        public static float LoadMusicVolume()
         {
             return LoadVolume(MusicVolumeKey);
         }
 
-        public float LoadSfxVolume()
+        public static float LoadSfxVolume()
         {
             return LoadVolume(SfxVolumeKey);
         }
 
-        public void Save(float musicVolume, float sfxVolume)
+        public static void SaveAudioSettings(float musicVolume, float sfxVolume)
         {
             PlayerPrefs.SetFloat(MusicVolumeKey, musicVolume);
             PlayerPrefs.SetFloat(SfxVolumeKey, sfxVolume);

@@ -44,7 +44,8 @@ namespace DefaultNamespace.UI
 
             if (scaleTarget != null)
             {
-                scaleTarget.localScale = Vector3.zero;
+                // Never use zero scale here; it breaks ScrollRect bounds
+                scaleTarget.localScale = restingScale * 0.01f;
                 entranceSequence.Join(scaleTarget.DOScale(restingScale, duration).SetEase(Ease.OutBack));
                 hasEntrance = true;
             }

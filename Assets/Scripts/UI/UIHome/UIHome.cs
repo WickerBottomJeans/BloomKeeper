@@ -10,6 +10,7 @@ namespace DefaultNamespace.UI
     {
         [SerializeField] private RectTransform content;
         [SerializeField] private RectTransform middleSlot;
+        [SerializeField] private RectTransform fullScreenRoot;
         [SerializeField] private UILevelSelect levelSelectPrefab;
         [SerializeField] private UIFriendsView friendsPrefab;
         [SerializeField] private UIShopView shopPrefab;
@@ -119,6 +120,9 @@ namespace DefaultNamespace.UI
                 ChapterBottomView newBottomView = newBottomObject.GetComponent<ChapterBottomView>();
                 if (newBottomView == null)
                     throw new InvalidOperationException($"Addressable prefab '{bottomNavigationAddress}' does not contain ChapterBottomView on its root.");
+
+                newTopperView.SetBleedTarget(fullScreenRoot);
+                newBottomView.SetBleedTarget(fullScreenRoot);
 
                 ReleaseChapterViews();
                 newTopperObject.transform.SetSiblingIndex(0);

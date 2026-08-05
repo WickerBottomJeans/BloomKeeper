@@ -12,6 +12,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private Image avatarImage;
         [SerializeField] private Button addLifeButton;
         [SerializeField] private Button addCurrencyButton;
+        [SerializeField] private RectTransformEdgeBleed backgroundBleed;
 
         public event Action AddLifeRequested;
         public event Action AddCurrencyRequested;
@@ -41,6 +42,11 @@ namespace DefaultNamespace.UI
         public void DisplayAvatar(Sprite avatar)
         {
             avatarImage.sprite = avatar;
+        }
+
+        public void SetBleedTarget(RectTransform targetRect)
+        {
+            backgroundBleed.SetTarget(targetRect);
         }
 
         private void HandleAddLifeClicked()

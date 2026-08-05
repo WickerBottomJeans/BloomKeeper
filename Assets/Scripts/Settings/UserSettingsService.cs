@@ -6,7 +6,6 @@ namespace DefaultNamespace.Settings
 {
     public sealed class UserSettingsService : Singleton<UserSettingsService>
     {
-        private PlayerPrefsUserSettingsStore store;
         private float musicVolume;
         private float sfxVolume;
         private bool isDirty;
@@ -23,9 +22,8 @@ namespace DefaultNamespace.Settings
             base.Awake();
             if (Instance != this) return;
 
-            store = new PlayerPrefsUserSettingsStore();
-            musicVolume = store.LoadMusicVolume();
-            sfxVolume = store.LoadSfxVolume();
+            musicVolume = PlayerPrefsStore.LoadMusicVolume();
+            sfxVolume = PlayerPrefsStore.LoadSfxVolume();
             ownsSettings = true;
         }
 
@@ -53,7 +51,7 @@ namespace DefaultNamespace.Settings
         {
             if (!isDirty) return;
 
-            store.Save(musicVolume, sfxVolume);
+            PlayerPrefsStore.SaveAudioSettings(musicVolume, sfxVolume);
             isDirty = false;
         }
 

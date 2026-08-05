@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -29,7 +30,7 @@ namespace DefaultNamespace.UI
             visitButton.onClick.AddListener(HandleVisitClicked);
         }
 
-        public async UniTask Init(ChapterChooserItemState state)
+        public async UniTask Init(ChapterChooserItemState state, CancellationToken cancellationToken)
         {
             ResetForPool();
             int requestedVersion = initVersion;
@@ -45,7 +46,7 @@ namespace DefaultNamespace.UI
             AsyncOperationHandle<Sprite> loadHandle = Addressables.LoadAssetAsync<Sprite>(chapter.chooserImageAddress);
             try
             {
-                Sprite chooserImage = await loadHandle.ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
+                Sprite chooserImage = await loadHandle.ToUniTask(cancellationToken: cancellationToken);
                 if (requestedVersion != initVersion) return;
                 chooserImageHandle = loadHandle;
                 loadHandle = default;

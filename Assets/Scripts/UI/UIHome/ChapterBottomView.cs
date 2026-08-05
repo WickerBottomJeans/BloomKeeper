@@ -10,9 +10,15 @@ namespace DefaultNamespace.UI
         [SerializeField] private Button socialButton;
         [SerializeField] private Button shopButton;
         [SerializeField] private Button settingsButton;
+        [SerializeField] private RectTransformEdgeBleed backgroundBleed;
 
         public event Action<HomeMiddleTab> TabRequested;
         public event Action SettingsRequested;
+
+        public void SetBleedTarget(RectTransform targetRect)
+        {
+            backgroundBleed.SetTarget(targetRect);
+        }
 
         private void Awake()
         {

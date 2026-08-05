@@ -21,7 +21,7 @@ namespace DefaultNamespace.Editor
             BuildScript.buildCompleted -= HandleAddressablesBuildCompleted;
             BuildScript.buildCompleted += HandleAddressablesBuildCompleted;
         }
-
+    
         private static void HandleAddressablesBuildCompleted(AddressableAssetBuildResult result)
         {
             if (result is not AddressablesPlayerBuildResult || !string.IsNullOrEmpty(result.Error))
