@@ -12,6 +12,7 @@ namespace DefaultNamespace
     public class LevelSessionManager : Singleton<LevelSessionManager>
     {
         public event Action<LevelSessionResult> OnLevelFinished;
+        public event Action BoosterUseFailed;
 
         private ObjectiveManager objectiveManager;
         private ConstrainerManager constrainerManager;
@@ -32,15 +33,6 @@ namespace DefaultNamespace
         private bool isLevelSessionStarted;
         private bool isLevelSessionPaused;
 
-        protected override void Awake()
-        {
-            base.Awake();
-            if (Instance != this) return;
-
-            boosterUseCoordinator = gameObject.AddComponent<BoosterUseCoordinator>();
-            boosterUseCoordinator.enabled = false;
-        }
-
         private void Update()
         {
             constrainerManager?.Tick(Time.deltaTime);
@@ -48,9 +40,8 @@ namespace DefaultNamespace
 
         public void ClearCurrentLevelSession()
         {
-            boosterUseCoordinator.enabled = false;
-            boosterUseCoordinator.BoosterUseApproved -= HandleBoosterUseApproved;
-            boosterUseCoordinator.BoosterUseCanceled -= HandleBoosterUseCanceled;
+            if (boosterUseCoordinator != null)
+                boosterUseCoordinator.BoosterUseApproved -= HandleBoosterUseApproved;
             constrainerManager?.StopLevel();
             if (isLevelSessionPaused)
                 GameTimeService.ReleasePause(this);
@@ -74,6 +65,7 @@ namespace DefaultNamespace
             {
                 gameBoardInstance.OnGameplayEvent -= HandleGameplayEvent;
                 gameBoardInstance.OnBoardSettled -= HandleBoardSettled;
+                gameBoardInstance.BoosterUseFailed -= HandleBoosterUseFailed;
                 Destroy(gameBoardInstance.gameObject);
                 gameBoardInstance = null;
             }
@@ -85,6 +77,7 @@ namespace DefaultNamespace
 
             objectiveManager = null;
             constrainerManager = null;
+            boosterUseCoordinator = null;
             scoreManager = null;
             currentLevelData = null;
             pendingConstrainerFailures.Clear();
@@ -123,13 +116,14 @@ namespace DefaultNamespace
 
             objectiveManager = new ObjectiveManager(objectives);
             constrainerManager = new ConstrainerManager(constrainers);
+            boosterUseCoordinator = new BoosterUseCoordinator();
             objectiveManager.OnAllComplete += HandleLevelComplete;
             objectiveManager.OnProgressUpdated += HandleObjectiveProgressUpdated;
             constrainerManager.OnFailed += HandleConstrainerFailed;
             constrainerManager.OnProgressUpdated += HandleConstrainerProgressUpdated;
             Tile[,] grid = BoardInitializer.Initialize(currentLevelData);
-            
-            DisplayLevel(grid, constrainerManager.GetViewData(), currentLevelData);
+            var levelUIInitData = new LevelUIInitData(objectiveManager.GetViewData(), constrainerManager.GetViewData(), scoreManager.GetViewData(), boosterUseCoordinator.GetAvailableBoosters());
+            DisplayLevel(grid, levelUIInitData);
             isLevelSessionPrepared = true;
         }
 
@@ -143,8 +137,6 @@ namespace DefaultNamespace
             isLevelSessionStarted = true;
             isLevelSessionPaused = false;
             boosterUseCoordinator.BoosterUseApproved += HandleBoosterUseApproved;
-            boosterUseCoordinator.BoosterUseCanceled += HandleBoosterUseCanceled;
-            boosterUseCoordinator.enabled = true;
             constrainerManager.StartLevel();
         }
 
@@ -158,7 +150,6 @@ namespace DefaultNamespace
                 throw new InvalidOperationException("Cannot pause a level session that is already paused.");
 
             isLevelSessionPaused = true;
-            boosterUseCoordinator.enabled = false;
             constrainerManager.StopLevel();
             GameTimeService.RequestPause(this);
         }
@@ -174,16 +165,13 @@ namespace DefaultNamespace
 
             GameTimeService.ReleasePause(this);
             isLevelSessionPaused = false;
-            boosterUseCoordinator.enabled = true;
             constrainerManager.StartLevel();
         }
 
-        private void DisplayLevel(Tile[,] grid, List<ConstrainerViewData> constrainerViewData, LevelData levelData)
+        private void DisplayLevel(Tile[,] grid, LevelUIInitData levelUIInitData)
         {
             ShowWorldLevelBackground();
-            int scoreTarget = GetScoreTarget(levelData.starScoreThresholds);
-            List<int> scoreMilestones = GetScoreMilestones(levelData.starScoreThresholds);
-            UIManager.Instance.ShowLevelUI(objectiveManager.GetViewData(), constrainerViewData, scoreTarget, scoreMilestones, levelData.StarCap);
+            UIManager.Instance.ShowLevelUI(levelUIInitData);
             SpawnGameBoard(grid, UIManager.Instance.GetLevelBoardPlayAreaScreenRect());
         }
 
@@ -201,6 +189,7 @@ namespace DefaultNamespace
             gameBoardInstance.Init(grid, playAreaScreenRect, ResolveObjectiveTargets);
             gameBoardInstance.OnGameplayEvent += HandleGameplayEvent;
             gameBoardInstance.OnBoardSettled += HandleBoardSettled;
+            gameBoardInstance.BoosterUseFailed += HandleBoosterUseFailed;
         }
 
         private IReadOnlyList<ObjectiveTileTargetGroup> ResolveObjectiveTargets(IReadOnlyList<TileState> boardSnapshot)
@@ -220,9 +209,14 @@ namespace DefaultNamespace
             gameBoardInstance.UseBooster(boosterType);
         }
 
-        private void HandleBoosterUseCanceled()
+        private void HandleBoosterUseFailed()
         {
-            gameBoardInstance.CancelBoosterUse();
+            BoosterUseFailed?.Invoke();
+        }
+
+        public void RequestBoosterUse(BoosterType boosterType)
+        {
+            boosterUseCoordinator.RequestUse(boosterType);
         }
 
         private void HandleObjectiveProgressUpdated()
@@ -253,7 +247,6 @@ namespace DefaultNamespace
             if (isLevelEnded) return;
 
             isLevelEnded = true;
-            boosterUseCoordinator.enabled = false;
             constrainerManager?.StopLevel();
             if (failureData.Count == 0)
                 throw new InvalidOperationException("Cannot show lose screen without constrainer failure data.");
@@ -281,31 +274,6 @@ namespace DefaultNamespace
             UIManager.Instance.DisplayLevelScore(currentScore, currentStars);
         }
 
-        private static int GetScoreTarget(IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
-        {
-            int target = 0;
-            foreach (StarScoreThresholdJson threshold in starScoreThresholds)
-            {
-                if (threshold.score > target)
-                    target = threshold.score;
-            }
-
-            return target;
-        }
-
-        private static List<int> GetScoreMilestones(IReadOnlyList<StarScoreThresholdJson> starScoreThresholds)
-        {
-            int target = GetScoreTarget(starScoreThresholds);
-            List<int> milestones = new();
-            foreach (StarScoreThresholdJson threshold in starScoreThresholds)
-            {
-                if (threshold.score > 0 && threshold.score < target)
-                    milestones.Add(threshold.score);
-            }
-
-            return milestones;
-        }
-
         private void HandleBoardSettled()
         {
             if (isLevelEnded) return;
@@ -330,7 +298,6 @@ namespace DefaultNamespace
             if (isLevelEnded) return;
 
             isLevelEnded = true;
-            boosterUseCoordinator.enabled = false;
             constrainerManager?.StopLevel();
             int earnedStars = scoreManager.CalculateStars();
             OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentAttemptId, true, scoreManager.CurrentScore, earnedStars, currentLevelData.StarCap, string.Empty));

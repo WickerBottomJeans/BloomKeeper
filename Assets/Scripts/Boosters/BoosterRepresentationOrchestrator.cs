@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DefaultNamespace;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
 using UnityEngine;
@@ -9,12 +10,26 @@ namespace Boosters
 {
     public sealed class BoosterRepresentationOrchestrator : MonoBehaviour
     {
-        private Dictionary<Type, IBoosterRepresentationPresenter> presenters;
+        [SerializeField] private BoosterTargetPresentationConfig boosterTargetPresentationConfig;
 
-        public void Init(BoardVFXManager boardVFXManager)
+        private Dictionary<Type, IBoosterRepresentationPresenter> presenters;
+        private TileViewManager tileViewManager;
+
+        public void Init(TileViewManager tileViewManager, BoardVFXManager boardVFXManager)
         {
+            this.tileViewManager = tileViewManager;
             presenters = new Dictionary<Type, IBoosterRepresentationPresenter>();
             Register(new BloomWandPresenter(boardVFXManager));
+        }
+
+        public void ShowBoosterTargets(BoosterType boosterType, IReadOnlyList<Vector2Int> positions)
+        {
+            tileViewManager.ShowBoosterTargets(positions, boosterTargetPresentationConfig.GetMaterial(boosterType));
+        }
+
+        public void HideBoosterTargets()
+        {
+            tileViewManager.HideBoosterTargets();
         }
 
         public void AcquireVitalViews(BoosterUseResult boosterUseResult, MatchResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)

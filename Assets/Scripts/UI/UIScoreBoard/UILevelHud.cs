@@ -20,12 +20,12 @@ public class UILevelHud : MonoBehaviour
         pauseButton.onClick.AddListener(HandlePauseClicked);
     }
 
-    public void Init(List<ObjectiveViewData> objectiveViewData, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
+    public void Init(IReadOnlyList<ObjectiveViewData> objectiveViewData, IReadOnlyList<ConstrainerViewData> constrainerViewData, ScoreViewData scoreViewData)
     {
         ClearConstrainers();
         objectiveBoard.Display(objectiveViewData);
         DisplayConstrainers(constrainerViewData);
-        scoreBoard.Init(scoreTarget, scoreMilestones, starCap);
+        scoreBoard.Init(scoreViewData.TargetScore, scoreViewData.MilestoneScores, scoreViewData.StarCap);
     }
 
     public void RefreshObjectives(List<ObjectiveViewData> objectiveViewData)
@@ -33,7 +33,7 @@ public class UILevelHud : MonoBehaviour
         objectiveBoard.Refresh(objectiveViewData);
     }
 
-    public void DisplayConstrainers(List<ConstrainerViewData> viewData)
+    public void DisplayConstrainers(IReadOnlyList<ConstrainerViewData> viewData)
     {
         foreach (ConstrainerViewData data in viewData)
         {

@@ -17,11 +17,27 @@ namespace DefaultNamespace.UI
             remove => levelHud.PauseRequested -= value;
         }
 
-        public void Init(List<ObjectiveViewData> objectiveViewData, List<ConstrainerViewData> constrainerViewData, int scoreTarget, IReadOnlyList<int> scoreMilestones, int starCap)
+        public event Action<BoosterType> BoosterUseRequested
         {
-            levelHud.Init(objectiveViewData, constrainerViewData, scoreTarget, scoreMilestones, starCap);
+            add => boosterBoard.BoosterUseRequested += value;
+            remove => boosterBoard.BoosterUseRequested -= value;
+        }
+
+        public event Action BoosterCancelRequested
+        {
+            add => boosterBoard.BoosterCancelRequested += value;
+            remove => boosterBoard.BoosterCancelRequested -= value;
+        }
+
+        public void Init(LevelUIInitData levelUIInitData)
+        {
+            levelHud.Init(levelUIInitData.Objectives, levelUIInitData.Constrainers, levelUIInitData.Score);
+            boosterBoard.Display(levelUIInitData.AvailableBoosters);
             boosterBoard.Show();
         }
+
+        public void EnterBoosterTargeting(BoosterType boosterType) => boosterBoard.EnterBoosterTargeting(boosterType);
+        public void ExitBoosterTargeting() => boosterBoard.ExitBoosterTargeting();
 
         public void RefreshObjectives(List<ObjectiveViewData> objectiveViewData)
         {

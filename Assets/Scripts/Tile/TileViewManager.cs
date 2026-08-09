@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
@@ -11,6 +12,8 @@ namespace DefaultNamespace
         [SerializeField] private TileView _tileViewPrefab;
 
         private TileView[,] _views;
+        private readonly List<TileView> _activeBoosterTargetViews = new List<TileView>();
+        private bool _boosterTargetsShown;
 
         public void Init(Tile[,] grid, BoardLayout layout)
         {
@@ -52,6 +55,54 @@ namespace DefaultNamespace
             string key = SpriteKeyHelper.GetTileSpriteKey(tile.TileType);
             Sprite sprite = SpriteLoader.Instance.GetSprite(key);
             _views[col, row].SetBase(sprite);
+        }
+
+        public void ShowBoosterTargets(IReadOnlyList<Vector2Int> positions, Material material)
+        {
+            if (positions == null) throw new ArgumentNullException(nameof(positions));
+            if (material == null) throw new ArgumentNullException(nameof(material));
+            if (_boosterTargetsShown) throw new InvalidOperationException("Booster targets are already shown.");
+
+            var views = new List<TileView>(positions.Count);
+            var uniqueViews = new HashSet<TileView>();
+            foreach (Vector2Int position in positions)
+            {
+                if (position.x < 0 || position.x >= _views.GetLength(0) || position.y < 0 || position.y >= _views.GetLength(1))
+                    throw new ArgumentOutOfRangeException(nameof(positions), position, "Booster target position is outside the board view.");
+
+                TileView view = _views[position.x, position.y];
+                if (view == null) throw new InvalidOperationException($"Booster target position {position} has no tile view.");
+                if (!uniqueViews.Add(view)) throw new ArgumentException($"Booster target position {position} is duplicated.", nameof(positions));
+                views.Add(view);
+            }
+
+            _boosterTargetsShown = true;
+            try
+            {
+                foreach (TileView view in views)
+                {
+                    view.ShowBoosterTarget(material);
+                    _activeBoosterTargetViews.Add(view);
+                }
+            }
+            catch
+            {
+                foreach (TileView view in _activeBoosterTargetViews)
+                    view.HideBoosterTarget();
+                _activeBoosterTargetViews.Clear();
+                _boosterTargetsShown = false;
+                throw;
+            }
+        }
+
+        public void HideBoosterTargets()
+        {
+            if (!_boosterTargetsShown) throw new InvalidOperationException("Booster targets are not shown.");
+
+            foreach (TileView view in _activeBoosterTargetViews)
+                view.HideBoosterTarget();
+            _activeBoosterTargetViews.Clear();
+            _boosterTargetsShown = false;
         }
         
         /// <summary>

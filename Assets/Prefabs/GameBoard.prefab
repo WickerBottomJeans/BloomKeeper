@@ -195,3 +195,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83ae0c9b772d4eb8ab9fb0178a10ed2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Boosters.BoosterRepresentationOrchestrator
+  boosterTargetPresentationConfig: {fileID: 11400000, guid: 31cd44c42c1d9d2478400e35267147e1, type: 2}

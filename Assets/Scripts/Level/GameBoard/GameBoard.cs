@@ -68,6 +68,7 @@ public class GameBoard : MonoBehaviour
 
     public event Action<IGameplayEvent> OnGameplayEvent;
     public event Action OnBoardSettled;
+    public event Action BoosterUseFailed;
 
     public void Init(Tile[,] grid, Rect playAreaScreenRect,
         Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets)
@@ -85,7 +86,7 @@ public class GameBoard : MonoBehaviour
         skillRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager,
             layout);
         boosterRepresentationOrchestrator = GetComponent<BoosterRepresentationOrchestrator>();
-        boosterRepresentationOrchestrator.Init(boardVFXManager);
+        boosterRepresentationOrchestrator.Init(tileViewManager, boardVFXManager);
         boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager, skillRepresentationOrchestrator, boosterRepresentationOrchestrator, boardAudioManager, layout, grid);
 
         boardInputHandler.Init(layout, cam);
@@ -93,6 +94,7 @@ public class GameBoard : MonoBehaviour
         boardInputHandler.OnSwapRequested += HandleSwap;
         boardInputHandler.OnEditRequested += HandleEditRequested;
         UIManager.Instance.OnPetalEditConfirmed += HandlePetalEditConfirmed;
+        UIManager.Instance.BoosterCancelRequested += CancelBoosterUse;
 
     }
 
@@ -164,26 +166,53 @@ public class GameBoard : MonoBehaviour
 
     private async UniTask EnterBoosterTargeting()
     {
-        if (!activeBoosterType.HasValue) throw new InvalidOperationException("Booster targeting requires an active booster type.");
-
-        activeBoosterChooser = BoosterManager.CreateChooser(activeBoosterType.Value);
-        IReadOnlyList<Vector2Int> targets = await activeBoosterChooser.Choose(grid, boardInputHandler);
-        activeBoosterChooser = null;
-
-        if (targets == null)
+        bool targetingPresentationEntered = false;
+        bool boosterTargetsShown = false;
+        try
         {
-            activeBoosterType = null;
-            TransitionTo(BoardState.Idle);
-            return;
-        }
+            if (!activeBoosterType.HasValue) throw new InvalidOperationException("Booster targeting requires an active booster type.");
 
-        pendingBoosterUseResult = BoosterManager.Execute(activeBoosterType.Value, grid, targets);
-        activeBoosterType = null;
-        pendingSkillActivations.Clear();
-        pendingMatches = new List<MatchGroup>(pendingBoosterUseResult.MatchGroups);
-        isResolvingPlayerMove = false;
-        currentCascadeDepth = 0;
-        TransitionTo(BoardState.Resolving);
+            activeBoosterChooser = BoosterManager.CreateChooser(activeBoosterType.Value);
+            IReadOnlyList<Vector2Int> boosterTargetCandidates = activeBoosterChooser.GetBoosterTargetCandidates(grid);
+            boardPresentationCoordinator.ShowBoosterTargets(activeBoosterType.Value, boosterTargetCandidates);
+            boosterTargetsShown = true;
+
+            UIManager.Instance.EnterBoosterTargeting(activeBoosterType.Value);
+            targetingPresentationEntered = true;
+            IReadOnlyList<Vector2Int> targets = await activeBoosterChooser.Choose(grid, boardInputHandler);
+            activeBoosterChooser = null;
+
+            if (targets == null)
+            {
+                activeBoosterType = null;
+                TransitionTo(BoardState.Idle);
+                return;
+            }
+
+            pendingBoosterUseResult = BoosterManager.Execute(activeBoosterType.Value, grid, targets);
+            activeBoosterType = null;
+            pendingSkillActivations.Clear();
+            pendingMatches = new List<MatchGroup>(pendingBoosterUseResult.MatchGroups);
+            isResolvingPlayerMove = false;
+            currentCascadeDepth = 0;
+            TransitionTo(BoardState.Resolving);
+        }
+        catch
+        {
+            activeBoosterChooser = null;
+            activeBoosterType = null;
+            pendingBoosterUseResult = null;
+            TransitionTo(BoardState.Idle);
+            BoosterUseFailed?.Invoke();
+            throw;
+        }
+        finally
+        {
+            if (boosterTargetsShown)
+                boardPresentationCoordinator.HideBoosterTargets();
+            if (targetingPresentationEntered)
+                UIManager.Instance.ExitBoosterTargeting();
+        }
     }
 
     private async UniTask EnterSwapping()
@@ -379,7 +408,10 @@ public class GameBoard : MonoBehaviour
         }
 
         if (UIManager.Instance != null)
+        {
             UIManager.Instance.OnPetalEditConfirmed -= HandlePetalEditConfirmed;
+            UIManager.Instance.BoosterCancelRequested -= CancelBoosterUse;
+        }
     }
 
     private void OnDrawGizmos()

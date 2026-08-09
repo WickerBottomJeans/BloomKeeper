@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9e5dbdd515546f89984f37e06d0309c, type: 3}
+  m_Name: BoosterButtonConfig
+  m_EditorClassIdentifier: Assembly-CSharp::BoosterButtonConfig
+  buttonMappings:
+  - boosterType: 1
+    icon: {fileID: 3890060355396647484, guid: 491745a0507e80b498aa30ee32f20aa0, type: 3}
+    guidanceText: "Choose any tile\u2014the Bloom Wand will strike whatever is there
+      with a powerful burst of petals!"
+  - boosterType: 2
+    icon: {fileID: 102785524858115614, guid: f7bf9e3c95bbec248b89d4a748f7ef1b, type: 3}
+    guidanceText: "Choose two petals to swap places\u2014they don\u2019t need to
+      make a match"

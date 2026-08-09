@@ -79,6 +79,7 @@ Goal: prevent the first thirty seconds from looking like an unfinished engineeri
 - [ ] Add a minimal licensed audio pass if the current build is silent: one music loop plus clear swap, match, skill, win, loss, and button feedback routed through the persisted volume settings. Do not build a large audio feature set.
 - [ ] Give every showcased skill activation a coordinated presentation pass with intentional timing, distinctive VFX, and matching SFX; treat this as one presentation overhaul rather than attaching isolated sounds.
 - [x] Complete the Striped skill presentation pass with coordinated rainbow VFX and matching one-shot SFX.
+- [ ] Compare the tile and petal animation systems before adding booster target-candidate feedback; determine whether they should share one animation path or remain separate.
 - [ ] Add clear visual warnings when a move or timer constrainer is approaching failure.
 - [ ] Investigate and fix the Curtain rect and text mismatch when the display aspect ratio changes toward a square.
 - [ ] Investigate and fix `UILevel` disappearing when the display aspect ratio changes toward a square.

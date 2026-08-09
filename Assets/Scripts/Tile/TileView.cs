@@ -15,6 +15,8 @@ namespace DefaultNamespace
         public SpriteRenderer OverlayAnimationRenderer => _overlayAnimationRenderer;
 
         private float _tileSize;
+        private Material _normalBaseMaterial;
+        private bool _boosterTargetShown;
 
         public void Init(float tileSize, int baseSortingOrder)
         {
@@ -22,6 +24,7 @@ namespace DefaultNamespace
                 throw new ArgumentOutOfRangeException(nameof(tileSize));
 
             _tileSize = tileSize;
+            _normalBaseMaterial = _baseRenderer.sharedMaterial;
             _baseRenderer.sortingOrder = baseSortingOrder;
             _overlayAnimationRenderer.gameObject.SetActive(false);
         }
@@ -35,6 +38,23 @@ namespace DefaultNamespace
             Vector3 scale = Vector3.one * (_tileSize / sprite.bounds.size.x);
             _baseRenderer.transform.localScale = scale;
             _targetScales[_baseRenderer] = scale;
+        }
+
+        public void ShowBoosterTarget(Material material)
+        {
+            if (material == null) throw new ArgumentNullException(nameof(material));
+            if (_boosterTargetShown) throw new InvalidOperationException("Booster target presentation is already shown on this tile.");
+
+            _boosterTargetShown = true;
+            _baseRenderer.sharedMaterial = material;
+        }
+
+        public void HideBoosterTarget()
+        {
+            if (!_boosterTargetShown) throw new InvalidOperationException("Booster target presentation is not shown on this tile.");
+
+            _baseRenderer.sharedMaterial = _normalBaseMaterial;
+            _boosterTargetShown = false;
         }
 
         public void SetOverlay(Sprite sprite)

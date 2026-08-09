@@ -42,6 +42,23 @@ namespace DefaultNamespace
             return stars;
         }
 
+        public ScoreViewData GetViewData()
+        {
+            int targetScore = 0;
+            int starCap = 0;
+            foreach (StarScoreThresholdJson threshold in starScoreThresholds)
+            {
+                if (threshold.score > targetScore) targetScore = threshold.score;
+                if (threshold.starCount > starCap) starCap = threshold.starCount;
+            }
+
+            var milestoneScores = new List<int>();
+            foreach (StarScoreThresholdJson threshold in starScoreThresholds)
+                if (threshold.score > 0 && threshold.score < targetScore) milestoneScores.Add(threshold.score);
+
+            return new ScoreViewData(targetScore, milestoneScores, starCap);
+        }
+
         private int CalculateScore(BoardResolvedEvent e)
         {
             int clearedPetalCount = 0;

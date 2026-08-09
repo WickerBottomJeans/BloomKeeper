@@ -66,6 +66,16 @@ namespace DefaultNamespace.UI
             }
         }
 
+        public void ShowBoosterTargets(BoosterType boosterType, IReadOnlyList<Vector2Int> positions)
+        {
+            boosterRepresentationOrchestrator.ShowBoosterTargets(boosterType, positions);
+        }
+
+        public void HideBoosterTargets()
+        {
+            boosterRepresentationOrchestrator.HideBoosterTargets();
+        }
+
         private async UniTask PlayResolution(MatchResolveResult result, IReadOnlyList<SkillUseResult> skillResults, AudioPlaybackScope audioScope = null)
         {
             var skillResultsByMatch = new Dictionary<MatchGroup, SkillUseResult>(skillResults.Count);

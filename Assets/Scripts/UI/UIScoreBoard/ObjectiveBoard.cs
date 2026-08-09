@@ -16,7 +16,7 @@ namespace DefaultNamespace.UI
 
         private readonly List<ObjectiveWidget> spawnedWidgets = new();
 
-        public void Display(List<ObjectiveViewData> viewData)
+        public void Display(IReadOnlyList<ObjectiveViewData> viewData)
         {
             Clear();
 

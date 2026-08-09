@@ -12,6 +12,19 @@ namespace Boosters
         private UniTaskCompletionSource<IReadOnlyList<Vector2Int>> completionSource;
         private Vector2Int? pressedTarget;
 
+        public IReadOnlyList<Vector2Int> GetBoosterTargetCandidates(Tile[,] grid)
+        {
+            if (grid == null) throw new ArgumentNullException(nameof(grid));
+
+            var candidates = new List<Vector2Int>();
+            for (int x = 0; x < grid.GetLength(0); x++)
+                for (int y = 0; y < grid.GetLength(1); y++)
+                    if (CanTarget(grid, new Vector2Int(x, y)))
+                        candidates.Add(new Vector2Int(x, y));
+
+            return candidates;
+        }
+
         public async UniTask<IReadOnlyList<Vector2Int>> Choose(Tile[,] grid, BoardInputHandler inputHandler)
         {
             if (grid == null) throw new ArgumentNullException(nameof(grid));
@@ -65,6 +78,11 @@ namespace Boosters
         }
 
         private bool CanTarget(Vector2Int position)
+        {
+            return CanTarget(grid, position);
+        }
+
+        private static bool CanTarget(Tile[,] grid, Vector2Int position)
         {
             if (position.x < 0 || position.x >= grid.GetLength(0) || position.y < 0 || position.y >= grid.GetLength(1)) return false;
 

@@ -1,32 +1,23 @@
 using System;
+using System.Collections.Generic;
 using DefaultNamespace;
-using UnityEngine;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-using UnityEngine.InputSystem;
-#endif
 
 namespace Boosters
 {
-    public sealed class BoosterUseCoordinator : MonoBehaviour
+    public sealed class BoosterUseCoordinator
     {
         public event Action<BoosterType> BoosterUseApproved;
-        public event Action BoosterUseCanceled;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        private void Update()
+        
+        /// <summary>
+        /// Just place holder for now. MUST change later
+        /// </summary>
+        /// <returns></returns>
+        public IReadOnlyList<BoosterType> GetAvailableBoosters() => new[] { BoosterType.BloomWand, BoosterType.GardenersGlove };
+
+        public void RequestUse(BoosterType boosterType)
         {
-            Keyboard keyboard = Keyboard.current;
-            if (keyboard == null) return;
-
-            if (keyboard.pKey.wasPressedThisFrame)
-            {
-                BoosterUseApproved?.Invoke(BoosterType.BloomWand);
-                return;
-            }
-
-            if (keyboard.cKey.wasPressedThisFrame)
-                BoosterUseCanceled?.Invoke();
+            BoosterUseApproved?.Invoke(boosterType);
         }
-#endif
     }
 }
