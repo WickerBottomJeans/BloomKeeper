@@ -64,6 +64,12 @@
         Butterfly = 5,
         StripeStripeFusion = 6
     }
+
+    public enum BoosterType
+    {
+        BloomWand = 1,
+        GardenersGlove = 2
+    }
     
     public enum MatchShape
     {

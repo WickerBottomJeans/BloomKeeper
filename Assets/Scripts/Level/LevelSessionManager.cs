@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Boosters;
 using DefaultNamespace.UI;
 using DefaultNamespace.Utility;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace DefaultNamespace
         private ConstrainerManager constrainerManager;
         [SerializeField] private WorldLevelBackground worldLevelBackgroundPrefab;
         [SerializeField] private GameBoard gameBoardPrefab;
+        private BoosterUseCoordinator boosterUseCoordinator;
         private WorldLevelBackground worldLevelBackgroundInstance;
         private GameBoard gameBoardInstance;
         private readonly List<ConstrainerFailureData> pendingConstrainerFailures = new();
@@ -30,6 +32,15 @@ namespace DefaultNamespace
         private bool isLevelSessionStarted;
         private bool isLevelSessionPaused;
 
+        protected override void Awake()
+        {
+            base.Awake();
+            if (Instance != this) return;
+
+            boosterUseCoordinator = gameObject.AddComponent<BoosterUseCoordinator>();
+            boosterUseCoordinator.enabled = false;
+        }
+
         private void Update()
         {
             constrainerManager?.Tick(Time.deltaTime);
@@ -37,6 +48,9 @@ namespace DefaultNamespace
 
         public void ClearCurrentLevelSession()
         {
+            boosterUseCoordinator.enabled = false;
+            boosterUseCoordinator.BoosterUseApproved -= HandleBoosterUseApproved;
+            boosterUseCoordinator.BoosterUseCanceled -= HandleBoosterUseCanceled;
             constrainerManager?.StopLevel();
             if (isLevelSessionPaused)
                 GameTimeService.ReleasePause(this);
@@ -128,6 +142,9 @@ namespace DefaultNamespace
 
             isLevelSessionStarted = true;
             isLevelSessionPaused = false;
+            boosterUseCoordinator.BoosterUseApproved += HandleBoosterUseApproved;
+            boosterUseCoordinator.BoosterUseCanceled += HandleBoosterUseCanceled;
+            boosterUseCoordinator.enabled = true;
             constrainerManager.StartLevel();
         }
 
@@ -141,6 +158,7 @@ namespace DefaultNamespace
                 throw new InvalidOperationException("Cannot pause a level session that is already paused.");
 
             isLevelSessionPaused = true;
+            boosterUseCoordinator.enabled = false;
             constrainerManager.StopLevel();
             GameTimeService.RequestPause(this);
         }
@@ -156,6 +174,7 @@ namespace DefaultNamespace
 
             GameTimeService.ReleasePause(this);
             isLevelSessionPaused = false;
+            boosterUseCoordinator.enabled = true;
             constrainerManager.StartLevel();
         }
 
@@ -196,6 +215,16 @@ namespace DefaultNamespace
             pendingLevelComplete = true;
         }
 
+        private void HandleBoosterUseApproved(BoosterType boosterType)
+        {
+            gameBoardInstance.UseBooster(boosterType);
+        }
+
+        private void HandleBoosterUseCanceled()
+        {
+            gameBoardInstance.CancelBoosterUse();
+        }
+
         private void HandleObjectiveProgressUpdated()
         {
             UIManager.Instance.RefreshLevelObjectives(objectiveManager.GetViewData());
@@ -224,6 +253,7 @@ namespace DefaultNamespace
             if (isLevelEnded) return;
 
             isLevelEnded = true;
+            boosterUseCoordinator.enabled = false;
             constrainerManager?.StopLevel();
             if (failureData.Count == 0)
                 throw new InvalidOperationException("Cannot show lose screen without constrainer failure data.");
@@ -300,6 +330,7 @@ namespace DefaultNamespace
             if (isLevelEnded) return;
 
             isLevelEnded = true;
+            boosterUseCoordinator.enabled = false;
             constrainerManager?.StopLevel();
             int earnedStars = scoreManager.CalculateStars();
             OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentAttemptId, true, scoreManager.CurrentScore, earnedStars, currentLevelData.StarCap, string.Empty));

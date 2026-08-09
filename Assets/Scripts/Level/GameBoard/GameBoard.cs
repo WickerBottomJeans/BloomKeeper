@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Boosters;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
 using DefaultNamespace.Audio;
@@ -14,6 +15,7 @@ using UnityEditor;
 using UnityEngine;
 using Utility;
 
+[RequireComponent(typeof(BoosterRepresentationOrchestrator))]
 public class GameBoard : MonoBehaviour
 {
     //TODO: maybe make the about to active petal to like blink blink or sth
@@ -43,9 +45,13 @@ public class GameBoard : MonoBehaviour
     private List<(Vector2Int from, Vector2Int to)> pendingMoves;
     private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
     private BoardPresentationCoordinator boardPresentationCoordinator;
+    private BoosterRepresentationOrchestrator boosterRepresentationOrchestrator;
+    private BoosterUseResult pendingBoosterUseResult;
     private Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets;
     private bool isResolvingPlayerMove;
     private int currentCascadeDepth;
+    private IBoosterChooser activeBoosterChooser;
+    private BoosterType? activeBoosterType;
 
     private enum BoardState
     {
@@ -56,7 +62,8 @@ public class GameBoard : MonoBehaviour
         Gravity,
         Filling,
         Cascade,
-        Shuffling
+        Shuffling,
+        BoosterTargeting
     }
 
     public event Action<IGameplayEvent> OnGameplayEvent;
@@ -74,11 +81,12 @@ public class GameBoard : MonoBehaviour
 
         petalViewManager.Init(grid, layout);
         tileViewManager.Init(grid, layout);
-        boardVFXManager.Init(layout);
+        boardVFXManager.Init(layout, cam);
         skillRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager,
             layout);
-        boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager,
-            skillRepresentationOrchestrator, boardAudioManager, layout, grid);
+        boosterRepresentationOrchestrator = GetComponent<BoosterRepresentationOrchestrator>();
+        boosterRepresentationOrchestrator.Init(boardVFXManager);
+        boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager, skillRepresentationOrchestrator, boosterRepresentationOrchestrator, boardAudioManager, layout, grid);
 
         boardInputHandler.Init(layout, cam);
 
@@ -86,6 +94,22 @@ public class GameBoard : MonoBehaviour
         boardInputHandler.OnEditRequested += HandleEditRequested;
         UIManager.Instance.OnPetalEditConfirmed += HandlePetalEditConfirmed;
 
+    }
+
+    public void UseBooster(BoosterType boosterType)
+    {
+        if (currentState != BoardState.Idle) throw new InvalidOperationException("A booster can only begin targeting while the board is idle.");
+        if (activeBoosterChooser != null) throw new InvalidOperationException("A booster is already targeting the board.");
+
+        activeBoosterType = boosterType;
+        TransitionTo(BoardState.BoosterTargeting);
+    }
+
+    public void CancelBoosterUse()
+    {
+        if (activeBoosterChooser == null) return;
+
+        activeBoosterChooser.Cancel();
     }
 
     private void HandleSwap(Vector2Int tileA, Vector2Int tileB)
@@ -133,8 +157,33 @@ public class GameBoard : MonoBehaviour
             case BoardState.Cascade: EnterCascade(); break;
             case BoardState.Idle: EnterIdle(); break;
             case BoardState.Shuffling: EnterShuffling().Forget(); break;
+            case BoardState.BoosterTargeting: EnterBoosterTargeting().Forget(); break;
 
         }
+    }
+
+    private async UniTask EnterBoosterTargeting()
+    {
+        if (!activeBoosterType.HasValue) throw new InvalidOperationException("Booster targeting requires an active booster type.");
+
+        activeBoosterChooser = BoosterManager.CreateChooser(activeBoosterType.Value);
+        IReadOnlyList<Vector2Int> targets = await activeBoosterChooser.Choose(grid, boardInputHandler);
+        activeBoosterChooser = null;
+
+        if (targets == null)
+        {
+            activeBoosterType = null;
+            TransitionTo(BoardState.Idle);
+            return;
+        }
+
+        pendingBoosterUseResult = BoosterManager.Execute(activeBoosterType.Value, grid, targets);
+        activeBoosterType = null;
+        pendingSkillActivations.Clear();
+        pendingMatches = new List<MatchGroup>(pendingBoosterUseResult.MatchGroups);
+        isResolvingPlayerMove = false;
+        currentCascadeDepth = 0;
+        TransitionTo(BoardState.Resolving);
     }
 
     private async UniTask EnterSwapping()
@@ -179,6 +228,12 @@ public class GameBoard : MonoBehaviour
     private async UniTask EnterResolving()
     {
         TurnResolution turnResolution = CalculateTurnResolution();
+        if (pendingBoosterUseResult != null)
+        {
+            if (turnResolution.InitialMatch == null) throw new InvalidOperationException("Booster presentation requires an initial match resolution.");
+            await boardPresentationCoordinator.PlayBooster(pendingBoosterUseResult, turnResolution.InitialMatch);
+            pendingBoosterUseResult = null;
+        }
         await PlayTurnResolution(turnResolution);
         TransitionTo(BoardState.Gravity);
     }
@@ -318,7 +373,10 @@ public class GameBoard : MonoBehaviour
     private void OnDestroy()
     {
         if (boardInputHandler != null)
+        {
+            boardInputHandler.OnSwapRequested -= HandleSwap;
             boardInputHandler.OnEditRequested -= HandleEditRequested;
+        }
 
         if (UIManager.Instance != null)
             UIManager.Instance.OnPetalEditConfirmed -= HandlePetalEditConfirmed;

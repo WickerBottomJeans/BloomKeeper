@@ -33,20 +33,10 @@ namespace Skills
             if (!prismaticBloomParticipant.HasValue)
                 throw new InvalidOperationException("Prismatic Bloom effect has no Prismatic Bloom participant.");
 
-            Petal targetPetal;
-            SpecialSkillType replacementSkill;
-            if (combinationPartner.HasValue)
-            {
-                targetPetal = combinationPartner.Value.Petal;
-                replacementSkill = targetPetal.Skill;
-            }
-            else
-            {
-                targetPetal = activation.TriggerPetal ?? throw new InvalidOperationException("A chained Prismatic Bloom activation requires a trigger petal.");
-                replacementSkill = SpecialSkillType.None;
-            }
+            PetalType? targetPetalType = SelectTargetPetalType(combinationPartner, activation.TriggerPetal, context.Grid);
+            SpecialSkillType replacementSkill = combinationPartner.HasValue ? combinationPartner.Value.Petal.Skill : SpecialSkillType.None;
 
-            if (targetPetal.PetalType == PetalType.None)
+            if (targetPetalType == PetalType.None)
                 throw new InvalidOperationException("Prismatic Bloom activated with no valid target petal type.");
 
             Petal selfPetal = new Petal(prismaticBloomParticipant.Value.Petal);
@@ -54,22 +44,74 @@ namespace Skills
             IReadOnlyList<Vector2Int> consumedInputPositions = activation.GetConsumedInputPositions();
             MatchGroup inputMatchGroup = combinationPartner.HasValue ? new MatchGroup(new List<Vector2Int> { source }, MatchShape.None, isFromSkillCombo: true) : null;
 
+            if (!targetPetalType.HasValue)
+            {
+                var emptyMatch = new MatchGroup(new List<Vector2Int>(), MatchShape.None, selfPetal);
+                var emptyRepresentation = new PrismaticBloomRepresentationData(source, replacementSkill, new List<PetalChange>(), consumedInputPositions);
+                return new SkillUseResult(emptyMatch, emptyRepresentation, inputMatchGroup);
+            }
+
             if (replacementSkill == SpecialSkillType.None)
             {
-                MatchGroup prismaticBloomMatch = CreateMatchGroup(context.Grid, targetPetal.PetalType, selfPetal);
+                MatchGroup prismaticBloomMatch = CreateMatchGroup(context.Grid, targetPetalType.Value, selfPetal);
                 var prismaticBloomRepresentation = new PrismaticBloomRepresentationData(source, replacementSkill, new List<PetalChange>(), consumedInputPositions);
                 return new SkillUseResult(prismaticBloomMatch, prismaticBloomRepresentation, inputMatchGroup);
             }
 
-            List<PetalChange> petalChanges = GiveSkillToPetalsOfType(context.Grid, targetPetal.PetalType, replacementSkill);
+            List<PetalChange> petalChanges = GiveSkillToPetalsOfType(context.Grid, targetPetalType.Value, replacementSkill);
             var mutatedPositions = new List<Vector2Int>(petalChanges.Count);
             foreach (PetalChange change in petalChanges)
                 mutatedPositions.Add(change.Position);
 
-            var effectCauser = new Petal(targetPetal.PetalType, SpecialSkillType.PrismaticBloom);
+            var effectCauser = new Petal(targetPetalType.Value, SpecialSkillType.PrismaticBloom);
             var matchGroup = new MatchGroup(mutatedPositions, MatchShape.None, effectCauser);
             var representation = new PrismaticBloomRepresentationData(source, replacementSkill, petalChanges, consumedInputPositions);
             return new SkillUseResult(matchGroup, representation, inputMatchGroup);
+        }
+
+        private static PetalType? SelectTargetPetalType(SkillParticipant? combinationPartner, Petal triggerPetal, Tile[,] grid)
+        {
+            if (combinationPartner.HasValue) return combinationPartner.Value.Petal.PetalType;
+            if (triggerPetal != null) return triggerPetal.PetalType;
+            return FindMostCommonPetalType(grid);
+        }
+
+        private static PetalType? FindMostCommonPetalType(Tile[,] grid)
+        {
+            var counts = new Dictionary<PetalType, int>();
+            var firstSeenTypes = new List<PetalType>();
+
+            for (int x = 0; x < grid.GetLength(0); x++)
+            for (int y = 0; y < grid.GetLength(1); y++)
+            {
+                Petal petal = grid[x, y]?.Petal;
+                if (petal == null || petal.PetalType == PetalType.None) continue;
+
+                if (counts.TryGetValue(petal.PetalType, out int count))
+                {
+                    counts[petal.PetalType] = count + 1;
+                    continue;
+                }
+
+                counts.Add(petal.PetalType, 1);
+                firstSeenTypes.Add(petal.PetalType);
+            }
+
+            if (firstSeenTypes.Count == 0) return null;
+
+            PetalType selectedType = firstSeenTypes[0];
+            int selectedCount = counts[selectedType];
+            for (int i = 1; i < firstSeenTypes.Count; i++)
+            {
+                PetalType candidateType = firstSeenTypes[i];
+                int candidateCount = counts[candidateType];
+                if (candidateCount <= selectedCount) continue;
+
+                selectedType = candidateType;
+                selectedCount = candidateCount;
+            }
+
+            return selectedType;
         }
 
         private static MatchGroup CreateMatchGroup(Tile[,] grid, PetalType targetType, Petal causer)

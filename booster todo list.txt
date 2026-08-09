@@ -1,0 +1,7 @@
+Booster todo list
+
+1. Give GameBoard booster execution logic that applies a requested booster effect and knows nothing outside the board.
+2. Make the level booster UI tray only emit a semantic request to use the selected booster and own no booster behavior.
+3. Add a BoosterUseCoordinator that listens for booster requests and coordinates targeting, server authorization, confirmed account balance updates, and approved GameBoard execution.
+4. Make the backend store and safely consume each player's booster inventory.
+5. Load the player's booster inventory into PlayerAccount and display it in the booster tray.

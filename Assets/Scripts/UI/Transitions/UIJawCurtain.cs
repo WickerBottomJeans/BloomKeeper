@@ -21,15 +21,15 @@ namespace DefaultNamespace.UI
 #if UNITY_EDITOR
         private void Update()
         {
-            UnityEngine.InputSystem.Keyboard keyboard = UnityEngine.InputSystem.Keyboard.current;
-            if (keyboard == null || !keyboard.pKey.wasPressedThisFrame) return;
-
-            if (isTestOpen)
-                Close();
-            else
-                Open();
-
-            isTestOpen = !isTestOpen;
+            // UnityEngine.InputSystem.Keyboard keyboard = UnityEngine.InputSystem.Keyboard.current;
+            // if (keyboard == null || !keyboard.pKey.wasPressedThisFrame) return;
+            //
+            // if (isTestOpen)
+            //     Close();
+            // else
+            //     Open();
+            //
+            // isTestOpen = !isTestOpen;
         }
 #endif
 

@@ -19,11 +19,16 @@ public class BoardInputHandler : MonoBehaviour
     public event Action<Vector2Int> OnEditRequested;
 
     public event Action<Vector2Int, Vector2Int> OnSwapRequested;
+    public event Action<Vector2Int> OnPointerPressed;
+    public event Action<Vector2Int> OnPointerMoved;
+    public event Action<Vector2Int> OnPointerReleased;
+    public event Action OnPointerCanceled;
 
     private BoardLayout boardLayout;
     private Camera _camera;
 
     private bool isDragging;
+    private bool swapRequested;
     private Vector2 touchStartScreenPos;
     private Vector2Int selectedTile;
     private Vector3 lastResolvedWorldPos;
@@ -43,14 +48,14 @@ public class BoardInputHandler : MonoBehaviour
         if (!pressAction.enabled)
         {
             if (isDragging)
-                ClearDragState();
+                CancelPointer();
             return;
         }
 
         if (pressAction.WasPressedThisFrame())
             OnTouchBegan(pointerPositionAction.action.ReadValue<Vector2>());
         else if (pressAction.WasReleasedThisFrame())
-            OnTouchCanceled();
+            OnTouchEnded(pointerPositionAction.action.ReadValue<Vector2>());
         else if (isDragging && pressAction.IsPressed())
             OnTouchMoved(pointerPositionAction.action.ReadValue<Vector2>());
     }
@@ -75,12 +80,23 @@ public class BoardInputHandler : MonoBehaviour
         }
 
         isDragging = true;
+        swapRequested = false;
         touchStartScreenPos = screenPos;
         selectedTile = tile;
+        OnPointerPressed?.Invoke(tile);
     }
 
     private void OnTouchMoved(Vector2 screenPos)
     {
+        if (!TryResolveTile(screenPos, out Vector2Int tile))
+        {
+            CancelPointer();
+            return;
+        }
+
+        OnPointerMoved?.Invoke(tile);
+        if (swapRequested) return;
+
         Vector2 delta = screenPos - touchStartScreenPos;
         if (delta.magnitude < dragThresholdPx) return;
 
@@ -89,24 +105,45 @@ public class BoardInputHandler : MonoBehaviour
 
         if (!IsInBounds(targetTile)) 
         {
-            ClearDragState();
+            CancelPointer();
             return;
         }
 
         OnSwapRequested?.Invoke(selectedTile, targetTile);
+        swapRequested = true;
+    }
+
+    private void OnTouchEnded(Vector2 screenPos)
+    {
+        if (!isDragging) return;
+
+        if (TryResolveTile(screenPos, out Vector2Int tile))
+            OnPointerReleased?.Invoke(tile);
+        else
+            OnPointerCanceled?.Invoke();
+
         ClearDragState();
     }
 
-    private void OnTouchCanceled() => ClearDragState();
+    private void CancelPointer()
+    {
+        OnPointerCanceled?.Invoke();
+        ClearDragState();
+    }
 
     private void ClearDragState()
     {
         isDragging = false;
+        swapRequested = false;
         touchStartScreenPos = default;
         selectedTile = default;
     }
 
-    private void OnDisable() => ClearDragState();
+    private void OnDisable()
+    {
+        if (isDragging)
+            CancelPointer();
+    }
 
     private bool TryResolveTile(Vector2 screenPos, out Vector2Int tile)
     {

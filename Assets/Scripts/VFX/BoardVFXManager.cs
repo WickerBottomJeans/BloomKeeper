@@ -19,6 +19,7 @@ namespace DefaultNamespace.VFX
             [SerializeField] private VFXBubblePopParticles bubblePopParticlesPrefab;
             [SerializeField] private VFXPrismaticBloomProjectile prismaticBloomProjectilePrefab;
             [SerializeField] private VFXPrismaticBloomFinisher prismaticBloomFinisherPrefab;
+            [SerializeField] private VFXBloomWand bloomWandPrefab;
         [SerializeField] private Transform boardVFXRoot;
             [SerializeField] private float mutationLaserWidthRatio = 0.12f;
 
@@ -30,9 +31,11 @@ namespace DefaultNamespace.VFX
             private ObjectPool<VFXBubblePopParticles> bubblePopParticlesPool;
             private ObjectPool<VFXPrismaticBloomProjectile> prismaticBloomProjectilePool;
             private ObjectPool<VFXPrismaticBloomFinisher> prismaticBloomFinisherPool;
+        private ObjectPool<VFXBloomWand> bloomWandPool;
         private BoardLayout layout;
+        private Camera gameplayCamera;
 
-        public void Init(BoardLayout boardLayout)
+        public void Init(BoardLayout boardLayout, Camera camera)
         {
             if (mutationLaserPrefab == null)
                 throw new InvalidOperationException("BoardVFXManager requires a MutationLaserView prefab.");
@@ -50,6 +53,7 @@ namespace DefaultNamespace.VFX
                 throw new InvalidOperationException("BoardVFXManager requires a Prismatic Bloom finisher prefab.");
 
             layout = boardLayout ?? throw new ArgumentNullException(nameof(boardLayout));
+            gameplayCamera = camera;
             Transform root = boardVFXRoot != null ? boardVFXRoot : transform;
 
             mutationLaserPool = new ObjectPool<MutationLaserView>(
@@ -154,6 +158,21 @@ namespace DefaultNamespace.VFX
                     finisher.gameObject.SetActive(false);
                 },
                 actionOnDestroy: finisher => Destroy(finisher.gameObject)
+            );
+
+            bloomWandPool = new ObjectPool<VFXBloomWand>(
+                createFunc: () => Instantiate(bloomWandPrefab, root),
+                actionOnGet: wand =>
+                {
+                    wand.gameObject.SetActive(true);
+                    wand.ResetForPool();
+                },
+                actionOnRelease: wand =>
+                {
+                    wand.ResetForPool();
+                    wand.gameObject.SetActive(false);
+                },
+                actionOnDestroy: wand => Destroy(wand.gameObject)
             );
         }
 
@@ -328,6 +347,42 @@ namespace DefaultNamespace.VFX
             prismaticBloomProjectilePool.Release(projectile);
         }
 
+        public async UniTask PlayBloomWandUntilImpact(Vector2Int target)
+        {
+            if (bloomWandPool == null) throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+
+            VFXBloomWand wand = bloomWandPool.Get();
+            try
+            {
+                Vector2 targetWorldPosition = layout.GetTileWorldPos(target.x, target.y);
+                float viewportDepth = gameplayCamera.WorldToViewportPoint(new Vector3(targetWorldPosition.x, targetWorldPosition.y, wand.transform.position.z)).z;
+                Vector3 screenBottomLeft = gameplayCamera.ViewportToWorldPoint(new Vector3(0f, 0f, viewportDepth));
+                Vector3 screenTopRight = gameplayCamera.ViewportToWorldPoint(new Vector3(1f, 1f, viewportDepth));
+                var screenWorldBounds = Rect.MinMaxRect(screenBottomLeft.x, screenBottomLeft.y, screenTopRight.x, screenTopRight.y);
+                await wand.Prepare(targetWorldPosition, screenWorldBounds, layout.TileSize);
+                await wand.Fire();
+            }
+            catch
+            {
+                bloomWandPool.Release(wand);
+                throw;
+            }
+
+            FinishBloomWandAndRelease(wand).Forget();
+        }
+
+        private async UniTask FinishBloomWandAndRelease(VFXBloomWand wand)
+        {
+            try
+            {
+                await wand.Finish();
+            }
+            finally
+            {
+                bloomWandPool.Release(wand);
+            }
+        }
+
         public void PlayPrismaticBloomFinisher(Vector3 position)
         {
             if (prismaticBloomFinisherPool == null)
@@ -427,6 +482,7 @@ namespace DefaultNamespace.VFX
             bubblePopParticlesPool?.Clear();
             prismaticBloomProjectilePool?.Clear();
             prismaticBloomFinisherPool?.Clear();
+            bloomWandPool?.Clear();
         }
     }
 }
