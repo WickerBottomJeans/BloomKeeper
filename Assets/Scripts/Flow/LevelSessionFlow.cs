@@ -39,17 +39,15 @@ namespace DefaultNamespace
         private void EnterPlaying()
         {
             LevelSessionManager.Instance.StartPreparedLevelSession();
-            LevelSessionManager.Instance.BoosterUseFailed += HandleBoosterUseFailed;
+            LevelSessionManager.Instance.RecoverableOperationFailed += HandleRecoverableOperationFailed;
             UIManager.Instance.LevelPauseRequested += HandlePauseRequested;
-            UIManager.Instance.BoosterUseRequested += HandleBoosterUseRequested;
             ApplicationInputController.Instance.SetGameBoardInputActive(true);
         }
 
         private void EnterResultHold(LevelSessionResult result)
         {
-            LevelSessionManager.Instance.BoosterUseFailed -= HandleBoosterUseFailed;
+            LevelSessionManager.Instance.RecoverableOperationFailed -= HandleRecoverableOperationFailed;
             UIManager.Instance.LevelPauseRequested -= HandlePauseRequested;
-            UIManager.Instance.BoosterUseRequested -= HandleBoosterUseRequested;
             ApplicationInputController.Instance.SetGameBoardInputActive(false);
             LevelFinished?.Invoke(result);
         }
@@ -57,9 +55,8 @@ namespace DefaultNamespace
         private void EnterExiting()
         {
             if (isPaused) HidePauseMenu();
-            LevelSessionManager.Instance.BoosterUseFailed -= HandleBoosterUseFailed;
+            LevelSessionManager.Instance.RecoverableOperationFailed -= HandleRecoverableOperationFailed;
             UIManager.Instance.LevelPauseRequested -= HandlePauseRequested;
-            UIManager.Instance.BoosterUseRequested -= HandleBoosterUseRequested;
             ApplicationInputController.Instance.SetGameBoardInputActive(false);
             LevelSessionManager.Instance.OnLevelFinished -= HandleLevelFinished;
             LevelSessionManager.Instance.ClearCurrentLevelSession();
@@ -77,25 +74,20 @@ namespace DefaultNamespace
             ShowPauseMenu();
         }
 
-        private void HandleBoosterUseRequested(BoosterType boosterType)
-        {
-            LevelSessionManager.Instance.RequestBoosterUse(boosterType);
-        }
-
-        private void HandleBoosterUseFailed()
+        private void HandleRecoverableOperationFailed()
         {
             PauseSession();
-            ApplicationOperationRunner.Instance.Run(RunBoosterUseFailureDialogAsync);
+            ApplicationOperationRunner.Instance.Run(RunRecoverableOperationFailureDialogAsync);
         }
 
-        private async UniTask RunBoosterUseFailureDialogAsync()
+        private async UniTask RunRecoverableOperationFailureDialogAsync()
         {
             DialogOptionButton[] options = { DialogOptionButton.Ok };
-            await DialogManager.Instance.RunDialogWorkflow("Oops!", "Something went wrong while using that booster. Sorry about that—you can continue playing the level.", async session =>
+            await DialogManager.Instance.RunDialogWorkflow("Oops!", "Something went wrong. Sorry about that—you can continue playing the level.", async session =>
             {
                 int buttonId = await session.WaitForButtonClick();
                 if ((DialogButtonType)buttonId != DialogButtonType.Ok)
-                    throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported booster-use failure dialog button.");
+                    throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported recoverable-operation failure dialog button.");
             }, options);
 
             ResumeSession();

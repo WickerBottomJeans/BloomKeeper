@@ -10,11 +10,11 @@ namespace Boosters
     {
         [SerializeField] private List<BoosterTargetMaterialMapping> materialMappings = new List<BoosterTargetMaterialMapping>();
 
-        public Material GetMaterial(BoosterType boosterType)
+        public BoosterTargetMaterialMapping GetPresentation(BoosterType boosterType)
         {
             foreach (BoosterTargetMaterialMapping materialMapping in materialMappings)
                 if (materialMapping.BoosterType == boosterType)
-                    return materialMapping.Material;
+                    return materialMapping;
 
             throw new InvalidOperationException($"BoosterTargetPresentationConfig has no material for booster type: {boosterType}.");
         }

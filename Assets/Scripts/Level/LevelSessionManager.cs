@@ -12,7 +12,7 @@ namespace DefaultNamespace
     public class LevelSessionManager : Singleton<LevelSessionManager>
     {
         public event Action<LevelSessionResult> OnLevelFinished;
-        public event Action BoosterUseFailed;
+        public event Action RecoverableOperationFailed;
 
         private ObjectiveManager objectiveManager;
         private ConstrainerManager constrainerManager;
@@ -41,7 +41,12 @@ namespace DefaultNamespace
         public void ClearCurrentLevelSession()
         {
             if (boosterUseCoordinator != null)
+            {
                 boosterUseCoordinator.BoosterUseApproved -= HandleBoosterUseApproved;
+                boosterUseCoordinator.BoosterCancelApproved -= HandleBoosterCancelApproved;
+            }
+            UIManager.Instance.BoosterUseRequested -= HandleBoosterUseRequested;
+            UIManager.Instance.BoosterCancelRequested -= HandleBoosterCancelRequested;
             constrainerManager?.StopLevel();
             if (isLevelSessionPaused)
                 GameTimeService.ReleasePause(this);
@@ -137,6 +142,9 @@ namespace DefaultNamespace
             isLevelSessionStarted = true;
             isLevelSessionPaused = false;
             boosterUseCoordinator.BoosterUseApproved += HandleBoosterUseApproved;
+            boosterUseCoordinator.BoosterCancelApproved += HandleBoosterCancelApproved;
+            UIManager.Instance.BoosterUseRequested += HandleBoosterUseRequested;
+            UIManager.Instance.BoosterCancelRequested += HandleBoosterCancelRequested;
             constrainerManager.StartLevel();
         }
 
@@ -209,14 +217,24 @@ namespace DefaultNamespace
             gameBoardInstance.UseBooster(boosterType);
         }
 
-        private void HandleBoosterUseFailed()
+        private void HandleBoosterCancelApproved()
         {
-            BoosterUseFailed?.Invoke();
+            gameBoardInstance.CancelBoosterUse();
         }
 
-        public void RequestBoosterUse(BoosterType boosterType)
+        private void HandleBoosterUseRequested(BoosterType boosterType)
         {
             boosterUseCoordinator.RequestUse(boosterType);
+        }
+
+        private void HandleBoosterCancelRequested()
+        {
+            boosterUseCoordinator.RequestCancel();
+        }
+
+        private void HandleBoosterUseFailed()
+        {
+            RecoverableOperationFailed?.Invoke();
         }
 
         private void HandleObjectiveProgressUpdated()

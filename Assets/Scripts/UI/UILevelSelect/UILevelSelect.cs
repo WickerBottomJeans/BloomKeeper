@@ -11,11 +11,10 @@ namespace DefaultNamespace.UI
 
         private int? displayedChapterId;
 
-        public event Action<int> OnLevelSelected;
-
-        private void Awake()
+        public event Action<int> OnLevelSelected
         {
-            mapButtonLayer.OnLevelSelected += HandleLevelSelected;
+            add => mapButtonLayer.OnLevelSelected += value;
+            remove => mapButtonLayer.OnLevelSelected -= value;
         }
 
         public async UniTask Show(ChapterContent chapterContent, PlayerProgressionData progression)
@@ -46,14 +45,5 @@ namespace DefaultNamespace.UI
             gameObject.SetActive(false);
         }
 
-        private void HandleLevelSelected(int levelId)
-        {
-            OnLevelSelected?.Invoke(levelId);
-        }
-
-        private void OnDestroy()
-        {
-            mapButtonLayer.OnLevelSelected -= HandleLevelSelected;
-        }
     }
 }

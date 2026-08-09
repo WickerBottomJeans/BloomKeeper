@@ -104,6 +104,30 @@ namespace DefaultNamespace
             _activeBoosterTargetViews.Clear();
             _boosterTargetsShown = false;
         }
+
+        public void PlayRipple(Vector2 worldOrigin, float strength, float radius, float travelDuration, float tileMoveDuration)
+        {
+            if (strength < 0f) throw new ArgumentOutOfRangeException(nameof(strength));
+            if (radius <= 0f) throw new ArgumentOutOfRangeException(nameof(radius));
+            if (travelDuration < 0f) throw new ArgumentOutOfRangeException(nameof(travelDuration));
+            if (tileMoveDuration <= 0f) throw new ArgumentOutOfRangeException(nameof(tileMoveDuration));
+
+            foreach (TileView view in _views)
+            {
+                if (view == null) continue;
+
+                Vector2 fromOrigin = (Vector2)view.transform.position - worldOrigin;
+                float distance = fromOrigin.magnitude;
+                if (distance > radius) continue;
+
+                float normalizedDistance = distance / radius;
+                Vector2 direction = distance > Mathf.Epsilon ? fromOrigin / distance : Vector2.zero;
+                Vector3 worldDisplacement = direction * (strength * (1f - normalizedDistance));
+                Vector2 displacement = transform.InverseTransformVector(worldDisplacement);
+                float delay = normalizedDistance * travelDuration;
+                view.PlayRipple(displacement, delay, tileMoveDuration).Forget();
+            }
+        }
         
         /// <summary>
         /// Refresh both base tile and its overlay
@@ -133,19 +157,19 @@ namespace DefaultNamespace
 
                 string newOverlayKey = SpriteKeyHelper.GetTileOverlayKey(change.After.TileType.Value, change.After.ObstacleLayerCount);
 
-                if (view.OverlayRenderer.sprite != null && newOverlayKey != null)
+                if (view.HasOverlay && newOverlayKey != null)
                 {
                     Sprite incoming = SpriteLoader.Instance.GetSprite(newOverlayKey);
-                    transitionTasks.Add(TileViewAnimator.PlayOverlayTransition(view, incoming));
+                    transitionTasks.Add(view.PlayOverlayTransition(incoming));
                 }
-                else if (view.OverlayRenderer.sprite != null && newOverlayKey == null)
+                else if (view.HasOverlay && newOverlayKey == null)
                 {
-                    transitionTasks.Add(TileViewAnimator.PlayOverlayDespawn(view));
+                    transitionTasks.Add(view.PlayOverlayDespawn());
                 }
-                else if (view.OverlayRenderer.sprite == null && newOverlayKey != null)
+                else if (!view.HasOverlay && newOverlayKey != null)
                 {
                     view.SetOverlay(SpriteLoader.Instance.GetSprite(newOverlayKey));
-                    transitionTasks.Add(TileViewAnimator.PlayOverlaySpawn(view));
+                    transitionTasks.Add(view.PlayOverlaySpawn());
                 }
             }
 

@@ -7,6 +7,7 @@ namespace Boosters
     public sealed class BoosterUseCoordinator
     {
         public event Action<BoosterType> BoosterUseApproved;
+        public event Action BoosterCancelApproved;
 
         
         /// <summary>
@@ -18,6 +19,11 @@ namespace Boosters
         public void RequestUse(BoosterType boosterType)
         {
             BoosterUseApproved?.Invoke(boosterType);
+        }
+
+        public void RequestCancel()
+        {
+            BoosterCancelApproved?.Invoke();
         }
     }
 }

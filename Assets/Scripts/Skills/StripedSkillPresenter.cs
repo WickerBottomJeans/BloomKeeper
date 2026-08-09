@@ -12,22 +12,19 @@ namespace Skills
     public sealed class StripedSkillPresenter : SkillRepresentationPresenter<StripedRepresentationData>
     {
         private const float SourcePetalPrepareScale = 1.5f;
+        private const float PrepareDuration = 0.15f;
+        private const float FireDuration = 0.2f;
+        private const float FinishDuration = 0.1f;
 
         private readonly PetalViewManager petalViewManager;
         private readonly TileViewManager tileViewManager;
         private readonly BoardVFXManager boardVFXManager;
-        private readonly float prepareDuration;
-        private readonly float fireDuration;
-        private readonly float finishDuration;
 
-        public StripedSkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, float prepareDuration, float fireDuration, float finishDuration)
+        public StripedSkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager)
         {
             this.petalViewManager = petalViewManager;
             this.tileViewManager = tileViewManager;
             this.boardVFXManager = boardVFXManager;
-            this.prepareDuration = prepareDuration;
-            this.fireDuration = fireDuration;
-            this.finishDuration = finishDuration;
         }
 
         protected override async UniTask Play(StripedRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
@@ -51,13 +48,13 @@ namespace Skills
 
         private UniTask Prepare(VFXStripeHalo halo, Vector2Int source, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
-            return UniTask.WhenAll(halo.Prepare(prepareDuration, audioScope),
-                petalViewManager.PlayScale(source, SourcePetalPrepareScale, prepareDuration, Ease.OutCubic, accessKeys));
+            return UniTask.WhenAll(halo.Prepare(PrepareDuration, audioScope),
+                petalViewManager.PlayScale(source, SourcePetalPrepareScale, PrepareDuration, Ease.OutCubic, accessKeys));
         }
 
         private UniTask Fire(VFXStripeBeamAxis beamAxis, Vector2Int source, bool isVertical)
         {
-            return boardVFXManager.FireStripedBeamAxisVFX(beamAxis, source, isVertical, fireDuration);
+            return boardVFXManager.FireStripedBeamAxisVFX(beamAxis, source, isVertical, FireDuration);
         }
 
         private async UniTask Finish(VFXStripeBeamAxis beamAxis, VFXStripeHalo halo, Vector2Int source, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
@@ -90,7 +87,7 @@ namespace Skills
             }
 
             petalViewManager.ReleasePetalViewsImmediately(ownedRemovedPositions, accessKeys);
-            await UniTask.WhenAll(beamAxis.Finish(finishDuration), halo.Finish(finishDuration), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(obstacleChanges));
+            await UniTask.WhenAll(beamAxis.Finish(FinishDuration), halo.Finish(FinishDuration), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(obstacleChanges));
         }
     }
 }

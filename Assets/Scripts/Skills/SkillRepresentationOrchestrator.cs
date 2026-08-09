@@ -11,27 +11,8 @@ namespace Skills
 {
     public class SkillRepresentationOrchestrator : MonoBehaviour
     {
-        [Header("Bubble Timing")]
-        [SerializeField] private float bubblePrepareDuration = 0.4f;
-        [SerializeField] private float bubbleFireDuration = 0.3f;
-        [SerializeField] private float bubbleFinishDuration = 0.2f;
-
-        [Header("Butterfly Timing")]
-        [SerializeField] private float butterflyPrepareDuration = 0.1f;
-        [SerializeField] private float butterflyFireDuration = 0.3f;
-        [SerializeField] private float butterflyFinishDuration = 0.1f;
-
-        [Header("Striped Timing")]
-        [SerializeField] private float stripedPrepareDuration = 0.15f;
-        [SerializeField] private float stripedFireDuration = 0.2f;
-        [SerializeField] private float stripedFinishDuration = 0.1f;
-
-        [Header("Prismatic Bloom Timing")]
         [SerializeField] private AudioCue prismaticBloomCue;
         [SerializeField] private AudioCue prismaticBloomFinishCue;
-        [SerializeField, Min(0f)] private float prismaticBloomPrepareDuration = 0.2f;
-        [SerializeField, Min(0f)] private float prismaticBloomFireDuration = 0.3f;
-        [SerializeField, Min(0f)] private float prismaticBloomMaximumSpinSpeed = 720f;
 
         private Dictionary<Type, ISkillRepresentationPresenter> presenters;
         private PetalViewManager petalViewManager;
@@ -40,11 +21,11 @@ namespace Skills
         {
             this.petalViewManager = petalViewManager;
             presenters = new Dictionary<Type, ISkillRepresentationPresenter>();
-            Register(new BubbleSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, layout, bubblePrepareDuration, bubbleFireDuration, bubbleFinishDuration));
-            Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, stripedPrepareDuration, stripedFireDuration, stripedFinishDuration));
-            Register(new StripeStripeFusionPresenter(petalViewManager, tileViewManager, boardVFXManager, stripedPrepareDuration, stripedFireDuration, stripedFinishDuration));
-            Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout, butterflyPrepareDuration, butterflyFireDuration, butterflyFinishDuration));
-            Register(new PrismaticBloomSkillPresenter(petalViewManager, boardVFXManager, layout, prismaticBloomCue, prismaticBloomFinishCue, prismaticBloomPrepareDuration, prismaticBloomFireDuration, prismaticBloomMaximumSpinSpeed));
+            Register(new BubbleSkillPresenter(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager, layout));
+            Register(new StripedSkillPresenter(petalViewManager, tileViewManager, boardVFXManager));
+            Register(new StripeStripeFusionPresenter(petalViewManager, tileViewManager, boardVFXManager));
+            Register(new ButterflySkillPresenter(petalViewManager, tileViewManager, boardVFXManager, layout));
+            Register(new PrismaticBloomSkillPresenter(petalViewManager, boardVFXManager, layout, prismaticBloomCue, prismaticBloomFinishCue));
         }
 
         public void AcquireVitalViews(SkillUseResult skillResult, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)

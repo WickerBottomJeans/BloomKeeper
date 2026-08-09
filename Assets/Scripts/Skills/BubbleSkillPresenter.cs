@@ -12,26 +12,23 @@ namespace Skills
     public sealed class BubbleSkillPresenter : SkillRepresentationPresenter<BubbleRepresentationData>
     {
         private const float BubbleInflateScaleMultiplier = 1.5f;
+        private const float PrepareDuration = 0.4f;
+        private const float FireDuration = 0.3f;
+        private const float FinishDuration = 0.2f;
 
         private readonly PetalViewManager petalViewManager;
         private readonly TileViewManager tileViewManager;
         private readonly BoardVFXManager boardVFXManager;
         private readonly BoardAudioManager boardAudioManager;
         private readonly BoardLayout layout;
-        private readonly float prepareDuration;
-        private readonly float fireDuration;
-        private readonly float finishDuration;
 
-        public BubbleSkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout, float prepareDuration, float fireDuration, float finishDuration)
+        public BubbleSkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout)
         {
             this.petalViewManager = petalViewManager;
             this.tileViewManager = tileViewManager;
             this.boardVFXManager = boardVFXManager;
             this.boardAudioManager = boardAudioManager;
             this.layout = layout;
-            this.prepareDuration = prepareDuration;
-            this.fireDuration = fireDuration;
-            this.finishDuration = finishDuration;
         }
 
         protected override async UniTask Play(BubbleRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
@@ -54,7 +51,7 @@ namespace Skills
         private UniTask Prepare(Vector2Int center, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
         {
             boardAudioManager.PlayBubblePrepare(audioScope);
-            return accessKeys.ContainsKey(center) ? petalViewManager.PlayBubbleInflate(center, BubbleInflateScaleMultiplier, prepareDuration, accessKeys) : UniTask.CompletedTask;
+            return accessKeys.ContainsKey(center) ? petalViewManager.PlayBubbleInflate(center, BubbleInflateScaleMultiplier, PrepareDuration, accessKeys) : UniTask.CompletedTask;
         }
 
         private async UniTask Fire(Vector2Int center, MatchGroupResolveResult resolution, IDictionary<Vector2Int, VFXBubble> bubbles, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
@@ -81,7 +78,7 @@ namespace Skills
                 VFXBubble bubble = boardVFXManager.RentBubbleVFX();
                 bubbles.Add(position, bubble);
                 Vector3 target = layout.GetTileWorldPos(position.x, position.y);
-                tasks.Add(bubble.Shoot(origin, target, fireDuration));
+                tasks.Add(bubble.Shoot(origin, target, FireDuration));
             }
 
             try
@@ -133,7 +130,7 @@ namespace Skills
             var popDelays = new Dictionary<Vector2Int, float>(bubbles.Count);
             var popOrder = new List<Vector2Int>(bubbles.Keys);
             foreach (Vector2Int position in popOrder)
-                popDelays.Add(position, UnityEngine.Random.Range(0f, finishDuration));
+                popDelays.Add(position, UnityEngine.Random.Range(0f, FinishDuration));
             popOrder.Sort((left, right) => popDelays[left].CompareTo(popDelays[right]));
 
             float elapsed = 0f;
@@ -150,7 +147,7 @@ namespace Skills
                     petalViewManager.ReleasePetalViewsImmediately(new[] { position }, accessKeys);
             }
 
-            await UniTask.Delay(TimeSpan.FromSeconds(finishDuration - elapsed));
+            await UniTask.Delay(TimeSpan.FromSeconds(FinishDuration - elapsed));
         }
     }
 }

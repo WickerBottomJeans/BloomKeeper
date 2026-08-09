@@ -11,6 +11,10 @@ namespace Skills
     public sealed class ButterflySkillPresenter : SkillRepresentationPresenter<ButterflyRepresentationData>
     {
         private const float FlightCurveAmplitudeInTiles = 2f;
+        private const float SourcePetalPrepareScale = 1.5f;
+        private const float PrepareDuration = 0.1f;
+        private const float FireDuration = 0.7f;
+        private const float FinishDuration = 0.1f;
         private static readonly IReadOnlyDictionary<PetalType, Color> ParticleColors = new Dictionary<PetalType, Color>
         {
             { PetalType.Strawberry, new Color32(255, 105, 120, 255) },
@@ -26,19 +30,13 @@ namespace Skills
         private readonly TileViewManager tileViewManager;
         private readonly BoardVFXManager boardVFXManager;
         private readonly BoardLayout layout;
-        private readonly float prepareDuration;
-        private readonly float fireDuration;
-        private readonly float finishDuration;
 
-        public ButterflySkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardLayout layout, float prepareDuration, float fireDuration, float finishDuration)
+        public ButterflySkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardLayout layout)
         {
             this.petalViewManager = petalViewManager;
             this.tileViewManager = tileViewManager;
             this.boardVFXManager = boardVFXManager;
             this.layout = layout;
-            this.prepareDuration = prepareDuration;
-            this.fireDuration = fireDuration;
-            this.finishDuration = finishDuration;
         }
 
         protected override async UniTask Play(ButterflyRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
@@ -52,7 +50,7 @@ namespace Skills
             if (!representation.Target.HasValue)
             {
                 IReadOnlyList<Vector2Int> source = accessKeys.ContainsKey(representation.Source) ? new[] { representation.Source } : System.Array.Empty<Vector2Int>();
-                await UniTask.WhenAll(petalViewManager.PlayDisappearAndRelease(source, finishDuration, accessKeys), tileViewManager.PlayTileChanges(changes));
+                await UniTask.WhenAll(petalViewManager.PlayDisappearAndRelease(source, FinishDuration, accessKeys), tileViewManager.PlayTileChanges(changes));
                 return;
             }
 
@@ -69,7 +67,7 @@ namespace Skills
             Transform visualTransform = petalViewManager.GetAccessibleVisualTransform(source, accessKeys);
             VFXButterflySkill butterflyVFX = boardVFXManager.RentButterflySkillVFX(visualTransform);
             butterflyVFX.SetColor(ParticleColors[sourcePetalType]);
-            await UniTask.WhenAll(butterflyVFX.Prepare(prepareDuration, audioScope), petalViewManager.PlayRootScale(source, 1.5f, prepareDuration, accessKeys));
+            await UniTask.WhenAll(butterflyVFX.Prepare(PrepareDuration, audioScope), petalViewManager.PlayRootScale(source, SourcePetalPrepareScale, PrepareDuration, accessKeys));
             return butterflyVFX;
         }
 
@@ -79,7 +77,7 @@ namespace Skills
                 return;
 
             butterflyVFX.Fire();
-            await petalViewManager.PlayFly(source, target, layout, fireDuration, FlightCurveAmplitudeInTiles, accessKeys);
+            await petalViewManager.PlayFly(source, target, layout, FireDuration, FlightCurveAmplitudeInTiles, accessKeys);
         }
 
         private async UniTask Finish(VFXButterflySkill butterflyVFX, Vector2Int source, Vector2Int target, MatchGroupResolveResult resolution, IReadOnlyList<TileChange> changes, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
@@ -98,10 +96,10 @@ namespace Skills
 
             if (butterflyVFX != null)
             {
-                boardVFXManager.FinishButterflySkillVFX(butterflyVFX, finishDuration, audioScope).Forget();
+                boardVFXManager.FinishButterflySkillVFX(butterflyVFX, FinishDuration, audioScope).Forget();
             }
 
-            await UniTask.WhenAll(petalViewManager.PlayDisappearAndRelease(disappearingPositions, finishDuration, accessKeys), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(changes));
+            await UniTask.WhenAll(petalViewManager.PlayDisappearAndRelease(disappearingPositions, FinishDuration, accessKeys), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(changes));
         }
     }
 }

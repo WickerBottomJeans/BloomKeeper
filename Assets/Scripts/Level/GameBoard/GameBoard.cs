@@ -86,7 +86,7 @@ public class GameBoard : MonoBehaviour
         skillRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager,
             layout);
         boosterRepresentationOrchestrator = GetComponent<BoosterRepresentationOrchestrator>();
-        boosterRepresentationOrchestrator.Init(tileViewManager, boardVFXManager);
+        boosterRepresentationOrchestrator.Init(tileViewManager, boardVFXManager, layout);
         boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager, skillRepresentationOrchestrator, boosterRepresentationOrchestrator, boardAudioManager, layout, grid);
 
         boardInputHandler.Init(layout, cam);
@@ -94,7 +94,6 @@ public class GameBoard : MonoBehaviour
         boardInputHandler.OnSwapRequested += HandleSwap;
         boardInputHandler.OnEditRequested += HandleEditRequested;
         UIManager.Instance.OnPetalEditConfirmed += HandlePetalEditConfirmed;
-        UIManager.Instance.BoosterCancelRequested += CancelBoosterUse;
 
     }
 
@@ -410,7 +409,6 @@ public class GameBoard : MonoBehaviour
         if (UIManager.Instance != null)
         {
             UIManager.Instance.OnPetalEditConfirmed -= HandlePetalEditConfirmed;
-            UIManager.Instance.BoosterCancelRequested -= CancelBoosterUse;
         }
     }
 
