@@ -6,11 +6,13 @@ using UnityEngine;
 
 namespace Boosters
 {
-    public sealed class BloomWandChooser : IBoosterChooser
+    public sealed class GardenersGloveChooser : IBoosterChooser
     {
         private Tile[,] grid;
         private UniTaskCompletionSource<IReadOnlyList<Vector2Int>> completionSource;
+        private readonly List<Vector2Int> selectedTargets = new List<Vector2Int>(2);
         private Vector2Int? pressedTarget;
+        private bool isCompleting;
 
         public event Action<Vector2Int, bool> TargetSelectionChanged;
 
@@ -31,11 +33,13 @@ namespace Boosters
         {
             if (grid == null) throw new ArgumentNullException(nameof(grid));
             if (inputHandler == null) throw new ArgumentNullException(nameof(inputHandler));
-            if (this.grid != null) throw new InvalidOperationException("Bloom Wand target selection is already active.");
+            if (this.grid != null) throw new InvalidOperationException("Gardener's Glove target selection is already active.");
 
             this.grid = grid;
             completionSource = new UniTaskCompletionSource<IReadOnlyList<Vector2Int>>();
+            selectedTargets.Clear();
             pressedTarget = null;
+            isCompleting = false;
 
             inputHandler.OnPointerPressed += HandlePointerPressed;
             inputHandler.OnPointerReleased += HandlePointerReleased;
@@ -52,7 +56,9 @@ namespace Boosters
                 inputHandler.OnPointerCanceled -= Cancel;
                 completionSource = null;
                 this.grid = null;
+                selectedTargets.Clear();
                 pressedTarget = null;
+                isCompleting = false;
             }
         }
 
@@ -65,19 +71,41 @@ namespace Boosters
         private void HandlePointerPressed(Vector2Int position)
         {
             EnsureActive();
+            if (isCompleting) return;
             pressedTarget = CanTarget(position) ? position : null;
         }
 
         private void HandlePointerReleased(Vector2Int position)
         {
             EnsureActive();
+            if (isCompleting) return;
 
             Vector2Int? target = pressedTarget;
             pressedTarget = null;
             if (!target.HasValue || target.Value != position || !CanTarget(position)) return;
 
+            if (selectedTargets.Remove(position))
+            {
+                TargetSelectionChanged?.Invoke(position, false);
+                return;
+            }
+
+            selectedTargets.Add(position);
             TargetSelectionChanged?.Invoke(position, true);
-            completionSource.TrySetResult(new[] { position });
+
+            if (selectedTargets.Count == 2)
+            {
+                isCompleting = true;
+                CompleteAfterSelectionFrame().Forget();
+            }
+        }
+
+        private async UniTask CompleteAfterSelectionFrame()
+        {
+            UniTaskCompletionSource<IReadOnlyList<Vector2Int>> activeCompletionSource = completionSource;
+            IReadOnlyList<Vector2Int> targets = selectedTargets.ToArray();
+            await UniTask.NextFrame();
+            activeCompletionSource.TrySetResult(targets);
         }
 
         private bool CanTarget(Vector2Int position)
@@ -90,12 +118,12 @@ namespace Boosters
             if (position.x < 0 || position.x >= grid.GetLength(0) || position.y < 0 || position.y >= grid.GetLength(1)) return false;
 
             Tile tile = grid[position.x, position.y];
-            return tile != null && tile.GetClearEffectCapacity() > 0;
+            return tile != null && tile.CanSwapPetal();
         }
 
         private void EnsureActive()
         {
-            if (completionSource == null) throw new InvalidOperationException("Bloom Wand target selection has not begun.");
+            if (completionSource == null) throw new InvalidOperationException("Gardener's Glove target selection has not begun.");
         }
     }
 }

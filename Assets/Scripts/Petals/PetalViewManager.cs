@@ -172,6 +172,16 @@ public class PetalViewManager : MonoBehaviour
         return view.PlayScale(scaleMultiplier, duration, ease);
     }
 
+    public void ShowBoosterSelection(Vector2Int position, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        GetAccessibleView(accessKeys, position).ShowBoosterSelection();
+    }
+
+    public void HideBoosterSelection(Vector2Int position, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+    {
+        GetAccessibleView(accessKeys, position).HideBoosterSelection();
+    }
+
     public UniTask PlayRootScale(Vector2Int position, float scaleMultiplier, float duration, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
     {
         PetalView view = GetAccessibleView(accessKeys, position);

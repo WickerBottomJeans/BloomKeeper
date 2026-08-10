@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
@@ -7,6 +8,8 @@ namespace Boosters
 {
     public interface IBoosterChooser
     {
+        event Action<Vector2Int, bool> TargetSelectionChanged;
+
         IReadOnlyList<Vector2Int> GetBoosterTargetCandidates(Tile[,] grid);
         UniTask<IReadOnlyList<Vector2Int>> Choose(Tile[,] grid, BoardInputHandler inputHandler);
         void Cancel();

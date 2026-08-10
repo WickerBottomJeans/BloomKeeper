@@ -15,4 +15,16 @@ namespace Boosters
             TargetPosition = targetPosition;
         }
     }
+
+    public sealed class GardenersGloveRepresentationData : BoosterRepresentationData
+    {
+        public Vector2Int OriginPosition { get; }
+        public Vector2Int TargetPosition { get; }
+
+        public GardenersGloveRepresentationData(Vector2Int originPosition, Vector2Int targetPosition)
+        {
+            OriginPosition = originPosition;
+            TargetPosition = targetPosition;
+        }
+    }
 }

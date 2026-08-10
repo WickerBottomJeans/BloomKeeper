@@ -9,7 +9,8 @@ namespace Boosters
     {
         private static readonly IReadOnlyDictionary<BoosterType, (Func<IBoosterChooser> createChooser, IBoosterExecutor executor)> Boosters = new Dictionary<BoosterType, (Func<IBoosterChooser> createChooser, IBoosterExecutor executor)>
         {
-            { BoosterType.BloomWand, (() => new BloomWandChooser(), new BloomWandExecutor()) }
+            { BoosterType.BloomWand, (() => new BloomWandChooser(), new BloomWandExecutor()) },
+            { BoosterType.GardenersGlove, (() => new GardenersGloveChooser(), new GardenersGloveExecutor()) }
         };
 
         public static IBoosterChooser CreateChooser(BoosterType boosterType)

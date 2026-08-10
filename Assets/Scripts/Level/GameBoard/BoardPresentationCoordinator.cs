@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Boosters;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.Audio;
+using DefaultNamespace.VFX;
 using Skills;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ namespace DefaultNamespace.UI
         private readonly BoardAudioManager boardAudioManager;
         private readonly BoardLayout layout;
 
-        public BoardPresentationCoordinator(PetalViewManager petalViewManager, TileViewManager tileViewManager, SkillRepresentationOrchestrator skillRepresentationOrchestrator, BoosterRepresentationOrchestrator boosterRepresentationOrchestrator, BoardAudioManager boardAudioManager, BoardLayout layout, Tile[,] grid)
+        public BoardPresentationCoordinator(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, SkillRepresentationOrchestrator skillRepresentationOrchestrator, BoosterRepresentationOrchestrator boosterRepresentationOrchestrator, BoardAudioManager boardAudioManager, BoardLayout layout, Tile[,] grid)
         {
             this.petalViewManager = petalViewManager;
             this.skillRepresentationOrchestrator = skillRepresentationOrchestrator;
@@ -26,6 +27,7 @@ namespace DefaultNamespace.UI
             this.layout = layout;
             boardActionCoordinator = new BoardActionCoordinator(petalViewManager, boardAudioManager, layout, grid);
             matchPresentationCoordinator = new MatchPresentationCoordinator(petalViewManager, tileViewManager, boardAudioManager);
+            boosterRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, boardActionCoordinator, layout);
         }
 
         public UniTask PlaySwap(Vector2Int tileA, Vector2Int tileB)
@@ -49,21 +51,9 @@ namespace DefaultNamespace.UI
             await PlayResolution(skillWave.Resolution, skillWave.SkillResults, audioScope);
         }
 
-        public async UniTask PlayBooster(BoosterUseResult boosterUseResult, MatchResolveResult resolution)
+        public UniTask PlayBooster(BoosterUseResult boosterUseResult)
         {
-            var accessKeys = new Dictionary<Vector2Int, ViewAccessKey>();
-            try
-            {
-                boosterRepresentationOrchestrator.AcquireVitalViews(boosterUseResult, resolution, accessKeys);
-                await boosterRepresentationOrchestrator.Play(boosterUseResult, resolution, accessKeys);
-            }
-            finally
-            {
-                var remainingAccessKeys = new List<ViewAccessKey>(accessKeys.Values);
-                foreach (ViewAccessKey accessKey in remainingAccessKeys)
-                    petalViewManager.ReleaseView(accessKey);
-                accessKeys.Clear();
-            }
+            return boosterRepresentationOrchestrator.Play(boosterUseResult);
         }
 
         public void ShowBoosterTargets(BoosterType boosterType, IReadOnlyList<Vector2Int> positions)
@@ -74,6 +64,11 @@ namespace DefaultNamespace.UI
         public void HideBoosterTargets()
         {
             boosterRepresentationOrchestrator.HideBoosterTargets();
+        }
+
+        public void SetBoosterTargetSelected(Vector2Int position, bool isSelected)
+        {
+            boosterRepresentationOrchestrator.SetBoosterTargetSelected(position, isSelected);
         }
 
         private async UniTask PlayResolution(MatchResolveResult result, IReadOnlyList<SkillUseResult> skillResults, AudioPlaybackScope audioScope = null)

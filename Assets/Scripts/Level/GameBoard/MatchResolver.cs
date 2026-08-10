@@ -20,15 +20,17 @@ namespace DefaultNamespace.UI
             new Vector2Int(1, 1)
         };
 
-        public static MatchResolveResult Resolve(List<MatchGroup> matches, Tile[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget)
+        public static MatchResolveResult Resolve(List<MatchGroup> matches, Tile[,] grid, IReadOnlyList<Vector2Int> preferredSkillSpawnPositions)
         {
+            if (preferredSkillSpawnPositions == null) throw new ArgumentNullException(nameof(preferredSkillSpawnPositions));
+
             var groupResults = new List<MatchGroupResolveResult>(matches.Count);
             var removedPositions = new List<Vector2Int>();
             var pendingSpawns = new List<SkillPetalSpawn>();
 
             foreach (MatchGroup match in matches)
             {
-                MatchGroupResolveResult groupResult = ProcessMatch(match, grid, swapOrigin, swapTarget, removedPositions, pendingSpawns);
+                MatchGroupResolveResult groupResult = ProcessMatch(match, grid, preferredSkillSpawnPositions, removedPositions, pendingSpawns);
                 groupResults.Add(groupResult);
             }
 
@@ -38,7 +40,7 @@ namespace DefaultNamespace.UI
             return new MatchResolveResult(groupResults, pendingSpawns, adjacenttileChanges);
         }
 
-        public static MatchResolveResult Resolve(IReadOnlyList<SkillUseResult> skillResults, Tile[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget)
+        public static MatchResolveResult Resolve(IReadOnlyList<SkillUseResult> skillResults, Tile[,] grid, IReadOnlyList<Vector2Int> preferredSkillSpawnPositions)
         {
             var orderedMatches = new List<MatchGroup>();
             foreach (SkillUseResult skillResult in skillResults)
@@ -59,16 +61,16 @@ namespace DefaultNamespace.UI
                 }
             }
 
-            return Resolve(orderedMatches, grid, swapOrigin, swapTarget);
+            return Resolve(orderedMatches, grid, preferredSkillSpawnPositions);
         }
 
-        private static MatchGroupResolveResult ProcessMatch(MatchGroup match, Tile[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget, List<Vector2Int> removedPositions, List<SkillPetalSpawn> pendingSpawns)
+        private static MatchGroupResolveResult ProcessMatch(MatchGroup match, Tile[,] grid, IReadOnlyList<Vector2Int> preferredSkillSpawnPositions, List<Vector2Int> removedPositions, List<SkillPetalSpawn> pendingSpawns)
         {
-            TryQueueSkillSpawn(match, grid, swapOrigin, swapTarget, pendingSpawns);
+            TryQueueSkillSpawn(match, grid, preferredSkillSpawnPositions, pendingSpawns);
             return ClearMatchTiles(match, grid, removedPositions);
         }
 
-        private static void TryQueueSkillSpawn(MatchGroup match, Tile[,] grid, Vector2Int swapOrigin, Vector2Int swapTarget, List<SkillPetalSpawn> pendingSpawns)
+        private static void TryQueueSkillSpawn(MatchGroup match, Tile[,] grid, IReadOnlyList<Vector2Int> preferredSkillSpawnPositions, List<SkillPetalSpawn> pendingSpawns)
         {
             SpecialSkillType? spawnSkill = match.Shape switch
             {
@@ -93,7 +95,7 @@ namespace DefaultNamespace.UI
             {
                 matchedType = PetalType.None;
             }
-            Vector2Int spawnPos = DetermineSpawnPos(match, swapOrigin, swapTarget);
+            Vector2Int spawnPos = DetermineSpawnPos(match, preferredSkillSpawnPositions);
             pendingSpawns.Add(new SkillPetalSpawn(match.TilePositions, spawnPos, matchedType, spawnSkill.Value));
         }
 
@@ -137,13 +139,14 @@ namespace DefaultNamespace.UI
         /// Determine spawn pos for the new skill petal
         /// </summary>
         /// <param name="match"></param>
-        /// <param name="swapOrigin"></param>
-        /// <param name="swapTarget"></param>
+        /// <param name="preferredSkillSpawnPositions"></param>
         /// <returns></returns>
-        private static Vector2Int DetermineSpawnPos(MatchGroup match, Vector2Int swapOrigin, Vector2Int swapTarget)
+        private static Vector2Int DetermineSpawnPos(MatchGroup match, IReadOnlyList<Vector2Int> preferredSkillSpawnPositions)
         {
-            if (match.TilePositions.Contains(swapTarget)) return swapTarget;
-            if (match.TilePositions.Contains(swapOrigin)) return swapOrigin;
+            foreach (Vector2Int preferredPosition in preferredSkillSpawnPositions)
+                if (match.TilePositions.Contains(preferredPosition))
+                    return preferredPosition;
+
             return GetCascadeSpawnPos(match);
         }
 

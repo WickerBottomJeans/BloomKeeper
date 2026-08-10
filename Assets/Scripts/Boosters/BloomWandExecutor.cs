@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DefaultNamespace;
+using DefaultNamespace.UI;
 using UnityEngine;
 
 namespace Boosters
@@ -21,7 +22,8 @@ namespace Boosters
 
             var matchGroup = new MatchGroup(new List<Vector2Int> { target }, MatchShape.None);
             var representation = new BloomWandRepresentationData(target);
-            return new BoosterUseResult(new List<MatchGroup> { matchGroup }, representation);
+            var resolutionInput = new BoardResolutionInput(new List<MatchGroup> { matchGroup }, Array.Empty<SkillActivation>(), Array.Empty<Vector2Int>());
+            return new BoosterUseResult(resolutionInput, representation);
         }
     }
 }

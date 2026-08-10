@@ -1,16 +1,16 @@
 using System;
-using System.Collections.Generic;
+using DefaultNamespace.UI;
 
 namespace Boosters
 {
     public sealed class BoosterUseResult
     {
-        public IReadOnlyList<MatchGroup> MatchGroups { get; }
+        public BoardResolutionInput ResolutionInput { get; }
         public BoosterRepresentationData Representation { get; }
 
-        public BoosterUseResult(IReadOnlyList<MatchGroup> matchGroups, BoosterRepresentationData representation)
+        public BoosterUseResult(BoardResolutionInput resolutionInput, BoosterRepresentationData representation)
         {
-            MatchGroups = matchGroups ?? throw new ArgumentNullException(nameof(matchGroups));
+            ResolutionInput = resolutionInput ?? throw new ArgumentNullException(nameof(resolutionInput));
             Representation = representation ?? throw new ArgumentNullException(nameof(representation));
         }
     }

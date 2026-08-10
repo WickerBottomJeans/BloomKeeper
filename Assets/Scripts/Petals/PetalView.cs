@@ -29,6 +29,10 @@ public class PetalView : MonoBehaviour
     [SerializeField] private Vector2 petalChangeStretchScale = new Vector2(0.9f, 1.1f);
     [SerializeField] [Range(0f, 1f)] private float petalChangeSquashDurationRatio = 0.3f;
     [SerializeField] [Range(0f, 1f)] private float petalChangeStretchDurationRatio = 0.35f;
+    [SerializeField] private float boosterSelectionScaleMultiplier = 1.2f;
+    [SerializeField] private float boosterSelectionPulseHalfDuration = 0.25f;
+    [SerializeField] private float boosterSelectionPeakScaleMultiplier = 1.6f;
+    [SerializeField] private int boosterSelectionSortingOrderOffset = 10;
     private Vector3 TargetScale { get; set; }
     public Transform VisualTransform => spriteRenderer.transform;
     private Material defaultMaterial;
@@ -38,6 +42,9 @@ public class PetalView : MonoBehaviour
     private Vector3 defaultBubbleScale;
     private Color defaultBubbleColor;
     private int defaultSortingOrder;
+    private int defaultBubbleSortingLayerId;
+    private int defaultBubbleSortingOrder;
+    private bool isBoosterSelected;
 
     private void Awake()
     {
@@ -47,6 +54,8 @@ public class PetalView : MonoBehaviour
         defaultBubbleScale = bubbleOverlay.transform.localScale;
         defaultBubbleColor = bubbleOverlay.color;
         defaultSortingOrder = spriteRenderer.sortingOrder;
+        defaultBubbleSortingLayerId = bubbleOverlay.sortingLayerID;
+        defaultBubbleSortingOrder = bubbleOverlay.sortingOrder;
         SyncShadowSorting();
         CacheDefaultMaterial();
     }
@@ -105,6 +114,28 @@ public class PetalView : MonoBehaviour
             .SetEase(ease)
             .SetLink(gameObject, LinkBehaviour.KillOnDestroy)
             .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
+    }
+
+    public void ShowBoosterSelection()
+    {
+        if (isBoosterSelected) throw new InvalidOperationException("Petal booster selection is already visible.");
+
+        isBoosterSelected = true;
+        KillVisualAnimation();
+        VisualTransform.localScale = TargetScale;
+        spriteRenderer.sortingOrder = defaultSortingOrder + boosterSelectionSortingOrderOffset;
+        SyncShadowSorting();
+        bubbleOverlay.sortingLayerID = spriteRenderer.sortingLayerID;
+        bubbleOverlay.sortingOrder = defaultBubbleSortingOrder + boosterSelectionSortingOrderOffset;
+        VisualTransform.localScale = TargetScale * boosterSelectionScaleMultiplier;
+        VisualTransform.DOScale(TargetScale * boosterSelectionPeakScaleMultiplier, boosterSelectionPulseHalfDuration).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
+    }
+
+    public void HideBoosterSelection()
+    {
+        if (!isBoosterSelected) throw new InvalidOperationException("Petal booster selection is not visible.");
+
+        RestoreBoosterSelection();
     }
 
     public UniTask PlayRootScale(float scaleMultiplier, float duration)
@@ -301,6 +332,7 @@ public class PetalView : MonoBehaviour
     public void ResetForPool()
     {
         KillActiveAnimation();
+        RestoreBoosterSelection();
         transform.localScale = defaultRootScale;
         spriteRenderer.color = defaultColor;
         shadowRenderer.color = defaultShadowColor;
@@ -387,6 +419,17 @@ public class PetalView : MonoBehaviour
     {
         shadowRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
         shadowRenderer.sortingOrder = spriteRenderer.sortingOrder + ShadowSortingOrderOffset;
+    }
+
+    private void RestoreBoosterSelection()
+    {
+        isBoosterSelected = false;
+        VisualTransform.DOKill();
+        VisualTransform.localScale = TargetScale;
+        spriteRenderer.sortingOrder = defaultSortingOrder;
+        SyncShadowSorting();
+        bubbleOverlay.sortingLayerID = defaultBubbleSortingLayerId;
+        bubbleOverlay.sortingOrder = defaultBubbleSortingOrder;
     }
 
     private void PrepareDirectionalJelly(Vector2 displacement, float tileSize, float duration, out Vector3 stretchScale, out Vector3 squashScale)

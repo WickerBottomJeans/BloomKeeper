@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
-using DefaultNamespace.UI;
 using UnityEngine;
 
 namespace Boosters
@@ -12,9 +11,9 @@ namespace Boosters
         BoosterType BoosterType { get; }
         Type RepresentationType { get; }
         void ShowTargets(IReadOnlyList<Vector2Int> positions, BoosterTargetPresentationConfig.BoosterTargetMaterialMapping presentation);
+        void SetTargetSelected(Vector2Int position, bool isSelected);
         void HideTargets();
-        void AcquireAdditionalVitalViews(BoosterRepresentationData representation, MatchResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
-        UniTask Play(BoosterRepresentationData representation, MatchResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
+        UniTask Play(BoosterRepresentationData representation);
     }
 
     public abstract class BoosterRepresentationPresenter<TRepresentation> : IBoosterRepresentationPresenter where TRepresentation : BoosterRepresentationData
@@ -23,22 +22,14 @@ namespace Boosters
         public Type RepresentationType => typeof(TRepresentation);
 
         public abstract void ShowTargets(IReadOnlyList<Vector2Int> positions, BoosterTargetPresentationConfig.BoosterTargetMaterialMapping presentation);
+        public abstract void SetTargetSelected(Vector2Int position, bool isSelected);
         public abstract void HideTargets();
 
-        public void AcquireAdditionalVitalViews(BoosterRepresentationData representation, MatchResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        public UniTask Play(BoosterRepresentationData representation)
         {
-            AcquireAdditionalVitalViews((TRepresentation)representation, resolution, accessKeys);
+            return Play((TRepresentation)representation);
         }
 
-        public UniTask Play(BoosterRepresentationData representation, MatchResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
-        {
-            return Play((TRepresentation)representation, resolution, accessKeys);
-        }
-
-        protected virtual void AcquireAdditionalVitalViews(TRepresentation representation, MatchResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
-        {
-        }
-
-        protected abstract UniTask Play(TRepresentation representation, MatchResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys);
+        protected abstract UniTask Play(TRepresentation representation);
     }
 }

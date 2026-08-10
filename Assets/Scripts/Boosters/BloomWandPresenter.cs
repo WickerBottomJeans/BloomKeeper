@@ -32,12 +32,16 @@ namespace Boosters
             tileViewManager.ShowBoosterTargets(positions, presentation.Material);
         }
 
+        public override void SetTargetSelected(Vector2Int position, bool isSelected)
+        {
+        }
+
         public override void HideTargets()
         {
             tileViewManager.HideBoosterTargets();
         }
 
-        protected override async UniTask Play(BloomWandRepresentationData representation, MatchResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        protected override async UniTask Play(BloomWandRepresentationData representation)
         {
             await boardVFXManager.PlayBloomWandUntilImpact(representation.TargetPosition);
 

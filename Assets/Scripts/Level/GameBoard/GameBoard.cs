@@ -44,6 +44,7 @@ public class GameBoard : MonoBehaviour
     private List<MatchGroup> pendingMatches;
     private List<(Vector2Int from, Vector2Int to)> pendingMoves;
     private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
+    private IReadOnlyList<Vector2Int> pendingPreferredSkillSpawnPositions = Array.Empty<Vector2Int>();
     private BoardPresentationCoordinator boardPresentationCoordinator;
     private BoosterRepresentationOrchestrator boosterRepresentationOrchestrator;
     private BoosterUseResult pendingBoosterUseResult;
@@ -86,8 +87,7 @@ public class GameBoard : MonoBehaviour
         skillRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager,
             layout);
         boosterRepresentationOrchestrator = GetComponent<BoosterRepresentationOrchestrator>();
-        boosterRepresentationOrchestrator.Init(tileViewManager, boardVFXManager, layout);
-        boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager, skillRepresentationOrchestrator, boosterRepresentationOrchestrator, boardAudioManager, layout, grid);
+        boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager, boardVFXManager, skillRepresentationOrchestrator, boosterRepresentationOrchestrator, boardAudioManager, layout, grid);
 
         boardInputHandler.Init(layout, cam);
 
@@ -165,13 +165,16 @@ public class GameBoard : MonoBehaviour
 
     private async UniTask EnterBoosterTargeting()
     {
+        IBoosterChooser chooser = null;
         bool targetingPresentationEntered = false;
         bool boosterTargetsShown = false;
         try
         {
             if (!activeBoosterType.HasValue) throw new InvalidOperationException("Booster targeting requires an active booster type.");
 
-            activeBoosterChooser = BoosterManager.CreateChooser(activeBoosterType.Value);
+            chooser = BoosterManager.CreateChooser(activeBoosterType.Value);
+            activeBoosterChooser = chooser;
+            chooser.TargetSelectionChanged += HandleBoosterTargetSelectionChanged;
             IReadOnlyList<Vector2Int> boosterTargetCandidates = activeBoosterChooser.GetBoosterTargetCandidates(grid);
             boardPresentationCoordinator.ShowBoosterTargets(activeBoosterType.Value, boosterTargetCandidates);
             boosterTargetsShown = true;
@@ -190,8 +193,7 @@ public class GameBoard : MonoBehaviour
 
             pendingBoosterUseResult = BoosterManager.Execute(activeBoosterType.Value, grid, targets);
             activeBoosterType = null;
-            pendingSkillActivations.Clear();
-            pendingMatches = new List<MatchGroup>(pendingBoosterUseResult.MatchGroups);
+            LoadResolutionInput(pendingBoosterUseResult.ResolutionInput);
             isResolvingPlayerMove = false;
             currentCascadeDepth = 0;
             TransitionTo(BoardState.Resolving);
@@ -207,6 +209,8 @@ public class GameBoard : MonoBehaviour
         }
         finally
         {
+            if (chooser != null)
+                chooser.TargetSelectionChanged -= HandleBoosterTargetSelectionChanged;
             if (boosterTargetsShown)
                 boardPresentationCoordinator.HideBoosterTargets();
             if (targetingPresentationEntered)
@@ -214,34 +218,29 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+    private void HandleBoosterTargetSelectionChanged(Vector2Int position, bool isSelected)
+    {
+        boardPresentationCoordinator.SetBoosterTargetSelected(position, isSelected);
+    }
+
     private async UniTask EnterSwapping()
     {
         pendingSkillActivations.Clear();
         pendingMatches = new List<MatchGroup>();
+        pendingPreferredSkillSpawnPositions = Array.Empty<Vector2Int>();
         currentCascadeDepth = 0;
 
-        PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
+        BoardResolutionInput resolutionInput = BoardSwapOperation.Execute(grid, swapOrigin, swapTarget);
         await boardPresentationCoordinator.PlaySwap(swapOrigin, swapTarget);
 
-        pendingSkillActivations.AddRange(SkillDetector.DetectOnSwap(grid, swapOrigin, swapTarget));
-
-        if (pendingSkillActivations.Count > 0)
-        {
-            isResolvingPlayerMove = true;
-            OnGameplayEvent?.Invoke(new PlayerMoveCommittedEvent());
-            TransitionTo(BoardState.Resolving);
-            return;
-        }
-
-        pendingMatches = MatchDetector.Detect(grid);
-
-        if (pendingMatches.Count == 0)
+        if (!resolutionInput.RequiresResolution)
         {
             PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
             TransitionTo(BoardState.SwappingBack);
             return;
         }
 
+        LoadResolutionInput(resolutionInput);
         isResolvingPlayerMove = true;
         OnGameplayEvent?.Invoke(new PlayerMoveCommittedEvent());
         TransitionTo(BoardState.Resolving);
@@ -255,13 +254,21 @@ public class GameBoard : MonoBehaviour
 
     private async UniTask EnterResolving()
     {
-        TurnResolution turnResolution = CalculateTurnResolution();
         if (pendingBoosterUseResult != null)
         {
-            if (turnResolution.InitialMatch == null) throw new InvalidOperationException("Booster presentation requires an initial match resolution.");
-            await boardPresentationCoordinator.PlayBooster(pendingBoosterUseResult, turnResolution.InitialMatch);
+            BoosterUseResult boosterUseResult = pendingBoosterUseResult;
+            await boardPresentationCoordinator.PlayBooster(boosterUseResult);
             pendingBoosterUseResult = null;
+
+            if (!boosterUseResult.ResolutionInput.RequiresResolution)
+            {
+                pendingPreferredSkillSpawnPositions = Array.Empty<Vector2Int>();
+                TransitionTo(BoardState.Idle);
+                return;
+            }
         }
+
+        TurnResolution turnResolution = CalculateTurnResolution();
         await PlayTurnResolution(turnResolution);
         TransitionTo(BoardState.Gravity);
     }
@@ -276,16 +283,18 @@ public class GameBoard : MonoBehaviour
             IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups = resolveObjectiveTargets(BoardSnapshotBuilder.Capture(grid));
             List<SkillUseResult> openingSkillResults = SkillManager.UseSkills(grid, pendingSkillActivations, objectiveTargetGroups);
             pendingSkillActivations.Clear();
-            MatchResolveResult openingResolution = MatchResolver.Resolve(openingSkillResults, grid, swapOrigin, swapTarget);
+            MatchResolveResult openingResolution = MatchResolver.Resolve(openingSkillResults, grid, pendingPreferredSkillSpawnPositions);
             skillWaves.Add(new SkillResolutionWave(openingResolution, openingSkillResults));
             AddSkillActivations(openingResolution);
         }
         else
         {
-            initialMatch = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
+            initialMatch = MatchResolver.Resolve(pendingMatches, grid, pendingPreferredSkillSpawnPositions);
             pendingMatches.Clear();
             AddSkillActivations(initialMatch);
         }
+
+        pendingPreferredSkillSpawnPositions = Array.Empty<Vector2Int>();
 
         while (pendingSkillActivations.Count > 0)
         {
@@ -296,7 +305,7 @@ public class GameBoard : MonoBehaviour
             foreach (SkillUseResult skillResult in skillResults)
                 pendingMatches.Add(skillResult.MatchGroup);
 
-            MatchResolveResult resolution = MatchResolver.Resolve(pendingMatches, grid, swapOrigin, swapTarget);
+            MatchResolveResult resolution = MatchResolver.Resolve(pendingMatches, grid, Array.Empty<Vector2Int>());
             pendingMatches.Clear();
             skillWaves.Add(new SkillResolutionWave(resolution, skillResults));
             AddSkillActivations(resolution);
@@ -309,6 +318,14 @@ public class GameBoard : MonoBehaviour
     {
         foreach (MatchGroupResolveResult groupResult in resolution.GroupResults)
             pendingSkillActivations.AddRange(groupResult.SkillActivations);
+    }
+
+    private void LoadResolutionInput(BoardResolutionInput resolutionInput)
+    {
+        pendingMatches = new List<MatchGroup>(resolutionInput.MatchGroups);
+        pendingSkillActivations.Clear();
+        pendingSkillActivations.AddRange(resolutionInput.SkillActivations);
+        pendingPreferredSkillSpawnPositions = resolutionInput.PreferredSkillSpawnPositions;
     }
 
     private async UniTask PlayTurnResolution(TurnResolution turnResolution)
@@ -376,6 +393,7 @@ public class GameBoard : MonoBehaviour
 
         currentCascadeDepth++;
         pendingMatches = cascadeMatches;
+        pendingPreferredSkillSpawnPositions = Array.Empty<Vector2Int>();
         TransitionTo(BoardState.Resolving);
     }
 

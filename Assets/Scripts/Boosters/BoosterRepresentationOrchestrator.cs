@@ -16,11 +16,12 @@ namespace Boosters
         private Dictionary<BoosterType, IBoosterRepresentationPresenter> targetPresenters;
         private IBoosterRepresentationPresenter activeTargetPresenter;
 
-        public void Init(TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardLayout boardLayout)
+        public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardActionCoordinator boardActionCoordinator, BoardLayout boardLayout)
         {
             presenters = new Dictionary<Type, IBoosterRepresentationPresenter>();
             targetPresenters = new Dictionary<BoosterType, IBoosterRepresentationPresenter>();
             Register(new BloomWandPresenter(tileViewManager, boardVFXManager, boardLayout));
+            Register(new GardenersGlovePresenter(petalViewManager, tileViewManager, boardActionCoordinator));
         }
 
         public void ShowBoosterTargets(BoosterType boosterType, IReadOnlyList<Vector2Int> positions)
@@ -40,14 +41,16 @@ namespace Boosters
             activeTargetPresenter = null;
         }
 
-        public void AcquireVitalViews(BoosterUseResult boosterUseResult, MatchResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        public void SetBoosterTargetSelected(Vector2Int position, bool isSelected)
         {
-            GetPresenter(boosterUseResult.Representation).AcquireAdditionalVitalViews(boosterUseResult.Representation, resolution, accessKeys);
+            if (activeTargetPresenter == null) throw new InvalidOperationException("Booster target presentation is not active.");
+
+            activeTargetPresenter.SetTargetSelected(position, isSelected);
         }
 
-        public UniTask Play(BoosterUseResult boosterUseResult, MatchResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        public UniTask Play(BoosterUseResult boosterUseResult)
         {
-            return GetPresenter(boosterUseResult.Representation).Play(boosterUseResult.Representation, resolution, accessKeys).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            return GetPresenter(boosterUseResult.Representation).Play(boosterUseResult.Representation).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
         }
 
         private void Register(IBoosterRepresentationPresenter presenter)
