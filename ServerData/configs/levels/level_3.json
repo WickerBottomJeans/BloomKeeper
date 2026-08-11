@@ -2,6 +2,7 @@
   "levelId": 3,
   "chapterId": 1,
   "nextLevelId": 4,
+  "allowedBoosters": [1, 2],
   "starScoreThresholds": [
     { "starCount": 1, "score": 1440 },
     { "starCount": 2, "score": 3000 },

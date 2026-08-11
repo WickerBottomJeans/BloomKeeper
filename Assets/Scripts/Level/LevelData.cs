@@ -10,6 +10,7 @@ namespace DefaultNamespace
         public int levelId;
         public int chapterId;
         public int? nextLevelId;
+        public List<BoosterType> allowedBoosters;
         public int boardWidth;
         public int boardHeight;
         public List<TileData> tiles;

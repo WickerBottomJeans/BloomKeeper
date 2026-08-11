@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.DataModels;
 using DataEntityKey = PlayFab.DataModels.EntityKey;
+using EconomyEntityKey = PlayFab.EconomyModels.EntityKey;
 
 namespace BloomKeeper.PlayFabFunctions.Services;
 
@@ -31,6 +32,12 @@ public class PlayFabFunctionContextReader
         return new DataEntityKey { Id = context.CallerEntityProfile.Entity.Id, Type = context.CallerEntityProfile.Entity.Type };
     }
 
+    public EconomyEntityKey GetCallerEconomyEntity(PlayFabFunctionExecutionContext context)
+    {
+        DataEntityKey callerEntity = GetCallerEntity(context);
+        return new EconomyEntityKey { Id = callerEntity.Id, Type = callerEntity.Type };
+    }
+
     public T GetFunctionArgument<T>(PlayFabFunctionExecutionContext context)
     {
         if (context == null) throw new InvalidOperationException("PlayFab function context is missing.");
@@ -53,5 +60,17 @@ public class PlayFabFunctionContextReader
         var apiSettings = new PlayFabApiSettings { TitleId = context.TitleAuthenticationContext.Id };
         var authContext = new PlayFabAuthenticationContext { EntityToken = context.TitleAuthenticationContext.EntityToken };
         return new PlayFabDataInstanceAPI(apiSettings, authContext);
+    }
+
+    public PlayFabEconomyInstanceAPI CreateEconomyApi(PlayFabFunctionExecutionContext context)
+    {
+        if (context == null) throw new InvalidOperationException("PlayFab function context is missing.");
+        if (context.TitleAuthenticationContext == null) throw new InvalidOperationException("PlayFab title authentication context is missing.");
+        if (string.IsNullOrWhiteSpace(context.TitleAuthenticationContext.Id)) throw new InvalidOperationException("PlayFab title ID is missing.");
+        if (string.IsNullOrWhiteSpace(context.TitleAuthenticationContext.EntityToken)) throw new InvalidOperationException("PlayFab title entity token is missing.");
+
+        var apiSettings = new PlayFabApiSettings { TitleId = context.TitleAuthenticationContext.Id };
+        var authContext = new PlayFabAuthenticationContext { EntityToken = context.TitleAuthenticationContext.EntityToken };
+        return new PlayFabEconomyInstanceAPI(apiSettings, authContext);
     }
 }

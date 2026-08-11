@@ -50,7 +50,7 @@ public class UIBoosterBoard : MonoBehaviour
     public event Action<BoosterType> BoosterUseRequested;
     public event Action BoosterCancelRequested;
 
-    public void Display(IReadOnlyList<BoosterType> availableBoosters)
+    public void Display(IReadOnlyList<BoosterViewData> availableBoosters)
     {
         ClearButtons();
 
@@ -78,7 +78,7 @@ public class UIBoosterBoard : MonoBehaviour
 
         // Spawn the copy over the selected booster.
         selectedButtonCopy = Instantiate(buttonTemplate, selectedBoosterSlot);
-        selectedButtonCopy.Configure(boosterType);
+        selectedButtonCopy.Configure(selectedButton.ViewData);
         selectedButtonCopy.Show();
         selectedButtonCopy.SetInputEnabled(false);
         selectedButtonCopy.RectTransform.position = selectedButton.RectTransform.position;
@@ -104,6 +104,35 @@ public class UIBoosterBoard : MonoBehaviour
         targetingTransition.Join(userGuideGroup.DOFade(1f, targetingEnterDuration));
         targetingTransition.Join(cancelButtonGroup.DOFade(1f, targetingEnterDuration));
         targetingTransition.SetLink(gameObject, LinkBehaviour.KillOnDestroy);
+    }
+
+    public void EnterBoosterAuthorizationPending()
+    {
+        if (selectedButtonCopy == null) throw new InvalidOperationException("Booster targeting presentation is not active.");
+
+        cancelButtonGroup.interactable = false;
+        cancelButtonGroup.blocksRaycasts = false;
+    }
+
+    public void Refresh(IReadOnlyList<BoosterViewData> boosterViewData)
+    {
+        if (boosterViewData == null) throw new ArgumentNullException(nameof(boosterViewData));
+        if (boosterViewData.Count != activeButtons.Count) throw new ArgumentException("Booster refresh data does not match the displayed booster count.", nameof(boosterViewData));
+
+        foreach (BoosterViewData viewData in boosterViewData)
+            FindButton(viewData.BoosterType).Configure(viewData);
+
+        if (selectedButtonCopy != null)
+        {
+            selectedButtonCopy.Configure(selectedButton.ViewData);
+            selectedButtonCopy.SetInputEnabled(false);
+            foreach (UIBoosterButton boosterButton in activeButtons)
+                boosterButton.SetInputEnabled(false);
+            return;
+        }
+
+        foreach (UIBoosterButton boosterButton in activeButtons)
+            boosterButton.SetInputEnabled(boosterButton.ViewData.Amount > 0);
     }
 
     public void ExitBoosterTargeting()
@@ -152,13 +181,14 @@ public class UIBoosterBoard : MonoBehaviour
 
     #region Private Methods
 
-    private void SpawnButton(BoosterType boosterType)
+    private void SpawnButton(BoosterViewData viewData)
     {
         UIBoosterButton boosterButton = Instantiate(buttonTemplate, buttonRoot);
-        boosterButton.Configure(boosterType);
+        boosterButton.Configure(viewData);
         boosterButton.BoosterUseRequested += HandleBoosterUseRequested;
         activeButtons.Add(boosterButton);
         boosterButton.Show();
+        boosterButton.SetInputEnabled(viewData.Amount > 0);
     }
 
     private void ClearButtons()
@@ -189,7 +219,7 @@ public class UIBoosterBoard : MonoBehaviour
         // Restore the original buttons.
         selectedButton.SetVisualAlpha(1f);
         foreach (UIBoosterButton boosterButton in activeButtons)
-            boosterButton.SetInputEnabled(true);
+            boosterButton.SetInputEnabled(boosterButton.ViewData.Amount > 0);
 
         // Remove the copy and hide targeting UI.
         Destroy(selectedButtonCopy.gameObject);
@@ -210,7 +240,7 @@ public class UIBoosterBoard : MonoBehaviour
         foreach (UIBoosterButton boosterButton in activeButtons)
         {
             boosterButton.SetVisualAlpha(1f);
-            boosterButton.SetInputEnabled(true);
+            boosterButton.SetInputEnabled(boosterButton.ViewData.Amount > 0);
         }
 
         if (selectedButtonCopy != null)

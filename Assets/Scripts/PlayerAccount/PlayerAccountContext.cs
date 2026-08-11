@@ -26,6 +26,14 @@ namespace DefaultNamespace
             return CurrentAccount.Progression;
         }
 
+        public BoosterInventoryData GetCurrentBoosterInventory()
+        {
+            if (CurrentAccount == null)
+                throw new InvalidOperationException("Cannot access booster inventory before an account is loaded.");
+
+            return CurrentAccount.BoosterInventory;
+        }
+
         public void Clear()
         {
             CurrentAccount = null;

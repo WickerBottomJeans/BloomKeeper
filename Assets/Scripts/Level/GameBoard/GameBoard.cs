@@ -64,12 +64,15 @@ public class GameBoard : MonoBehaviour
         Filling,
         Cascade,
         Shuffling,
-        BoosterTargeting
+        BoosterTargeting,
+        BoosterAuthorization
     }
 
     public event Action<IGameplayEvent> OnGameplayEvent;
     public event Action OnBoardSettled;
     public event Action BoosterUseFailed;
+    public event Action<BoosterType, IReadOnlyList<Vector2Int>> BoosterTargetsSelected;
+    public event Action BoosterTargetingCanceled;
 
     public void Init(Tile[,] grid, Rect playAreaScreenRect,
         Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets)
@@ -97,7 +100,7 @@ public class GameBoard : MonoBehaviour
 
     }
 
-    public void UseBooster(BoosterType boosterType)
+    public void BeginBoosterTargeting(BoosterType boosterType)
     {
         if (currentState != BoardState.Idle) throw new InvalidOperationException("A booster can only begin targeting while the board is idle.");
         if (activeBoosterChooser != null) throw new InvalidOperationException("A booster is already targeting the board.");
@@ -106,11 +109,45 @@ public class GameBoard : MonoBehaviour
         TransitionTo(BoardState.BoosterTargeting);
     }
 
-    public void CancelBoosterUse()
+    public void CancelBoosterTargeting()
     {
         if (activeBoosterChooser == null) return;
 
         activeBoosterChooser.Cancel();
+    }
+
+    public void ExecuteApprovedBooster(BoosterType boosterType, IReadOnlyList<Vector2Int> targets)
+    {
+        if (currentState != BoardState.BoosterAuthorization) throw new InvalidOperationException("A booster can only execute while waiting for authorization.");
+        if (!activeBoosterType.HasValue || activeBoosterType.Value != boosterType) throw new InvalidOperationException("Approved booster does not match the active booster use.");
+        if (targets == null) throw new ArgumentNullException(nameof(targets));
+
+        try
+        {
+            pendingBoosterUseResult = BoosterManager.Execute(boosterType, grid, targets);
+            activeBoosterType = null;
+            LoadResolutionInput(pendingBoosterUseResult.ResolutionInput);
+            isResolvingPlayerMove = false;
+            currentCascadeDepth = 0;
+            TransitionTo(BoardState.Resolving);
+        }
+        catch
+        {
+            activeBoosterType = null;
+            pendingBoosterUseResult = null;
+            TransitionTo(BoardState.Idle);
+            BoosterUseFailed?.Invoke();
+            throw;
+        }
+    }
+
+    public void RejectPendingBoosterUse()
+    {
+        if (currentState != BoardState.BoosterAuthorization) throw new InvalidOperationException("A booster rejection requires pending authorization.");
+        if (!activeBoosterType.HasValue) throw new InvalidOperationException("A booster rejection requires an active booster type.");
+
+        activeBoosterType = null;
+        TransitionTo(BoardState.Idle);
     }
 
     private void HandleSwap(Vector2Int tileA, Vector2Int tileB)
@@ -166,7 +203,6 @@ public class GameBoard : MonoBehaviour
     private async UniTask EnterBoosterTargeting()
     {
         IBoosterChooser chooser = null;
-        bool targetingPresentationEntered = false;
         bool boosterTargetsShown = false;
         try
         {
@@ -179,24 +215,20 @@ public class GameBoard : MonoBehaviour
             boardPresentationCoordinator.ShowBoosterTargets(activeBoosterType.Value, boosterTargetCandidates);
             boosterTargetsShown = true;
 
-            UIManager.Instance.EnterBoosterTargeting(activeBoosterType.Value);
-            targetingPresentationEntered = true;
             IReadOnlyList<Vector2Int> targets = await activeBoosterChooser.Choose(grid, boardInputHandler);
             activeBoosterChooser = null;
 
             if (targets == null)
             {
                 activeBoosterType = null;
+                BoosterTargetingCanceled?.Invoke();
                 TransitionTo(BoardState.Idle);
                 return;
             }
 
-            pendingBoosterUseResult = BoosterManager.Execute(activeBoosterType.Value, grid, targets);
-            activeBoosterType = null;
-            LoadResolutionInput(pendingBoosterUseResult.ResolutionInput);
-            isResolvingPlayerMove = false;
-            currentCascadeDepth = 0;
-            TransitionTo(BoardState.Resolving);
+            BoosterType selectedBoosterType = activeBoosterType.Value;
+            TransitionTo(BoardState.BoosterAuthorization);
+            BoosterTargetsSelected?.Invoke(selectedBoosterType, targets);
         }
         catch
         {
@@ -213,8 +245,6 @@ public class GameBoard : MonoBehaviour
                 chooser.TargetSelectionChanged -= HandleBoosterTargetSelectionChanged;
             if (boosterTargetsShown)
                 boardPresentationCoordinator.HideBoosterTargets();
-            if (targetingPresentationEntered)
-                UIManager.Instance.ExitBoosterTargeting();
         }
     }
 

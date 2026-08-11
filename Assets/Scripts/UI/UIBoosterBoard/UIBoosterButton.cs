@@ -1,6 +1,7 @@
 using System;
 using DG.Tweening;
 using DefaultNamespace;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,29 +10,31 @@ public sealed class UIBoosterButton : MonoBehaviour
 {
     [SerializeField] private Button button;
     [SerializeField] private Image icon;
+    [SerializeField] private TMP_Text amountText;
     [SerializeField] private BoosterButtonConfig config;
+    [SerializeField] private CanvasGroup canvasGroup;
 
     public event Action<BoosterType> BoosterUseRequested;
 
-    private BoosterType boosterType;
-    private CanvasGroup canvasGroup;
+    private BoosterViewData viewData;
 
-    public BoosterType BoosterType => boosterType;
+    public BoosterType BoosterType => viewData.BoosterType;
+    public BoosterViewData ViewData => viewData;
     public RectTransform RectTransform => (RectTransform)transform;
 
     private void Awake()
     {
-        canvasGroup = GetComponent<CanvasGroup>();
         button.onClick.AddListener(HandleClicked);
     }
 
-    public void Configure(BoosterType type)
+    public void Configure(BoosterViewData data)
     {
-        boosterType = type;
-        icon.sprite = config.GetIcon(type);
+        viewData = data ?? throw new ArgumentNullException(nameof(data));
+        icon.sprite = config.GetIcon(data.BoosterType);
+        amountText.text = data.Amount.ToString();
     }
 
-    public string GetGuidanceText() => config.GetGuidanceText(boosterType);
+    public string GetGuidanceText() => config.GetGuidanceText(viewData.BoosterType);
     public void SetVisualAlpha(float alpha) => canvasGroup.alpha = alpha;
     public Tween FadeVisual(float alpha, float duration) => canvasGroup.DOFade(alpha, duration);
 
@@ -46,7 +49,7 @@ public sealed class UIBoosterButton : MonoBehaviour
 
     private void HandleClicked()
     {
-        BoosterUseRequested?.Invoke(boosterType);
+        BoosterUseRequested?.Invoke(viewData.BoosterType);
     }
 
     private void OnDestroy()

@@ -1,5 +1,6 @@
 {
   "levelId": 8,
+  "allowedBoosters": [1, 2],
   "starScoreThresholds": [
     { "starCount": 1, "score": 8800 },
     { "starCount": 2, "score": 12500 },

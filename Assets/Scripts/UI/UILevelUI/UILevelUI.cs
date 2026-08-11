@@ -37,7 +37,9 @@ namespace DefaultNamespace.UI
         }
 
         public void EnterBoosterTargeting(BoosterType boosterType) => boosterBoard.EnterBoosterTargeting(boosterType);
+        public void EnterBoosterAuthorizationPending() => boosterBoard.EnterBoosterAuthorizationPending();
         public void ExitBoosterTargeting() => boosterBoard.ExitBoosterTargeting();
+        public void RefreshBoosters(IReadOnlyList<BoosterViewData> boosterViewData) => boosterBoard.Refresh(boosterViewData);
 
         public void RefreshObjectives(List<ObjectiveViewData> objectiveViewData)
         {

@@ -67,6 +67,18 @@ namespace DefaultNamespace.UI
             levelUIInstance.ExitBoosterTargeting();
         }
 
+        public void EnterBoosterAuthorizationPending()
+        {
+            if (levelUIInstance == null) throw new InvalidOperationException("Cannot enter booster authorization presentation before the level UI exists.");
+            levelUIInstance.EnterBoosterAuthorizationPending();
+        }
+
+        public void RefreshLevelBoosters(IReadOnlyList<BoosterViewData> boosterViewData)
+        {
+            if (levelUIInstance == null) throw new InvalidOperationException("Cannot refresh boosters before the level UI exists.");
+            levelUIInstance.RefreshBoosters(boosterViewData);
+        }
+
         public Rect GetLevelBoardPlayAreaScreenRect()
         {
             if (levelUIInstance == null) return new Rect(0f, 0f, Screen.width, Screen.height);

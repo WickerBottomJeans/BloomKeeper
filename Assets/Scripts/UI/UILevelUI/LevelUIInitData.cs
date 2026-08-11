@@ -9,9 +9,9 @@ namespace DefaultNamespace.UI
         public IReadOnlyList<ObjectiveViewData> Objectives { get; }
         public IReadOnlyList<ConstrainerViewData> Constrainers { get; }
         public ScoreViewData Score { get; }
-        public IReadOnlyList<BoosterType> AvailableBoosters { get; }
+        public IReadOnlyList<BoosterViewData> AvailableBoosters { get; }
 
-        public LevelUIInitData(IReadOnlyList<ObjectiveViewData> objectives, IReadOnlyList<ConstrainerViewData> constrainers, ScoreViewData score, IReadOnlyList<BoosterType> availableBoosters)
+        public LevelUIInitData(IReadOnlyList<ObjectiveViewData> objectives, IReadOnlyList<ConstrainerViewData> constrainers, ScoreViewData score, IReadOnlyList<BoosterViewData> availableBoosters)
         {
             Objectives = objectives ?? throw new ArgumentNullException(nameof(objectives));
             Constrainers = constrainers ?? throw new ArgumentNullException(nameof(constrainers));

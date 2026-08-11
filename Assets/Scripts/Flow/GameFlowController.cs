@@ -37,10 +37,11 @@ namespace DefaultNamespace
             var guestCustomIdStore = new GuestCustomIdStore();
             var guestLoginService = new PlayFabGuestLoginService(guestCustomIdStore);
             var progressionService = new PlayFabProgressionService();
+            var boosterInventoryService = new PlayFabBoosterInventoryService();
             var addressableContentService = new AddressableContentService();
             bootFlow = new BootFlow(addressableContentService);
             authFlow = new AuthFlow(guestLoginService);
-            accountLoadFlow = new AccountLoadFlow(progressionService);
+            accountLoadFlow = new AccountLoadFlow(progressionService, boosterInventoryService);
             levelCompletionFlow = new LevelCompletionFlow(progressionService);
             homeFlow = new HomeFlow(addressableContentService);
             levelSessionFlow = new LevelSessionFlow();

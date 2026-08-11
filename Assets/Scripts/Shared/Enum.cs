@@ -70,6 +70,25 @@
         BloomWand = 1,
         GardenersGlove = 2
     }
+
+    public enum BoosterUsePhase
+    {
+        Idle = 1,
+        Targeting = 2,
+        Authorizing = 3,
+        AwaitingAuthorizationRetry = 4
+    }
+
+    public enum ConsumeBoosterOutcome
+    {
+        Consumed = 1,
+        Rejected = 2
+    }
+
+    public enum ConsumeBoosterRejectionReason
+    {
+        InsufficientQuantity = 1
+    }
     
     public enum MatchShape
     {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Boosters;
+using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
 using DefaultNamespace.Utility;
 using UnityEngine;
@@ -25,13 +26,14 @@ namespace DefaultNamespace
         private ScoreManager scoreManager;
         private LevelData currentLevelData;
         private int currentLevelId;
-        private string currentAttemptId;
+        private string currentLevelAttemptId;
         private bool pendingLevelComplete;
         private bool isLevelEnded;
         private bool isTurnSettling;
         private bool isLevelSessionPrepared;
         private bool isLevelSessionStarted;
         private bool isLevelSessionPaused;
+        private bool isBoosterAuthorizationPauseActive;
 
         private void Update()
         {
@@ -42,7 +44,7 @@ namespace DefaultNamespace
         {
             if (boosterUseCoordinator != null)
             {
-                boosterUseCoordinator.BoosterUseApproved -= HandleBoosterUseApproved;
+                boosterUseCoordinator.BoosterTargetingApproved -= HandleBoosterTargetingApproved;
                 boosterUseCoordinator.BoosterCancelApproved -= HandleBoosterCancelApproved;
             }
             UIManager.Instance.BoosterUseRequested -= HandleBoosterUseRequested;
@@ -50,6 +52,8 @@ namespace DefaultNamespace
             constrainerManager?.StopLevel();
             if (isLevelSessionPaused)
                 GameTimeService.ReleasePause(this);
+            if (isBoosterAuthorizationPauseActive)
+                GameTimeService.ReleasePause(boosterUseCoordinator);
 
             if (objectiveManager != null)
             {
@@ -71,6 +75,8 @@ namespace DefaultNamespace
                 gameBoardInstance.OnGameplayEvent -= HandleGameplayEvent;
                 gameBoardInstance.OnBoardSettled -= HandleBoardSettled;
                 gameBoardInstance.BoosterUseFailed -= HandleBoosterUseFailed;
+                gameBoardInstance.BoosterTargetsSelected -= HandleBoosterTargetsSelected;
+                gameBoardInstance.BoosterTargetingCanceled -= HandleBoosterTargetingCanceled;
                 Destroy(gameBoardInstance.gameObject);
                 gameBoardInstance = null;
             }
@@ -92,8 +98,9 @@ namespace DefaultNamespace
             isLevelSessionPrepared = false;
             isLevelSessionStarted = false;
             isLevelSessionPaused = false;
+            isBoosterAuthorizationPauseActive = false;
             currentLevelId = 0;
-            currentAttemptId = null;
+            currentLevelAttemptId = null;
         }
 
         public void PrepareLevelSession(LevelData levelData)
@@ -102,7 +109,7 @@ namespace DefaultNamespace
 
             currentLevelData = levelData;
             currentLevelId = levelData.levelId;
-            currentAttemptId = Guid.NewGuid().ToString("N");
+            currentLevelAttemptId = Guid.NewGuid().ToString("N");
             scoreManager = new ScoreManager(currentLevelData.starScoreThresholds);
             scoreManager.OnScoreChanged += HandleScoreChanged;
 
@@ -121,13 +128,13 @@ namespace DefaultNamespace
 
             objectiveManager = new ObjectiveManager(objectives);
             constrainerManager = new ConstrainerManager(constrainers);
-            boosterUseCoordinator = new BoosterUseCoordinator();
+            boosterUseCoordinator = new BoosterUseCoordinator(currentLevelData.allowedBoosters, new PlayFabBoosterInventoryService());
             objectiveManager.OnAllComplete += HandleLevelComplete;
             objectiveManager.OnProgressUpdated += HandleObjectiveProgressUpdated;
             constrainerManager.OnFailed += HandleConstrainerFailed;
             constrainerManager.OnProgressUpdated += HandleConstrainerProgressUpdated;
             Tile[,] grid = BoardInitializer.Initialize(currentLevelData);
-            var levelUIInitData = new LevelUIInitData(objectiveManager.GetViewData(), constrainerManager.GetViewData(), scoreManager.GetViewData(), boosterUseCoordinator.GetAvailableBoosters());
+            var levelUIInitData = new LevelUIInitData(objectiveManager.GetViewData(), constrainerManager.GetViewData(), scoreManager.GetViewData(), boosterUseCoordinator.GetViewData());
             DisplayLevel(grid, levelUIInitData);
             isLevelSessionPrepared = true;
         }
@@ -141,7 +148,7 @@ namespace DefaultNamespace
 
             isLevelSessionStarted = true;
             isLevelSessionPaused = false;
-            boosterUseCoordinator.BoosterUseApproved += HandleBoosterUseApproved;
+            boosterUseCoordinator.BoosterTargetingApproved += HandleBoosterTargetingApproved;
             boosterUseCoordinator.BoosterCancelApproved += HandleBoosterCancelApproved;
             UIManager.Instance.BoosterUseRequested += HandleBoosterUseRequested;
             UIManager.Instance.BoosterCancelRequested += HandleBoosterCancelRequested;
@@ -173,7 +180,8 @@ namespace DefaultNamespace
 
             GameTimeService.ReleasePause(this);
             isLevelSessionPaused = false;
-            constrainerManager.StartLevel();
+            if (!isBoosterAuthorizationPauseActive)
+                constrainerManager.StartLevel();
         }
 
         private void DisplayLevel(Tile[,] grid, LevelUIInitData levelUIInitData)
@@ -198,6 +206,8 @@ namespace DefaultNamespace
             gameBoardInstance.OnGameplayEvent += HandleGameplayEvent;
             gameBoardInstance.OnBoardSettled += HandleBoardSettled;
             gameBoardInstance.BoosterUseFailed += HandleBoosterUseFailed;
+            gameBoardInstance.BoosterTargetsSelected += HandleBoosterTargetsSelected;
+            gameBoardInstance.BoosterTargetingCanceled += HandleBoosterTargetingCanceled;
         }
 
         private IReadOnlyList<ObjectiveTileTargetGroup> ResolveObjectiveTargets(IReadOnlyList<TileState> boardSnapshot)
@@ -212,14 +222,29 @@ namespace DefaultNamespace
             pendingLevelComplete = true;
         }
 
-        private void HandleBoosterUseApproved(BoosterType boosterType)
+        private async UniTask RetryPendingBoosterAuthorization()
         {
-            gameBoardInstance.UseBooster(boosterType);
+            BoosterAuthorizationResult result = await RequestBoosterAuthorizationRetry();
+            CompletePendingBoosterAuthorization(result);
+        }
+
+        private void FailPendingBoosterAuthorizationAfterRetry(Exception exception)
+        {
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
+
+            Debug.LogWarning(exception);
+            FailPendingBoosterAuthorization();
+        }
+
+        private void HandleBoosterTargetingApproved(BoosterType boosterType)
+        {
+            UIManager.Instance.EnterBoosterTargeting(boosterType);
+            gameBoardInstance.BeginBoosterTargeting(boosterType);
         }
 
         private void HandleBoosterCancelApproved()
         {
-            gameBoardInstance.CancelBoosterUse();
+            gameBoardInstance.CancelBoosterTargeting();
         }
 
         private void HandleBoosterUseRequested(BoosterType boosterType)
@@ -230,6 +255,142 @@ namespace DefaultNamespace
         private void HandleBoosterCancelRequested()
         {
             boosterUseCoordinator.RequestCancel();
+        }
+
+        private void HandleBoosterTargetingCanceled()
+        {
+            boosterUseCoordinator.CompleteTargetingCancellation();
+            UIManager.Instance.ExitBoosterTargeting();
+        }
+
+        private void HandleBoosterTargetsSelected(BoosterType boosterType, IReadOnlyList<Vector2Int> targets)
+        {
+            UIManager.Instance.EnterBoosterAuthorizationPending();
+            BeginBoosterAuthorizationPause();
+            RunInitialBoosterAuthorization(boosterType, targets).Forget();
+        }
+
+        /// <summary>
+        /// Asks the server to authorize the use of this booster
+        /// </summary>
+        /// <param name="boosterType"></param>
+        /// <param name="targets"></param>
+        private async UniTask RunInitialBoosterAuthorization(BoosterType boosterType, IReadOnlyList<Vector2Int> targets)
+        {
+            BoosterAuthorizationResult result;
+            try
+            {
+                //Request booster consume to server
+                result = await ApplicationPresentationService.Instance.RunWithLoading(() => boosterUseCoordinator.AuthorizeBoosterUse(boosterType, targets).AsTask());
+            }
+            //Have problem but still let retry
+            catch (BoosterConsumptionException exception) when (exception.IsRetryable)
+            {
+                Debug.LogWarning(exception);
+                ApplicationOperationRunner.Instance.Run(RunBoosterAuthorizationRetryDialogAsync);
+                return;
+            }
+            //Fail
+            catch (Exception exception)
+            {
+                Debug.LogWarning(exception);
+                FailPendingBoosterAuthorization();
+                return;
+            }
+
+            CompletePendingBoosterAuthorization(result);
+        }
+
+        private async UniTask RunBoosterAuthorizationRetryDialogAsync()
+        {
+            Exception terminalFailure = null;
+            DialogOptionButton[] options = { DialogOptionButton.Retry };
+            await DialogManager.Instance.RunDialogWorkflow("Connection interrupted", "The booster has not been applied yet. Retry to safely confirm the same use.", async session =>
+            {
+                while (true)
+                {
+                    int buttonId = await session.WaitForButtonClick();
+                    if ((DialogButtonType)buttonId != DialogButtonType.Retry) throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported booster authorization retry button.");
+
+                    try
+                    {
+                        await RetryPendingBoosterAuthorization();
+                        return;
+                    }
+                    catch (BoosterConsumptionException exception) when (exception.IsRetryable)
+                    {
+                    }
+                    catch (Exception exception)
+                    {
+                        terminalFailure = exception;
+                        return;
+                    }
+                }
+            }, options);
+
+            if (terminalFailure != null)
+                FailPendingBoosterAuthorizationAfterRetry(terminalFailure);
+        }
+
+        private UniTask<BoosterAuthorizationResult> RequestBoosterAuthorizationRetry()
+        {
+            return ApplicationPresentationService.Instance.RunWithLoading(() => boosterUseCoordinator.RetryPendingAuthorization().AsTask());
+        }
+
+        /// <summary>
+        /// When the request to use a booster has a response
+        /// </summary>
+        /// <param name="result"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        private void CompletePendingBoosterAuthorization(BoosterAuthorizationResult result)
+        {
+            if (result == null) throw new ArgumentNullException(nameof(result));
+            UIManager.Instance.RefreshLevelBoosters(boosterUseCoordinator.GetViewData());
+            UIManager.Instance.ExitBoosterTargeting();
+
+            try
+            {
+                if (result.Consumed)
+                    gameBoardInstance.ExecuteApprovedBooster(result.BoosterType, result.Targets);
+                else
+                    gameBoardInstance.RejectPendingBoosterUse();
+            }
+            finally
+            {
+                EndBoosterAuthorizationPause();
+            }
+        }
+
+        private void FailPendingBoosterAuthorization()
+        {
+            boosterUseCoordinator.AbandonPendingUse();
+            UIManager.Instance.ExitBoosterTargeting();
+            gameBoardInstance.RejectPendingBoosterUse();
+            EndBoosterAuthorizationPause();
+            RecoverableOperationFailed?.Invoke();
+        }
+
+        private void BeginBoosterAuthorizationPause()
+        {
+            if (isBoosterAuthorizationPauseActive) throw new InvalidOperationException("Booster authorization already owns a game-time pause.");
+
+            constrainerManager.StopLevel();
+            GameTimeService.RequestPause(boosterUseCoordinator);
+            isBoosterAuthorizationPauseActive = true;
+            ApplicationInputController.Instance.SetGameBoardInputActive(false);
+        }
+
+        private void EndBoosterAuthorizationPause()
+        {
+            if (!isBoosterAuthorizationPauseActive) throw new InvalidOperationException("Booster authorization does not own a game-time pause.");
+
+            GameTimeService.ReleasePause(boosterUseCoordinator);
+            isBoosterAuthorizationPauseActive = false;
+            if (!isLevelSessionPaused && !isLevelEnded)
+            {
+                constrainerManager.StartLevel();
+                ApplicationInputController.Instance.SetGameBoardInputActive(true);
+            }
         }
 
         private void HandleBoosterUseFailed()
@@ -270,7 +431,7 @@ namespace DefaultNamespace
                 throw new InvalidOperationException("Cannot show lose screen without constrainer failure data.");
             //TODO: maybe add a way to make multireason failure sound more fun
             string message = failureData[0].failureText;
-            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentAttemptId, false, scoreManager.CurrentScore, scoreManager.CalculateStars(), currentLevelData.StarCap, message));
+            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentLevelAttemptId, false, scoreManager.CurrentScore, scoreManager.CalculateStars(), currentLevelData.StarCap, message));
         }
 
         private void HandleGameplayEvent(IGameplayEvent e)
@@ -318,7 +479,7 @@ namespace DefaultNamespace
             isLevelEnded = true;
             constrainerManager?.StopLevel();
             int earnedStars = scoreManager.CalculateStars();
-            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentAttemptId, true, scoreManager.CurrentScore, earnedStars, currentLevelData.StarCap, string.Empty));
+            OnLevelFinished?.Invoke(new LevelSessionResult(currentLevelId, currentLevelAttemptId, true, scoreManager.CurrentScore, earnedStars, currentLevelData.StarCap, string.Empty));
         }
     }
 }
