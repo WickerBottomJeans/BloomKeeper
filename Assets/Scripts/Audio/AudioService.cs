@@ -6,7 +6,7 @@ using UnityEngine.Audio;
 
 namespace DefaultNamespace.Audio
 {
-    public sealed class AudioService : Singleton<AudioService>
+    public class AudioService : Singleton<AudioService>
     {
         private const string MusicVolumeParameter = "MusicVolume";
         private const string SfxVolumeParameter = "SfxVolume";

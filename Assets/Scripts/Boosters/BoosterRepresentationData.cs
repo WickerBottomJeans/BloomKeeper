@@ -6,7 +6,7 @@ namespace Boosters
     {
     }
 
-    public sealed class BloomWandRepresentationData : BoosterRepresentationData
+    public class BloomWandRepresentationData : BoosterRepresentationData
     {
         public Vector2Int TargetPosition { get; }
 
@@ -16,7 +16,7 @@ namespace Boosters
         }
     }
 
-    public sealed class GardenersGloveRepresentationData : BoosterRepresentationData
+    public class GardenersGloveRepresentationData : BoosterRepresentationData
     {
         public Vector2Int OriginPosition { get; }
         public Vector2Int TargetPosition { get; }

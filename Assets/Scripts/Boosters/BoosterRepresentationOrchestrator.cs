@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Boosters
 {
-    public sealed class BoosterRepresentationOrchestrator : MonoBehaviour
+    public class BoosterRepresentationOrchestrator : MonoBehaviour
     {
         [SerializeField] private BoosterTargetPresentationConfig boosterTargetPresentationConfig;
 

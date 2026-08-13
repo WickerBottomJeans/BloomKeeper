@@ -4,7 +4,7 @@ using UnityEngine.Audio;
 
 namespace DefaultNamespace.Audio
 {
-    sealed class StingerPlayer : IDisposable
+    class StingerPlayer : IDisposable
     {
         private readonly AudioSource source;
 

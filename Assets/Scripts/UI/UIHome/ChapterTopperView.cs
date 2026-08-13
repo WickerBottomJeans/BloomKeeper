@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class ChapterTopperView : MonoBehaviour
+    public class ChapterTopperView : MonoBehaviour
     {
         [SerializeField] private TMP_Text livesText;
         [SerializeField] private TMP_Text currencyText;

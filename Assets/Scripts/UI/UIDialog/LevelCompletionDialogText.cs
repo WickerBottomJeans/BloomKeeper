@@ -22,8 +22,14 @@ namespace DefaultNamespace.UI
                     return "That score doesn't look right, so we couldn't save the result.";
                 case CompleteLevelAttemptRejectionReason.InvalidAttemptId:
                     return "This level attempt couldn't be identified, so we couldn't save the result.";
-                case CompleteLevelAttemptRejectionReason.AttemptIdConflict:
+                case CompleteLevelAttemptRejectionReason.AttemptResultConflict:
                     return "This level attempt conflicts with a result that was already processed, so we couldn't save it.";
+                case CompleteLevelAttemptRejectionReason.AttemptNotCurrent:
+                    return "This is no longer your current level attempt, so we couldn't save the result.";
+                case CompleteLevelAttemptRejectionReason.AttemptNotActive:
+                    return "This level attempt is no longer active, so we couldn't save the result.";
+                case CompleteLevelAttemptRejectionReason.AttemptLevelMismatch:
+                    return "This level doesn't match the active attempt, so we couldn't save the result.";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(rejectionReason), rejectionReason, "Unsupported level completion rejection reason.");
             }

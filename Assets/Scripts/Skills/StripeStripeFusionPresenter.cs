@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class StripeStripeFusionPresenter : SkillRepresentationPresenter<StripeStripeFusionRepresentationData>
+    public class StripeStripeFusionPresenter : SkillRepresentationPresenter<StripeStripeFusionRepresentationData>
     {
         private const float PrepareDuration = 0.15f;
         private const float FireDuration = 0.2f;

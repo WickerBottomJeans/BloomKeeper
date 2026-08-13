@@ -1,10 +1,11 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace DefaultNamespace.VFX
 {
-    public sealed class VFXPrismaticBloomFinisher : MonoBehaviour
+    public class VFXPrismaticBloomFinisher : MonoBehaviour
     {
         [SerializeField] private ParticleSystem particles;
 
@@ -23,11 +24,11 @@ namespace DefaultNamespace.VFX
             transform.localScale = defaultScale * tileSize;
         }
 
-        public async UniTask Play()
+        public async UniTask Play(CancellationToken cancellationToken)
         {
             particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             particles.Play(true);
-            await UniTask.WaitUntil(() => !particles.IsAlive(true), cancellationToken: this.GetCancellationTokenOnDestroy());
+            await UniTask.WaitUntil(() => !particles.IsAlive(true), cancellationToken: cancellationToken);
         }
 
         public void ResetForPool()

@@ -2,7 +2,7 @@ using System;
 
 namespace DefaultNamespace
 {
-    public sealed class BoosterConsumptionException : Exception
+    public class BoosterConsumptionException : Exception
     {
         public bool IsRetryable { get; }
 

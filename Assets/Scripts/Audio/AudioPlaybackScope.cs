@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DefaultNamespace.Audio
 {
-    public sealed class AudioPlaybackScope : IDisposable
+    public class AudioPlaybackScope : IDisposable
     {
         private readonly Dictionary<AudioCue, int> acceptedPlayCounts = new();
         private bool isDisposed;

@@ -3,7 +3,7 @@ using DefaultNamespace.UI;
 
 namespace Boosters
 {
-    public sealed class BoosterUseResult
+    public class BoosterUseResult
     {
         public BoardResolutionInput ResolutionInput { get; }
         public BoosterRepresentationData Representation { get; }

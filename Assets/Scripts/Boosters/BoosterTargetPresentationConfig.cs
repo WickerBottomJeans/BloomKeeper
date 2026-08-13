@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Boosters
 {
     [CreateAssetMenu(fileName = "BoosterTargetPresentationConfig", menuName = "BloomKeeper/Boosters/Booster Target Presentation Config")]
-    public sealed class BoosterTargetPresentationConfig : ScriptableObject
+    public class BoosterTargetPresentationConfig : ScriptableObject
     {
         [SerializeField] private List<BoosterTargetMaterialMapping> materialMappings = new List<BoosterTargetMaterialMapping>();
 
@@ -20,7 +20,7 @@ namespace Boosters
         }
 
         [Serializable]
-        public sealed class BoosterTargetMaterialMapping
+        public class BoosterTargetMaterialMapping
         {
             [SerializeField] private BoosterType boosterType;
             [SerializeField] private Material material;

@@ -3,7 +3,7 @@ using UnityEngine;
 namespace DefaultNamespace.UI
 {
     [RequireComponent(typeof(RectTransform))]
-    public sealed class SafeAreaFitter : MonoBehaviour
+    public class SafeAreaFitter : MonoBehaviour
     {
         [SerializeField] private bool applyLeft = true;
         [SerializeField] private bool applyRight = true;

@@ -1,29 +1,27 @@
-using System;
 using DefaultNamespace.UI;
 
 namespace DefaultNamespace
 {
     public interface IGameplayEvent { }
 
-    public interface IGameplayEventHandler
+    public interface IGameplayEventHandler<in TEvent> where TEvent : IGameplayEvent
     {
-        Type HandledEventType { get; }
-        void Handle(IGameplayEvent e);
+        void Handle(TEvent gameplayEvent);
     }
 
     public class PlayerMoveCommittedEvent : IGameplayEvent { }
 
-    public class BoardResolvedEvent : IGameplayEvent
+    public class BoardResolutionStepCompletedEvent : IGameplayEvent
     {
         public MatchResolveResult Result { get; }
         public int CascadeDepth { get; }
-        public bool CountsForScore { get; }
+        public bool IsFromPlayerMove { get; }
 
-        public BoardResolvedEvent(MatchResolveResult result, int cascadeDepth, bool countsForScore)
+        public BoardResolutionStepCompletedEvent(MatchResolveResult result, int cascadeDepth, bool isFromPlayerMove)
         {
             Result = result;
             CascadeDepth = cascadeDepth;
-            CountsForScore = countsForScore;
+            IsFromPlayerMove = isFromPlayerMove;
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.Audio;
 
 namespace DefaultNamespace.Audio
 {
-    sealed class MusicPlayer : IDisposable
+    class MusicPlayer : IDisposable
     {
         private readonly AudioMixerGroup mixerGroup;
         private readonly float crossfadeDuration;

@@ -69,10 +69,9 @@ public class GameBoard : MonoBehaviour
     }
 
     public event Action<IGameplayEvent> OnGameplayEvent;
-    public event Action OnBoardSettled;
-    public event Action BoosterUseFailed;
-    public event Action<BoosterType, IReadOnlyList<Vector2Int>> BoosterTargetsSelected;
-    public event Action BoosterTargetingCanceled;
+    public event Action<bool> IdleStateChanged;
+
+    public bool IsIdle => currentState == BoardState.Idle;
 
     public void Init(Tile[,] grid, Rect playAreaScreenRect,
         Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets)
@@ -100,13 +99,14 @@ public class GameBoard : MonoBehaviour
 
     }
 
-    public void BeginBoosterTargeting(BoosterType boosterType)
+    public async UniTask<BoosterTargetSelectionResult> TrySelectBoosterTargets(BoosterType boosterType)
     {
-        if (currentState != BoardState.Idle) throw new InvalidOperationException("A booster can only begin targeting while the board is idle.");
+        if (currentState != BoardState.Idle) return BoosterTargetSelectionResult.Unavailable;
         if (activeBoosterChooser != null) throw new InvalidOperationException("A booster is already targeting the board.");
 
         activeBoosterType = boosterType;
         TransitionTo(BoardState.BoosterTargeting);
+        return await RunBoosterTargetSelection();
     }
 
     public void CancelBoosterTargeting()
@@ -136,7 +136,6 @@ public class GameBoard : MonoBehaviour
             activeBoosterType = null;
             pendingBoosterUseResult = null;
             TransitionTo(BoardState.Idle);
-            BoosterUseFailed?.Invoke();
             throw;
         }
     }
@@ -184,7 +183,11 @@ public class GameBoard : MonoBehaviour
 
     private void TransitionTo(BoardState newState)
     {
+        bool wasIdle = currentState == BoardState.Idle;
         currentState = newState;
+        if (wasIdle && newState != BoardState.Idle)
+            IdleStateChanged?.Invoke(false);
+
         switch (newState)
         {
             case BoardState.Swapping: EnterSwapping().Forget(); break;
@@ -195,12 +198,10 @@ public class GameBoard : MonoBehaviour
             case BoardState.Cascade: EnterCascade(); break;
             case BoardState.Idle: EnterIdle(); break;
             case BoardState.Shuffling: EnterShuffling().Forget(); break;
-            case BoardState.BoosterTargeting: EnterBoosterTargeting().Forget(); break;
-
         }
     }
 
-    private async UniTask EnterBoosterTargeting()
+    private async UniTask<BoosterTargetSelectionResult> RunBoosterTargetSelection()
     {
         IBoosterChooser chooser = null;
         bool boosterTargetsShown = false;
@@ -215,20 +216,18 @@ public class GameBoard : MonoBehaviour
             boardPresentationCoordinator.ShowBoosterTargets(activeBoosterType.Value, boosterTargetCandidates);
             boosterTargetsShown = true;
 
-            IReadOnlyList<Vector2Int> targets = await activeBoosterChooser.Choose(grid, boardInputHandler);
+            BoosterTargetSelectionResult result = await activeBoosterChooser.Choose(grid, boardInputHandler);
             activeBoosterChooser = null;
 
-            if (targets == null)
+            if (result.IsCanceled)
             {
                 activeBoosterType = null;
-                BoosterTargetingCanceled?.Invoke();
                 TransitionTo(BoardState.Idle);
-                return;
+                return result;
             }
 
-            BoosterType selectedBoosterType = activeBoosterType.Value;
             TransitionTo(BoardState.BoosterAuthorization);
-            BoosterTargetsSelected?.Invoke(selectedBoosterType, targets);
+            return result;
         }
         catch
         {
@@ -236,7 +235,6 @@ public class GameBoard : MonoBehaviour
             activeBoosterType = null;
             pendingBoosterUseResult = null;
             TransitionTo(BoardState.Idle);
-            BoosterUseFailed?.Invoke();
             throw;
         }
         finally
@@ -368,7 +366,7 @@ public class GameBoard : MonoBehaviour
 
             SkillResolutionWave openingSkillWave = turnResolution.SkillWaves[0];
             await boardPresentationCoordinator.PlaySkillWave(openingSkillWave);
-            OnGameplayEvent?.Invoke(new BoardResolvedEvent(openingSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerMove));
+            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(openingSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerMove));
             nextSkillWaveIndex = 1;
         }
         else
@@ -376,14 +374,14 @@ public class GameBoard : MonoBehaviour
             if (turnResolution.SkillWaves.Count == 0)
             {
                 await boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch);
-                OnGameplayEvent?.Invoke(new BoardResolvedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerMove));
+                OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerMove));
                 return;
             }
 
             SkillResolutionWave firstSkillWave = turnResolution.SkillWaves[0];
             await UniTask.WhenAll(boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch), boardPresentationCoordinator.PlaySkillWave(firstSkillWave));
-            OnGameplayEvent?.Invoke(new BoardResolvedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerMove));
-            OnGameplayEvent?.Invoke(new BoardResolvedEvent(firstSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerMove));
+            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerMove));
+            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(firstSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerMove));
             nextSkillWaveIndex = 1;
         }
 
@@ -391,7 +389,7 @@ public class GameBoard : MonoBehaviour
         {
             SkillResolutionWave skillWave = turnResolution.SkillWaves[i];
             await boardPresentationCoordinator.PlaySkillWave(skillWave);
-            OnGameplayEvent?.Invoke(new BoardResolvedEvent(skillWave.Resolution, currentCascadeDepth,
+            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(skillWave.Resolution, currentCascadeDepth,
                 isResolvingPlayerMove));
         }
     }
@@ -435,7 +433,7 @@ public class GameBoard : MonoBehaviour
             return;
         }
 
-        OnBoardSettled?.Invoke();
+        IdleStateChanged?.Invoke(true);
     }
 
     private async UniTask EnterShuffling()

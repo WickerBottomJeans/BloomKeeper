@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UISliderFill : MonoBehaviour
+    public class UISliderFill : MonoBehaviour
     {
         [SerializeField] private Slider slider;
         [SerializeField] private RectMask2D fillMask;

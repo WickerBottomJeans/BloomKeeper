@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.Audio;
 using DG.Tweening;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.VFX
 {
-    public sealed class VFXBloomWand : MonoBehaviour
+    public class VFXBloomWand : MonoBehaviour
     {
         [SerializeField] private Transform wandPivot;
         [SerializeField] private Transform contactPoint;
@@ -115,7 +116,7 @@ namespace DefaultNamespace.VFX
         /// <summary>
         /// Sell the impact, retreat to the player's corner, and finish lingering particles.
         /// </summary>
-        public async UniTask Finish()
+        public async UniTask Finish(CancellationToken cancellationToken)
         {
             if (!hasFired) throw new InvalidOperationException("Bloom Wand VFX must fire before finishing.");
 
@@ -132,11 +133,11 @@ namespace DefaultNamespace.VFX
                 transform.position = inverseProgress * inverseProgress * impactPosition + 2f * inverseProgress * progress * curveControlPosition + progress * progress * entryPosition;
             }).SetEase(Ease.InCubic));
             retreat.Join(transform.DOScale(entryScale, travelDuration).SetEase(Ease.InCubic));
-            await retreat.SetLink(gameObject, LinkBehaviour.KillOnDestroy).ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
+            await retreat.SetLink(gameObject, LinkBehaviour.KillOnDestroy).ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, cancellationToken);
 
             // Let the world-space impact finish after the wand has left.
             wandRenderer.enabled = false;
-            await UniTask.WaitUntil(() => !contactParticles.IsAlive(true), cancellationToken: this.GetCancellationTokenOnDestroy());
+            await UniTask.WaitUntil(() => !contactParticles.IsAlive(true), cancellationToken: cancellationToken);
         }
 
         /// <summary>

@@ -28,12 +28,12 @@ namespace DefaultNamespace
             return guestCustomId;
         }
 
-        private static string CreateGuestCustomId()
+        private  string CreateGuestCustomId()
         {
             return $"guest_{Guid.NewGuid():N}";
         }
 
-        private static bool IsValidGuestCustomId(string guestCustomId)
+        private  bool IsValidGuestCustomId(string guestCustomId)
         {
             return !string.IsNullOrWhiteSpace(guestCustomId) && guestCustomId.StartsWith("guest_");
         }

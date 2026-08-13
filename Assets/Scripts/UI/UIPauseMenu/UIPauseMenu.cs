@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UIPauseMenu : MonoBehaviour
+    public class UIPauseMenu : MonoBehaviour
     {
         [SerializeField] private Button resumeButton;
         [SerializeField] private Button settingsButton;

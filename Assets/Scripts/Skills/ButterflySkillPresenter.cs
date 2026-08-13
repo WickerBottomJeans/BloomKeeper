@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class ButterflySkillPresenter : SkillRepresentationPresenter<ButterflyRepresentationData>
+    public class ButterflySkillPresenter : SkillRepresentationPresenter<ButterflyRepresentationData>
     {
         private const float FlightCurveAmplitudeInTiles = 2f;
         private const float SourcePetalPrepareScale = 1.5f;

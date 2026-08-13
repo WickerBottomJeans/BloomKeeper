@@ -9,14 +9,12 @@ namespace DefaultNamespace
     {
         private readonly AddressableContentService addressableContentService;
 
-        public event Action BootCompleted;
-
         public BootFlow(AddressableContentService addressableContentService)
         {
             this.addressableContentService = addressableContentService ?? throw new ArgumentNullException(nameof(addressableContentService));
         }
 
-        public async UniTask Enter()
+        public async UniTask Run()
         {
             ConfigureFrameRate();
             await addressableContentService.InitializeAsync();
@@ -27,10 +25,9 @@ namespace DefaultNamespace
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             UIManager.Instance.ShowTesterToggle();
 #endif
-            BootCompleted?.Invoke();
         }
 
-        private static void ConfigureFrameRate()
+        private  void ConfigureFrameRate()
         {
             // TODO: This is just temporary so i can test some stuff. MUST redo later
             QualitySettings.vSyncCount = 0;

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class TurnResolution
+    public class TurnResolution
     {
         public MatchResolveResult InitialMatch { get; }
         public IReadOnlyList<SkillResolutionWave> SkillWaves { get; }
@@ -14,7 +14,7 @@ namespace DefaultNamespace.UI
         }
     }
 
-    public sealed class SkillResolutionWave
+    public class SkillResolutionWave
     {
         public MatchResolveResult Resolution { get; }
         public IReadOnlyList<SkillUseResult> SkillResults { get; }

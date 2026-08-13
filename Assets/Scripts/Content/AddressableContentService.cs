@@ -20,6 +20,10 @@ namespace DefaultNamespace
             }
         }
 
+        /// <summary>
+        /// [Duong] Ensures all Addressable assets with this label are downloaded and up to date
+        /// </summary>
+        /// <param name="label"></param>
         public async UniTask EnsureDownloadedAsync(string label)
         {
             ValidateLabel(label);
@@ -34,7 +38,7 @@ namespace DefaultNamespace
             }
         }
 
-        private static void ValidateLabel(string label)
+        private  void ValidateLabel(string label)
         {
             if (string.IsNullOrWhiteSpace(label)) throw new ArgumentException("Addressables label must contain a value.", nameof(label));
         }

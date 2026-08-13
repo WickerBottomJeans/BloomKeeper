@@ -367,7 +367,7 @@ namespace DefaultNamespace.Editor
 
             pendingLevelId = EditorGUILayout.IntField("New Level ID", pendingLevelId);
             pendingLevelName = EditorGUILayout.TextField("Label", pendingLevelName);
-            bool invalidPendingLevel = pendingLevelId <= 0 || string.IsNullOrWhiteSpace(pendingLevelName) || levelButtons.Any(level => level.levelId == pendingLevelId);
+            bool invalidPendingLevel = string.IsNullOrWhiteSpace(pendingLevelName) || levelButtons.Any(level => level.levelId == pendingLevelId);
             EditorGUI.BeginDisabledGroup(invalidPendingLevel);
             if (GUILayout.Button(isPlacingLevel ? "Cancel Placement" : "Place Level")) isPlacingLevel = !isPlacingLevel;
             EditorGUI.EndDisabledGroup();
@@ -570,9 +570,7 @@ namespace DefaultNamespace.Editor
                         throw new InvalidDataException($"'{chapterPath}' does not contain a chapter definition.");
                 }
 
-                chapter.chapterName = newChapterName;
-                if (chapter.chapterId <= 0)
-                    throw new InvalidDataException("Chapter identity must be positive.");
+                chapter.chapterName = newChapterName;              
                 if (string.IsNullOrWhiteSpace(chapter.chapterName))
                     throw new InvalidDataException($"Chapter {chapter.chapterId} must have a name.");
 

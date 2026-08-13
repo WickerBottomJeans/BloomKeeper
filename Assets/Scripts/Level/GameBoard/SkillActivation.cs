@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Skills;
 using System;
 using UnityEngine;
@@ -92,7 +92,7 @@ namespace DefaultNamespace.UI
         }
     }
 
-    public sealed class SkillUseResult
+    public class SkillUseResult
     {
         public MatchGroup InputMatchGroup { get; }
         public MatchGroup MatchGroup { get; }

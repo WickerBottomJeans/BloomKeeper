@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "BoosterButtonConfig", menuName = "BloomKeeper/UI/Booster Button Config")]
-public sealed class BoosterButtonConfig : ScriptableObject
+public class BoosterButtonConfig : ScriptableObject
 {
     [FormerlySerializedAs("iconMappings")]
     [SerializeField] private List<BoosterButtonMapping> buttonMappings = new List<BoosterButtonMapping>();
@@ -31,7 +31,7 @@ public sealed class BoosterButtonConfig : ScriptableObject
     }
 
     [Serializable]
-    public sealed class BoosterButtonMapping
+    public class BoosterButtonMapping
     {
         [SerializeField] private BoosterType boosterType;
         [SerializeField] private Sprite icon;

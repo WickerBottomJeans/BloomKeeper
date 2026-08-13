@@ -384,10 +384,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 438607901}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c008a05eca0b40139aa7e90af1ef6cc5, type: 3}
+  m_Script: {fileID: 11500000, guid: 46cdf40e04164498912c947a4ea5eff7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.GameFlowController
   musicStateController: {fileID: 438607911}
+  levelSessionRuntime: {fileID: 438607906}
 --- !u!114 &438607905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -404,7 +405,6 @@ MonoBehaviour:
   jawCurtainTipConfig: {fileID: 11400000, guid: ee582d7cfb7411d49ae195f43678ac96, type: 2}
   authScreenPrefab: {fileID: 5937290179025323228, guid: 13346db061e46a14a993adfc16b7ac73, type: 3}
   backdropPrefab: {fileID: 8339736254305832784, guid: eadd338566c53e543bbaf6d632391f75, type: 3}
-  chapterChooserPrefab: {fileID: 7404442811326615135, guid: 45da3fc88d6444943997c517ec3b4d59, type: 3}
   dialogPrefab: {fileID: 2063504911643791199, guid: f2d451a0803c8a84da3f2e0497da20c3, type: 3}
   petalEditorPrefab: {fileID: 8406235925533610904, guid: 46b455af4d951334595ff0b29c2f8dd7, type: 3}
   homePrefab: {fileID: 2487866397883307974, guid: 780104b68f9ad09489bd6855ee224a84, type: 3}

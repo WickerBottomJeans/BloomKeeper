@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class SkillExecutionContext
+    public class SkillExecutionContext
     {
         public Tile[,] Grid { get; }
         public IReadOnlyList<ObjectiveTileTargetGroup> ObjectiveTargetGroups { get; }

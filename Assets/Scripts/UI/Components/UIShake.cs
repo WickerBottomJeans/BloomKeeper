@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UIShake : MonoBehaviour
+    public class UIShake : MonoBehaviour
     {
         [SerializeField] private RectTransform shakeTarget;
         [SerializeField, Min(0f)] private float duration = 0.4f;

@@ -4,11 +4,11 @@ using DefaultNamespace.UI;
 
 namespace DefaultNamespace
 {
-    public sealed class SettingsFlow
+    public class SettingsFlow
     {
         private bool isActive;
 
-        public void Enter()
+        public void Open()
         {
             if (isActive)
                 throw new InvalidOperationException("Cannot enter Settings while the Settings flow is already active.");

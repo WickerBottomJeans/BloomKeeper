@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Core;
 using DefaultNamespace;
 using DefaultNamespace.UI;
@@ -183,7 +183,7 @@ public class BoardInputHandler : MonoBehaviour
         tile.x >= 0 && tile.x < boardLayout.Cols &&
         tile.y >= 0 && tile.y < boardLayout.Rows;
 
-    private static Vector2Int ResolveDirection(Vector2 delta)
+    private  Vector2Int ResolveDirection(Vector2 delta)
     {
         if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
             return delta.x > 0 ? Vector2Int.right : Vector2Int.left;

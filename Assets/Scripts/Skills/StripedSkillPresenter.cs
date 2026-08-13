@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class StripedSkillPresenter : SkillRepresentationPresenter<StripedRepresentationData>
+    public class StripedSkillPresenter : SkillRepresentationPresenter<StripedRepresentationData>
     {
         private const float SourcePetalPrepareScale = 1.5f;
         private const float PrepareDuration = 0.15f;

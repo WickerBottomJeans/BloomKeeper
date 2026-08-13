@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class MatchPresentationCoordinator
+    public class MatchPresentationCoordinator
     {
         private readonly PetalViewManager petalViewManager;
         private readonly TileViewManager tileViewManager;
@@ -80,7 +80,7 @@ namespace DefaultNamespace.UI
             await UniTask.WhenAll(tasks);
         }
 
-        private static void AddNormalRemovals(MatchGroupResolveResult groupResult, List<Vector2Int> normalRemovals)
+        private  void AddNormalRemovals(MatchGroupResolveResult groupResult, List<Vector2Int> normalRemovals)
         {
             if (groupResult.SourceMatchGroup.IsFromSkillCombo) return;
 
@@ -91,7 +91,7 @@ namespace DefaultNamespace.UI
             }
         }
 
-        private static void AddNormalTileChanges(MatchGroupResolveResult groupResult, List<TileChange> normalTileChanges)
+        private  void AddNormalTileChanges(MatchGroupResolveResult groupResult, List<TileChange> normalTileChanges)
         {
             if (groupResult.SourceMatchGroup.IsFromSkillCombo) return;
 

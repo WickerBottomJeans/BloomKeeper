@@ -30,7 +30,8 @@ The enabled `MainGame` scene is a persistent application shell. Navigation does 
 
 | Owner | Responsibility | Lifetime |
 | --- | --- | --- |
-| `GameFlowController` | Composes application flows and coordinates navigation between them. | Scene lifetime |
+| `ApplicationBootstrapper` | Constructs application services and flows, then connects the state machine to Unity's lifecycle. | Scene lifetime |
+| `ApplicationStateMachine` | Owns the explicit application state and coordinates legal transitions between flows. | Scene lifetime |
 | `UIManager` | Canvas-level UI facade split into feature-specific partial class files. | Application lifetime |
 | `LevelSessionManager` | Owns the current level, gameplay managers, board instance, and result decision. | Application lifetime; session state is replaced per level |
 | `SpriteLoader` | Loads and caches Addressable sprite atlases used by gameplay views. | Application lifetime |
@@ -38,37 +39,44 @@ The enabled `MainGame` scene is a persistent application shell. Navigation does 
 | `DialogManager` | Runs modal dialog workflows and resolves selected options asynchronously. | Application lifetime |
 | `GameBoard` | Owns the live board model and serializes one turn through its state machine. | One level session |
 
-`GameFlowController`, `LevelSessionManager`, `UIManager`, and `SpriteLoader` are Unity-facing composition points. Most gameplay rules are plain C# objects or static domain services. Unity views project domain state and animate changes after the model has already been mutated.
+`ApplicationBootstrapper`, `LevelSessionManager`, `UIManager`, and `SpriteLoader` are Unity-facing composition points. `ApplicationStateMachine` and the application flows are plain C# orchestration objects. Most gameplay rules are plain C# objects or static domain services. Unity views project domain state and animate changes after the model has already been mutated.
 
 ## Application Flow
 
-`GameFlowController` creates the flow objects in `Awake` and enters boot from `Start`.
+`ApplicationBootstrapper` creates the runtime collaborators in `Awake`, starts `ApplicationStateMachine` from `Start`, and disposes its lifetime event subscriptions from `OnDestroy`. The state machine owns one explicit state at a time; one-shot operations return outcomes, while active flows publish later user actions through semantic events.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Boot
-    Boot --> Auth
-    Auth --> AccountLoad: guest login succeeds
-    Auth --> Auth: retry after failure
-    AccountLoad --> Home
-    Home --> LevelSession: select level
-    LevelSession --> Completion: win or loss
-    Completion --> Result
-    Result --> Home: home
-    Result --> LevelSession: retry
+    [*] --> Booting
+    Booting --> Auth
+    Auth --> LoadingHome: account ready
+    LoadingHome --> Home
+    Home --> SettingUpLevel: select level
+    LevelResult --> SettingUpLevel: retry or next
+    SettingUpLevel --> Home: setup fails from Home
+    SettingUpLevel --> LevelResult: setup fails from Result
+    SettingUpLevel --> PlayingLevel: setup approved
+    PlayingLevel --> QuittingLevel: quit
+    QuittingLevel --> PlayingLevel: cancel or failure
+    QuittingLevel --> LoadingHome: abandonment confirmed
+    PlayingLevel --> PreparingLevelResult: win or loss
+    PreparingLevelResult --> LevelResult: result saved
+    PreparingLevelResult --> LoadingHome: result cannot be confirmed
+    LevelResult --> LoadingHome: home
 ```
 
 | Flow | Current responsibility |
 | --- | --- |
 | `BootFlow` | Configures the current frame-rate policy, loads sprite atlases, and exposes tester UI in editor/development builds. |
-| `AuthFlow` | Shows the auth screen, prevents concurrent login attempts, and requests guest login. |
-| `AccountLoadFlow` | Loads progression through the PlayFab/Azure boundary and creates `PlayerAccount`. |
+| `AuthFlow` | Shows the auth screen and runs guest login plus initial account loading as one player-facing operation. |
 | `HomeFlow` | Shows the level map, forwards level selection, and waits for initial map background loading. |
-| `LevelSessionFlow` | Starts a level, controls player-action availability, and holds the session when a result is produced. |
-| `LevelCompletionFlow` | Submits the level result and applies the server response to in-memory progression. |
-| `ResultFlow` | Shows win or lose UI and publishes home or retry requests. |
+| `LevelSetupFlow` | Loads level config, obtains server approval, and resolves failures before local play starts. |
+| `PlayLevelFlow` | Owns the live local level session, pause lifecycle, gameplay input, and level-finished notification. |
+| `QuitLevelFlow` | Confirms voluntary quitting and requests server abandonment of the active level. |
+| `FinishLevelFlow` | Captures the final frame, submits the completed result, and owns confirmed win/lose presentation. |
+| `SettingsFlow` | Owns the self-closing Settings overlay without changing the main application state. |
 
-Screen changes are commonly wrapped in `UIJawCurtain` transitions. UniTask is used to sequence asynchronous presentation and PlayFab work. C# events connect flow boundaries; each flow subscribes on entry and unsubscribes on exit.
+Screen changes are commonly wrapped in `UIJawCurtain` transitions, but curtain presentation does not define application state. UniTask sequences asynchronous presentation and PlayFab work. `ApplicationStateMachine` subscribes to semantic flow events for its lifetime and disposes those subscriptions with the scene; each active flow still binds and unbinds its own UI events on entry and exit.
 
 ## Authentication And Account State
 
@@ -76,10 +84,11 @@ Only guest authentication is implemented.
 
 1. `GuestCustomIdStore` obtains or creates a persistent device-local custom ID.
 2. `PlayFabGuestLoginService` calls `LoginWithCustomID` with account creation enabled.
-3. The service uses the entity token included in the login result or requests one separately.
+3. The service requests the logged-in player's entity token.
 4. `PlayFabAuthSession` stores the PlayFab ID, session ticket, entity identity, entity token, expiration, guest custom ID, and newly-created flag.
-5. `AccountLoadFlow` loads progression and creates a `PlayerAccount`.
-6. `PlayerAccountContext` becomes the application-wide owner of that account for the active session.
+5. `PlayerAccountLoader` loads progression and booster inventory, then creates a `PlayerAccount`.
+6. `AuthFlow` runs login and account loading under one loading presentation. Any failure returns to the same auth screen after one information dialog.
+7. `PlayerAccountContext` becomes the application-wide owner of the ready account before `AuthFlow` notifies the state machine.
 
 `PlayFabAuthSession` is an immutable snapshot. Token refresh, logout, account switching, Google login, Apple login, account linking, and account merging are not implemented. The auth view contains a separate login button, but the current flow only binds guest play.
 
@@ -139,7 +148,7 @@ The backend currently verifies basic request sanity and whether the requested le
 - `LevelMapButtonLayer` uses `VerticalScrollPool<LevelButton>` to virtualize authored button positions.
 - Each visible button reads earned stars from the progression dictionary.
 - `LevelMapBackgroundLayer` and `LevelMapChunkTextureCache` load visible Addressable background textures from the chunk manifest.
-- Selecting a button raises a level ID through `UIManager` to `HomeFlow` and then `GameFlowController`.
+- Selecting a button raises a level ID through `UIManager` to `HomeFlow` and then `ApplicationStateMachine`.
 
 The progression model contains `highestUnlockedLevel`, but level buttons currently do not enforce it. Every authored map button remains selectable.
 
@@ -323,7 +332,7 @@ The repository contains two PlayMode test files. They use reflection and still c
 
 These statements describe the boundaries the current implementation relies on:
 
-1. `GameFlowController` owns application navigation; individual screens do not choose the next application state.
+1. `ApplicationStateMachine` owns application navigation; individual screens do not choose the next application state.
 2. `LevelSessionManager` owns one level session and is the only layer that decides its final win or loss.
 3. `GameBoard` owns turn ordering and the authoritative `BoardCell[,]` model.
 4. Presentation follows model mutation and receives explicit change/result data.

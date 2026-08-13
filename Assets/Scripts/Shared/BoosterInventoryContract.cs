@@ -14,19 +14,19 @@ namespace DefaultNamespace
         public const string CanonicalStackId = "default";
     }
 
-    public sealed class LoadBoosterInventoryResponse
+    public class LoadBoosterInventoryResponse
     {
         public int schemaVersion = BoosterInventoryContract.CurrentSchemaVersion;
         public Dictionary<string, int> quantitiesByFriendlyId = new Dictionary<string, int>();
     }
 
-    public sealed class ConsumeBoosterRequest
+    public class ConsumeBoosterRequest
     {
         public string operationId;
         public string boosterFriendlyId;
     }
 
-    public sealed class ConsumeBoosterResponse
+    public class ConsumeBoosterResponse
     {
         public int schemaVersion = BoosterInventoryContract.CurrentSchemaVersion;
         public ConsumeBoosterOutcome outcome;

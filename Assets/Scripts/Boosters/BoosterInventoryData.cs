@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DefaultNamespace
 {
-    public sealed class BoosterInventoryData
+    public class BoosterInventoryData
     {
         private readonly Dictionary<BoosterType, int> quantities;
 

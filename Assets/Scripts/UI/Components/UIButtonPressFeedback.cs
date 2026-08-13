@@ -91,7 +91,7 @@ namespace DefaultNamespace.UI
             feedbackTween = sequence;
         }
 
-        private static Vector3 ScaleBy(Vector3 scale, Vector2 multiplier)
+        private  Vector3 ScaleBy(Vector3 scale, Vector2 multiplier)
         {
             return new Vector3(scale.x * multiplier.x, scale.y * multiplier.y, scale.z);
         }

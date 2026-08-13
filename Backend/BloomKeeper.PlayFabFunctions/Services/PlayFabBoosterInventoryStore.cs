@@ -85,7 +85,7 @@ public class PlayFabBoosterInventoryStore
     /// <param name="economyApi"></param>
     /// <returns>Catalog ID → Friendly ID dict.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private static async Task<Dictionary<string, string>> ResolveCatalogIds(PlayFabEconomyInstanceAPI economyApi)
+    private  async Task<Dictionary<string, string>> ResolveCatalogIds(PlayFabEconomyInstanceAPI economyApi)
     {
         // [Duong] Fetch the supported booster catalog items from PlayFab by Friendly ID
         var request = new GetItemsRequest
@@ -120,7 +120,7 @@ public class PlayFabBoosterInventoryStore
         return friendlyIdsByCatalogId;
     }
 
-    private static T GetRequiredPlayFabResult<T>(PlayFabResult<T> result, string operationName) where T : PlayFabResultCommon
+    private  T GetRequiredPlayFabResult<T>(PlayFabResult<T> result, string operationName) where T : PlayFabResultCommon
     {
         if (result == null) throw new InvalidOperationException($"PlayFab {operationName} returned no result.");
         if (result.Error != null) throw new InvalidOperationException($"PlayFab {operationName} failed: {result.Error.GenerateErrorReport()}");

@@ -8,8 +8,14 @@ namespace DefaultNamespace
         public int highestUnlockedLevel = 1;
 
         /// <summary>
-        /// Key = levelId. Value = saved progress for that level.
+        /// [Duong] Key = levelId. Value = saved progress for that level.
         /// </summary>
         public Dictionary<int, LevelProgressData> levels = new Dictionary<int, LevelProgressData>();
+
+        public void ApplyLevelProgress(int levelId, LevelProgressData levelProgress, int highestUnlockedLevel)
+        {
+            this.highestUnlockedLevel = highestUnlockedLevel;
+            levels[levelId] = levelProgress;
+        }
     }
 }

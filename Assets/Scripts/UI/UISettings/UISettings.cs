@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UISettings : MonoBehaviour
+    public class UISettings : MonoBehaviour
     {
         [SerializeField] private Slider musicSlider;
         [SerializeField] private Slider sfxSlider;

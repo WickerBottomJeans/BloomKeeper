@@ -1,20 +1,19 @@
-using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 
 namespace DefaultNamespace
 {
-    public class AccountLoadFlow
+    public class PlayerAccountLoader
     {
         private readonly PlayFabProgressionService progressionService;
         private readonly PlayFabBoosterInventoryService boosterInventoryService;
 
-        public AccountLoadFlow(PlayFabProgressionService progressionService, PlayFabBoosterInventoryService boosterInventoryService)
+        public PlayerAccountLoader(PlayFabProgressionService progressionService, PlayFabBoosterInventoryService boosterInventoryService)
         {
             this.progressionService = progressionService;
             this.boosterInventoryService = boosterInventoryService;
         }
 
-        public async UniTask<PlayerAccount> Enter(PlayFabAuthSession authSession)
+        public async Task<PlayerAccount> Load(PlayFabAuthSession authSession)
         {
             Task<PlayerProgressionData> progressionTask = progressionService.LoadProgression(authSession);
             Task<BoosterInventoryData> boosterInventoryTask = boosterInventoryService.LoadInventory(authSession);
@@ -22,10 +21,6 @@ namespace DefaultNamespace
             PlayerProgressionData progression = await progressionTask;
             BoosterInventoryData boosterInventory = await boosterInventoryTask;
             return new PlayerAccount(authSession, progression, boosterInventory);
-        }
-
-        public void Exit()
-        {
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.VFX
 {
-    public sealed class VFXStripeHalo : MonoBehaviour
+    public class VFXStripeHalo : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer sourceHalo;
         [SerializeField] private AudioCue skillCue;

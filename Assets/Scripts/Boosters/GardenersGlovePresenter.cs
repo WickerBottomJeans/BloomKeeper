@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Boosters
 {
-    public sealed class GardenersGlovePresenter : BoosterRepresentationPresenter<GardenersGloveRepresentationData>
+    public class GardenersGlovePresenter : BoosterRepresentationPresenter<GardenersGloveRepresentationData>
     {
         private const string SelectionViewUserName = nameof(GardenersGlovePresenter);
 

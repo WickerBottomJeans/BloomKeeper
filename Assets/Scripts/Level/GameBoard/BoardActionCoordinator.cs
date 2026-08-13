@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class BoardActionCoordinator
+    public class BoardActionCoordinator
     {
         private readonly PetalViewManager petalViewManager;
         private readonly BoardAudioManager boardAudioManager;

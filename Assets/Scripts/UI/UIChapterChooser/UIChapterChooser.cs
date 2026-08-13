@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UIChapterChooser : MonoBehaviour
+    public class UIChapterChooser : MonoBehaviour
     {
         [SerializeField] private HorizontalSnapPool snapPool;
         [SerializeField] private RectTransform scrollRectTransform;
@@ -151,7 +151,7 @@ namespace DefaultNamespace.UI
             initialization.Forget();
         }
 
-        private static void HideView(UIChapterView view)
+        private  void HideView(UIChapterView view)
         {
             view.ResetForPool();
         }

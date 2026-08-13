@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Boosters;
 using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.CloudScriptModels;
 
 namespace DefaultNamespace
 {
-    public class PlayFabBoosterInventoryService
+    public class PlayFabBoosterInventoryService : IBoosterConsumptionGateway
     {
         private const string LoadBoosterInventoryFunctionName = "LoadBoosterInventory";
         private const string ConsumeBoosterFunctionName = "ConsumeBooster";
@@ -36,11 +37,11 @@ namespace DefaultNamespace
             return completion.Task;
         }
 
-        public Task<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, BoosterInventoryData inventory)> ConsumeBooster(PlayFabAuthSession authSession, string operationId, BoosterType boosterType)
+        public Task<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, BoosterInventoryData inventory)> ConsumeBooster(PlayFabAuthSession authSession, string boosterConsumptionIdempotencyKey, BoosterType boosterType)
         {
             if (authSession == null) throw new ArgumentNullException(nameof(authSession));
-            if (!Guid.TryParseExact(operationId, "N", out _))
-                throw new ArgumentException("Booster operation ID must be a canonical GUID.", nameof(operationId));
+            if (!Guid.TryParseExact(boosterConsumptionIdempotencyKey, "N", out _))
+                throw new ArgumentException("Booster consumption idempotency key must be a canonical GUID.", nameof(boosterConsumptionIdempotencyKey));
             if (!FriendlyIdsByBoosterType.TryGetValue(boosterType, out string friendlyId))
                 throw new ArgumentOutOfRangeException(nameof(boosterType), boosterType,
                     "Booster type is not supported by PlayFab inventory.");
@@ -48,7 +49,7 @@ namespace DefaultNamespace
             var completion =
                 new TaskCompletionSource<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason,
                     BoosterInventoryData inventory)>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var functionParameter = new ConsumeBoosterRequest { operationId = operationId, boosterFriendlyId = friendlyId };
+            var functionParameter = new ConsumeBoosterRequest { operationId = boosterConsumptionIdempotencyKey, boosterFriendlyId = friendlyId };
             var request = new ExecuteFunctionRequest
             {
                 AuthenticationContext = new PlayFabAuthenticationContext(authSession.SessionTicket,
@@ -65,7 +66,7 @@ namespace DefaultNamespace
             return completion.Task;
         }
 
-        private static void HandleLoadInventoryResult(ExecuteFunctionResult result, TaskCompletionSource<BoosterInventoryData> completion)
+        private  void HandleLoadInventoryResult(ExecuteFunctionResult result, TaskCompletionSource<BoosterInventoryData> completion)
         {
             try
             {
@@ -77,7 +78,7 @@ namespace DefaultNamespace
             }
         }
 
-        private static BoosterInventoryData CreateInventoryFromFunctionResult(ExecuteFunctionResult result)
+        private  BoosterInventoryData CreateInventoryFromFunctionResult(ExecuteFunctionResult result)
         {
             if (result == null || result.Error != null || result.FunctionResultTooLarge == true || result.FunctionResult == null)
                 throw new InvalidOperationException("PlayFab LoadBoosterInventory failed.");
@@ -89,7 +90,7 @@ namespace DefaultNamespace
             return CreateInventory(response.quantitiesByFriendlyId, "PlayFab LoadBoosterInventory");
         }
 
-        private static void HandleConsumeBoosterResult(ExecuteFunctionResult result, TaskCompletionSource<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, BoosterInventoryData inventory)> completion)
+        private  void HandleConsumeBoosterResult(ExecuteFunctionResult result, TaskCompletionSource<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, BoosterInventoryData inventory)> completion)
         {
             try
             {
@@ -101,7 +102,7 @@ namespace DefaultNamespace
             }
         }
 
-        private static (ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, BoosterInventoryData inventory) CreateConsumeBoosterResult(ExecuteFunctionResult result)
+        private  (ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, BoosterInventoryData inventory) CreateConsumeBoosterResult(ExecuteFunctionResult result)
         {
             if (result == null) throw new BoosterConsumptionException("PlayFab ConsumeBooster returned no execution result.", false);
             if (result.Error != null) throw new BoosterConsumptionException($"PlayFab ConsumeBooster Azure Function failed: {result.Error.Error}: {result.Error.Message}", PlayFabRetryPolicy.IsRetryable(result.Error));
@@ -119,7 +120,7 @@ namespace DefaultNamespace
             return (response.outcome, response.rejectionReason, inventory);
         }
 
-        private static BoosterInventoryData CreateInventory(IReadOnlyDictionary<string, int> quantitiesByFriendlyId, string operationName)
+        private  BoosterInventoryData CreateInventory(IReadOnlyDictionary<string, int> quantitiesByFriendlyId, string operationName)
         {
             if (quantitiesByFriendlyId == null) throw new InvalidOperationException($"{operationName} returned no booster quantities.");
 

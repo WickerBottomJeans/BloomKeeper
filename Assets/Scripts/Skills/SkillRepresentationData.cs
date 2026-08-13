@@ -15,7 +15,7 @@ namespace Skills
         }
     }
 
-    public sealed class BubbleRepresentationData : SkillRepresentationData
+    public class BubbleRepresentationData : SkillRepresentationData
     {
         public Vector2Int Center { get; }
         public IReadOnlyList<Vector2Int> AffectedPositions { get; }
@@ -27,7 +27,7 @@ namespace Skills
         }
     }
 
-    public sealed class StripedRepresentationData : SkillRepresentationData
+    public class StripedRepresentationData : SkillRepresentationData
     {
         /// <summary>
         /// Coord of the Petal skill which is being executed in the Grid
@@ -44,7 +44,7 @@ namespace Skills
         }
     }
 
-    public sealed class StripeStripeFusionRepresentationData : SkillRepresentationData
+    public class StripeStripeFusionRepresentationData : SkillRepresentationData
     {
         public Vector2Int Anchor { get; }
         public IReadOnlyList<Vector2Int> AffectedPositions { get; }
@@ -56,7 +56,7 @@ namespace Skills
         }
     }
 
-    public sealed class ButterflyRepresentationData : SkillRepresentationData
+    public class ButterflyRepresentationData : SkillRepresentationData
     {
         public Vector2Int Source { get; }
         public Vector2Int? Target { get; }
@@ -70,7 +70,7 @@ namespace Skills
         }
     }
 
-    public sealed class PrismaticBloomRepresentationData : SkillRepresentationData
+    public class PrismaticBloomRepresentationData : SkillRepresentationData
     {
         public Vector2Int Source { get; }
         public SpecialSkillType ReplacementSkill { get; }

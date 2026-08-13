@@ -12,7 +12,7 @@ namespace DefaultNamespace.UI
 
     public partial class DialogManager
     {
-        private sealed class DialogSession : IDialogSession
+        private class DialogSession : IDialogSession
         {
             private readonly Channel<int> buttonClicks = Channel.CreateSingleConsumerUnbounded<int>();
             private Action<DialogSession> buttonWaitStarted;

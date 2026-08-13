@@ -9,7 +9,7 @@ using UnityEngine.UI;
 namespace DefaultNamespace.UI
 {
     [RequireComponent(typeof(ScrollRect))]
-    public sealed class HorizontalSnapPool : MonoBehaviour, IBeginDragHandler, IEndDragHandler
+    public class HorizontalSnapPool : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     {
         [SerializeField, Min(0f)] private float snapDuration = 0.2f;
         [SerializeField] private Ease snapEase = Ease.OutCubic;
@@ -290,7 +290,7 @@ namespace DefaultNamespace.UI
                     $"Index must be between 0 and {itemCount - 1}.");
         }
 
-        private sealed class ViewPool<T> : IDisposable where T : Component
+        private class ViewPool<T> : IDisposable where T : Component
         {
             private readonly RectTransform content;
             private readonly RectTransform viewport;

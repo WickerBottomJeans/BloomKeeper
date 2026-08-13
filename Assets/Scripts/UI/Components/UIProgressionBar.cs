@@ -52,7 +52,7 @@ namespace DefaultNamespace.UI
             return Mathf.Clamp01((float)value / targetValue);
         }
 
-        private static void SetAnchorX(RectTransform rect, float x)
+        private  void SetAnchorX(RectTransform rect, float x)
         {
             rect.anchorMin = new Vector2(x, rect.anchorMin.y);
             rect.anchorMax = new Vector2(x, rect.anchorMax.y);

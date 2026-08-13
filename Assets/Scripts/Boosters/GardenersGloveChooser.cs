@@ -6,10 +6,10 @@ using UnityEngine;
 
 namespace Boosters
 {
-    public sealed class GardenersGloveChooser : IBoosterChooser
+    public class GardenersGloveChooser : IBoosterChooser
     {
         private Tile[,] grid;
-        private UniTaskCompletionSource<IReadOnlyList<Vector2Int>> completionSource;
+        private UniTaskCompletionSource<BoosterTargetSelectionResult> completionSource;
         private readonly List<Vector2Int> selectedTargets = new List<Vector2Int>(2);
         private Vector2Int? pressedTarget;
         private bool isCompleting;
@@ -29,14 +29,14 @@ namespace Boosters
             return candidates;
         }
 
-        public async UniTask<IReadOnlyList<Vector2Int>> Choose(Tile[,] grid, BoardInputHandler inputHandler)
+        public async UniTask<BoosterTargetSelectionResult> Choose(Tile[,] grid, BoardInputHandler inputHandler)
         {
             if (grid == null) throw new ArgumentNullException(nameof(grid));
             if (inputHandler == null) throw new ArgumentNullException(nameof(inputHandler));
             if (this.grid != null) throw new InvalidOperationException("Gardener's Glove target selection is already active.");
 
             this.grid = grid;
-            completionSource = new UniTaskCompletionSource<IReadOnlyList<Vector2Int>>();
+            completionSource = new UniTaskCompletionSource<BoosterTargetSelectionResult>();
             selectedTargets.Clear();
             pressedTarget = null;
             isCompleting = false;
@@ -65,7 +65,7 @@ namespace Boosters
         public void Cancel()
         {
             EnsureActive();
-            completionSource.TrySetResult(null);
+            completionSource.TrySetResult(BoosterTargetSelectionResult.Canceled);
         }
 
         private void HandlePointerPressed(Vector2Int position)
@@ -102,10 +102,10 @@ namespace Boosters
 
         private async UniTask CompleteAfterSelectionFrame()
         {
-            UniTaskCompletionSource<IReadOnlyList<Vector2Int>> activeCompletionSource = completionSource;
+            UniTaskCompletionSource<BoosterTargetSelectionResult> activeCompletionSource = completionSource;
             IReadOnlyList<Vector2Int> targets = selectedTargets.ToArray();
             await UniTask.NextFrame();
-            activeCompletionSource.TrySetResult(targets);
+            activeCompletionSource.TrySetResult(BoosterTargetSelectionResult.Selected(targets));
         }
 
         private bool CanTarget(Vector2Int position)
@@ -113,7 +113,7 @@ namespace Boosters
             return CanTarget(grid, position);
         }
 
-        private static bool CanTarget(Tile[,] grid, Vector2Int position)
+        private  bool CanTarget(Tile[,] grid, Vector2Int position)
         {
             if (position.x < 0 || position.x >= grid.GetLength(0) || position.y < 0 || position.y >= grid.GetLength(1)) return false;
 

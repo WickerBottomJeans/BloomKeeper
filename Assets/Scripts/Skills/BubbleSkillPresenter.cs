@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class BubbleSkillPresenter : SkillRepresentationPresenter<BubbleRepresentationData>
+    public class BubbleSkillPresenter : SkillRepresentationPresenter<BubbleRepresentationData>
     {
         private const float BubbleInflateScaleMultiplier = 1.5f;
         private const float PrepareDuration = 0.4f;

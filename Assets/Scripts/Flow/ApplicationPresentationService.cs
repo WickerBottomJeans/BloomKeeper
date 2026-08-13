@@ -5,7 +5,7 @@ using DefaultNamespace.UI;
 
 namespace DefaultNamespace
 {
-    public sealed class ApplicationPresentationService
+    public class ApplicationPresentationService
     {
         public static ApplicationPresentationService Instance { get; } = new ApplicationPresentationService();
 

@@ -11,7 +11,7 @@ namespace Boosters
         event Action<Vector2Int, bool> TargetSelectionChanged;
 
         IReadOnlyList<Vector2Int> GetBoosterTargetCandidates(Tile[,] grid);
-        UniTask<IReadOnlyList<Vector2Int>> Choose(Tile[,] grid, BoardInputHandler inputHandler);
+        UniTask<BoosterTargetSelectionResult> Choose(Tile[,] grid, BoardInputHandler inputHandler);
         void Cancel();
     }
 }

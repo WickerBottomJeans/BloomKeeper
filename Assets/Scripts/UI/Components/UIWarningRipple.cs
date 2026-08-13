@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UIWarningRipple : MonoBehaviour
+    public class UIWarningRipple : MonoBehaviour
     {
         [SerializeField] private Image rippleTemplate;
         [SerializeField, Min(1)] private int rippleCount = 2;
@@ -78,13 +78,13 @@ namespace DefaultNamespace.UI
             return sequence;
         }
 
-        private static void ShowRipple(Image ripple, Vector3 restingScale, Color visibleColor, float startingScale)
+        private  void ShowRipple(Image ripple, Vector3 restingScale, Color visibleColor, float startingScale)
         {
             ripple.rectTransform.localScale = restingScale * startingScale;
             ripple.color = visibleColor;
         }
 
-        private static void HideRipple(Image ripple, Vector3 restingScale, float startingScale)
+        private  void HideRipple(Image ripple, Vector3 restingScale, float startingScale)
         {
             ripple.rectTransform.localScale = restingScale * startingScale;
             Color hiddenColor = ripple.color;

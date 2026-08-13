@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class ViewAccessKey
+public class ViewAccessKey
 {
     public PetalView View { get; }
     public Vector2Int Position { get; }

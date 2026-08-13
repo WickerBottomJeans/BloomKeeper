@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class PrismaticBloomSkillExecutor : ISkillExecutor
+    public class PrismaticBloomSkillExecutor : ISkillExecutor
     {
         public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
         {
@@ -69,14 +69,14 @@ namespace Skills
             return new SkillUseResult(matchGroup, representation, inputMatchGroup);
         }
 
-        private static PetalType? SelectTargetPetalType(SkillParticipant? combinationPartner, Petal triggerPetal, Tile[,] grid)
+        private  PetalType? SelectTargetPetalType(SkillParticipant? combinationPartner, Petal triggerPetal, Tile[,] grid)
         {
             if (combinationPartner.HasValue) return combinationPartner.Value.Petal.PetalType;
             if (triggerPetal != null) return triggerPetal.PetalType;
             return FindMostCommonPetalType(grid);
         }
 
-        private static PetalType? FindMostCommonPetalType(Tile[,] grid)
+        private  PetalType? FindMostCommonPetalType(Tile[,] grid)
         {
             var counts = new Dictionary<PetalType, int>();
             var firstSeenTypes = new List<PetalType>();
@@ -114,7 +114,7 @@ namespace Skills
             return selectedType;
         }
 
-        private static MatchGroup CreateMatchGroup(Tile[,] grid, PetalType targetType, Petal causer)
+        private  MatchGroup CreateMatchGroup(Tile[,] grid, PetalType targetType, Petal causer)
         {
             int columns = grid.GetLength(0);
             int rows = grid.GetLength(1);
@@ -130,7 +130,7 @@ namespace Skills
             return new MatchGroup(positions, MatchShape.None, causer);
         }
 
-        private static List<PetalChange> GiveSkillToPetalsOfType(Tile[,] grid, PetalType targetType, SpecialSkillType newSkill)
+        private  List<PetalChange> GiveSkillToPetalsOfType(Tile[,] grid, PetalType targetType, SpecialSkillType newSkill)
         {
             int columns = grid.GetLength(0);
             int rows = grid.GetLength(1);

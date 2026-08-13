@@ -2,7 +2,7 @@ using System;
 
 namespace DefaultNamespace
 {
-    public sealed class BoosterViewData
+    public class BoosterViewData
     {
         public BoosterType BoosterType { get; }
         public int Amount { get; }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DefaultNamespace
 {
-    public sealed class ObjectiveTileTargetGroup
+    public class ObjectiveTileTargetGroup
     {
         public ObjectiveType ObjectiveType { get; }
         public IReadOnlyList<Vector2Int> Positions { get; }

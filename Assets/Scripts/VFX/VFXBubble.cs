@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.Audio;
 using DG.Tweening;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.VFX
 {
-    public sealed class VFXBubble : MonoBehaviour
+    public class VFXBubble : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer bubbleRenderer;
         [SerializeField] private ParticleSystem enderParticle;
@@ -53,9 +54,9 @@ namespace DefaultNamespace.VFX
             AudioService.Instance.PlaySfx(popCue, audioScope);
         }
 
-        public UniTask WaitForEnderParticles()
+        public UniTask WaitForEnderParticles(CancellationToken cancellationToken)
         {
-            return UniTask.WaitUntil(() => !enderParticle.IsAlive(true), cancellationToken: this.GetCancellationTokenOnDestroy());
+            return UniTask.WaitUntil(() => !enderParticle.IsAlive(true), cancellationToken: cancellationToken);
         }
 
         public void ResetForPool()

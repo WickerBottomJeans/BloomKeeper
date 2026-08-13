@@ -40,7 +40,7 @@ namespace DefaultNamespace
             if (chapterDefinitions.TryGetValue(chapterId, out ChapterDefinition chapterDefinition))
                 return chapterDefinition;
 
-            ChapterIndexEntry chapterEntry = GetChapterEntry(chapterId);
+            ChapterIndexEntry chapterEntry = ChapterIndex.GetEntry(chapterId);
             chapterDefinition = await chapterDefinitionLoader.LoadAsync(chapterEntry.configPath);
             chapterDefinitions.Add(chapterId, chapterDefinition);
             return chapterDefinition;
@@ -86,13 +86,5 @@ namespace DefaultNamespace
             return true;
         }
 
-        private ChapterIndexEntry GetChapterEntry(int chapterId)
-        {
-            foreach (ChapterIndexEntry chapterEntry in ChapterIndex.chapters)
-                if (chapterEntry.chapterId == chapterId)
-                    return chapterEntry;
-
-            throw new KeyNotFoundException($"Chapter index has no entry for chapter {chapterId}.");
-        }
     }
 }

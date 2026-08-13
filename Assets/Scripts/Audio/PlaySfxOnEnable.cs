@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.Audio
 {
-    public sealed class PlaySfxOnEnable : MonoBehaviour
+    public class PlaySfxOnEnable : MonoBehaviour
     {
         [SerializeField] private AudioCue cue;
 

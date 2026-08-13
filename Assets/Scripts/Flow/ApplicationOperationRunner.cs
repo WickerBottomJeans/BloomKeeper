@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DefaultNamespace
 {
-    public sealed class ApplicationOperationRunner
+    public class ApplicationOperationRunner
     {
         public static ApplicationOperationRunner Instance { get; } = new ApplicationOperationRunner();
 
@@ -64,7 +64,7 @@ namespace DefaultNamespace
             QuitApplication();
         }
 
-        private static void QuitApplication()
+        private  void QuitApplication()
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;

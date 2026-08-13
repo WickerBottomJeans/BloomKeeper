@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UIChapterView : MonoBehaviour
+    public class UIChapterView : MonoBehaviour
     {
         [SerializeField] private Image avatarImage;
         [SerializeField] private Sprite placeholderSprite;

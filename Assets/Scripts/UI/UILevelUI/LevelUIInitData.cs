@@ -4,7 +4,7 @@ using DefaultNamespace;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class LevelUIInitData
+    public class LevelUIInitData
     {
         public IReadOnlyList<ObjectiveViewData> Objectives { get; }
         public IReadOnlyList<ConstrainerViewData> Constrainers { get; }
@@ -20,7 +20,7 @@ namespace DefaultNamespace.UI
         }
     }
 
-    public sealed class ScoreViewData
+    public class ScoreViewData
     {
         public int TargetScore { get; }
         public IReadOnlyList<int> MilestoneScores { get; }

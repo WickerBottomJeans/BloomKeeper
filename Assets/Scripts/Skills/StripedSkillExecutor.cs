@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class StripedSkillExecutor : ISkillExecutor
+    public class StripedSkillExecutor : ISkillExecutor
     {
         public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
         {

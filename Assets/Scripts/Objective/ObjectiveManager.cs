@@ -6,11 +6,11 @@ using DefaultNamespace.UI;
 
 namespace DefaultNamespace
 {
-    public class ObjectiveManager
+    public class ObjectiveManager : IGameplayEventHandler<BoardResolutionStepCompletedEvent>
     {
         private readonly List<IObjective> objectives;
 
-        public event Action OnAllComplete;
+        public event Action OnAllObjectedCompleted;
         public event Action OnProgressUpdated;
 
         public ObjectiveManager(List<IObjective> objectives)
@@ -18,15 +18,15 @@ namespace DefaultNamespace
             this.objectives = objectives;
         }
 
-        public void Apply(IReadOnlyList<TileChange> changes)
+        public void Handle(BoardResolutionStepCompletedEvent gameplayEvent)
         {
             foreach (IObjective objective in objectives)
-                objective.Apply(changes);
+                objective.Apply(gameplayEvent.Result.TileChanges);
 
             OnProgressUpdated?.Invoke();
 
             if (objectives.All(o => o.CheckObjective()))
-                OnAllComplete?.Invoke();
+                OnAllObjectedCompleted?.Invoke();
         }
 
         public bool AllComplete => objectives.All(o => o.CheckObjective());

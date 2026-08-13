@@ -164,6 +164,8 @@ Exit condition: a reviewer can understand, watch, download, run, and inspect the
 Goal: remove avoidable reasons for an interviewer to doubt the work.
 
 - [ ] Update `ARCHITECTURE.md` so it describes the implementation that is actually being released.
+- [x] Replace `GameFlowController`'s implicit flow state with an explicit `ApplicationStateMachine`. This goal came from reviewing `TryEnterLevel(..., Action commitSourceExit)`: Home, Result retry, and Next Level shared one level-entry pipeline but supplied different source-exit actions, revealing that the active flow and legal transitions were represented only implicitly.
+- [ ] Review the dialog system for robust lifecycle, cancellation, queueing, event binding, clean ownership, and SOLID boundaries; fix only confirmed issues.
 - [ ] Mark `ROADMAP.md` clearly as long-term work so unchecked production features do not make the portfolio appear unfinished.
 - [ ] Review comments in representative gameplay, flow, authentication, and backend files; resolve, rewrite, or remove informal and stale TODO comments.
 - [ ] Remove Butterfly-specific objective data and target-assignment state from `SkillExecutionContext`; give Butterfly its own batch-scoped dependencies so unrelated skill executors receive only shared execution data.

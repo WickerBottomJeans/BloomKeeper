@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DefaultNamespace.Audio
 {
     [CreateAssetMenu(fileName = "AudioCue", menuName = "BloomKeeper/Audio Cue")]
-    public sealed class AudioCue : ScriptableObject
+    public class AudioCue : ScriptableObject
     {
         [SerializeField] private AudioClip[] clips;
         [SerializeField] private AudioBus bus;

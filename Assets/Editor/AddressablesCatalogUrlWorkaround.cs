@@ -52,7 +52,7 @@ namespace DefaultNamespace.Editor
         }
     }
 
-    public sealed class AddressablesCatalogUrlBuildValidator : IPreprocessBuildWithReport
+    public class AddressablesCatalogUrlBuildValidator : IPreprocessBuildWithReport
     {
         public int callbackOrder => 0;
 

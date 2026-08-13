@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DefaultNamespace
 {
-    public sealed class WorldLevelBackground : MonoBehaviour
+    public class WorldLevelBackground : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer spriteRenderer;
 

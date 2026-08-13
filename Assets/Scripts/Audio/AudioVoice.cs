@@ -4,7 +4,7 @@ using UnityEngine.Audio;
 
 namespace DefaultNamespace.Audio
 {
-    sealed class AudioVoice
+    class AudioVoice
     {
         private readonly AudioSource source;
 

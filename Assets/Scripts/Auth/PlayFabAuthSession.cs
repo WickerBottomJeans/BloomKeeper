@@ -18,6 +18,10 @@ namespace DefaultNamespace
 
         public PlayFabAuthSession(string playFabId, string guestCustomId, string sessionTicket, string entityId, string entityType, string entityToken, DateTime? entityTokenExpiration, bool newlyCreated)
         {
+            if (string.IsNullOrWhiteSpace(entityId)) throw new InvalidOperationException("PlayFab guest login succeeded without an entity ID.");
+            if (string.IsNullOrWhiteSpace(entityType)) throw new InvalidOperationException("PlayFab guest login succeeded without an entity type.");
+            if (string.IsNullOrWhiteSpace(entityToken)) throw new InvalidOperationException("PlayFab guest login succeeded without an entity token.");
+
             PlayFabId = playFabId;
             GuestCustomId = guestCustomId;
             SessionTicket = sessionTicket;

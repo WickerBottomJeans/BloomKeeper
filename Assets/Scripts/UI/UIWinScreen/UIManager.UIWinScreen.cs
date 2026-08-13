@@ -12,14 +12,14 @@ namespace DefaultNamespace.UI
         public event Action WinScreenHomeRequested;
         public event Action WinScreenNextRequested;
 
-        public void ShowWinScreen(int stars, int starCap, bool showNext)
+        public void ShowWinScreen(Texture levelResultBackgroundTexture, int stars, int starCap, bool showNext)
         {
             if (winScreenInstance == null)
                 winScreenInstance = Instantiate(winScreenPrefab, uiRoot);
 
             UnbindWinScreen();
             BindWinScreen();
-            winScreenInstance.Display(stars, starCap, showNext);
+            winScreenInstance.Display(levelResultBackgroundTexture, stars, starCap, showNext);
             winScreenInstance.gameObject.SetActive(true);
         }
 

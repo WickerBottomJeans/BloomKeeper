@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
@@ -6,7 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace DefaultNamespace.VFX
 {
-    public sealed class VFXPrismaticBloomProjectile : MonoBehaviour
+    public class VFXPrismaticBloomProjectile : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer projectileRenderer;
         [SerializeField] private Sprite[] projectileSprites;
@@ -46,12 +47,12 @@ namespace DefaultNamespace.VFX
             return transform.DOMove(target, duration).SetEase(Ease.OutQuad).SetLink(gameObject, LinkBehaviour.KillOnDestroy).ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
         }
 
-        public async UniTask Finish()
+        public async UniTask Finish(CancellationToken cancellationToken)
         {
             projectileRenderer.enabled = false;
             flyingParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             enderParticle.Play(true);
-            await UniTask.WaitUntil(() => !flyingParticle.IsAlive(true) && !enderParticle.IsAlive(true), cancellationToken: this.GetCancellationTokenOnDestroy());
+            await UniTask.WaitUntil(() => !flyingParticle.IsAlive(true) && !enderParticle.IsAlive(true), cancellationToken: cancellationToken);
         }
 
         public void ResetForPool()

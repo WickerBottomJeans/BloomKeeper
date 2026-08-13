@@ -2,7 +2,7 @@ namespace DefaultNamespace.UI
 {
     public partial class DialogManager
     {
-        private sealed class DialogRequest
+        private class DialogRequest
         {
             public DialogRequest(string title, string message, DialogOptionButton[] options, DialogSession session)
             {

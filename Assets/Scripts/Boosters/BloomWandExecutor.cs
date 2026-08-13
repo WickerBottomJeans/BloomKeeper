@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Boosters
 {
-    public sealed class BloomWandExecutor : IBoosterExecutor
+    public class BloomWandExecutor : IBoosterExecutor
     {
         public BoosterUseResult Execute(Tile[,] grid, IReadOnlyList<Vector2Int> targets)
         {

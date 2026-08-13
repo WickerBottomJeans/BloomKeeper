@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.Settings
 {
-    public sealed class UserSettingsService : Singleton<UserSettingsService>
+    public class UserSettingsService : Singleton<UserSettingsService>
     {
         private float musicVolume;
         private float sfxVolume;
@@ -55,7 +55,7 @@ namespace DefaultNamespace.Settings
             isDirty = false;
         }
 
-        private static void ValidateVolume(float value)
+        private  void ValidateVolume(float value)
         {
             if (value < 0f || value > 1f)
                 throw new ArgumentOutOfRangeException(nameof(value), value, "Volume must be between 0 and 1.");

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class HorizontalScrollPool<T> : IDisposable where T : Component
+    public class HorizontalScrollPool<T> : IDisposable where T : Component
     {
         private readonly RectTransform content;
         private readonly RectTransform viewport;

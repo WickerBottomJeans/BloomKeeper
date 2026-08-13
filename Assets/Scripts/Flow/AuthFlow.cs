@@ -1,67 +1,87 @@
 using System;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
+using UnityEngine;
 
 namespace DefaultNamespace
 {
     /// <summary>
-    /// Owns the auth screen before the player enters home
+    /// [Duong] Owns the auth screen and prepares the current player account before notifying the application that it is ready
     /// </summary>
     public class AuthFlow
     {
         private const string GuestPlayButtonText = "<size=70%>Play as</size> <size=120%>Guest</size>";
 
         private readonly PlayFabGuestLoginService guestLoginService;
-        private bool isLoginInProgress;
+        private readonly PlayerAccountLoader playerAccountLoader;
+        private bool isAccountLoadInProgress;
 
-        public event Action<PlayFabAuthSession> AuthCompleted;
-        public event Action<Exception> AuthFailed;
+        public event Action AccountReady;
 
-        public AuthFlow(PlayFabGuestLoginService guestLoginService)
+        public AuthFlow(PlayFabGuestLoginService guestLoginService, PlayerAccountLoader playerAccountLoader)
         {
             this.guestLoginService = guestLoginService;
+            this.playerAccountLoader = playerAccountLoader;
         }
 
+        /// <summary>
+        /// [Duong] Really just showing AuthScreen UI
+        /// </summary>
         public void Enter()
         {
             UIManager.Instance.AuthPlayRequested += HandleAuthPlayRequested;
             UIManager.Instance.ShowAuthScreen(GuestPlayButtonText);
         }
 
+        /// <summary>
+        /// [Duong] Hide UI
+        /// </summary>
         public void Exit()
         {
             UIManager.Instance.AuthPlayRequested -= HandleAuthPlayRequested;
             UIManager.Instance.HideAuthScreen();
         }
 
-        public void RetryLogin()
-        {
-            AttemptGuestLogin().Forget();
-        }
-
         private void HandleAuthPlayRequested()
         {
-            AttemptGuestLogin().Forget();
+            LoadGuestAccount().Forget();
         }
 
-        private async UniTask AttemptGuestLogin()
+        /// <summary>
+        /// [Duong] Log in as guest then after succeeding, load account related data like progession, inventory, etc
+        /// </summary>
+        private async UniTask LoadGuestAccount()
         {
-            if (isLoginInProgress) return;
+            if (isAccountLoadInProgress) return;
 
-            isLoginInProgress = true;
+            isAccountLoadInProgress = true;
+            PlayerAccount playerAccount;
             try
             {
-                PlayFabAuthSession session = await ApplicationPresentationService.Instance.RunWithLoading(() => guestLoginService.LoginAsGuest());
-                AuthCompleted?.Invoke(session);
+                playerAccount = await ApplicationPresentationService.Instance.RunWithLoading(async () =>
+                {
+                    PlayFabAuthSession playFabAuthSession = await guestLoginService.LoginAsGuest();
+                    return await playerAccountLoader.Load(playFabAuthSession);
+                });
             }
             catch (Exception exception)
             {
-                    AuthFailed?.Invoke(exception);
+                Debug.LogWarning(exception);
+                DialogOptionButton[] options = { DialogOptionButton.Ok };
+                await DialogManager.Instance.RunDialogWorkflow("Account unavailable", "Unable to load your account. Check your connection and try again.", async dialogSession =>
+                {
+                    int buttonId = await dialogSession.WaitForButtonClick();
+                    if ((DialogButtonType)buttonId != DialogButtonType.Ok) throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported account-load failure dialog button.");
+                }, options);
+                return;
             }
             finally
             {
-                isLoginInProgress = false;
+                isAccountLoadInProgress = false;
             }
+
+            PlayerAccountContext.Instance.SetCurrentAccount(playerAccount);
+            AccountReady?.Invoke();
         }
     }
 }

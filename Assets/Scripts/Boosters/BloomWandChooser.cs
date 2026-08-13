@@ -6,10 +6,10 @@ using UnityEngine;
 
 namespace Boosters
 {
-    public sealed class BloomWandChooser : IBoosterChooser
+    public class BloomWandChooser : IBoosterChooser
     {
         private Tile[,] grid;
-        private UniTaskCompletionSource<IReadOnlyList<Vector2Int>> completionSource;
+        private UniTaskCompletionSource<BoosterTargetSelectionResult> completionSource;
         private Vector2Int? pressedTarget;
 
         public event Action<Vector2Int, bool> TargetSelectionChanged;
@@ -27,14 +27,14 @@ namespace Boosters
             return candidates;
         }
 
-        public async UniTask<IReadOnlyList<Vector2Int>> Choose(Tile[,] grid, BoardInputHandler inputHandler)
+        public async UniTask<BoosterTargetSelectionResult> Choose(Tile[,] grid, BoardInputHandler inputHandler)
         {
             if (grid == null) throw new ArgumentNullException(nameof(grid));
             if (inputHandler == null) throw new ArgumentNullException(nameof(inputHandler));
             if (this.grid != null) throw new InvalidOperationException("Bloom Wand target selection is already active.");
 
             this.grid = grid;
-            completionSource = new UniTaskCompletionSource<IReadOnlyList<Vector2Int>>();
+            completionSource = new UniTaskCompletionSource<BoosterTargetSelectionResult>();
             pressedTarget = null;
 
             inputHandler.OnPointerPressed += HandlePointerPressed;
@@ -59,7 +59,7 @@ namespace Boosters
         public void Cancel()
         {
             EnsureActive();
-            completionSource.TrySetResult(null);
+            completionSource.TrySetResult(BoosterTargetSelectionResult.Canceled);
         }
 
         private void HandlePointerPressed(Vector2Int position)
@@ -77,7 +77,7 @@ namespace Boosters
             if (!target.HasValue || target.Value != position || !CanTarget(position)) return;
 
             TargetSelectionChanged?.Invoke(position, true);
-            completionSource.TrySetResult(new[] { position });
+            completionSource.TrySetResult(BoosterTargetSelectionResult.Selected(new[] { position }));
         }
 
         private bool CanTarget(Vector2Int position)
@@ -85,7 +85,7 @@ namespace Boosters
             return CanTarget(grid, position);
         }
 
-        private static bool CanTarget(Tile[,] grid, Vector2Int position)
+        private  bool CanTarget(Tile[,] grid, Vector2Int position)
         {
             if (position.x < 0 || position.x >= grid.GetLength(0) || position.y < 0 || position.y >= grid.GetLength(1)) return false;
 

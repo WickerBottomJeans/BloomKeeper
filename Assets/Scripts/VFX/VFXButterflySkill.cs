@@ -65,7 +65,7 @@ namespace DefaultNamespace.VFX
             await butterflyGlowingOutline.DOFade(0f, duration).SetLink(gameObject, LinkBehaviour.KillOnDestroy).ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
         }
 
-        private static void SetTrailColor(TrailRenderer trail, Color color)
+        private  void SetTrailColor(TrailRenderer trail, Color color)
         {
             Gradient gradient = trail.colorGradient;
             GradientColorKey[] colorKeys = gradient.colorKeys;

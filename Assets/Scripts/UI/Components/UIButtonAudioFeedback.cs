@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UIButtonAudioFeedback : MonoBehaviour, IPointerDownHandler
+    public class UIButtonAudioFeedback : MonoBehaviour, IPointerDownHandler
     {
         [SerializeField] private Button button;
         [SerializeField] private AudioCue buttonDownCue;

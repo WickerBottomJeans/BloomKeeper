@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UIShopView : MonoBehaviour
+    public class UIShopView : MonoBehaviour
     {
         public void Show()
         {

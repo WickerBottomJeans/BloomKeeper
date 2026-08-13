@@ -4,7 +4,7 @@ using DefaultNamespace.UI;
 
 namespace DefaultNamespace
 {
-    public class ScoreManager
+    public class ScoreManager : IGameplayEventHandler<BoardResolutionStepCompletedEvent>
     {
         private readonly List<ScoreRuleJson> rules;
         private readonly List<StarScoreThresholdJson> starScoreThresholds;
@@ -18,16 +18,15 @@ namespace DefaultNamespace
             this.starScoreThresholds = starScoreThresholds;
         }
 
-        public int Apply(BoardResolvedEvent e)
+        public void Handle(BoardResolutionStepCompletedEvent gameplayEvent)
         {
-            if (!e.CountsForScore) return 0;
+            if (!gameplayEvent.IsFromPlayerMove) return;
 
-            int delta = CalculateScore(e);
-            if (delta <= 0) return 0;
+            int delta = CalculateScore(gameplayEvent);
+            if (delta <= 0) return;
 
             CurrentScore += delta;
             OnScoreChanged?.Invoke(CurrentScore, CalculateStars());
-            return delta;
         }
 
         public int CalculateStars()
@@ -59,7 +58,7 @@ namespace DefaultNamespace
             return new ScoreViewData(targetScore, milestoneScores, starCap);
         }
 
-        private int CalculateScore(BoardResolvedEvent e)
+        private int CalculateScore(BoardResolutionStepCompletedEvent e)
         {
             int clearedPetalCount = 0;
             int clearedSpiderWebCount = 0;

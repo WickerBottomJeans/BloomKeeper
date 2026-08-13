@@ -12,6 +12,7 @@ namespace UI
     {
         [SerializeField] private Button homeButton;
         [SerializeField] private Button nextButton;
+        [SerializeField] private RawImage levelResultBackground;
         [SerializeField] private StarBoard starBoard;
         [SerializeField] private UIPopupEntranceAnimator entranceAnimator;
         [SerializeField] private GameObject[] entranceVfx = Array.Empty<GameObject>();
@@ -48,8 +49,9 @@ namespace UI
             SetEntranceVfxActive(false);
         }
 
-        public void Display(int stars, int starCap, bool showNext)
+        public void Display(Texture levelResultBackgroundTexture, int stars, int starCap, bool showNext)
         {
+            levelResultBackground.texture = levelResultBackgroundTexture;
             starBoard.SetStarCap(starCap);
             pendingStarCount = stars;
             nextButton.gameObject.SetActive(showNext);

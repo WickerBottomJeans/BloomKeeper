@@ -1,6 +1,6 @@
 namespace DefaultNamespace.UI
 {
-    public sealed class ChapterChooserItemState
+    public class ChapterChooserItemState
     {
         public ChapterIndexEntry Chapter { get; }
         public bool IsCurrent { get; }

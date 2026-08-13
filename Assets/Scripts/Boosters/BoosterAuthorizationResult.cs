@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Boosters
 {
-    public sealed class BoosterAuthorizationResult
+    public class BoosterAuthorizationResult
     {
         public BoosterType BoosterType { get; }
         public IReadOnlyList<Vector2Int> Targets { get; }

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(CanvasGroup))]
-public sealed class UIBoosterButton : MonoBehaviour
+public class UIBoosterButton : MonoBehaviour
 {
     [SerializeField] private Button button;
     [SerializeField] private Image icon;

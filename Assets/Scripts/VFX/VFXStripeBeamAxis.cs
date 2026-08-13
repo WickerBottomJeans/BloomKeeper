@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.VFX
 {
-    public sealed class VFXStripeBeamAxis : MonoBehaviour
+    public class VFXStripeBeamAxis : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer negativeBeam;
         [SerializeField] private SpriteRenderer positiveBeam;

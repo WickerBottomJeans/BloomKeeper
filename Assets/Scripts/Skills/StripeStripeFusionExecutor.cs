@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class StripeStripeFusionExecutor : ISkillExecutor
+    public class StripeStripeFusionExecutor : ISkillExecutor
     {
         public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
         {
@@ -43,7 +43,7 @@ namespace Skills
             return new SkillUseResult(effectMatchGroup, representation, inputMatchGroup);
         }
 
-        private static bool IsStriped(SpecialSkillType skillType)
+        private  bool IsStriped(SpecialSkillType skillType)
         {
             return skillType == SpecialSkillType.StripedHorizontal || skillType == SpecialSkillType.StripedVertical;
         }

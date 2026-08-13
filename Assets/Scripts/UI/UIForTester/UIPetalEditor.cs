@@ -92,7 +92,7 @@ namespace UI.UIForTester
             button.onClick.AddListener(() => OnConfirmed?.Invoke(petalType, skillType));
         }
 
-        private static string GetSkillLabel(SpecialSkillType skillType)
+        private  string GetSkillLabel(SpecialSkillType skillType)
         {
             return skillType switch
             {

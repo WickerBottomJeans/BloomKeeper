@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-public sealed class AudioImportProcessor : AssetPostprocessor
+public class AudioImportProcessor : AssetPostprocessor
 {
     private const string AudioRoot = "Assets/Audio/Clips/";
     private const string UiAudioFolder = AudioRoot + "UI/";

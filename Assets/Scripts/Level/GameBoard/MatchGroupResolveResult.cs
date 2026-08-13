@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class MatchGroupResolveResult
+    public class MatchGroupResolveResult
     {
         public MatchGroup SourceMatchGroup { get; }
         public IReadOnlyList<TileChange> TileChanges { get; }

@@ -5,7 +5,7 @@ namespace DefaultNamespace.UI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public sealed class RectTransformEdgeBleed : MonoBehaviour
+    public class RectTransformEdgeBleed : MonoBehaviour
     {
         [SerializeField] private bool bleedLeft;
         [SerializeField] private bool bleedRight;
@@ -115,7 +115,7 @@ namespace DefaultNamespace.UI
             ValidateAxisAlignment(parentRect, targetWorldCorners, "target");
         }
 
-        private static void ValidateAxisAlignment(RectTransform coordinateSpace, Vector3[] worldCorners, string rectRole)
+        private  void ValidateAxisAlignment(RectTransform coordinateSpace, Vector3[] worldCorners, string rectRole)
         {
             Vector2 bottomLeft = coordinateSpace.InverseTransformPoint(worldCorners[0]);
             Vector2 topLeft = coordinateSpace.InverseTransformPoint(worldCorners[1]);

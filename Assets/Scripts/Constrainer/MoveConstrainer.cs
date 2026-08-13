@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DefaultNamespace
 {
-    public class MoveConstrainer : IConstrainer, IGameplayEventHandler
+    public class MoveConstrainer : IConstrainer, IGameplayEventHandler<PlayerMoveCommittedEvent>
     {
         private readonly int initialMoveCount;
         private readonly int warningAtRemaining;
@@ -24,9 +24,7 @@ namespace DefaultNamespace
         public event Action<ConstrainerFailureData> OnFailed;
         public event Action OnProgressUpdated;
         public ConstrainerType ConstrainerType { get; } = ConstrainerType.MoveLimit;
-        public Type HandledEventType => typeof(PlayerMoveCommittedEvent);
-
-        public void Handle(IGameplayEvent e)
+        public void Handle(PlayerMoveCommittedEvent gameplayEvent)
         {
             if (remainingMoveCount <= 0) return;
 

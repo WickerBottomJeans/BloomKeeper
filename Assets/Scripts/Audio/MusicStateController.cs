@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.Audio
 {
-    public sealed class MusicStateController : MonoBehaviour
+    public class MusicStateController : MonoBehaviour
     {
         [SerializeField] private AudioCue homeMusicCue;
         [SerializeField] private AudioCue gameplayMusicCue;
@@ -12,7 +12,7 @@ namespace DefaultNamespace.Audio
             AudioService.Instance.PlayMusic(homeMusicCue);
         }
 
-        public void EnterGameplay()
+        public void EnterLevel()
         {
             AudioService.Instance.PlayMusic(gameplayMusicCue);
         }

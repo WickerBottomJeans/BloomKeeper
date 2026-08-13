@@ -6,6 +6,9 @@ using DefaultNamespace.UI;
 
 namespace DefaultNamespace
 {
+    /// <summary>
+    /// [Duong] Manages the Home screen, chapter loading, chapter selection, tab navigation, and UI events.
+    /// </summary>
     public class HomeFlow
     {
         private readonly AddressableContentService addressableContentService;
@@ -22,6 +25,9 @@ namespace DefaultNamespace
             this.addressableContentService = addressableContentService ?? throw new ArgumentNullException(nameof(addressableContentService));
         }
 
+        /// <summary>
+        /// [Duong] Load configs and addresable content and show home UI
+        /// </summary>
         public async UniTask Enter()
         {
             UIManager.Instance.LevelSelected += HandleLevelSelected;
@@ -35,8 +41,8 @@ namespace DefaultNamespace
             PlayerProgressionData progression = PlayerAccountContext.Instance.GetCurrentProgression();
             if (!currentChapterId.HasValue) currentChapterId = PlayerPrefsStore.LoadLastSelectedChapterId();
             ChapterIndexEntry chapterEntry = currentChapterId.HasValue
-                ? GetChapterEntry(ConfigManager.Instance.ChapterIndex, currentChapterId.Value)
-                : ResolveLatestUnlockedChapter(ConfigManager.Instance.ChapterIndex, progression.highestUnlockedLevel);
+                ? ConfigManager.Instance.ChapterIndex.GetEntry(currentChapterId.Value)
+                : ConfigManager.Instance.ChapterIndex.GetLatestUnlockedEntry(progression.highestUnlockedLevel);
             if (chapterEntry.unlockLevelId > progression.highestUnlockedLevel)
                 throw new InvalidOperationException($"Stored chapter {chapterEntry.chapterId} requires level {chapterEntry.unlockLevelId}, but the highest unlocked level is {progression.highestUnlockedLevel}.");
             await addressableContentService.EnsureDownloadedAsync(chapterEntry.downloadLabel);
@@ -46,6 +52,9 @@ namespace DefaultNamespace
             SetCurrentChapter(chapterEntry.chapterId);
         }
 
+        /// <summary>
+        /// [Duong] Unbind stuff and hide UI
+        /// </summary>
         public void Exit()
         {
             UIManager.Instance.LevelSelected -= HandleLevelSelected;
@@ -56,23 +65,32 @@ namespace DefaultNamespace
             UIManager.Instance.AddLifeRequested -= HandleAddLifeRequested;
             UIManager.Instance.AddCurrencyRequested -= HandleAddCurrencyRequested;
             UIManager.Instance.HideHome();
-            UIManager.Instance.HideChapterChooser();
             activeMiddleTab = null;
         }
 
+        /// <summary>
+        /// [Duong] Sets the current Home chapter and saves it to PlayerPrefs.
+        /// </summary>
         public void SetCurrentChapter(int chapterId)
         {
             PlayerPrefsStore.SaveLastSelectedChapterId(chapterId);
             currentChapterId = chapterId;
         }
 
+        /// <summary>
+        /// [Duong] Forwards the UI's request to start the selected level
+        /// </summary>
         private void HandleLevelSelected(int levelId)
         {
             StartLevelRequested?.Invoke(levelId);
         }
 
+        /// <summary>
+        /// [Duong] Handles a Home tab request, opening the chapter chooser when Map is already active
+        /// </summary>
         private void HandleHomeTabRequested(HomeMiddleTab tab)
         {
+            //[Duong] Clicking the active Map tab opens the chapter chooser
             if (tab == HomeMiddleTab.Map && activeMiddleTab == HomeMiddleTab.Map)
             {
                 ApplicationOperationRunner.Instance.Run(OpenChapterChooserAsync);
@@ -105,7 +123,7 @@ namespace DefaultNamespace
             ApplicationOperationRunner.Instance.Run(() => ChangeChapterAsync(chapterId));
         }
 
-        private static void HandleChapterChooserCloseRequested()
+        private  void HandleChapterChooserCloseRequested()
         {
             UIManager.Instance.HideChapterChooser();
         }
@@ -118,7 +136,7 @@ namespace DefaultNamespace
 
         private async UniTask ChangeChapterAsync(int chapterId)
         {
-            ChapterIndexEntry chapterEntry = GetChapterEntry(ConfigManager.Instance.ChapterIndex, chapterId);
+            ChapterIndexEntry chapterEntry = ConfigManager.Instance.ChapterIndex.GetEntry(chapterId);
             await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.General, async () =>
             {
                 await addressableContentService.EnsureDownloadedAsync(chapterEntry.downloadLabel);
@@ -144,31 +162,6 @@ namespace DefaultNamespace
         private void HandleAddCurrencyRequested()
         {
             AddCurrencyRequested?.Invoke();
-        }
-
-        private static ChapterIndexEntry ResolveLatestUnlockedChapter(ChapterIndex chapterIndex, int highestUnlockedLevel)
-        {
-            ChapterIndexEntry latestUnlockedChapter = null;
-            foreach (ChapterIndexEntry chapter in chapterIndex.chapters)
-            {
-                if (chapter.unlockLevelId <= 0)
-                    throw new InvalidOperationException($"Chapter {chapter.chapterId} has invalid unlock level {chapter.unlockLevelId}.");
-                if (chapter.unlockLevelId > highestUnlockedLevel) continue;
-                if (latestUnlockedChapter == null || chapter.unlockLevelId > latestUnlockedChapter.unlockLevelId)
-                    latestUnlockedChapter = chapter;
-            }
-
-            return latestUnlockedChapter ?? throw new InvalidOperationException($"No chapter is unlocked for highest unlocked level {highestUnlockedLevel}.");
-        }
-
-        private static ChapterIndexEntry GetChapterEntry(ChapterIndex chapterIndex, int chapterId)
-        {
-            foreach (ChapterIndexEntry chapter in chapterIndex.chapters)
-            {
-                if (chapter.chapterId == chapterId) return chapter;
-            }
-
-            throw new InvalidOperationException($"Chapter index has no entry for chapter {chapterId}.");
         }
 
     }

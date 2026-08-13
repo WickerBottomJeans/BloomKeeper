@@ -11,6 +11,7 @@ namespace UI
         [SerializeField] private TextMeshProUGUI label;
         [SerializeField] private Button retryButton;
         [SerializeField] private Button homeButton;
+        [SerializeField] private RawImage levelResultBackground;
         [SerializeField] private AudioCue loseCue;
 
         public event Action RetryRequested;
@@ -27,8 +28,9 @@ namespace UI
             AudioService.Instance.PlayStinger(loseCue);
         }
 
-        public void Display(string message)
+        public void Display(Texture levelResultBackgroundTexture, string message)
         {
+            levelResultBackground.texture = levelResultBackgroundTexture;
             if (label == null) return;
             label.text = message;
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
@@ -9,7 +10,7 @@ using UnityEngine.Pool;
 namespace DefaultNamespace.VFX
 {
         //TODO: we need to care for the case skill A destroy petal skill B. we need to leave B alone so it can run its own VFX next cascade
-        public sealed class BoardVFXManager : MonoBehaviour
+        public class BoardVFXManager : MonoBehaviour
         {
             [SerializeField] private MutationLaserView mutationLaserPrefab;
             [SerializeField] private VFXStripeBeamAxis stripedBeamAxisPrefab;
@@ -30,8 +31,9 @@ namespace DefaultNamespace.VFX
         private ObjectPool<VFXBubble> bubblePool;
             private ObjectPool<VFXBubblePopParticles> bubblePopParticlesPool;
             private ObjectPool<VFXPrismaticBloomProjectile> prismaticBloomProjectilePool;
-            private ObjectPool<VFXPrismaticBloomFinisher> prismaticBloomFinisherPool;
+        private ObjectPool<VFXPrismaticBloomFinisher> prismaticBloomFinisherPool;
         private ObjectPool<VFXBloomWand> bloomWandPool;
+        private readonly CancellationTokenSource lingeringVFXCancellation = new CancellationTokenSource();
         private BoardLayout layout;
         private Camera gameplayCamera;
 
@@ -290,14 +292,22 @@ namespace DefaultNamespace.VFX
 
         private async UniTask ReleaseBubbleAfterParticles(VFXBubble bubble)
         {
+            CancellationToken cancellationToken = lingeringVFXCancellation.Token;
             try
             {
-                await bubble.WaitForEnderParticles();
+                await bubble.WaitForEnderParticles(cancellationToken);
             }
-            finally
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch
             {
                 bubblePool.Release(bubble);
+                throw;
             }
+
+            bubblePool.Release(bubble);
         }
 
         public void PlayBubblePopParticles(Vector2Int position, float inflatedScaleMultiplier, AudioPlaybackScope audioScope)
@@ -332,14 +342,22 @@ namespace DefaultNamespace.VFX
 
         private async UniTask FinishPrismaticBloomProjectileAndRelease(VFXPrismaticBloomProjectile projectile)
         {
+            CancellationToken cancellationToken = lingeringVFXCancellation.Token;
             try
             {
-                await projectile.Finish();
+                await projectile.Finish(cancellationToken);
             }
-            finally
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch
             {
                 ReleasePrismaticBloomProjectile(projectile);
+                throw;
             }
+
+            ReleasePrismaticBloomProjectile(projectile);
         }
 
         private void ReleasePrismaticBloomProjectile(VFXPrismaticBloomProjectile projectile)
@@ -373,14 +391,22 @@ namespace DefaultNamespace.VFX
 
         private async UniTask FinishBloomWandAndRelease(VFXBloomWand wand)
         {
+            CancellationToken cancellationToken = lingeringVFXCancellation.Token;
             try
             {
-                await wand.Finish();
+                await wand.Finish(cancellationToken);
             }
-            finally
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch
             {
                 bloomWandPool.Release(wand);
+                throw;
             }
+
+            bloomWandPool.Release(wand);
         }
 
         public void PlayPrismaticBloomFinisher(Vector3 position)
@@ -394,16 +420,24 @@ namespace DefaultNamespace.VFX
         private async UniTask PlayPrismaticBloomFinisherAndRelease(Vector3 position)
         {
             VFXPrismaticBloomFinisher finisher = prismaticBloomFinisherPool.Get();
+            CancellationToken cancellationToken = lingeringVFXCancellation.Token;
             try
             {
                 finisher.transform.position = position;
                 finisher.Configure(layout.TileSize);
-                await finisher.Play();
+                await finisher.Play(cancellationToken);
             }
-            finally
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch
             {
                 prismaticBloomFinisherPool.Release(finisher);
+                throw;
             }
+
+            prismaticBloomFinisherPool.Release(finisher);
         }
 
         private async UniTask PlayBubblePopParticlesAndRelease(Vector2Int position, float inflatedScaleMultiplier, AudioPlaybackScope audioScope)
@@ -412,19 +446,27 @@ namespace DefaultNamespace.VFX
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
 
             VFXBubblePopParticles particles = bubblePopParticlesPool.Get();
+            CancellationToken cancellationToken = lingeringVFXCancellation.Token;
             try
             {
                 particles.transform.position = layout.GetTileWorldPos(position.x, position.y);
                 particles.Configure(layout.TileSize, inflatedScaleMultiplier);
-                await particles.Play(audioScope);
+                await particles.Play(audioScope, cancellationToken);
             }
-            finally
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch
             {
                 bubblePopParticlesPool.Release(particles);
+                throw;
             }
+
+            bubblePopParticlesPool.Release(particles);
         }
 
-        private static bool HasLivingParticles(IReadOnlyList<ParticleSystem> particleSystems)
+        private  bool HasLivingParticles(IReadOnlyList<ParticleSystem> particleSystems)
         {
             foreach (ParticleSystem particles in particleSystems)
             {
@@ -474,6 +516,7 @@ namespace DefaultNamespace.VFX
 
         private void OnDestroy()
         {
+            lingeringVFXCancellation.Cancel();
             mutationLaserPool?.Clear();
             stripedBeamAxisPool?.Clear();
             stripedHaloPool?.Clear();
@@ -483,6 +526,7 @@ namespace DefaultNamespace.VFX
             prismaticBloomProjectilePool?.Clear();
             prismaticBloomFinisherPool?.Clear();
             bloomWandPool?.Clear();
+            lingeringVFXCancellation.Dispose();
         }
     }
 }

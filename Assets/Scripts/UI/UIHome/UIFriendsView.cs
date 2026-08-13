@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UIFriendsView : MonoBehaviour
+    public class UIFriendsView : MonoBehaviour
     {
         public void Show()
         {

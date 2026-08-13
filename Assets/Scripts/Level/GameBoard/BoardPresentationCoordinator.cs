@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class BoardPresentationCoordinator
+    public class BoardPresentationCoordinator
     {
         private readonly PetalViewManager petalViewManager;
         private readonly BoardActionCoordinator boardActionCoordinator;

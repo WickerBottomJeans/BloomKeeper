@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class PrismaticBloomSkillPresenter : SkillRepresentationPresenter<PrismaticBloomRepresentationData>
+    public class PrismaticBloomSkillPresenter : SkillRepresentationPresenter<PrismaticBloomRepresentationData>
     {
         private const float PrepareDuration = 0.2f;
         private const float FireDuration = 0.3f;
@@ -98,7 +98,7 @@ namespace Skills
                 await petalViewManager.PlayNormalRemovals(new[] { target }, accessKeys);
         }
 
-        private static PetalChange GetChangeAt(PrismaticBloomRepresentationData representation, Vector2Int target)
+        private  PetalChange GetChangeAt(PrismaticBloomRepresentationData representation, Vector2Int target)
         {
             foreach (PetalChange change in representation.Changes)
             {
@@ -109,7 +109,7 @@ namespace Skills
             throw new InvalidOperationException($"Prismatic Bloom has no petal change for target {target}.");
         }
 
-        private static List<Vector2Int> GetTargets(PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution)
+        private  List<Vector2Int> GetTargets(PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution)
         {
             List<Vector2Int> targets;
             if (representation.ReplacementSkill == SpecialSkillType.None)

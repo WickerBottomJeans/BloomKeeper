@@ -1,11 +1,12 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.Audio;
 using UnityEngine;
 
 namespace DefaultNamespace.VFX
 {
-    public sealed class VFXBubblePopParticles : MonoBehaviour
+    public class VFXBubblePopParticles : MonoBehaviour
     {
         [SerializeField] private ParticleSystem particles;
         [SerializeField] private AudioCue popCue;
@@ -27,11 +28,11 @@ namespace DefaultNamespace.VFX
             transform.localScale = defaultScale * tileSize * inflatedScaleMultiplier;
         }
 
-        public async UniTask Play(AudioPlaybackScope audioScope)
+        public async UniTask Play(AudioPlaybackScope audioScope, CancellationToken cancellationToken)
         {
             particles.Play(true);
             AudioService.Instance.PlaySfx(popCue, audioScope);
-            await UniTask.WaitUntil(() => !particles.IsAlive(true), cancellationToken: this.GetCancellationTokenOnDestroy());
+            await UniTask.WaitUntil(() => !particles.IsAlive(true), cancellationToken: cancellationToken);
         }
 
         public void ResetForPool()

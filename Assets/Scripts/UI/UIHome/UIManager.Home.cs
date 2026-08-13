@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -14,6 +15,8 @@ namespace DefaultNamespace.UI
         public event Action SettingsRequested;
         public event Action AddLifeRequested;
         public event Action AddCurrencyRequested;
+        public event Action<int> ChapterVisitRequested;
+        public event Action ChapterChooserCloseRequested;
 
         public async UniTask ShowHome(ChapterContent chapter, PlayerProgressionData progression)
         {
@@ -31,6 +34,23 @@ namespace DefaultNamespace.UI
             await homeInstance.DisplayMiddleTabAsync(tab);
         }
 
+        public async UniTask PrepareChapterChooserAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)
+        {
+            if (homeInstance == null) throw new InvalidOperationException("Cannot prepare the chapter chooser before UIHome has been shown.");
+            await homeInstance.PrepareChapterChooserAsync(chapterStates);
+        }
+
+        public void ShowChapterChooser()
+        {
+            if (homeInstance == null) throw new InvalidOperationException("Cannot show the chapter chooser before UIHome has been shown.");
+            homeInstance.ShowChapterChooser();
+        }
+
+        public void HideChapterChooser()
+        {
+            homeInstance?.HideChapterChooser();
+        }
+
         public void HideHome()
         {
             UnbindHome();
@@ -44,6 +64,8 @@ namespace DefaultNamespace.UI
             homeInstance.SettingsRequested += HandleHomeSettingsRequested;
             homeInstance.AddLifeRequested += HandleHomeAddLifeRequested;
             homeInstance.AddCurrencyRequested += HandleHomeAddCurrencyRequested;
+            homeInstance.ChapterVisitRequested += HandleChapterVisitRequested;
+            homeInstance.ChapterChooserCloseRequested += HandleChapterChooserCloseRequested;
         }
 
         private void UnbindHome()
@@ -55,6 +77,8 @@ namespace DefaultNamespace.UI
             homeInstance.SettingsRequested -= HandleHomeSettingsRequested;
             homeInstance.AddLifeRequested -= HandleHomeAddLifeRequested;
             homeInstance.AddCurrencyRequested -= HandleHomeAddCurrencyRequested;
+            homeInstance.ChapterVisitRequested -= HandleChapterVisitRequested;
+            homeInstance.ChapterChooserCloseRequested -= HandleChapterChooserCloseRequested;
         }
 
         private void HandleHomeLevelSelected(int levelId)
@@ -80,6 +104,16 @@ namespace DefaultNamespace.UI
         private void HandleHomeAddCurrencyRequested()
         {
             AddCurrencyRequested?.Invoke();
+        }
+
+        private void HandleChapterVisitRequested(int chapterId)
+        {
+            ChapterVisitRequested?.Invoke(chapterId);
+        }
+
+        private void HandleChapterChooserCloseRequested()
+        {
+            ChapterChooserCloseRequested?.Invoke();
         }
     }
 }

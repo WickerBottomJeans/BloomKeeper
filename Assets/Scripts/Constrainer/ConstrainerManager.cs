@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace DefaultNamespace
 {
-    public class ConstrainerManager
+    public class ConstrainerManager : IGameplayEventHandler<PlayerMoveCommittedEvent>
     {
         private readonly List<IConstrainer> constrainers;
-        private readonly Dictionary<Type, List<IGameplayEventHandler>> handlersByEventType = new();
+        private readonly List<IGameplayEventHandler<PlayerMoveCommittedEvent>> playerMoveHandlers = new List<IGameplayEventHandler<PlayerMoveCommittedEvent>>();
         private bool isRunning;
 
         public ConstrainerManager(List<IConstrainer> constrainers)
@@ -16,7 +16,8 @@ namespace DefaultNamespace
             {
                 constrainer.OnFailed += HandleConstrainerFailed;
                 constrainer.OnProgressUpdated += HandleConstrainerProgressUpdated;
-                RegisterHandlers(constrainer);
+                if (constrainer is IGameplayEventHandler<PlayerMoveCommittedEvent> playerMoveHandler)
+                    playerMoveHandlers.Add(playerMoveHandler);
             }
         }
 
@@ -53,16 +54,12 @@ namespace DefaultNamespace
             }
         }
 
-        public void Apply(IGameplayEvent e)
+        public void Handle(PlayerMoveCommittedEvent gameplayEvent)
         {
             if (!isRunning) return;
 
-            Type eventType = e.GetType();
-            if (!handlersByEventType.TryGetValue(eventType, out List<IGameplayEventHandler> handlers))
-                return;
-
-            foreach (IGameplayEventHandler handler in handlers)
-                handler.Handle(e);
+            foreach (IGameplayEventHandler<PlayerMoveCommittedEvent> handler in playerMoveHandlers)
+                handler.Handle(gameplayEvent);
         }
 
         private void HandleConstrainerProgressUpdated()
@@ -73,20 +70,6 @@ namespace DefaultNamespace
         private void HandleConstrainerFailed(ConstrainerFailureData failureData)
         {
             OnFailed?.Invoke(failureData);
-        }
-
-        private void RegisterHandlers(IConstrainer constrainer)
-        {
-            if (constrainer is not IGameplayEventHandler handler) return;
-
-            Type eventType = handler.HandledEventType;
-            if (!handlersByEventType.TryGetValue(eventType, out List<IGameplayEventHandler> handlers))
-            {
-                handlers = new List<IGameplayEventHandler>();
-                handlersByEventType[eventType] = handlers;
-            }
-
-            handlers.Add(handler);
         }
     }
 }

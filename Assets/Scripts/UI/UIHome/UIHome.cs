@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -6,7 +7,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UIHome : MonoBehaviour
+    public class UIHome : MonoBehaviour
     {
         [SerializeField] private RectTransform content;
         [SerializeField] private RectTransform middleSlot;
@@ -14,6 +15,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private UILevelSelect levelSelectPrefab;
         [SerializeField] private UIFriendsView friendsPrefab;
         [SerializeField] private UIShopView shopPrefab;
+        [SerializeField] private UIChapterChooser chapterChooser;
 
         private AsyncOperationHandle<GameObject> topperInstanceHandle;
         private AsyncOperationHandle<GameObject> bottomInstanceHandle;
@@ -33,6 +35,15 @@ namespace DefaultNamespace.UI
         public event Action SettingsRequested;
         public event Action AddLifeRequested;
         public event Action AddCurrencyRequested;
+        public event Action<int> ChapterVisitRequested;
+        public event Action ChapterChooserCloseRequested;
+
+        private void Awake()
+        {
+            chapterChooser.ChapterVisitRequested += HandleChapterVisitRequested;
+            chapterChooser.CloseRequested += HandleChapterChooserCloseRequested;
+            chapterChooser.Hide();
+        }
 
         public async UniTask ShowAsync(ChapterContent chapter, PlayerProgressionData progression)
         {
@@ -74,8 +85,25 @@ namespace DefaultNamespace.UI
             }
         }
 
+        public async UniTask PrepareChapterChooserAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)
+        {
+            chapterChooser.HideForPreparation();
+            await chapterChooser.PrepareAsync(chapterStates);
+        }
+
+        public void ShowChapterChooser()
+        {
+            chapterChooser.Show();
+        }
+
+        public void HideChapterChooser()
+        {
+            chapterChooser.Hide();
+        }
+
         public void Hide()
         {
+            chapterChooser.Hide();
             gameObject.SetActive(false);
         }
 
@@ -208,6 +236,16 @@ namespace DefaultNamespace.UI
             AddCurrencyRequested?.Invoke();
         }
 
+        private void HandleChapterVisitRequested(int chapterId)
+        {
+            ChapterVisitRequested?.Invoke(chapterId);
+        }
+
+        private void HandleChapterChooserCloseRequested()
+        {
+            ChapterChooserCloseRequested?.Invoke();
+        }
+
         private void ReleaseChapterViews()
         {
             UnbindChapterViews();
@@ -221,7 +259,7 @@ namespace DefaultNamespace.UI
             displayedBottomNavigationAddress = null;
         }
 
-        private static void ReleasePendingInstance(AsyncOperationHandle<GameObject> handle)
+        private  void ReleasePendingInstance(AsyncOperationHandle<GameObject> handle)
         {
             if (!handle.IsValid()) return;
             if (handle.Status == AsyncOperationStatus.Succeeded) Addressables.ReleaseInstance(handle);
@@ -231,6 +269,8 @@ namespace DefaultNamespace.UI
         private void OnDestroy()
         {
             chapterDisplayRequestId++;
+            chapterChooser.ChapterVisitRequested -= HandleChapterVisitRequested;
+            chapterChooser.CloseRequested -= HandleChapterChooserCloseRequested;
             if (levelSelectInstance != null) levelSelectInstance.OnLevelSelected -= HandleLevelSelected;
             ReleaseChapterViews();
         }

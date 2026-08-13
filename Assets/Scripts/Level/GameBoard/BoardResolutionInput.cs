@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class BoardResolutionInput
+    public class BoardResolutionInput
     {
         public IReadOnlyList<MatchGroup> MatchGroups { get; }
         public IReadOnlyList<SkillActivation> SkillActivations { get; }

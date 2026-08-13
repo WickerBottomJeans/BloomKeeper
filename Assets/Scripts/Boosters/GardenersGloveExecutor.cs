@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Boosters
 {
-    public sealed class GardenersGloveExecutor : IBoosterExecutor
+    public class GardenersGloveExecutor : IBoosterExecutor
     {
         public BoosterUseResult Execute(Tile[,] grid, IReadOnlyList<Vector2Int> targets)
         {

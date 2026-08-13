@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.Audio
 {
-    public sealed class BoardAudioManager : MonoBehaviour
+    public class BoardAudioManager : MonoBehaviour
     {
         [SerializeField] private AudioCue petalSwapCue;
         [SerializeField] private AudioCue invalidSwapCue;

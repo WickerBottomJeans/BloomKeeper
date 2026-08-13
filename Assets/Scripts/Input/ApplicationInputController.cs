@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 namespace DefaultNamespace
 {
-    public sealed class ApplicationInputController : Singleton<ApplicationInputController>
+    public class ApplicationInputController : Singleton<ApplicationInputController>
     {
         [SerializeField] private InputActionReference uiAction;
         [SerializeField] private InputActionReference gameBoardAction;
@@ -45,7 +45,7 @@ namespace DefaultNamespace
             SetActionMapActive(gameBoardAction.action.actionMap, gameBoardInputActive && !inputSuspended);
         }
 
-        private static void SetActionMapActive(InputActionMap actionMap, bool active)
+        private  void SetActionMapActive(InputActionMap actionMap, bool active)
         {
             if (active)
                 actionMap.Enable();

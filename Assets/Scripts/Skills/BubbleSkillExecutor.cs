@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class BubbleSkillExecutor : ISkillExecutor
+    public class BubbleSkillExecutor : ISkillExecutor
     {
         private const int Range = 1;
 

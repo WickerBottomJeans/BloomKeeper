@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Boosters
 {
-    public sealed class BloomWandPresenter : BoosterRepresentationPresenter<BloomWandRepresentationData>
+    public class BloomWandPresenter : BoosterRepresentationPresenter<BloomWandRepresentationData>
     {
         private const float RippleStrengthInTiles = 0.25f;
         private const float RippleRadiusInTiles = 6f;

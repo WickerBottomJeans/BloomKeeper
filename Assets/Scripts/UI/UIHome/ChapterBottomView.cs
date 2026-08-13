@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class ChapterBottomView : MonoBehaviour
+    public class ChapterBottomView : MonoBehaviour
     {
         [SerializeField] private Button mapButton;
         [SerializeField] private Button socialButton;

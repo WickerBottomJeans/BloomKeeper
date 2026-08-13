@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.VFX
 {
-    public sealed class MutationLaserView : MonoBehaviour
+    public class MutationLaserView : MonoBehaviour
     {
         [SerializeField] private LineRenderer lineRenderer;
 

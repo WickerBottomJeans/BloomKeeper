@@ -6,7 +6,7 @@ using UnityEngine.Pool;
 
 namespace DefaultNamespace.Audio
 {
-    sealed class SfxPlayer : IDisposable
+    class SfxPlayer : IDisposable
     {
         private readonly Transform voiceRoot;
         private readonly List<AudioVoice> activeVoices = new();

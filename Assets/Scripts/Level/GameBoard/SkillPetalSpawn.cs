@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class SkillPetalSpawn
+    public class SkillPetalSpawn
     {
         public IReadOnlyList<Vector2Int> ContributorPositions { get; }
         public Vector2Int SpawnPosition { get; }

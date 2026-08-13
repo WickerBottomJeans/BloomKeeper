@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public sealed class UIJellyText : MonoBehaviour
+    public class UIJellyText : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI label;
         [SerializeField, Range(0f, 1f)] private float compressedScale = 0.9f;

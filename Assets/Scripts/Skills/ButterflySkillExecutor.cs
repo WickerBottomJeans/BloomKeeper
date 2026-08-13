@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public sealed class ButterflySkillExecutor : ISkillExecutor
+    public class ButterflySkillExecutor : ISkillExecutor
     {
         private static readonly System.Random Random = new System.Random();
 
@@ -32,7 +32,7 @@ namespace Skills
             return new SkillUseResult(matchGroup, representation);
         }
 
-        private static Vector2Int? FindObjectiveTarget(SkillExecutionContext context)
+        private  Vector2Int? FindObjectiveTarget(SkillExecutionContext context)
         {
             var objectiveWebTargets = new HashSet<Vector2Int>();
             var objectiveMatchTargets = new HashSet<Vector2Int>();
@@ -60,7 +60,7 @@ namespace Skills
             return SelectRandomTarget(new List<Vector2Int>(objectiveWebTargets)) ?? SelectRandomTarget(new List<Vector2Int>(objectiveMatchTargets));
         }
 
-        private static Vector2Int? FindFallbackTarget(SkillExecutionContext context)
+        private  Vector2Int? FindFallbackTarget(SkillExecutionContext context)
         {
             Tile[,] grid = context.Grid;
             var obstacleTargets = new List<Vector2Int>();
@@ -81,18 +81,18 @@ namespace Skills
             return SelectRandomTarget(obstacleTargets) ?? SelectRandomTarget(petalTargets);
         }
 
-        private static Vector2Int? SelectRandomTarget(IReadOnlyList<Vector2Int> targets)
+        private  Vector2Int? SelectRandomTarget(IReadOnlyList<Vector2Int> targets)
         {
             return targets.Count > 0 ? targets[Random.Next(targets.Count)] : null;
         }
 
-        private static void ReserveTarget(SkillExecutionContext context, Vector2Int target)
+        private  void ReserveTarget(SkillExecutionContext context, Vector2Int target)
         {
             context.AssignedButterflyCounts.TryGetValue(target, out int assignedCount);
             context.AssignedButterflyCounts[target] = assignedCount + 1;
         }
 
-        private static bool CanAssignTarget(SkillExecutionContext context, Vector2Int position)
+        private  bool CanAssignTarget(SkillExecutionContext context, Vector2Int position)
         {
             context.AssignedButterflyCounts.TryGetValue(position, out int assignedCount);
             Tile tile = context.Grid[position.x, position.y];
