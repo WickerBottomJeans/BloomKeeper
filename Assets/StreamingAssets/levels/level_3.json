@@ -23,6 +23,6 @@
     { "type": 1, "petals": [{ "petalType": 3, "amount": 18 }, { "petalType": 4, "amount": 18 }] }
   ],
   "constrainers": [
-    { "type": 1, "moveLimit": 26, "warningAtRemaining": 5 }
+    { "type": 2, "timeLimitSeconds": 5, "warningAtRemaining": 1 }
   ]
 }

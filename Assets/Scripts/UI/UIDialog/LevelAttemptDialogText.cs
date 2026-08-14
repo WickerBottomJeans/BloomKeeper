@@ -15,7 +15,9 @@ namespace DefaultNamespace.UI
             return rejectionReason switch
             {
                 StartLevelAttemptRejectionReason.LevelLocked => "This level isn't unlocked yet.",
+                StartLevelAttemptRejectionReason.InsufficientLives => "You're out of lives. One will refill soon.",
                 StartLevelAttemptRejectionReason.OperationConflict => "This level start conflicts with an earlier request.",
+                StartLevelAttemptRejectionReason.LevelUnavailable => "This level isn't available right now.",
                 _ => throw new ArgumentOutOfRangeException(nameof(rejectionReason), rejectionReason, "Unsupported level start rejection reason.")
             };
         }
@@ -24,7 +26,7 @@ namespace DefaultNamespace.UI
         {
             return rejectionReason switch
             {
-                AbandonLevelAttemptRejectionReason.AttemptNotCurrent => "That level attempt is no longer the current attempt.",
+                AbandonLevelAttemptRejectionReason.AttemptNotCurrent => "Someone else is playing on this account.",
                 AbandonLevelAttemptRejectionReason.AttemptAlreadyCompleted => "That level attempt has already been completed.",
                 _ => throw new ArgumentOutOfRangeException(nameof(rejectionReason), rejectionReason, "Unsupported level abandon rejection reason.")
             };

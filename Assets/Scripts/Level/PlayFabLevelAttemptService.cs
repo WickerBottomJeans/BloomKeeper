@@ -12,12 +12,12 @@ namespace DefaultNamespace
         private const string AbandonLevelAttemptFunctionName = "AbandonLevelAttempt";
         private const string CompleteLevelAttemptFunctionName = "CompleteLevelAttempt";
 
-        public Task<StartLevelAttemptResponse> StartLevelAttempt(PlayFabAuthSession authSession, string operationId, int levelId)
+        public Task<StartLevelAttemptResponse> StartLevelAttempt(PlayFabAuthSession authSession, string startLevelRequestIdempotencyKey, int levelId)
         {
             if (authSession == null) throw new ArgumentNullException(nameof(authSession));
-            if (!Guid.TryParseExact(operationId, "N", out _)) throw new ArgumentException("Level start operation ID must be a canonical GUID.", nameof(operationId));
+            if (!Guid.TryParseExact(startLevelRequestIdempotencyKey, "N", out _)) throw new ArgumentException("Start level request idempotency key must be a canonical GUID.", nameof(startLevelRequestIdempotencyKey));
 
-            var functionParameter = new StartLevelAttemptRequest { operationId = operationId, levelId = levelId };
+            var functionParameter = new StartLevelAttemptRequest { startLevelRequestIdempotencyKey = startLevelRequestIdempotencyKey, levelId = levelId };
             return ExecuteLevelAttemptFunction<StartLevelAttemptRequest, StartLevelAttemptResponse>(authSession, StartLevelAttemptFunctionName, functionParameter, ValidateStartLevelAttemptResponse);
         }
 
@@ -109,8 +109,9 @@ namespace DefaultNamespace
             if (response.schemaVersion != LevelAttemptContract.CurrentSchemaVersion) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned unsupported schema version {response.schemaVersion}.");
             if (response.outcome == StartLevelAttemptOutcome.Approved && (!Guid.TryParseExact(response.levelAttemptId, "N", out _) || response.rejectionReason.HasValue)) throw new InvalidOperationException("PlayFab StartLevelAttempt returned invalid started-attempt data.");
             if (response.outcome == StartLevelAttemptOutcome.Rejected && (!response.rejectionReason.HasValue || !string.IsNullOrEmpty(response.levelAttemptId))) throw new InvalidOperationException("PlayFab StartLevelAttempt returned invalid rejection data.");
-            if (response.outcome == StartLevelAttemptOutcome.Rejected && response.rejectionReason != StartLevelAttemptRejectionReason.LevelLocked && response.rejectionReason != StartLevelAttemptRejectionReason.OperationConflict) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned unsupported rejection reason {response.rejectionReason}.");
+            if (response.outcome == StartLevelAttemptOutcome.Rejected && response.rejectionReason != StartLevelAttemptRejectionReason.LevelLocked && response.rejectionReason != StartLevelAttemptRejectionReason.InsufficientLives && response.rejectionReason != StartLevelAttemptRejectionReason.OperationConflict && response.rejectionReason != StartLevelAttemptRejectionReason.LevelUnavailable) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned unsupported rejection reason {response.rejectionReason}.");
             if (response.outcome != StartLevelAttemptOutcome.Approved && response.outcome != StartLevelAttemptOutcome.Rejected) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned unsupported outcome {response.outcome}.");
+            PlayerLivesContract.ValidateSnapshot(response.lives);
         }
 
         private  void ValidateAbandonLevelAttemptResponse(AbandonLevelAttemptResponse response)
@@ -126,6 +127,7 @@ namespace DefaultNamespace
             if (response.outcome == CompleteLevelAttemptOutcome.Saved && (response.levelProgress == null || response.rejectionReason.HasValue)) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned invalid saved progression data.");
             if (response.outcome == CompleteLevelAttemptOutcome.Rejected && !response.rejectionReason.HasValue) throw new InvalidOperationException("PlayFab CompleteLevelAttempt rejected the attempt without a reason.");
             if (response.outcome != CompleteLevelAttemptOutcome.Saved && response.outcome != CompleteLevelAttemptOutcome.Rejected) throw new InvalidOperationException($"PlayFab CompleteLevelAttempt returned unsupported outcome {response.outcome}.");
+            PlayerLivesContract.ValidateSnapshot(response.lives);
         }
     }
 }

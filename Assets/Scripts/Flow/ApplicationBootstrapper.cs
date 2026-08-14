@@ -40,18 +40,19 @@ namespace DefaultNamespace
         {
             var guestCustomIdStore = new GuestCustomIdStore();
             var guestLoginService = new PlayFabGuestLoginService(guestCustomIdStore);
-            var progressionService = new PlayFabProgressionService();
+            var playerStateService = new PlayFabPlayerStateService();
             var levelAttemptService = new PlayFabLevelAttemptService();
             var boosterInventoryService = new PlayFabBoosterInventoryService();
+            var playerLivesPresentationService = new PlayerLivesPresentationService();
             var addressableContentService = new AddressableContentService();
             var bootFlow = new BootFlow(addressableContentService);
-            var playerAccountLoader = new PlayerAccountLoader(progressionService, boosterInventoryService);
-            var authFlow = new AuthFlow(guestLoginService, playerAccountLoader);
-            var homeFlow = new HomeFlow(addressableContentService);
-            var levelSetupFlow = new LevelSetupFlow(ConfigManager.Instance, levelAttemptService);
+            var playerSessionLoader = new PlayerSessionLoader(playerStateService, boosterInventoryService);
+            var authFlow = new AuthFlow(guestLoginService, playerSessionLoader, playerLivesPresentationService);
+            var homeFlow = new HomeFlow(addressableContentService, playerLivesPresentationService);
+            var levelSetupFlow = new LevelSetupFlow(ConfigManager.Instance, levelAttemptService, playerLivesPresentationService);
             var playLevelFlow = new PlayLevelFlow(levelSessionRuntime);
             var quitLevelFlow = new QuitLevelFlow(levelAttemptService);
-            var finishLevelFlow = new FinishLevelFlow(ConfigManager.Instance, levelAttemptService);
+            var finishLevelFlow = new FinishLevelFlow(ConfigManager.Instance, levelAttemptService, playerLivesPresentationService);
             var settingsFlow = new SettingsFlow();
             return new ApplicationStateMachine(bootFlow, authFlow, homeFlow, levelSetupFlow, playLevelFlow, quitLevelFlow, finishLevelFlow, settingsFlow, musicStateController);
         }

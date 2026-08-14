@@ -1,8 +1,9 @@
 using PlayFab;
 using PlayFab.DataModels;
 using PlayFab.Internal;
+using BloomKeeper.PlayFabFunctions.Services;
 
-namespace BloomKeeper.PlayFabFunctions.Services;
+namespace BloomKeeper.PlayFabFunctions.Services.PlayerStateStorage;
 
 /// <summary>
 /// [Duong] Generic PlayFab Entity Files wrapper: lists files and transfers their raw contents.

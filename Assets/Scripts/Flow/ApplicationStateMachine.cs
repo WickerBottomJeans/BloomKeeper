@@ -152,7 +152,7 @@ namespace DefaultNamespace
         }
 
         /// <summary>
-        /// [Duong] Sets up a level and exits the previous flow
+        /// [Duong] Loads the level config and gets server approval, then exits the source flow and starts gameplay
         /// </summary>
         private async UniTask TrySetupLevel(int levelId, State sourceState, UIJawCurtainTipCategory tipCategory)
         {

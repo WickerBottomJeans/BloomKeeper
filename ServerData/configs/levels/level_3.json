@@ -1,5 +1,6 @@
 {
   "levelId": 3,
+  "published": true,
   "chapterId": 1,
   "nextLevelId": 4,
   "allowedBoosters": [1, 2],
@@ -24,6 +25,6 @@
     { "type": 1, "petals": [{ "petalType": 3, "amount": 18 }, { "petalType": 4, "amount": 18 }] }
   ],
   "constrainers": [
-    { "type": 1, "moveLimit": 26, "warningAtRemaining": 5 }
+    { "type": 2, "timeLimitSeconds": 5, "warningAtRemaining": 1 }
   ]
 }

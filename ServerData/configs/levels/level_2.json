@@ -1,5 +1,6 @@
 {
   "levelId": 2,
+  "published": true,
   "chapterId": 1,
   "nextLevelId": 3,
   "allowedBoosters": [1, 2],

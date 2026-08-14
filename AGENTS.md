@@ -13,6 +13,9 @@
 - Do not edit production code, tests, prefabs, scenes, packages, configuration, or other project files until the user explicitly accepts the proposed architecture.
 - Before implementation, explain the proposed responsibilities, ownership, boundaries, and data flow, including meaningful alternatives and tradeoffs.
 - Before editing, list every file that will be created, modified, or deleted and describe the exact class, method, API, and behavior changes planned for each file.
+- Present implementation scopes by application flow. Each main heading must name a flow, and its bullets must identify the meaningful source files changed in that flow plus the responsibilities, semantic behavior, functions, and state being added, removed, or changed. Do not organize scopes as one flat file inventory.
+- Never mention `.meta` files, generated project bookkeeping, or other mechanical file operations in an implementation scope. They may be necessary implementation details, but they are not reviewable architecture or behavior.
+- When a file or type is only being renamed or moved, describe it explicitly as an old-name/path → new-name/path rename or move. Never present a rename or move as deleting the original and creating a replacement, even if the editing tool or source-control diff represents it that way.
 - Wait for the user to explicitly approve that exact implementation scope. Never infer approval from enthusiasm, general agreement, or approval of a broader concept.
 - When an exact implementation scope has been presented and the user is directly answering its approval question, affirmative replies such as `ok`, `yes`, `approved`, `do it`, or `proceed` explicitly approve that scope. Do not ask the user to repeat the approval using different wording.
 - Before making the first implementation edit, use read-only inspection to confirm that the approved scope is self-contained and can produce a complete, usable result. If a newly discovered dependency, blocker, assumption, or required change falls outside the approved scope, stop before editing any implementation file and request approval for a revised exact scope. Never create or leave a partial implementation that depends on unapproved follow-up work.
@@ -61,6 +64,7 @@
 
 ## Production-Grade Quality
 
+- This game is still in pre-release development and has no published player-data compatibility requirement. Do not increment schema versions when changing contracts or persisted formats; keep the existing schema version and update the format in place unless the user explicitly says release or migration compatibility is now required.
 - Do not implement hacks, throwaway code, temporary workarounds, quick fixes, cheap fixes, or knowingly brittle solutions.
 - Never propose or implement a symptom-suppressing patch as the solution. Diagnose the root cause and correct the responsible ownership, lifecycle, invariant, data flow, or system boundary. A guard that merely hides an exception, skips invalid work, retries blindly, or tolerates corrupted state is not an acceptable fix unless it is an explicit part of the correct lifecycle or failure contract and that contract has been explained to the user.
 - `DialogManager` has no layer restriction and may be called directly from any project class. Do not introduce a dedicated flow, presenter, wrapper, or forwarding class solely to access or run a dialog.
@@ -91,14 +95,19 @@
 ## Code Formatting
 
 - Keep function calls and signatures compact. Never format parameters or arguments one per line.
+- Method and function names must name the concrete subject of their action. Never rely on the owning class or surrounding context to explain what an action acts on; for example, use `TrySpendOneLife` instead of `TrySpend`.
 - Do not declare a class `sealed` unless preventing inheritance is required by a concrete, explainable design or correctness constraint. Never add `sealed` by default, for style, or merely because inheritance is not currently expected.
 - Name methods that receive and react to an event or signal with `Handle...`. Do not use `Report...` unless the method actually delivers a report to another consumer.
 - Library calls, such as DOTween APIs, are exempt when the library's conventional formatting places each parameter or argument on its own line for readability.
 - Write inline code comments as short, plain action labels, such as `// Hide all booster buttons.` Place each comment directly above the code chunk it describes, keep each comment to one action or concept, and split comments that describe multiple actions. Do not use long explanatory sentences when a brief label is enough.
-- `[Duong]` is a personal authorship marker that only the user may add manually. Never add `[Duong]` to an AI-authored comment, including when an existing nearby or replaced comment contains `[Duong]`; preserve an existing marker only when preserving the user-authored comment itself.
+- A chunk comment must describe only the behavior performed by the immediately following chunk. Do not describe behavior from a later chunk, connect separate chunks together, or comment on broad intent instead of the code directly below it.
+- `[Duong]` is a personal authorship marker that only the user may add manually. Never add `[Duong]` to an AI-authored comment, even when the user asks to add or edit comments. Preserve an existing `[Duong]` marker only when the user explicitly asks to edit that `[Duong]` comment.
 - For dictionary-return XML documentation, use concise directional syntax with `dict`, such as `<returns>Catalog ID → Friendly ID dict.</returns>`.
 - XML documentation summaries and comments must be short, natural, and relaxed. Informal wording is welcome when it is clear and accurate; do not rewrite it into formal or textbook language merely for convention. Summaries must state the member's concise caller-visible contract and any important resulting lifecycle or state consequence; do not merely repeat the member name, enumerate implementation steps, or include details callers do not need.
-- In XML summaries and inline comments, use `Config` instead of `configuration`.
+- Write summaries and comments in natural, informal English, like a native English-speaking developer wrote them. Avoid stiff, textbook, or translated-sounding phrasing.
+- Preserve the author's intended level of meaning: when wording is semantic, keep it semantic; when it documents actual code behavior, keep it mechanically accurate to what the code does.
+- When the author uses semantic documentation, preserve the author's simple, casual phrasing. Semantic XML summaries should describe the member's responsibility, and semantic chunk comments should group broad conceptual phases instead of narrating every statement.
+- In XML summaries and inline comments, use `config` instead of `configuration`.
 - When the user asks for an opinion or review of something they wrote, evaluate their version first and identify its concrete problems before offering a revised version. Do not silently replace their work with a suggestion; if it has no meaningful problem, say so explicitly.
 
 ## Code Organization

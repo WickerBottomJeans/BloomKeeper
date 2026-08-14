@@ -7,5 +7,6 @@ namespace DefaultNamespace
         public int levelId;
         public LevelProgressData levelProgress;
         public int highestUnlockedLevel;
+        public PlayerLivesSnapshot lives;
     }
 }

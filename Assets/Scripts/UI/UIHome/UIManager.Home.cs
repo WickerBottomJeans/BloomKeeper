@@ -18,14 +18,20 @@ namespace DefaultNamespace.UI
         public event Action<int> ChapterVisitRequested;
         public event Action ChapterChooserCloseRequested;
 
-        public async UniTask ShowHome(ChapterContent chapter, PlayerProgressionData progression)
+        public async UniTask ShowHome(ChapterContent chapter, PlayerProgressionData progression, PlayerLivesViewData lives)
         {
             if (homeInstance == null)
                 homeInstance = Instantiate(homePrefab, uiRoot);
 
             UnbindHome();
             BindHome();
-            await homeInstance.ShowAsync(chapter, progression);
+            await homeInstance.ShowAsync(chapter, progression, lives);
+        }
+
+        public void DisplayHomeLives(PlayerLivesViewData lives)
+        {
+            if (homeInstance == null) throw new InvalidOperationException("Cannot display Home lives before UIHome has been shown.");
+            homeInstance.DisplayLives(lives);
         }
 
         public async UniTask DisplayHomeTabAsync(HomeMiddleTab tab)

@@ -1,3 +1,5 @@
+using System;
+
 namespace DefaultNamespace
 {
     public class PlayerAccount
@@ -15,7 +17,7 @@ namespace DefaultNamespace
 
         public void ReplaceBoosterInventory(BoosterInventoryData boosterInventory)
         {
-            BoosterInventory = boosterInventory ?? throw new System.ArgumentNullException(nameof(boosterInventory));
+            BoosterInventory = boosterInventory ?? throw new ArgumentNullException(nameof(boosterInventory));
         }
     }
 }

@@ -9,6 +9,7 @@ namespace DefaultNamespace
     {
         public int levelId;
         public int chapterId;
+        public bool published;
         public int? nextLevelId;
         public List<BoosterType> allowedBoosters;
         public int boardWidth;

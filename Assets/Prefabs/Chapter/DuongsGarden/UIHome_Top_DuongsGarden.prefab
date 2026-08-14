@@ -96,6 +96,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2006307347136687018, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: m_fontSize
+      value: 52.95
+      objectReference: {fileID: 0}
+    - target: {fileID: 2438245033760028480, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2438245033760028480, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2438245033760028480, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2438245033760028480, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 66.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2438245033760028480, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 54
+      objectReference: {fileID: 0}
     - target: {fileID: 2567842213883666798, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
       propertyPath: m_Name
       value: UIHome_Top_DuongsGarden

@@ -45,10 +45,11 @@ namespace DefaultNamespace.UI
             chapterChooser.Hide();
         }
 
-        public async UniTask ShowAsync(ChapterContent chapter, PlayerProgressionData progression)
+        public async UniTask ShowAsync(ChapterContent chapter, PlayerProgressionData progression, PlayerLivesViewData lives)
         {
             if (chapter == null) throw new ArgumentNullException(nameof(chapter));
             if (progression == null) throw new ArgumentNullException(nameof(progression));
+            if (lives == null) throw new ArgumentNullException(nameof(lives));
 
             gameObject.SetActive(true);
             ChapterDefinition definition = chapter.Definition;
@@ -57,6 +58,7 @@ namespace DefaultNamespace.UI
 
             displayedChapter = chapter;
             displayedProgression = progression;
+            topperView.DisplayLives(lives);
         }
 
         public async UniTask DisplayMiddleTabAsync(HomeMiddleTab tab)
@@ -107,10 +109,10 @@ namespace DefaultNamespace.UI
             gameObject.SetActive(false);
         }
 
-        public void DisplayLives(int value)
+        public void DisplayLives(PlayerLivesViewData lives)
         {
             if (topperView == null) throw new InvalidOperationException("UIHome cannot display lives before its chapter Topper has loaded.");
-            topperView.DisplayLives(value);
+            topperView.DisplayLives(lives);
         }
 
         public void DisplayCurrency(int value)

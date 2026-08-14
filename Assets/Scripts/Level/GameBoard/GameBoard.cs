@@ -457,44 +457,4 @@ public class GameBoard : MonoBehaviour
             UIManager.Instance.OnPetalEditConfirmed -= HandlePetalEditConfirmed;
         }
     }
-
-    private void OnDrawGizmos()
-    {
-        if (!Application.isPlaying) return;
-        if (grid == null) return;
-        if (layout == null) return;
-
-#if UNITY_EDITOR
-        for (int x = 0; x < grid.GetLength(0); x++)
-        {
-            for (int y = 0; y < grid.GetLength(1); y++)
-            {
-                Tile tile = grid[x, y];
-                if (tile == null) continue;
-                Vector2 center = layout.GetTileWorldPos(x, y);
-
-                Gizmos.color = tile switch
-                {
-                    InactiveTile => new Color(0.55f, 0.1f, 0.1f, 0.8f),
-                    WebTile => new Color(0.6f, 0.6f, 0.6f, 0.8f),
-                    NormalTile => new Color(0.2f, 0.8f, 0.2f, 0.8f),
-                    _ => Color.white
-                };
-
-                Gizmos.DrawWireCube(center, Vector3.one * layout.TileSize * 0.95f);
-            }
-        }
-
-        for (int x = 0; x < grid.GetLength(0); x++)
-        {
-            for (int y = 0; y < grid.GetLength(1); y++)
-            {
-                Tile tile = grid[x, y];
-                if (tile == null || tile.Petal == null) continue;
-                Vector2 center = layout.GetTileWorldPos(x, y);
-                Handles.Label(center, tile.Petal.PetalType.ToString()[0].ToString());
-            }
-        }
-#endif
-    }
 }

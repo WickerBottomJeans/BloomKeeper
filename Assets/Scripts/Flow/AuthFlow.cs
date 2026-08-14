@@ -13,15 +13,17 @@ namespace DefaultNamespace
         private const string GuestPlayButtonText = "<size=70%>Play as</size> <size=120%>Guest</size>";
 
         private readonly PlayFabGuestLoginService guestLoginService;
-        private readonly PlayerAccountLoader playerAccountLoader;
+        private readonly PlayerSessionLoader playerSessionLoader;
+        private readonly PlayerLivesPresentationService playerLivesPresentationService;
         private bool isAccountLoadInProgress;
 
         public event Action AccountReady;
 
-        public AuthFlow(PlayFabGuestLoginService guestLoginService, PlayerAccountLoader playerAccountLoader)
+        public AuthFlow(PlayFabGuestLoginService guestLoginService, PlayerSessionLoader playerSessionLoader, PlayerLivesPresentationService playerLivesPresentationService)
         {
             this.guestLoginService = guestLoginService;
-            this.playerAccountLoader = playerAccountLoader;
+            this.playerSessionLoader = playerSessionLoader;
+            this.playerLivesPresentationService = playerLivesPresentationService;
         }
 
         /// <summary>
@@ -55,13 +57,13 @@ namespace DefaultNamespace
             if (isAccountLoadInProgress) return;
 
             isAccountLoadInProgress = true;
-            PlayerAccount playerAccount;
+            (PlayerAccount account, PlayerLivesSnapshot livesSnapshot) playerSession;
             try
             {
-                playerAccount = await ApplicationPresentationService.Instance.RunWithLoading(async () =>
+                playerSession = await ApplicationPresentationService.Instance.RunWithLoading(async () =>
                 {
                     PlayFabAuthSession playFabAuthSession = await guestLoginService.LoginAsGuest();
-                    return await playerAccountLoader.Load(playFabAuthSession);
+                    return await playerSessionLoader.Load(playFabAuthSession);
                 });
             }
             catch (Exception exception)
@@ -80,7 +82,8 @@ namespace DefaultNamespace
                 isAccountLoadInProgress = false;
             }
 
-            PlayerAccountContext.Instance.SetCurrentAccount(playerAccount);
+            PlayerAccountContext.Instance.SetCurrentAccount(playerSession.account);
+            playerLivesPresentationService.ReplaceServerLivesSnapshot(playerSession.livesSnapshot);
             AccountReady?.Invoke();
         }
     }

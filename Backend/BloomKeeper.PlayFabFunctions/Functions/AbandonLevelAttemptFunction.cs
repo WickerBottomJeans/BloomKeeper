@@ -1,5 +1,6 @@
 using BloomKeeper.PlayFabFunctions.Models;
 using BloomKeeper.PlayFabFunctions.Services;
+using BloomKeeper.PlayFabFunctions.Services.PlayerStateStorage;
 using DefaultNamespace;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,8 @@ public class AbandonLevelAttemptFunction
     private const int MaxWriteAttempts = 3;
     private const int InitialConflictRetryDelayMilliseconds = 100;
     private readonly PlayFabFunctionContextReader contextReader = new PlayFabFunctionContextReader();
-    private readonly PlayFabPlayerStateStore playerStateStore = new PlayFabPlayerStateStore();
+    private readonly PlayFabEntityFileClient fileClient = new PlayFabEntityFileClient();
+    private readonly LevelAttemptFileStore levelAttemptStore = new LevelAttemptFileStore();
     private readonly LevelAttemptService levelAttemptService = new LevelAttemptService();
 
     [Function("AbandonLevelAttempt")]
@@ -26,13 +28,15 @@ public class AbandonLevelAttemptFunction
 
         for (int writeAttempt = 1; writeAttempt <= MaxWriteAttempts; writeAttempt++)
         {
-            (PlayerProgressionData _, LevelAttemptData levelAttempt, int profileVersion) = await playerStateStore.LoadPlayerStateForUpdate(dataApi, dataEntity);
+            var fileMetadata = await fileClient.LoadEntityFileMetadata(dataApi, dataEntity);
+            (LevelAttemptData levelAttempt, bool _) = await levelAttemptStore.Load(fileClient, fileMetadata);
             (AbandonLevelAttemptResponse response, LevelAttemptData updatedLevelAttempt, bool levelAttemptChanged) = levelAttemptService.Abandon(levelAttempt, abandonRequest);
             if (levelAttemptChanged)
             {
                 try
                 {
-                    await playerStateStore.SaveLevelAttempt(dataApi, dataEntity, updatedLevelAttempt, profileVersion);
+                    var filesToUpload = new Dictionary<string, byte[]> { { levelAttemptStore.FileName, levelAttemptStore.Serialize(updatedLevelAttempt) } };
+                    await fileClient.UploadFiles(dataApi, dataEntity, filesToUpload, fileMetadata.ProfileVersion);
                 }
                 catch (EntityProfileVersionConflictException) when (writeAttempt < MaxWriteAttempts)
                 {

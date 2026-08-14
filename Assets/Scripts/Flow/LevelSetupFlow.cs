@@ -14,23 +14,36 @@ namespace DefaultNamespace
     {
         private readonly ConfigManager configManager;
         private readonly PlayFabLevelAttemptService levelAttemptService;
+        private readonly PlayerLivesPresentationService playerLivesPresentationService;
 
-        public LevelSetupFlow(ConfigManager configManager, PlayFabLevelAttemptService levelAttemptService)
+        public LevelSetupFlow(ConfigManager configManager, PlayFabLevelAttemptService levelAttemptService, PlayerLivesPresentationService playerLivesPresentationService)
         {
             this.configManager = configManager ?? throw new ArgumentNullException(nameof(configManager));
             this.levelAttemptService = levelAttemptService ?? throw new ArgumentNullException(nameof(levelAttemptService));
+            this.playerLivesPresentationService = playerLivesPresentationService ?? throw new ArgumentNullException(nameof(playerLivesPresentationService));
         }
 
         /// <summary>
         /// [Duong] Tries to obtain server approval and the config required to set up a level.
         /// </summary>
-        /// <returns>Level data and server attempt ID, or null when entry does not proceed.</returns>
         public async UniTask<(LevelData levelData, string levelAttemptId)?> TrySetup(int levelId)
         {
-            LevelData levelData;
+            string startLevelRequestIdempotencyKey = Guid.NewGuid().ToString("N");
+            UniTask<LevelData> levelDataTask = TryLoadLevelData(levelId);
+            UniTask<string> levelAttemptIdTask = TryStartLevelAttempt(startLevelRequestIdempotencyKey, levelId);
+            var (levelData, levelAttemptId) = await UniTask.WhenAll(levelDataTask, levelAttemptIdTask);
+            if (levelData == null || levelAttemptId == null) return null;
+            return (levelData, levelAttemptId);
+        }
+
+        /// <summary>
+        /// [Duong] Tries to get level config data
+        /// </summary>
+        private async UniTask<LevelData> TryLoadLevelData(int levelId)
+        {
             try
             {
-                levelData = await configManager.GetLevelDataAsync(levelId);
+                return await configManager.GetLevelDataAsync(levelId);
             }
             catch (IOException exception)
             {
@@ -38,14 +51,19 @@ namespace DefaultNamespace
                 await RunInformationDialog("Level unavailable", "This level is currently unavailable. Please try again later.");
                 return null;
             }
+        }
 
-            string startOperationId = Guid.NewGuid().ToString("N");
+        /// <summary>
+        /// [Duong] Asks server to start a new level attempt.
+        /// </summary>
+        private async UniTask<string> TryStartLevelAttempt(string startLevelRequestIdempotencyKey, int levelId)
+        {
             while (true)
             {
                 StartLevelAttemptResponse response;
                 try
                 {
-                    response = await levelAttemptService.StartLevelAttempt(PlayerAccountContext.Instance.CurrentAccount.AuthSession, startOperationId, levelId);
+                    response = await levelAttemptService.StartLevelAttempt(PlayerAccountContext.Instance.CurrentAccount.AuthSession, startLevelRequestIdempotencyKey, levelId);
                 }
                 catch (LevelAttemptRequestException exception) when (exception.IsRetryable)
                 {
@@ -60,8 +78,8 @@ namespace DefaultNamespace
                     return null;
                 }
 
-                if (response.outcome == StartLevelAttemptOutcome.Approved)
-                    return (levelData, response.levelAttemptId);
+                playerLivesPresentationService.ReplaceServerLivesSnapshot(response.lives);
+                if (response.outcome == StartLevelAttemptOutcome.Approved) return response.levelAttemptId;
 
                 await RunInformationDialog(LevelAttemptDialogText.RejectionTitle, LevelAttemptDialogText.GetStartRejectionMessage(response.rejectionReason.Value));
                 return null;

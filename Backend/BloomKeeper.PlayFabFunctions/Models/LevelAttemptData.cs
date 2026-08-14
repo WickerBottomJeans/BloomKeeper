@@ -6,7 +6,7 @@ public class LevelAttemptData
 {
     public int schemaVersion = LevelAttemptContract.CurrentSchemaVersion;
     public string attemptId;
-    public string startOperationId;
+    public string startLevelRequestIdempotencyKey;
     public int levelId;
     public LevelAttemptStatus status;
     public bool? didWin;

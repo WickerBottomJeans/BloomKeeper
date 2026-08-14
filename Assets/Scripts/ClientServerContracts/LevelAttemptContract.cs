@@ -5,9 +5,12 @@ namespace DefaultNamespace
         public const int CurrentSchemaVersion = 1;
     }
 
+    /// <summary>
+    /// [Duong] Client's request to start a level attempt
+    /// </summary>
     public class StartLevelAttemptRequest
     {
-        public string operationId;
+        public string startLevelRequestIdempotencyKey;
         public int levelId;
     }
 
@@ -20,6 +23,7 @@ namespace DefaultNamespace
         public StartLevelAttemptOutcome outcome;
         public StartLevelAttemptRejectionReason? rejectionReason;
         public string levelAttemptId;
+        public PlayerLivesSnapshot lives;
     }
 
     public class AbandonLevelAttemptRequest

@@ -25,7 +25,7 @@ namespace DefaultNamespace.UI
                 case CompleteLevelAttemptRejectionReason.AttemptResultConflict:
                     return "This level attempt conflicts with a result that was already processed, so we couldn't save it.";
                 case CompleteLevelAttemptRejectionReason.AttemptNotCurrent:
-                    return "This is no longer your current level attempt, so we couldn't save the result.";
+                    return "Someone else is playing on this account.";
                 case CompleteLevelAttemptRejectionReason.AttemptNotActive:
                     return "This level attempt is no longer active, so we couldn't save the result.";
                 case CompleteLevelAttemptRejectionReason.AttemptLevelMismatch:

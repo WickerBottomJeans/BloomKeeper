@@ -16,6 +16,7 @@ namespace DefaultNamespace
 
         private readonly ConfigManager configManager;
         private readonly PlayFabLevelAttemptService levelAttemptService;
+        private readonly PlayerLivesPresentationService playerLivesPresentationService;
         private int? currentLevelId;
         private Texture2D capturedBackground;
         private State state;
@@ -24,10 +25,11 @@ namespace DefaultNamespace
         public event Action<int> RetryRequested;
         public event Action<int> NextLevelRequested;
 
-        public FinishLevelFlow(ConfigManager configManager, PlayFabLevelAttemptService levelAttemptService)
+        public FinishLevelFlow(ConfigManager configManager, PlayFabLevelAttemptService levelAttemptService, PlayerLivesPresentationService playerLivesPresentationService)
         {
             this.configManager = configManager ?? throw new ArgumentNullException(nameof(configManager));
             this.levelAttemptService = levelAttemptService ?? throw new ArgumentNullException(nameof(levelAttemptService));
+            this.playerLivesPresentationService = playerLivesPresentationService ?? throw new ArgumentNullException(nameof(playerLivesPresentationService));
         }
 
         /// <summary>
@@ -109,6 +111,7 @@ namespace DefaultNamespace
             PlayerAccount account = PlayerAccountContext.Instance.CurrentAccount;
             CompleteLevelAttemptRequest request = new CompleteLevelAttemptRequest { attemptId = levelAttemptId, levelId = result.LevelId, didWin = result.DidWin, score = result.Score, stars = result.Stars };
             CompleteLevelAttemptResponse response = await ApplicationPresentationService.Instance.RunWithLoading(() => levelAttemptService.CompleteLevelAttempt(account.AuthSession, request));
+            playerLivesPresentationService.ReplaceServerLivesSnapshot(response.lives);
             if (response.outcome == CompleteLevelAttemptOutcome.Saved)
                 PlayerAccountContext.Instance.GetCurrentProgression().ApplyLevelProgress(response.levelId, response.levelProgress, response.highestUnlockedLevel);
             return response;

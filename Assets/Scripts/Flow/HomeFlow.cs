@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.Settings;
 using DefaultNamespace.UI;
@@ -12,17 +13,20 @@ namespace DefaultNamespace
     public class HomeFlow
     {
         private readonly AddressableContentService addressableContentService;
+        private readonly PlayerLivesPresentationService playerLivesPresentationService;
         private HomeMiddleTab? activeMiddleTab;
         private int? currentChapterId;
+        private CancellationTokenSource livesDisplayCancellation;
 
         public event Action<int> StartLevelRequested;
         public event Action SettingsRequested;
         public event Action AddLifeRequested;
         public event Action AddCurrencyRequested;
 
-        public HomeFlow(AddressableContentService addressableContentService)
+        public HomeFlow(AddressableContentService addressableContentService, PlayerLivesPresentationService playerLivesPresentationService)
         {
             this.addressableContentService = addressableContentService ?? throw new ArgumentNullException(nameof(addressableContentService));
+            this.playerLivesPresentationService = playerLivesPresentationService ?? throw new ArgumentNullException(nameof(playerLivesPresentationService));
         }
 
         /// <summary>
@@ -38,7 +42,9 @@ namespace DefaultNamespace
             UIManager.Instance.AddLifeRequested += HandleAddLifeRequested;
             UIManager.Instance.AddCurrencyRequested += HandleAddCurrencyRequested;
 
-            PlayerProgressionData progression = PlayerAccountContext.Instance.GetCurrentProgression();
+            playerLivesPresentationService.ServerLivesSnapshotChanged += HandleServerLivesSnapshotChanged;
+            PlayerAccount account = PlayerAccountContext.Instance.CurrentAccount;
+            PlayerProgressionData progression = account.Progression;
             if (!currentChapterId.HasValue) currentChapterId = PlayerPrefsStore.LoadLastSelectedChapterId();
             ChapterIndexEntry chapterEntry = currentChapterId.HasValue
                 ? ConfigManager.Instance.ChapterIndex.GetEntry(currentChapterId.Value)
@@ -47,9 +53,11 @@ namespace DefaultNamespace
                 throw new InvalidOperationException($"Stored chapter {chapterEntry.chapterId} requires level {chapterEntry.unlockLevelId}, but the highest unlocked level is {progression.highestUnlockedLevel}.");
             await addressableContentService.EnsureDownloadedAsync(chapterEntry.downloadLabel);
             ChapterContent chapterContent = await ConfigManager.Instance.GetChapterContentAsync(chapterEntry.chapterId);
-            await UIManager.Instance.ShowHome(chapterContent, progression);
+            await UIManager.Instance.ShowHome(chapterContent, progression, playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
             await ChangeTabAsync(HomeMiddleTab.Map);
             SetCurrentChapter(chapterEntry.chapterId);
+            livesDisplayCancellation = new CancellationTokenSource();
+            UpdateLivesDisplayLoop(livesDisplayCancellation.Token).Forget();
         }
 
         /// <summary>
@@ -64,6 +72,10 @@ namespace DefaultNamespace
             UIManager.Instance.SettingsRequested -= HandleSettingsRequested;
             UIManager.Instance.AddLifeRequested -= HandleAddLifeRequested;
             UIManager.Instance.AddCurrencyRequested -= HandleAddCurrencyRequested;
+            playerLivesPresentationService.ServerLivesSnapshotChanged -= HandleServerLivesSnapshotChanged;
+            livesDisplayCancellation.Cancel();
+            livesDisplayCancellation.Dispose();
+            livesDisplayCancellation = null;
             UIManager.Instance.HideHome();
             activeMiddleTab = null;
         }
@@ -142,7 +154,7 @@ namespace DefaultNamespace
                 await addressableContentService.EnsureDownloadedAsync(chapterEntry.downloadLabel);
                 ChapterContent chapterContent = await ConfigManager.Instance.GetChapterContentAsync(chapterId);
                 PlayerProgressionData progression = PlayerAccountContext.Instance.GetCurrentProgression();
-                await UIManager.Instance.ShowHome(chapterContent, progression);
+                await UIManager.Instance.ShowHome(chapterContent, progression, playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
                 await ChangeTabAsync(HomeMiddleTab.Map);
                 UIManager.Instance.HideChapterChooser();
                 SetCurrentChapter(chapterId);
@@ -162,6 +174,26 @@ namespace DefaultNamespace
         private void HandleAddCurrencyRequested()
         {
             AddCurrencyRequested?.Invoke();
+        }
+
+        private void HandleServerLivesSnapshotChanged()
+        {
+            UIManager.Instance.DisplayHomeLives(playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
+        }
+
+        private async UniTask UpdateLivesDisplayLoop(CancellationToken cancellationToken)
+        {
+            try
+            {
+                while (true)
+                {
+                    UIManager.Instance.DisplayHomeLives(playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
+                    await UniTask.Delay(TimeSpan.FromSeconds(1), true, cancellationToken: cancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
 
     }

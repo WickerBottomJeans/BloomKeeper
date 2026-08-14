@@ -5,14 +5,19 @@ namespace BloomKeeper.PlayFabFunctions.Services;
 
 public class LevelAttemptService
 {
-    public (StartLevelAttemptResponse response, LevelAttemptData levelAttempt, bool levelAttemptChanged) Start(PlayerProgressionData progression, LevelAttemptData currentLevelAttempt, StartLevelAttemptRequest request)
+    /// <summary>
+    /// [Duong] Try to start the requested level attempt for the player.
+    /// </summary>
+    public (StartLevelAttemptResponse response, LevelAttemptData levelAttempt, bool levelAttemptChanged) TryStartLevelAttempt(PlayerProgressionData progression, LevelAttemptData currentLevelAttempt, StartLevelAttemptRequest request, LevelData level)
     {
+        //[Duong] safety check
         if (progression == null) throw new ArgumentNullException(nameof(progression));
         if (request == null) throw new ArgumentNullException(nameof(request));
-        if (!Guid.TryParseExact(request.operationId, "N", out Guid parsedOperationId)) throw new ArgumentException("Level start operation ID must be a canonical GUID.", nameof(request));
+        if (!Guid.TryParseExact(request.startLevelRequestIdempotencyKey, "N", out Guid parsedStartLevelRequestIdempotencyKey)) throw new ArgumentException("Start level request idempotency key must be a canonical GUID.", nameof(request));
 
-        string operationId = parsedOperationId.ToString("N");
-        if (currentLevelAttempt != null && currentLevelAttempt.startOperationId == operationId)
+        string startLevelRequestIdempotencyKey = parsedStartLevelRequestIdempotencyKey.ToString("N");
+        //[Duong] Idempotency check
+        if (currentLevelAttempt != null && currentLevelAttempt.startLevelRequestIdempotencyKey == startLevelRequestIdempotencyKey)
         {
             if (currentLevelAttempt.levelId != request.levelId)
                 return (CreateStartRejectedResponse(StartLevelAttemptRejectionReason.OperationConflict), currentLevelAttempt, false);
@@ -20,13 +25,15 @@ public class LevelAttemptService
             return (CreateStartedResponse(currentLevelAttempt.attemptId), currentLevelAttempt, false);
         }
 
-        if (request.levelId > progression.highestUnlockedLevel)
-            return (CreateStartRejectedResponse(StartLevelAttemptRejectionReason.LevelLocked), currentLevelAttempt, false);
-
+        //[Duong] Reject if this level is unavailable or still locked
+        if (!LevelService.IsLevelAvailable(level)) return (CreateStartRejectedResponse(StartLevelAttemptRejectionReason.LevelUnavailable), currentLevelAttempt, false);
+        if (!LevelService.IsLevelUnlocked(progression, level)) return (CreateStartRejectedResponse(StartLevelAttemptRejectionReason.LevelLocked), currentLevelAttempt, false);
+        
+        // Create active level attempt
         var levelAttempt = new LevelAttemptData
         {
             attemptId = Guid.NewGuid().ToString("N"),
-            startOperationId = operationId,
+            startLevelRequestIdempotencyKey = startLevelRequestIdempotencyKey,
             levelId = request.levelId,
             status = LevelAttemptStatus.Active
         };
@@ -50,7 +57,7 @@ public class LevelAttemptService
         return (CreateAbandonedResponse(), currentLevelAttempt, true);
     }
 
-    public (CompleteLevelAttemptResponse response, bool progressionChanged, bool levelAttemptChanged) Complete(PlayerProgressionData progression, LevelAttemptData currentLevelAttempt, CompleteLevelAttemptRequest request)
+    public (CompleteLevelAttemptResponse response, bool progressionChanged, bool levelAttemptChanged) Complete(PlayerProgressionData progression, LevelAttemptData currentLevelAttempt, CompleteLevelAttemptRequest request, LevelData level)
     {
         if (progression == null) throw new ArgumentNullException(nameof(progression));
         if (request == null) throw new ArgumentNullException(nameof(request));
@@ -77,7 +84,7 @@ public class LevelAttemptService
         if (rejectionReason.HasValue)
             return (CreateCompleteRejectedResponse(progression, request.levelId, rejectionReason.Value), false, false);
 
-        bool progressionChanged = ApplyProgression(progression, request);
+        bool progressionChanged = ApplyProgression(progression, request, level);
         currentLevelAttempt.status = LevelAttemptStatus.Completed;
         currentLevelAttempt.didWin = request.didWin;
         currentLevelAttempt.score = request.score;
@@ -85,7 +92,7 @@ public class LevelAttemptService
         return (CreateCompleteSavedResponse(progression, request.levelId), progressionChanged, true);
     }
 
-    private  bool ApplyProgression(PlayerProgressionData progression, CompleteLevelAttemptRequest request)
+    private  bool ApplyProgression(PlayerProgressionData progression, CompleteLevelAttemptRequest request, LevelData level)
     {
         if (!request.didWin) return false;
 
@@ -94,7 +101,8 @@ public class LevelAttemptService
         levelProgress.completed = true;
         levelProgress.bestStars = Math.Max(levelProgress.bestStars, request.stars);
         levelProgress.bestScore = Math.Max(levelProgress.bestScore, request.score);
-        progression.highestUnlockedLevel = Math.Max(progression.highestUnlockedLevel, request.levelId + 1);
+        int? nextLevelId = LevelService.GetNextLevelId(level, request.levelId);
+        if (nextLevelId.HasValue) progression.highestUnlockedLevel = Math.Max(progression.highestUnlockedLevel, nextLevelId.Value);
         progression.levels[request.levelId] = levelProgress;
         return true;
     }
@@ -106,8 +114,6 @@ public class LevelAttemptService
 
     private  CompleteLevelAttemptRejectionReason? GetCompletionRejectionReason(PlayerProgressionData progression, CompleteLevelAttemptRequest request)
     {
-        // TODO: Validate levelId against the server-owned online level catalog when remote level content is implemented.
-        if (request.levelId > progression.highestUnlockedLevel) return CompleteLevelAttemptRejectionReason.LevelLocked;
         if (request.stars < 0) return CompleteLevelAttemptRejectionReason.NegativeStars;
         if (request.score < 0) return CompleteLevelAttemptRejectionReason.NegativeScore;
         return null;
@@ -118,7 +124,7 @@ public class LevelAttemptService
         return new StartLevelAttemptResponse { schemaVersion = LevelAttemptContract.CurrentSchemaVersion, outcome = StartLevelAttemptOutcome.Approved, levelAttemptId = levelAttemptId };
     }
 
-    private  StartLevelAttemptResponse CreateStartRejectedResponse(StartLevelAttemptRejectionReason rejectionReason)
+    public StartLevelAttemptResponse CreateStartRejectedResponse(StartLevelAttemptRejectionReason rejectionReason)
     {
         return new StartLevelAttemptResponse { schemaVersion = LevelAttemptContract.CurrentSchemaVersion, outcome = StartLevelAttemptOutcome.Rejected, rejectionReason = rejectionReason };
     }
