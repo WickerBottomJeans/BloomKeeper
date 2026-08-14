@@ -113,7 +113,7 @@ namespace DefaultNamespace
             CompleteLevelAttemptResponse response = await ApplicationPresentationService.Instance.RunWithLoading(() => levelAttemptService.CompleteLevelAttempt(account.AuthSession, request));
             playerLivesPresentationService.ReplaceServerLivesSnapshot(response.lives);
             if (response.outcome == CompleteLevelAttemptOutcome.Saved)
-                PlayerAccountContext.Instance.GetCurrentProgression().ApplyLevelProgress(response.levelId, response.levelProgress, response.highestUnlockedLevel);
+                account.ApplyConfirmedLevelProgress(response.levelId, response.levelProgress, response.highestUnlockedLevel);
             return response;
         }
 

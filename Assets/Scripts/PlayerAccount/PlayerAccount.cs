@@ -19,5 +19,11 @@ namespace DefaultNamespace
         {
             BoosterInventory = boosterInventory ?? throw new ArgumentNullException(nameof(boosterInventory));
         }
+
+        public void ApplyConfirmedLevelProgress(int levelId, LevelProgressData levelProgress, int highestUnlockedLevel)
+        {
+            Progression.highestUnlockedLevel = highestUnlockedLevel;
+            Progression.levels[levelId] = levelProgress;
+        }
     }
 }

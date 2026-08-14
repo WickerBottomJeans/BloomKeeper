@@ -1,5 +1,5 @@
 using System.Text;
-using BloomKeeper.PlayFabFunctions.Models;
+using DefaultNamespace;
 using Newtonsoft.Json;
 using PlayFab.DataModels;
 
