@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -36,7 +37,7 @@ namespace DefaultNamespace.VFX
             lineRenderer.endWidth = widthRatio;
         }
 
-        public async UniTask Play(Vector2 origin, Vector2 target, float duration)
+        public async UniTask Play(Vector2 origin, Vector2 target, float duration, CancellationToken cancellationToken)
         {
             lineRenderer.enabled = false;
             transform.position = origin;
@@ -44,7 +45,7 @@ namespace DefaultNamespace.VFX
             lineRenderer.SetPosition(1, transform.InverseTransformPoint(target));
             lineRenderer.enabled = true;
 
-            await UniTask.Delay(TimeSpan.FromSeconds(duration));
+            await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: cancellationToken);
 
             lineRenderer.enabled = false;
         }

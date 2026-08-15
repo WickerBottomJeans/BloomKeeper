@@ -39,10 +39,10 @@ public class LivesService
         lives.availableLives++;
         if (lives.availableLives == config.maximumLives) lives.regenerationAnchorUtc = null;
     }
-
     /// <summary>
     /// [Duong] Calculates regenerated lives and updates the PlayerLivesData.
     /// </summary>
+    /// <returns>did updating lives to the current time change the saved data</returns>
     public bool RegenerateLives(PlayerLivesData lives, PlayerLivesConfig config, DateTimeOffset now)
     {
         //[Duong] Check required data.

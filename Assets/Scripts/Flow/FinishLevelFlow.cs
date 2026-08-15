@@ -16,6 +16,7 @@ namespace DefaultNamespace
 
         private readonly ConfigManager configManager;
         private readonly PlayFabLevelAttemptService levelAttemptService;
+        private readonly PlayFabBoosterInventoryService boosterInventoryService;
         private readonly PlayerLivesPresentationService playerLivesPresentationService;
         private int? currentLevelId;
         private Texture2D capturedBackground;
@@ -25,10 +26,11 @@ namespace DefaultNamespace
         public event Action<int> RetryRequested;
         public event Action<int> NextLevelRequested;
 
-        public FinishLevelFlow(ConfigManager configManager, PlayFabLevelAttemptService levelAttemptService, PlayerLivesPresentationService playerLivesPresentationService)
+        public FinishLevelFlow(ConfigManager configManager, PlayFabLevelAttemptService levelAttemptService, PlayFabBoosterInventoryService boosterInventoryService, PlayerLivesPresentationService playerLivesPresentationService)
         {
             this.configManager = configManager ?? throw new ArgumentNullException(nameof(configManager));
             this.levelAttemptService = levelAttemptService ?? throw new ArgumentNullException(nameof(levelAttemptService));
+            this.boosterInventoryService = boosterInventoryService ?? throw new ArgumentNullException(nameof(boosterInventoryService));
             this.playerLivesPresentationService = playerLivesPresentationService ?? throw new ArgumentNullException(nameof(playerLivesPresentationService));
         }
 
@@ -79,7 +81,7 @@ namespace DefaultNamespace
             }
 
             currentLevelId = result.LevelId;
-            ShowResult(result);
+            ShowResult(result, response);
             state = State.Active;
             return true;
         }
@@ -113,7 +115,10 @@ namespace DefaultNamespace
             CompleteLevelAttemptResponse response = await ApplicationPresentationService.Instance.RunWithLoading(() => levelAttemptService.CompleteLevelAttempt(account.AuthSession, request));
             playerLivesPresentationService.ReplaceServerLivesSnapshot(response.lives);
             if (response.outcome == CompleteLevelAttemptOutcome.Saved)
+            {
                 account.ApplyConfirmedLevelProgress(response.levelId, response.levelProgress, response.highestUnlockedLevel);
+                if (result.DidWin) account.ReplaceBoosterInventory(boosterInventoryService.CreateBoosterInventory(response.boosterInventorySnapshot));
+            }
             return response;
         }
 
@@ -157,12 +162,12 @@ namespace DefaultNamespace
         /// <summary>
         /// [Duong] Show result thru UI
         /// </summary>
-        private void ShowResult(LevelSessionResult result)
+        private void ShowResult(LevelSessionResult result, CompleteLevelAttemptResponse completionResponse)
         {
             if (result.DidWin)
             {
                 bool showNext = TryGetNextUnlockedLevelId(result.LevelId, out _);
-                UIManager.Instance.ShowWinScreen(capturedBackground, result.Stars, result.StarCap, showNext);
+                UIManager.Instance.ShowWinScreen(capturedBackground, result.Stars, result.StarCap, showNext, completionResponse.completionRewardPresentationKeys);
                 UIManager.Instance.WinScreenHomeRequested += HandleHomeRequested;
                 if (showNext)
                     UIManager.Instance.WinScreenNextRequested += HandleNextRequested;

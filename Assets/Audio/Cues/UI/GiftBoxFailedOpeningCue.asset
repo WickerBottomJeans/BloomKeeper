@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb081a4581031de4ab17ede1c08e83a3, type: 3}
+  m_Name: GiftBoxFailedOpeningCue
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.Audio.AudioCue
+  clips:
+  - {fileID: 8300000, guid: 6aa0e6d6c05e5df4bba9a1f1a2f14e64, type: 3}
+  - {fileID: 8300000, guid: 0d329092c31780943a794767e03da9f9, type: 3}
+  - {fileID: 8300000, guid: 36315df9dfadae84c9b344ba94d6deae, type: 3}
+  bus: 2
+  volume: 1
+  minimumPitch: 1
+  maximumPitch: 1
+  maximumPlaysPerScope: 0

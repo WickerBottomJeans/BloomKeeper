@@ -11,6 +11,12 @@ public class PlayFabBoosterInventoryStore
     private const string FriendlyIdAlternateIdType = "FriendlyId";
     private const int InventoryPageSize = 50;
     private static readonly IReadOnlyList<string> SupportedFriendlyIds = new[] { BoosterCatalogIds.BloomWandFriendlyId, BoosterCatalogIds.GardenersGloveFriendlyId };
+    private readonly PlayFabInventoryService inventoryService;
+
+    public PlayFabBoosterInventoryStore(PlayFabInventoryService inventoryService)
+    {
+        this.inventoryService = inventoryService ?? throw new ArgumentNullException(nameof(inventoryService));
+    }
 
     public async Task<Dictionary<string, int>> LoadInventory(PlayFabEconomyInstanceAPI economyApi, EntityKey callerEntity)
     {
@@ -48,33 +54,20 @@ public class PlayFabBoosterInventoryStore
         return quantitiesByFriendlyId;
     }
 
-    public async Task<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, Dictionary<string, int> quantities)> ConsumeOne(PlayFabEconomyInstanceAPI economyApi, EntityKey callerEntity, string boosterFriendlyId, string operationId)
+    public async Task<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, Dictionary<string, int> quantities)> ConsumeOne(PlayFabEconomyInstanceAPI economyApi, EntityKey callerEntity, string boosterFriendlyId, string boosterConsumptionIdempotencyKey)
     {
         if (economyApi == null) throw new ArgumentNullException(nameof(economyApi));
         if (callerEntity == null) throw new ArgumentNullException(nameof(callerEntity));
         if (!SupportedFriendlyIds.Contains(boosterFriendlyId)) throw new ArgumentOutOfRangeException(nameof(boosterFriendlyId), boosterFriendlyId, "Booster Friendly ID is not supported.");
 
-        Dictionary<string, string> friendlyIdsByCatalogId = await ResolveCatalogIds(economyApi);
-        string catalogId = friendlyIdsByCatalogId.Single(entry => entry.Value == boosterFriendlyId).Key;
-        var request = new SubtractInventoryItemsRequest
+        await ResolveCatalogIds(economyApi);
+        bool wasSubtracted = await inventoryService.TrySubtractInventoryItem(economyApi, callerEntity, boosterFriendlyId, 1, boosterConsumptionIdempotencyKey);
+        if (!wasSubtracted)
         {
-            Amount = 1,
-            DeleteEmptyStacks = false,
-            Entity = callerEntity,
-            IdempotencyId = operationId,
-            Item = new InventoryItemReference { Id = catalogId, StackId = BoosterInventoryContract.CanonicalStackId }
-        };
-        PlayFabResult<SubtractInventoryItemsResponse> result = await economyApi.SubtractInventoryItemsAsync(request);
-        if (result == null) throw new InvalidOperationException("PlayFab SubtractInventoryItems returned no result.");
-
-        if (result.Error != null)
-        {
-            if (result.Error.Error != PlayFabErrorCode.InsufficientFunds) throw new InvalidOperationException($"PlayFab SubtractInventoryItems failed: {result.Error.GenerateErrorReport()}");
             Dictionary<string, int> rejectedQuantities = await LoadInventory(economyApi, callerEntity);
             return (ConsumeBoosterOutcome.Rejected, ConsumeBoosterRejectionReason.InsufficientQuantity, rejectedQuantities);
         }
 
-        if (result.Result == null) throw new InvalidOperationException("PlayFab SubtractInventoryItems returned no response body.");
         Dictionary<string, int> quantities = await LoadInventory(economyApi, callerEntity);
         return (ConsumeBoosterOutcome.Consumed, null, quantities);
     }

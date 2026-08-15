@@ -20,7 +20,7 @@ namespace DefaultNamespace
 
         public void Handle(BoardResolutionStepCompletedEvent gameplayEvent)
         {
-            if (!gameplayEvent.IsFromPlayerMove) return;
+            if (!gameplayEvent.IsPlayerInitiated) return;
 
             int delta = CalculateScore(gameplayEvent);
             if (delta <= 0) return;

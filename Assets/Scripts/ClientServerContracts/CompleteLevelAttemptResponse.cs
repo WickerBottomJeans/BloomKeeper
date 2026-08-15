@@ -1,5 +1,10 @@
+using System.Collections.Generic;
+
 namespace DefaultNamespace
 {
+    /// <summary>
+    /// [Duong] Server response after the client asks to complete a level attempt.
+    /// </summary>
     public class CompleteLevelAttemptResponse
     {
         public CompleteLevelAttemptOutcome outcome;
@@ -8,5 +13,7 @@ namespace DefaultNamespace
         public LevelProgressData levelProgress;
         public int highestUnlockedLevel;
         public PlayerLivesSnapshot lives;
+        public BoosterInventorySnapshot boosterInventorySnapshot;
+        public List<string> completionRewardPresentationKeys = new List<string>();
     }
 }

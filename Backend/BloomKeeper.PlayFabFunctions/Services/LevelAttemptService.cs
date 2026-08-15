@@ -57,54 +57,74 @@ public class LevelAttemptService
         return (CreateAbandonedResponse(), currentLevelAttempt, true);
     }
 
-    public (CompleteLevelAttemptResponse response, bool progressionChanged, bool levelAttemptChanged) Complete(PlayerProgressionData progression, LevelAttemptData currentLevelAttempt, CompleteLevelAttemptRequest request, LevelData level)
+    /// <summary>
+    /// [Duong] Completes the current level attempt when valid and tells the caller what changed.
+    /// </summary>
+    public LevelAttemptCompletionResult CompleteLevelAttempt(PlayerProgressionData progression, LevelAttemptData currentLevelAttempt, CompleteLevelAttemptRequest request, LevelData level)
     {
         if (progression == null) throw new ArgumentNullException(nameof(progression));
         if (request == null) throw new ArgumentNullException(nameof(request));
 
         if (!Guid.TryParseExact(request.attemptId, "N", out Guid parsedAttemptId))
-            return (CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.InvalidAttemptId), false, false);
+            return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.InvalidAttemptId), null, null);
 
         string attemptId = parsedAttemptId.ToString("N");
         if (currentLevelAttempt == null || currentLevelAttempt.attemptId != attemptId)
-            return (CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptNotCurrent), false, false);
+            return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptNotCurrent), null, null);
         if (currentLevelAttempt.levelId != request.levelId)
-            return (CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptLevelMismatch), false, false);
+            return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptLevelMismatch), null, null);
         if (currentLevelAttempt.status == LevelAttemptStatus.Completed)
         {
             if (!MatchesCompletedResult(currentLevelAttempt, request))
-                return (CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptResultConflict), false, false);
+                return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptResultConflict), null, null);
 
-            return (CreateCompleteSavedResponse(progression, request.levelId), false, false);
+            return new LevelAttemptCompletionResult(CreateCompleteSavedResponse(progression, request.levelId), null, null);
         }
         if (currentLevelAttempt.status != LevelAttemptStatus.Active)
-            return (CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptNotActive), false, false);
+            return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptNotActive), null, null);
 
         CompleteLevelAttemptRejectionReason? rejectionReason = GetCompletionRejectionReason(progression, request);
         if (rejectionReason.HasValue)
-            return (CreateCompleteRejectedResponse(progression, request.levelId, rejectionReason.Value), false, false);
+            return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, rejectionReason.Value), null, null);
 
-        bool progressionChanged = ApplyProgression(progression, request, level);
-        currentLevelAttempt.status = LevelAttemptStatus.Completed;
-        currentLevelAttempt.didWin = request.didWin;
-        currentLevelAttempt.score = request.score;
-        currentLevelAttempt.stars = request.stars;
-        return (CreateCompleteSavedResponse(progression, request.levelId), progressionChanged, true);
+        PlayerProgressionData? updatedProgression = request.didWin ? CreateUpdatedProgression(progression, request, level) : null;
+        LevelAttemptData updatedLevelAttempt = CreateCompletedLevelAttempt(currentLevelAttempt, request);
+        CompleteLevelAttemptResponse response = CreateCompleteSavedResponse(updatedProgression ?? progression, request.levelId);
+        return new LevelAttemptCompletionResult(response, updatedProgression, updatedLevelAttempt);
     }
 
-    private  bool ApplyProgression(PlayerProgressionData progression, CompleteLevelAttemptRequest request, LevelData level)
+    private PlayerProgressionData CreateUpdatedProgression(PlayerProgressionData progression, CompleteLevelAttemptRequest request, LevelData level)
     {
-        if (!request.didWin) return false;
+        var updatedProgression = new PlayerProgressionData { schemaVersion = progression.schemaVersion, highestUnlockedLevel = progression.highestUnlockedLevel };
+        foreach ((int levelId, LevelProgressData levelProgress) in progression.levels)
+        {
+            updatedProgression.levels.Add(levelId, new LevelProgressData { completed = levelProgress.completed, bestStars = levelProgress.bestStars, bestScore = levelProgress.bestScore });
+        }
 
-        progression.levels.TryGetValue(request.levelId, out LevelProgressData levelProgress);
-        levelProgress ??= new LevelProgressData();
-        levelProgress.completed = true;
-        levelProgress.bestStars = Math.Max(levelProgress.bestStars, request.stars);
-        levelProgress.bestScore = Math.Max(levelProgress.bestScore, request.score);
+        updatedProgression.levels.TryGetValue(request.levelId, out LevelProgressData updatedLevelProgress);
+        updatedLevelProgress ??= new LevelProgressData();
+        updatedLevelProgress.completed = true;
+        updatedLevelProgress.bestStars = Math.Max(updatedLevelProgress.bestStars, request.stars);
+        updatedLevelProgress.bestScore = Math.Max(updatedLevelProgress.bestScore, request.score);
         int? nextLevelId = LevelService.GetNextLevelId(level, request.levelId);
-        if (nextLevelId.HasValue) progression.highestUnlockedLevel = Math.Max(progression.highestUnlockedLevel, nextLevelId.Value);
-        progression.levels[request.levelId] = levelProgress;
-        return true;
+        if (nextLevelId.HasValue) updatedProgression.highestUnlockedLevel = Math.Max(updatedProgression.highestUnlockedLevel, nextLevelId.Value);
+        updatedProgression.levels[request.levelId] = updatedLevelProgress;
+        return updatedProgression;
+    }
+
+    private LevelAttemptData CreateCompletedLevelAttempt(LevelAttemptData currentLevelAttempt, CompleteLevelAttemptRequest request)
+    {
+        return new LevelAttemptData
+        {
+            schemaVersion = currentLevelAttempt.schemaVersion,
+            attemptId = currentLevelAttempt.attemptId,
+            startLevelRequestIdempotencyKey = currentLevelAttempt.startLevelRequestIdempotencyKey,
+            levelId = currentLevelAttempt.levelId,
+            status = LevelAttemptStatus.Completed,
+            didWin = request.didWin,
+            score = request.score,
+            stars = request.stars
+        };
     }
 
     private  bool MatchesCompletedResult(LevelAttemptData levelAttempt, CompleteLevelAttemptRequest request)

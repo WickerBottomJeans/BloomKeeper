@@ -44,7 +44,7 @@ namespace DefaultNamespace
 
             string json = result.FunctionResult is string stringResult ? stringResult : JsonConvert.SerializeObject(result.FunctionResult);
             LoadPlayerStateResponse response = JsonConvert.DeserializeObject<LoadPlayerStateResponse>(json);
-            if (response == null || response.schemaVersion != PlayerLivesContract.CurrentSchemaVersion) throw new InvalidOperationException("PlayFab LoadPlayerState returned an unsupported response.");
+            if (response == null || response.schemaVersion != LoadPlayerStateContract.CurrentSchemaVersion) throw new InvalidOperationException("PlayFab LoadPlayerState returned an unsupported response.");
             if (response.progression == null || response.progression.schemaVersion <= 0 || response.progression.levels == null) throw new InvalidOperationException("PlayFab LoadPlayerState returned invalid progression data.");
             PlayerLivesContract.ValidateSnapshot(response.lives);
             return response;

@@ -1,5 +1,12 @@
 namespace DefaultNamespace
 {
+    public enum RewardKind
+    {
+        InventoryItem = 1,
+        Currency = 2,
+        TimedEntitlement = 3
+    }
+
     public enum ConsumeBoosterOutcome
     {
         Consumed = 1,

@@ -37,6 +37,12 @@ namespace DefaultNamespace
             return completion.Task;
         }
 
+        public BoosterInventoryData CreateBoosterInventory(BoosterInventorySnapshot boosterInventorySnapshot)
+        {
+            if (boosterInventorySnapshot == null) throw new ArgumentNullException(nameof(boosterInventorySnapshot));
+            return CreateInventory(boosterInventorySnapshot.quantitiesByFriendlyId, "PlayFab booster inventory snapshot");
+        }
+
         public Task<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, BoosterInventoryData inventory)> ConsumeBooster(PlayFabAuthSession authSession, string boosterConsumptionIdempotencyKey, BoosterType boosterType)
         {
             if (authSession == null) throw new ArgumentNullException(nameof(authSession));
@@ -49,7 +55,7 @@ namespace DefaultNamespace
             var completion =
                 new TaskCompletionSource<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason,
                     BoosterInventoryData inventory)>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var functionParameter = new ConsumeBoosterRequest { operationId = boosterConsumptionIdempotencyKey, boosterFriendlyId = friendlyId };
+            var functionParameter = new ConsumeBoosterRequest { boosterConsumptionIdempotencyKey = boosterConsumptionIdempotencyKey, boosterFriendlyId = friendlyId };
             var request = new ExecuteFunctionRequest
             {
                 AuthenticationContext = new PlayFabAuthenticationContext(authSession.SessionTicket,
@@ -87,7 +93,8 @@ namespace DefaultNamespace
             LoadBoosterInventoryResponse response = JsonConvert.DeserializeObject<LoadBoosterInventoryResponse>(json);
             if (response == null) throw new InvalidOperationException("PlayFab LoadBoosterInventory returned an invalid response.");
             if (response.schemaVersion != SupportedSchemaVersion) throw new InvalidOperationException("PlayFab LoadBoosterInventory returned an unsupported schema version.");
-            return CreateInventory(response.quantitiesByFriendlyId, "PlayFab LoadBoosterInventory");
+            if (response.boosterInventorySnapshot == null) throw new InvalidOperationException("PlayFab LoadBoosterInventory returned no booster inventory snapshot.");
+            return CreateInventory(response.boosterInventorySnapshot.quantitiesByFriendlyId, "PlayFab LoadBoosterInventory");
         }
 
         private  void HandleConsumeBoosterResult(ExecuteFunctionResult result, TaskCompletionSource<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, BoosterInventoryData inventory)> completion)

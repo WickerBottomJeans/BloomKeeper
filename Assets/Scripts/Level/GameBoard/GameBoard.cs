@@ -49,7 +49,7 @@ public class GameBoard : MonoBehaviour
     private BoosterRepresentationOrchestrator boosterRepresentationOrchestrator;
     private BoosterUseResult pendingBoosterUseResult;
     private Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets;
-    private bool isResolvingPlayerMove;
+    private bool isResolvingPlayerInitiatedAction;
     private int currentCascadeDepth;
     private IBoosterChooser activeBoosterChooser;
     private BoosterType? activeBoosterType;
@@ -127,7 +127,7 @@ public class GameBoard : MonoBehaviour
             pendingBoosterUseResult = BoosterManager.Execute(boosterType, grid, targets);
             activeBoosterType = null;
             LoadResolutionInput(pendingBoosterUseResult.ResolutionInput);
-            isResolvingPlayerMove = false;
+            isResolvingPlayerInitiatedAction = true;
             currentCascadeDepth = 0;
             TransitionTo(BoardState.Resolving);
         }
@@ -269,7 +269,7 @@ public class GameBoard : MonoBehaviour
         }
 
         LoadResolutionInput(resolutionInput);
-        isResolvingPlayerMove = true;
+        isResolvingPlayerInitiatedAction = true;
         OnGameplayEvent?.Invoke(new PlayerMoveCommittedEvent());
         TransitionTo(BoardState.Resolving);
     }
@@ -366,7 +366,7 @@ public class GameBoard : MonoBehaviour
 
             SkillResolutionWave openingSkillWave = turnResolution.SkillWaves[0];
             await boardPresentationCoordinator.PlaySkillWave(openingSkillWave);
-            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(openingSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerMove));
+            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(openingSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerInitiatedAction));
             nextSkillWaveIndex = 1;
         }
         else
@@ -374,14 +374,14 @@ public class GameBoard : MonoBehaviour
             if (turnResolution.SkillWaves.Count == 0)
             {
                 await boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch);
-                OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerMove));
+                OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerInitiatedAction));
                 return;
             }
 
             SkillResolutionWave firstSkillWave = turnResolution.SkillWaves[0];
             await UniTask.WhenAll(boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch), boardPresentationCoordinator.PlaySkillWave(firstSkillWave));
-            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerMove));
-            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(firstSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerMove));
+            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerInitiatedAction));
+            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(firstSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerInitiatedAction));
             nextSkillWaveIndex = 1;
         }
 
@@ -390,7 +390,7 @@ public class GameBoard : MonoBehaviour
             SkillResolutionWave skillWave = turnResolution.SkillWaves[i];
             await boardPresentationCoordinator.PlaySkillWave(skillWave);
             OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(skillWave.Resolution, currentCascadeDepth,
-                isResolvingPlayerMove));
+                isResolvingPlayerInitiatedAction));
         }
     }
 
@@ -413,7 +413,7 @@ public class GameBoard : MonoBehaviour
         List<MatchGroup> cascadeMatches = MatchDetector.Detect(grid);
         if (cascadeMatches.Count == 0)
         {
-            isResolvingPlayerMove = false;
+            isResolvingPlayerInitiatedAction = false;
             currentCascadeDepth = 0;
             TransitionTo(BoardState.Idle);
             return;

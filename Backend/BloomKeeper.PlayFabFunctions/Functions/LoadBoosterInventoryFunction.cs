@@ -11,14 +11,14 @@ namespace BloomKeeper.PlayFabFunctions.Functions;
 public class LoadBoosterInventoryFunction
 {
     private readonly PlayFabFunctionContextReader contextReader = new PlayFabFunctionContextReader();
-    private readonly PlayFabBoosterInventoryStore inventoryStore = new PlayFabBoosterInventoryStore();
+    private readonly PlayFabBoosterInventoryStore inventoryStore = new PlayFabBoosterInventoryStore(new PlayFabInventoryService());
 
     [Function("LoadBoosterInventory")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest request)
     {
         PlayFabFunctionExecutionContext context = await contextReader.ReadContext(request);
         Dictionary<string, int> quantities = await inventoryStore.LoadInventory(contextReader.CreateEconomyApi(context), contextReader.GetCallerEconomyEntity(context));
-        var response = new LoadBoosterInventoryResponse { quantitiesByFriendlyId = quantities };
+        var response = new LoadBoosterInventoryResponse { boosterInventorySnapshot = new BoosterInventorySnapshot { quantitiesByFriendlyId = quantities } };
         string json = JsonConvert.SerializeObject(response);
         return new ContentResult { Content = json, ContentType = "application/json", StatusCode = StatusCodes.Status200OK };
     }

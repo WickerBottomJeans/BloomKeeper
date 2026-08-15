@@ -61,6 +61,7 @@ public class LoadPlayerStateFunction
             }
 
             PlayerLivesSnapshot livesSnapshot = livesService.CreateLivesSnapshot(lives, livesConfig);
+            // TODO: Return pending rewards as unopened gifts so the client can show them in a gift box.
             var response = new LoadPlayerStateResponse { progression = progression, lives = livesSnapshot };
             return new ContentResult { Content = JsonConvert.SerializeObject(response), ContentType = "application/json", StatusCode = StatusCodes.Status200OK };
         }

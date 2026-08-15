@@ -15,13 +15,13 @@ namespace DefaultNamespace
     {
         public MatchResolveResult Result { get; }
         public int CascadeDepth { get; }
-        public bool IsFromPlayerMove { get; }
+        public bool IsPlayerInitiated { get; }
 
-        public BoardResolutionStepCompletedEvent(MatchResolveResult result, int cascadeDepth, bool isFromPlayerMove)
+        public BoardResolutionStepCompletedEvent(MatchResolveResult result, int cascadeDepth, bool isPlayerInitiated)
         {
             Result = result;
             CascadeDepth = cascadeDepth;
-            IsFromPlayerMove = isFromPlayerMove;
+            IsPlayerInitiated = isPlayerInitiated;
         }
     }
 }

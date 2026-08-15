@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.Audio;
@@ -14,6 +15,9 @@ namespace UI
         [SerializeField] private Button nextButton;
         [SerializeField] private RawImage levelResultBackground;
         [SerializeField] private StarBoard starBoard;
+        [SerializeField] private UIGiftBox giftBoxTemplate;
+        [SerializeField] private RectTransform giftRoot;
+        [SerializeField] private RewardPresentationConfig rewardPresentationConfig;
         [SerializeField] private UIPopupEntranceAnimator entranceAnimator;
         [SerializeField] private GameObject[] entranceVfx = Array.Empty<GameObject>();
         [SerializeField, Min(0f)] private float entranceVfxActivationSpan;
@@ -21,6 +25,7 @@ namespace UI
         [SerializeField] private AudioCue winCue;
 
         private int pendingStarCount;
+        private readonly List<UIGiftBox> spawnedGiftBoxes = new List<UIGiftBox>();
         
         public event Action HomeRequested;
         public event Action NextRequested;
@@ -31,6 +36,7 @@ namespace UI
         {
             homeButton.onClick.AddListener(OnHomeClick);
             nextButton.onClick.AddListener(OnNextClick);
+            giftBoxTemplate.gameObject.SetActive(false);
             ValidateEntranceVfxInactive();
         }
 
@@ -49,12 +55,53 @@ namespace UI
             SetEntranceVfxActive(false);
         }
 
-        public void Display(Texture levelResultBackgroundTexture, int stars, int starCap, bool showNext)
+        public void Display(Texture levelResultBackgroundTexture, int stars, int starCap, bool showNext, IReadOnlyList<string> completionRewardPresentationKeys)
         {
             levelResultBackground.texture = levelResultBackgroundTexture;
             starBoard.SetStarCap(starCap);
             pendingStarCount = stars;
             nextButton.gameObject.SetActive(showNext);
+            DisplayGiftBoxes(stars, completionRewardPresentationKeys);
+        }
+
+        private void DisplayGiftBoxes(int giftBoxCount, IReadOnlyList<string> completionRewardPresentationKeys)
+        {
+            if (completionRewardPresentationKeys == null) throw new ArgumentNullException(nameof(completionRewardPresentationKeys));
+            if (completionRewardPresentationKeys.Count > giftBoxCount) throw new ArgumentException("Completion rewards exceed the gift box count.", nameof(completionRewardPresentationKeys));
+
+            ClearSpawnedGiftBoxes();
+            var giftRewardSprites = new List<Sprite>(giftBoxCount);
+            foreach (string completionRewardPresentationKey in completionRewardPresentationKeys) giftRewardSprites.Add(rewardPresentationConfig.GetRewardSprite(completionRewardPresentationKey));
+            while (giftRewardSprites.Count < giftBoxCount) giftRewardSprites.Add(null);
+            ShuffleGiftRewardSprites(giftRewardSprites);
+
+            foreach (Sprite giftRewardSprite in giftRewardSprites)
+            {
+                UIGiftBox spawnedGiftBox = Instantiate(giftBoxTemplate, giftRoot);
+                spawnedGiftBox.gameObject.SetActive(true);
+                spawnedGiftBox.DisplayGiftBox(giftRewardSprite);
+                spawnedGiftBoxes.Add(spawnedGiftBox);
+            }
+        }
+
+        private void ShuffleGiftRewardSprites(List<Sprite> giftRewardSprites)
+        {
+            for (int rewardSpriteIndex = giftRewardSprites.Count - 1; rewardSpriteIndex > 0; rewardSpriteIndex--)
+            {
+                int swapRewardSpriteIndex = UnityEngine.Random.Range(0, rewardSpriteIndex + 1);
+                (giftRewardSprites[rewardSpriteIndex], giftRewardSprites[swapRewardSpriteIndex]) = (giftRewardSprites[swapRewardSpriteIndex], giftRewardSprites[rewardSpriteIndex]);
+            }
+        }
+
+        private void ClearSpawnedGiftBoxes()
+        {
+            foreach (UIGiftBox spawnedGiftBox in spawnedGiftBoxes)
+            {
+                spawnedGiftBox.gameObject.SetActive(false);
+                Destroy(spawnedGiftBox.gameObject);
+            }
+
+            spawnedGiftBoxes.Clear();
         }
 
         private async UniTask OnEntranceDone(CancellationToken cancellationToken)

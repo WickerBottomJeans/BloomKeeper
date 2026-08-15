@@ -40,7 +40,7 @@ namespace DefaultNamespace
 
             var completion = new TaskCompletionSource<CompleteLevelAttemptResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             ExecuteFunctionRequest request = CreateExecuteFunctionRequest(authSession, CompleteLevelAttemptFunctionName, functionParameter);
-            PlayFabCloudScriptAPI.ExecuteFunction(request, result => HandleCompleteLevelAttemptResult(result, completion), error => completion.SetException(new LevelCompletionSubmissionException($"PlayFab CompleteLevelAttempt request failed: {error.GenerateErrorReport()}", PlayFabRetryPolicy.IsRetryable(error), error.RetryAfterSeconds)));
+            PlayFabCloudScriptAPI.ExecuteFunction(request, result => HandleCompleteLevelAttemptResult(result, functionParameter.didWin, functionParameter.stars, completion), error => completion.SetException(new LevelCompletionSubmissionException($"PlayFab CompleteLevelAttempt request failed: {error.GenerateErrorReport()}", PlayFabRetryPolicy.IsRetryable(error), error.RetryAfterSeconds)));
             return completion.Task;
         }
 
@@ -77,12 +77,12 @@ namespace DefaultNamespace
             }
         }
 
-        private  void HandleCompleteLevelAttemptResult(ExecuteFunctionResult result, TaskCompletionSource<CompleteLevelAttemptResponse> completion)
+        private  void HandleCompleteLevelAttemptResult(ExecuteFunctionResult result, bool didWin, int earnedStars, TaskCompletionSource<CompleteLevelAttemptResponse> completion)
         {
             try
             {
                 CompleteLevelAttemptResponse response = DeserializeFunctionResult<CompleteLevelAttemptResponse>(result, CompleteLevelAttemptFunctionName, (message, isRetryable) => new LevelCompletionSubmissionException(message, isRetryable));
-                ValidateCompleteLevelAttemptResponse(response);
+                ValidateCompleteLevelAttemptResponse(response, didWin, earnedStars);
                 completion.SetResult(response);
             }
             catch (Exception exception)
@@ -122,11 +122,16 @@ namespace DefaultNamespace
             if (response.outcome != AbandonLevelAttemptOutcome.Abandoned && response.outcome != AbandonLevelAttemptOutcome.Rejected) throw new InvalidOperationException($"PlayFab AbandonLevelAttempt returned unsupported outcome {response.outcome}.");
         }
 
-        private  void ValidateCompleteLevelAttemptResponse(CompleteLevelAttemptResponse response)
+        private  void ValidateCompleteLevelAttemptResponse(CompleteLevelAttemptResponse response, bool didWin, int earnedStars)
         {
             if (response.outcome == CompleteLevelAttemptOutcome.Saved && (response.levelProgress == null || response.rejectionReason.HasValue)) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned invalid saved progression data.");
+            if (response.outcome == CompleteLevelAttemptOutcome.Saved && didWin && response.boosterInventorySnapshot == null) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned no booster inventory snapshot for a saved win.");
             if (response.outcome == CompleteLevelAttemptOutcome.Rejected && !response.rejectionReason.HasValue) throw new InvalidOperationException("PlayFab CompleteLevelAttempt rejected the attempt without a reason.");
             if (response.outcome != CompleteLevelAttemptOutcome.Saved && response.outcome != CompleteLevelAttemptOutcome.Rejected) throw new InvalidOperationException($"PlayFab CompleteLevelAttempt returned unsupported outcome {response.outcome}.");
+            if (response.completionRewardPresentationKeys == null) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned no completion reward presentation keys collection.");
+            if (response.outcome == CompleteLevelAttemptOutcome.Saved && didWin && response.completionRewardPresentationKeys.Count > earnedStars) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned more completion rewards than earned stars.");
+            foreach (string completionRewardPresentationKey in response.completionRewardPresentationKeys)
+                if (string.IsNullOrWhiteSpace(completionRewardPresentationKey)) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned an empty completion reward presentation key.");
             PlayerLivesContract.ValidateSnapshot(response.lives);
         }
     }

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "tableId": "completion",
+  "revision": "1",
+  "awardChanceBasisPoints": 5000,
+  "entries": [
+    {
+      "weight": 1,
+      "grant": {
+        "rewardId": "booster_bloom_wand_x1",
+        "kind": "InventoryItem",
+        "presentationKey": "booster_bloom_wand",
+        "inventoryItem": {
+          "itemFriendlyId": "booster_bloom_wand",
+          "quantity": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "grant": {
+        "rewardId": "booster_gardeners_glove_x1",
+        "kind": "InventoryItem",
+        "presentationKey": "booster_gardeners_glove",
+        "inventoryItem": {
+          "itemFriendlyId": "booster_gardeners_glove",
+          "quantity": 1
+        }
+      }
+    }
+  ]
+}

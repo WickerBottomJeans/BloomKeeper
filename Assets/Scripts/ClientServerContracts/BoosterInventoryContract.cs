@@ -14,15 +14,20 @@ namespace DefaultNamespace
         public const string CanonicalStackId = "default";
     }
 
+    public class BoosterInventorySnapshot
+    {
+        public Dictionary<string, int> quantitiesByFriendlyId = new Dictionary<string, int>();
+    }
+
     public class LoadBoosterInventoryResponse
     {
         public int schemaVersion = BoosterInventoryContract.CurrentSchemaVersion;
-        public Dictionary<string, int> quantitiesByFriendlyId = new Dictionary<string, int>();
+        public BoosterInventorySnapshot boosterInventorySnapshot;
     }
 
     public class ConsumeBoosterRequest
     {
-        public string operationId;
+        public string boosterConsumptionIdempotencyKey;
         public string boosterFriendlyId;
     }
 

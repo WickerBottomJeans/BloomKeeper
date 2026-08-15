@@ -52,7 +52,7 @@ namespace DefaultNamespace
             var levelSetupFlow = new LevelSetupFlow(ConfigManager.Instance, levelAttemptService, playerLivesPresentationService);
             var playLevelFlow = new PlayLevelFlow(levelSessionRuntime);
             var quitLevelFlow = new QuitLevelFlow(levelAttemptService);
-            var finishLevelFlow = new FinishLevelFlow(ConfigManager.Instance, levelAttemptService, playerLivesPresentationService);
+            var finishLevelFlow = new FinishLevelFlow(ConfigManager.Instance, levelAttemptService, boosterInventoryService, playerLivesPresentationService);
             var settingsFlow = new SettingsFlow();
             return new ApplicationStateMachine(bootFlow, authFlow, homeFlow, levelSetupFlow, playLevelFlow, quitLevelFlow, finishLevelFlow, settingsFlow, musicStateController);
         }

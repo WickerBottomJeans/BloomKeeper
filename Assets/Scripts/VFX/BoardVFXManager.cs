@@ -33,7 +33,8 @@ namespace DefaultNamespace.VFX
             private ObjectPool<VFXPrismaticBloomProjectile> prismaticBloomProjectilePool;
         private ObjectPool<VFXPrismaticBloomFinisher> prismaticBloomFinisherPool;
         private ObjectPool<VFXBloomWand> bloomWandPool;
-        private readonly CancellationTokenSource lingeringVFXCancellation = new CancellationTokenSource();
+        private readonly CancellationTokenSource boardVFXLifetimeCancellation = new CancellationTokenSource();
+        private bool isBoardVFXShuttingDown;
         private BoardLayout layout;
         private Camera gameplayCamera;
 
@@ -182,6 +183,7 @@ namespace DefaultNamespace.VFX
         {
             if (stripedBeamAxisPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+            boardVFXLifetimeCancellation.Token.ThrowIfCancellationRequested();
 
             VFXStripeBeamAxis beamAxis = stripedBeamAxisPool.Get();
             beamAxis.transform.position = layout.GetTileWorldPos(source.x, source.y);
@@ -193,6 +195,7 @@ namespace DefaultNamespace.VFX
         {
             if (stripedHaloPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+            boardVFXLifetimeCancellation.Token.ThrowIfCancellationRequested();
 
             VFXStripeHalo halo = stripedHaloPool.Get();
             halo.transform.position = layout.GetTileWorldPos(source.x, source.y);
@@ -202,6 +205,7 @@ namespace DefaultNamespace.VFX
 
         public UniTask FireStripedBeamAxisVFX(VFXStripeBeamAxis beamAxis, Vector2Int source, bool isVertical, float duration)
         {
+            boardVFXLifetimeCancellation.Token.ThrowIfCancellationRequested();
             int negativeSideLengthInTiles = isVertical ? source.y : source.x;
             int positiveSideLengthInTiles = isVertical ? layout.Rows - source.y - 1 : layout.Cols - source.x - 1;
             int longerSideLengthInTiles = Mathf.Max(negativeSideLengthInTiles, positiveSideLengthInTiles);
@@ -214,16 +218,18 @@ namespace DefaultNamespace.VFX
             Vector2 positiveEndWorld = layout.GetTileWorldPos(positiveDestination.x, positiveDestination.y) + endpointOffset;
             float negativeDuration = negativeSideLengthInTiles * secondsPerTile;
             float positiveDuration = positiveSideLengthInTiles * secondsPerTile;
-            return beamAxis.Fire(negativeEndWorld, positiveEndWorld, negativeDuration, positiveDuration);
+            return beamAxis.Fire(negativeEndWorld, positiveEndWorld, negativeDuration, positiveDuration).AttachExternalCancellation(boardVFXLifetimeCancellation.Token);
         }
 
         public void ReleaseStripedBeamAxisVFX(VFXStripeBeamAxis beamAxis)
         {
+            if (isBoardVFXShuttingDown) return;
             stripedBeamAxisPool.Release(beamAxis);
         }
 
         public void ReleaseStripedHaloVFX(VFXStripeHalo halo)
         {
+            if (isBoardVFXShuttingDown) return;
             stripedHaloPool.Release(halo);
         }
 
@@ -231,6 +237,7 @@ namespace DefaultNamespace.VFX
         {
             if (butterflySkillPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+            boardVFXLifetimeCancellation.Token.ThrowIfCancellationRequested();
 
             VFXButterflySkill butterfly = butterflySkillPool.Get();
             butterfly.transform.SetParent(parent, false);
@@ -242,21 +249,31 @@ namespace DefaultNamespace.VFX
 
         public async UniTask FinishButterflySkillVFX(VFXButterflySkill butterfly, float duration, AudioPlaybackScope audioScope)
         {
+            if (isBoardVFXShuttingDown) return;
+
             Transform root = boardVFXRoot != null ? boardVFXRoot : transform;
             butterfly.transform.SetParent(root, true);
             ParticleSystem[] particleSystems = butterfly.GetComponentsInChildren<ParticleSystem>(true);
+            CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
 
             try
             {
-                await butterfly.Finish(duration, audioScope);
-                await UniTask.WaitUntil(() => !HasLivingParticles(particleSystems));
+                await butterfly.Finish(duration, audioScope).AttachExternalCancellation(cancellationToken);
+                await UniTask.WaitUntil(() => !HasLivingParticles(particleSystems), cancellationToken: cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return;
             }
             finally
             {
-                foreach (ParticleSystem particles in particleSystems)
-                    particles.Clear(true);
+                if (!isBoardVFXShuttingDown)
+                {
+                    foreach (ParticleSystem particles in particleSystems)
+                        particles.Clear(true);
 
-                butterflySkillPool.Release(butterfly);
+                    butterflySkillPool.Release(butterfly);
+                }
             }
         }
 
@@ -264,6 +281,7 @@ namespace DefaultNamespace.VFX
         {
             if (bubblePool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+            boardVFXLifetimeCancellation.Token.ThrowIfCancellationRequested();
 
             VFXBubble bubble = bubblePool.Get();
             bubble.Configure(layout.TileSize);
@@ -272,18 +290,21 @@ namespace DefaultNamespace.VFX
 
         public void ReleaseBubbleVFX(VFXBubble bubble)
         {
+            if (isBoardVFXShuttingDown) return;
             bubblePool.Release(bubble);
         }
 
         public void PopBubbleVFX(VFXBubble bubble, AudioPlaybackScope audioScope)
         {
+            if (isBoardVFXShuttingDown) return;
+
             try
             {
                 bubble.Pop(audioScope);
             }
             catch
             {
-                bubblePool.Release(bubble);
+                ReleaseBubbleVFX(bubble);
                 throw;
             }
 
@@ -292,7 +313,7 @@ namespace DefaultNamespace.VFX
 
         private async UniTask ReleaseBubbleAfterParticles(VFXBubble bubble)
         {
-            CancellationToken cancellationToken = lingeringVFXCancellation.Token;
+            CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
             try
             {
                 await bubble.WaitForEnderParticles(cancellationToken);
@@ -303,15 +324,16 @@ namespace DefaultNamespace.VFX
             }
             catch
             {
-                bubblePool.Release(bubble);
+                ReleaseBubbleVFX(bubble);
                 throw;
             }
 
-            bubblePool.Release(bubble);
+            ReleaseBubbleVFX(bubble);
         }
 
         public void PlayBubblePopParticles(Vector2Int position, float inflatedScaleMultiplier, AudioPlaybackScope audioScope)
         {
+            if (isBoardVFXShuttingDown) return;
             PlayBubblePopParticlesAndRelease(position, inflatedScaleMultiplier, audioScope).Forget();
         }
 
@@ -319,12 +341,18 @@ namespace DefaultNamespace.VFX
         {
             if (prismaticBloomProjectilePool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+            CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
+            cancellationToken.ThrowIfCancellationRequested();
 
             VFXPrismaticBloomProjectile projectile = RentPrismaticBloomProjectile();
             try
             {
                 projectile.Configure(layout.TileSize);
-                await projectile.Shoot(origin, target, duration);
+                await projectile.Shoot(origin, target, duration).AttachExternalCancellation(cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
             }
             catch
             {
@@ -342,7 +370,7 @@ namespace DefaultNamespace.VFX
 
         private async UniTask FinishPrismaticBloomProjectileAndRelease(VFXPrismaticBloomProjectile projectile)
         {
-            CancellationToken cancellationToken = lingeringVFXCancellation.Token;
+            CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
             try
             {
                 await projectile.Finish(cancellationToken);
@@ -362,12 +390,15 @@ namespace DefaultNamespace.VFX
 
         private void ReleasePrismaticBloomProjectile(VFXPrismaticBloomProjectile projectile)
         {
+            if (isBoardVFXShuttingDown) return;
             prismaticBloomProjectilePool.Release(projectile);
         }
 
         public async UniTask PlayBloomWandUntilImpact(Vector2Int target)
         {
             if (bloomWandPool == null) throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+            CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
+            cancellationToken.ThrowIfCancellationRequested();
 
             VFXBloomWand wand = bloomWandPool.Get();
             try
@@ -377,12 +408,17 @@ namespace DefaultNamespace.VFX
                 Vector3 screenBottomLeft = gameplayCamera.ViewportToWorldPoint(new Vector3(0f, 0f, viewportDepth));
                 Vector3 screenTopRight = gameplayCamera.ViewportToWorldPoint(new Vector3(1f, 1f, viewportDepth));
                 var screenWorldBounds = Rect.MinMaxRect(screenBottomLeft.x, screenBottomLeft.y, screenTopRight.x, screenTopRight.y);
-                await wand.Prepare(targetWorldPosition, screenWorldBounds, layout.TileSize);
-                await wand.Fire();
+                await wand.Prepare(targetWorldPosition, screenWorldBounds, layout.TileSize).AttachExternalCancellation(cancellationToken);
+                await wand.Fire().AttachExternalCancellation(cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
             }
             catch
             {
-                bloomWandPool.Release(wand);
+                if (!isBoardVFXShuttingDown)
+                    bloomWandPool.Release(wand);
                 throw;
             }
 
@@ -391,7 +427,7 @@ namespace DefaultNamespace.VFX
 
         private async UniTask FinishBloomWandAndRelease(VFXBloomWand wand)
         {
-            CancellationToken cancellationToken = lingeringVFXCancellation.Token;
+            CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
             try
             {
                 await wand.Finish(cancellationToken);
@@ -402,17 +438,20 @@ namespace DefaultNamespace.VFX
             }
             catch
             {
-                bloomWandPool.Release(wand);
+                if (!isBoardVFXShuttingDown)
+                    bloomWandPool.Release(wand);
                 throw;
             }
 
-            bloomWandPool.Release(wand);
+            if (!isBoardVFXShuttingDown)
+                bloomWandPool.Release(wand);
         }
 
         public void PlayPrismaticBloomFinisher(Vector3 position)
         {
             if (prismaticBloomFinisherPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+            if (isBoardVFXShuttingDown) return;
 
             PlayPrismaticBloomFinisherAndRelease(position).Forget();
         }
@@ -420,7 +459,7 @@ namespace DefaultNamespace.VFX
         private async UniTask PlayPrismaticBloomFinisherAndRelease(Vector3 position)
         {
             VFXPrismaticBloomFinisher finisher = prismaticBloomFinisherPool.Get();
-            CancellationToken cancellationToken = lingeringVFXCancellation.Token;
+            CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
             try
             {
                 finisher.transform.position = position;
@@ -433,11 +472,13 @@ namespace DefaultNamespace.VFX
             }
             catch
             {
-                prismaticBloomFinisherPool.Release(finisher);
+                if (!isBoardVFXShuttingDown)
+                    prismaticBloomFinisherPool.Release(finisher);
                 throw;
             }
 
-            prismaticBloomFinisherPool.Release(finisher);
+            if (!isBoardVFXShuttingDown)
+                prismaticBloomFinisherPool.Release(finisher);
         }
 
         private async UniTask PlayBubblePopParticlesAndRelease(Vector2Int position, float inflatedScaleMultiplier, AudioPlaybackScope audioScope)
@@ -446,7 +487,7 @@ namespace DefaultNamespace.VFX
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
 
             VFXBubblePopParticles particles = bubblePopParticlesPool.Get();
-            CancellationToken cancellationToken = lingeringVFXCancellation.Token;
+            CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
             try
             {
                 particles.transform.position = layout.GetTileWorldPos(position.x, position.y);
@@ -459,11 +500,13 @@ namespace DefaultNamespace.VFX
             }
             catch
             {
-                bubblePopParticlesPool.Release(particles);
+                if (!isBoardVFXShuttingDown)
+                    bubblePopParticlesPool.Release(particles);
                 throw;
             }
 
-            bubblePopParticlesPool.Release(particles);
+            if (!isBoardVFXShuttingDown)
+                bubblePopParticlesPool.Release(particles);
         }
 
         private  bool HasLivingParticles(IReadOnlyList<ParticleSystem> particleSystems)
@@ -480,53 +523,53 @@ namespace DefaultNamespace.VFX
         {
             if (mutationLaserPool == null)
                 throw new InvalidOperationException("BoardVFXManager must be initialized before playing effects.");
+            CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
+            cancellationToken.ThrowIfCancellationRequested();
 
             Vector2 origin = layout.OriginWorldPos + originPosition * layout.TileSize;
-            await UniTask.Delay(TimeSpan.FromSeconds(chargeUpDuration));
-            await PlayLasers(origin, targetPositions, duration - chargeUpDuration);
+            await UniTask.Delay(TimeSpan.FromSeconds(chargeUpDuration), cancellationToken: cancellationToken);
+            await PlayLasers(origin, targetPositions, duration - chargeUpDuration, cancellationToken);
         }
 
-        private async UniTask PlayLasers(Vector2 origin, IReadOnlyList<Vector2Int> targetPositions, float duration)
+        private async UniTask PlayLasers(Vector2 origin, IReadOnlyList<Vector2Int> targetPositions, float duration, CancellationToken cancellationToken)
         {
             var tasks = new List<UniTask>(targetPositions.Count);
 
             foreach (Vector2Int targetPosition in targetPositions)
             {
                 Vector2 target = layout.GetTileWorldPos(targetPosition.x, targetPosition.y);
-                tasks.Add(PlayLaser(origin, target, duration));
+                tasks.Add(PlayLaser(origin, target, duration, cancellationToken));
             }
 
             await UniTask.WhenAll(tasks);
         }
 
-        private async UniTask PlayLaser(Vector2 origin, Vector2 target, float duration)
+        private async UniTask PlayLaser(Vector2 origin, Vector2 target, float duration, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             MutationLaserView laser = mutationLaserPool.Get();
 
             try
             {
                 laser.Configure(layout.TileSize, mutationLaserWidthRatio);
-                await laser.Play(origin, target, duration);
+                await laser.Play(origin, target, duration, cancellationToken);
             }
             finally
             {
-                mutationLaserPool.Release(laser);
+                if (!isBoardVFXShuttingDown)
+                    mutationLaserPool.Release(laser);
             }
+        }
+
+        private void OnDisable()
+        {
+            isBoardVFXShuttingDown = true;
+            boardVFXLifetimeCancellation.Cancel();
         }
 
         private void OnDestroy()
         {
-            lingeringVFXCancellation.Cancel();
-            mutationLaserPool?.Clear();
-            stripedBeamAxisPool?.Clear();
-            stripedHaloPool?.Clear();
-            butterflySkillPool?.Clear();
-            bubblePool?.Clear();
-            bubblePopParticlesPool?.Clear();
-            prismaticBloomProjectilePool?.Clear();
-            prismaticBloomFinisherPool?.Clear();
-            bloomWandPool?.Clear();
-            lingeringVFXCancellation.Dispose();
+            boardVFXLifetimeCancellation.Dispose();
         }
     }
 }
