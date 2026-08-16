@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public class UISettings : MonoBehaviour
+    public class UISettings : UIPopup
     {
         [SerializeField] private Slider musicSlider;
         [SerializeField] private Slider sfxSlider;
@@ -14,8 +14,9 @@ namespace DefaultNamespace.UI
         public event Action<float> SfxVolumeChanged;
         public event Action CloseRequested;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             musicSlider.onValueChanged.AddListener(HandleMusicVolumeChanged);
             sfxSlider.onValueChanged.AddListener(HandleSfxVolumeChanged);
             backButton.onClick.AddListener(HandleBackClicked);
@@ -25,12 +26,7 @@ namespace DefaultNamespace.UI
         {
             musicSlider.SetValueWithoutNotify(musicVolume);
             sfxSlider.SetValueWithoutNotify(sfxVolume);
-            gameObject.SetActive(true);
-        }
-
-        public void Hide()
-        {
-            gameObject.SetActive(false);
+            base.Show();
         }
 
         private void HandleMusicVolumeChanged(float value)

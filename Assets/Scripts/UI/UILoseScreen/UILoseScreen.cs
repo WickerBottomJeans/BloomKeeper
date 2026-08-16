@@ -1,24 +1,25 @@
 using System;
 using DefaultNamespace.Audio;
+using DefaultNamespace.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI
 {
-    public class UILoseScreen : MonoBehaviour
+    public class UILoseScreen : UIPopup
     {
         [SerializeField] private TextMeshProUGUI label;
         [SerializeField] private Button retryButton;
         [SerializeField] private Button homeButton;
-        [SerializeField] private RawImage levelResultBackground;
         [SerializeField] private AudioCue loseCue;
 
         public event Action RetryRequested;
         public event Action HomeRequested;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             retryButton.onClick.AddListener(HandleRetryClicked);
             homeButton.onClick.AddListener(HandleHomeClicked);
         }
@@ -28,9 +29,8 @@ namespace UI
             AudioService.Instance.PlayStinger(loseCue);
         }
 
-        public void Display(Texture levelResultBackgroundTexture, string message)
+        public void Display(string message)
         {
-            levelResultBackground.texture = levelResultBackgroundTexture;
             if (label == null) return;
             label.text = message;
         }

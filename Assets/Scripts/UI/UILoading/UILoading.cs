@@ -34,6 +34,7 @@ namespace DefaultNamespace.UI
 
         private void OnEnable()
         {
+            SetRandomSprite();
             image.rectTransform.localEulerAngles = baseImageEulerAngles;
             rotationTween?.Kill();
             rotationTween = image.rectTransform.DOLocalRotate(baseImageEulerAngles + new Vector3(0f, 0f, -360f), secondsPerRotation, RotateMode.FastBeyond360)
@@ -64,6 +65,12 @@ namespace DefaultNamespace.UI
         private void AdvanceSprite()
         {
             currentSpriteIndex = (currentSpriteIndex + 1) % sprites.Count;
+            image.sprite = sprites[currentSpriteIndex];
+        }
+
+        private void SetRandomSprite()
+        {
+            currentSpriteIndex = Random.Range(0, sprites.Count);
             image.sprite = sprites[currentSpriteIndex];
         }
 

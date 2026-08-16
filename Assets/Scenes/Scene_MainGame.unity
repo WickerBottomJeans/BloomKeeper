@@ -405,6 +405,7 @@ MonoBehaviour:
   jawCurtainTipConfig: {fileID: 11400000, guid: ee582d7cfb7411d49ae195f43678ac96, type: 2}
   authScreenPrefab: {fileID: 5937290179025323228, guid: 13346db061e46a14a993adfc16b7ac73, type: 3}
   backdropPrefab: {fileID: 8339736254305832784, guid: eadd338566c53e543bbaf6d632391f75, type: 3}
+  backgroundPrefab: {fileID: 3230237372720795873, guid: 470eff9f25c9cb349ae361af40338d49, type: 3}
   dialogPrefab: {fileID: 2063504911643791199, guid: f2d451a0803c8a84da3f2e0497da20c3, type: 3}
   petalEditorPrefab: {fileID: 8406235925533610904, guid: 46b455af4d951334595ff0b29c2f8dd7, type: 3}
   homePrefab: {fileID: 2487866397883307974, guid: 780104b68f9ad09489bd6855ee224a84, type: 3}

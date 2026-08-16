@@ -20,9 +20,7 @@ namespace DefaultNamespace.UI
 
         public async UniTask ShowHome(ChapterContent chapter, PlayerProgressionData progression, PlayerLivesViewData lives)
         {
-            if (homeInstance == null)
-                homeInstance = Instantiate(homePrefab, uiRoot);
-
+            GetPanel(ref homeInstance, homePrefab, uiRoot);
             UnbindHome();
             BindHome();
             await homeInstance.ShowAsync(chapter, progression, lives);

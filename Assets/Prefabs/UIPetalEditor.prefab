@@ -384,6 +384,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d6763899bf74137ac9dab8c6b93020b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.UIForTester.UIPetalEditor
+  mainContent: {fileID: 1996502338771931397}
+  dimmer: {fileID: 0}
+  hiddenScaleMultiplier: 0.01
+  entranceDuration: 0.2
+  exitDuration: 0.15
+  entranceContentEase: 27
+  entranceDimmerEase: 6
+  exitContentEase: 26
+  exitDimmerEase: 5
   tableScrollRect: {fileID: 3716369712123975220}
   tableContent: {fileID: 1360398383034394886}
   tileTemplate: {fileID: 4963631528831612171}

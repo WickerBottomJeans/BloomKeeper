@@ -42,7 +42,7 @@ namespace DefaultNamespace.UI
         {
             chapterChooser.ChapterVisitRequested += HandleChapterVisitRequested;
             chapterChooser.CloseRequested += HandleChapterChooserCloseRequested;
-            chapterChooser.Hide();
+            chapterChooser.HideChapterChooser();
         }
 
         public async UniTask ShowAsync(ChapterContent chapter, PlayerProgressionData progression, PlayerLivesViewData lives)
@@ -95,17 +95,17 @@ namespace DefaultNamespace.UI
 
         public void ShowChapterChooser()
         {
-            chapterChooser.Show();
+            chapterChooser.ShowChapterChooser();
         }
 
         public void HideChapterChooser()
         {
-            chapterChooser.Hide();
+            chapterChooser.HideChapterChooser();
         }
 
         public void Hide()
         {
-            chapterChooser.Hide();
+            chapterChooser.HideChapterChooser();
             gameObject.SetActive(false);
         }
 

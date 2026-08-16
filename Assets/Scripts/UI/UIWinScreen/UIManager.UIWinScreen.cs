@@ -13,21 +13,19 @@ namespace DefaultNamespace.UI
         public event Action WinScreenHomeRequested;
         public event Action WinScreenNextRequested;
 
-        public void ShowWinScreen(Texture levelResultBackgroundTexture, int stars, int starCap, bool showNext, IReadOnlyList<string> completionRewardPresentationKeys)
+        public void ShowWinScreen(int stars, int starCap, bool showNext, RewardDisplayData rewardDisplayData)
         {
-            if (winScreenInstance == null)
-                winScreenInstance = Instantiate(winScreenPrefab, uiRoot);
-
+            GetPanel(ref winScreenInstance, winScreenPrefab, uiRoot);
             UnbindWinScreen();
             BindWinScreen();
-            winScreenInstance.Display(levelResultBackgroundTexture, stars, starCap, showNext, completionRewardPresentationKeys);
-            winScreenInstance.gameObject.SetActive(true);
+            winScreenInstance.Display(stars, starCap, showNext, rewardDisplayData);
+            winScreenInstance.Show();
         }
 
         public void HideWinScreen()
         {
             UnbindWinScreen();
-            winScreenInstance?.gameObject.SetActive(false);
+            winScreenInstance?.Hide();
         }
 
         private void BindWinScreen()

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
-    public class UIDialog : MonoBehaviour
+    public class UIDialog : UIPopup
     {
         [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private TextMeshProUGUI messageText;
@@ -16,8 +16,9 @@ namespace DefaultNamespace.UI
         
         public event Action<int> ButtonClicked;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             buttonPrefab.gameObject.SetActive(false);
         }
 
@@ -26,16 +27,6 @@ namespace DefaultNamespace.UI
             titleText.text = title;
             messageText.text = message;
             RefreshButtons(options);
-        }
-
-        public void Show()
-        {
-            gameObject.SetActive(true);
-        }
-
-        public void Hide()
-        {
-            gameObject.SetActive(false);
         }
 
         public void SetButtonsInteractable(bool interactable)

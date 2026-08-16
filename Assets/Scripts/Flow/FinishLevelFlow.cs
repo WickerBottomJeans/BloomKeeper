@@ -10,7 +10,7 @@ namespace DefaultNamespace
         private enum State
         {
             Inactive,
-            BackgroundCaptured,
+            BackgroundShown,
             Active
         }
 
@@ -35,15 +35,24 @@ namespace DefaultNamespace
         }
 
         /// <summary>
-        /// [Duong] Captures the final gameplay frame
+        /// [Duong] Shows the final gameplay frame behind the level result
         /// </summary>
-        public async UniTask CaptureBackground()
+        public async UniTask ShowLevelResultBackground()
         {
-            if (state != State.Inactive) throw new InvalidOperationException($"Cannot capture a level-result background while the finish flow is {state}.");
+            if (state != State.Inactive) throw new InvalidOperationException($"Cannot show a level-result background while the finish flow is {state}.");
 
             await UniTask.WaitForEndOfFrame(UIManager.Instance);
-            capturedBackground = ScreenCapture.CaptureScreenshotAsTexture();
-            state = State.BackgroundCaptured;
+            capturedBackground = CaptureLevelResultBackground();
+            UIManager.Instance.ShowBackground(capturedBackground);
+            state = State.BackgroundShown;
+        }
+
+        private Texture2D CaptureLevelResultBackground()
+        {
+            Texture2D backgroundTexture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGBA32, false, false);
+            backgroundTexture.ReadPixels(new Rect(0f, 0f, Screen.width, Screen.height), 0, 0);
+            backgroundTexture.Apply();
+            return backgroundTexture;
         }
 
         /// <summary>
@@ -52,7 +61,7 @@ namespace DefaultNamespace
         public async UniTask<bool> TryEnter(LevelSessionResult result, string levelAttemptId)
         {
             if (result == null) throw new ArgumentNullException(nameof(result));
-            if (state != State.BackgroundCaptured) throw new InvalidOperationException($"Cannot enter the finish flow while it is {state}.");
+            if (state != State.BackgroundShown) throw new InvalidOperationException($"Cannot enter the finish flow while it is {state}.");
 
             CompleteLevelAttemptResponse response;
             try
@@ -99,6 +108,7 @@ namespace DefaultNamespace
             UIManager.Instance.LoseScreenHomeRequested -= HandleHomeRequested;
             UIManager.Instance.HideWinScreen();
             UIManager.Instance.HideLoseScreen();
+            UIManager.Instance.HideBackground();
             currentLevelId = null;
             UnityEngine.Object.Destroy(capturedBackground);
             capturedBackground = null;
@@ -167,14 +177,15 @@ namespace DefaultNamespace
             if (result.DidWin)
             {
                 bool showNext = TryGetNextUnlockedLevelId(result.LevelId, out _);
-                UIManager.Instance.ShowWinScreen(capturedBackground, result.Stars, result.StarCap, showNext, completionResponse.completionRewardPresentationKeys);
+                RewardDisplayData rewardDisplayData = new RewardDisplayData(completionResponse.completionRewardPresentationKeys, result.Stars);
+                UIManager.Instance.ShowWinScreen(result.Stars, result.StarCap, showNext, rewardDisplayData);
                 UIManager.Instance.WinScreenHomeRequested += HandleHomeRequested;
                 if (showNext)
                     UIManager.Instance.WinScreenNextRequested += HandleNextRequested;
                 return;
             }
 
-            UIManager.Instance.ShowLoseScreen(capturedBackground, result.FailureMessage);
+            UIManager.Instance.ShowLoseScreen(result.FailureMessage);
             UIManager.Instance.LoseScreenRetryRequested += HandleRetryRequested;
             UIManager.Instance.LoseScreenHomeRequested += HandleHomeRequested;
         }

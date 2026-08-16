@@ -12,21 +12,19 @@ namespace DefaultNamespace.UI
         public event Action LoseScreenRetryRequested;
         public event Action LoseScreenHomeRequested;
 
-        public void ShowLoseScreen(Texture levelResultBackgroundTexture, string message)
+        public void ShowLoseScreen(string message)
         {
-            if (loseScreenInstance == null)
-                loseScreenInstance = Instantiate(loseScreenPrefab, uiRoot);
-
+            GetPanel(ref loseScreenInstance, loseScreenPrefab, uiRoot);
             UnbindLoseScreen();
             BindLoseScreen();
-            loseScreenInstance.gameObject.SetActive(true);
-            loseScreenInstance.Display(levelResultBackgroundTexture, message);
+            loseScreenInstance.Display(message);
+            loseScreenInstance.Show();
         }
 
         public void HideLoseScreen()
         {
             UnbindLoseScreen();
-            loseScreenInstance?.gameObject.SetActive(false);
+            loseScreenInstance?.Hide();
         }
 
         private void BindLoseScreen()

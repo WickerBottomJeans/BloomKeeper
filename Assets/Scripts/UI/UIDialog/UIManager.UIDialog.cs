@@ -14,15 +14,15 @@ namespace DefaultNamespace.UI
 
         public void PresentDialogView(string title, string message, IReadOnlyList<DialogOptionButton> options)
         {
-            if (dialogInstance == null)
+            bool isNewDialogInstance = dialogInstance == null;
+            GetPanel(ref dialogInstance, dialogPrefab, uiRoot);
+            if (isNewDialogInstance)
             {
-                dialogInstance = Instantiate(dialogPrefab, uiRoot);
                 dialogInstance.ButtonClicked += HandleDialogButtonClicked;
             }
 
             dialogInstance.Display(title, message, options);
             dialogInstance.Show();
-            dialogInstance.transform.SetAsLastSibling();
         }
 
         public void DismissDialogView()

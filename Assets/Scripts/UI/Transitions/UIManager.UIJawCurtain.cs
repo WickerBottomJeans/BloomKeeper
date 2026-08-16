@@ -25,21 +25,18 @@ namespace DefaultNamespace.UI
         public UniTask CloseJawCurtain(string tipText, Sprite tipSprite = null)
         {
             UIJawCurtain jawCurtain = GetJawCurtain();
-            jawCurtain.transform.SetAsLastSibling();
             return jawCurtain.Close(tipText, tipSprite);
         }
 
         public void SnapJawCurtainClosed(string tipText, Sprite tipSprite = null)
         {
             UIJawCurtain jawCurtain = GetJawCurtain();
-            jawCurtain.transform.SetAsLastSibling();
             jawCurtain.SnapClosed(tipText, tipSprite);
         }
 
         public UniTask OpenJawCurtain()
         {
             UIJawCurtain jawCurtain = GetJawCurtain();
-            jawCurtain.transform.SetAsLastSibling();
             return jawCurtain.Open();
         }
 
@@ -52,10 +49,10 @@ namespace DefaultNamespace.UI
 
         private UIJawCurtain GetJawCurtain()
         {
-            if (jawCurtainInstance != null) return jawCurtainInstance;
+            bool isNewJawCurtainInstance = jawCurtainInstance == null;
+            GetPanel(ref jawCurtainInstance, jawCurtainPrefab, overlayRoot);
+            if (!isNewJawCurtainInstance) return jawCurtainInstance;
 
-            jawCurtainInstance = Instantiate(jawCurtainPrefab, overlayRoot);
-            jawCurtainInstance.transform.SetAsLastSibling();
             jawCurtainInstance.gameObject.SetActive(false);
             jawCurtainInstance.SnapOpen();
             jawCurtainInstance.gameObject.SetActive(true);

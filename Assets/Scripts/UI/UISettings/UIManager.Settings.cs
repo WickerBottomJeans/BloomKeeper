@@ -14,9 +14,7 @@ namespace DefaultNamespace.UI
 
         public void ShowSettings(float musicVolume, float sfxVolume)
         {
-            if (settingsInstance == null)
-                settingsInstance = Instantiate(settingsPrefab, uiRoot);
-
+            GetPanel(ref settingsInstance, settingsPrefab, uiRoot);
             UnbindSettings();
             BindSettings();
             settingsInstance.Show(musicVolume, sfxVolume);

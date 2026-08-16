@@ -17,8 +17,7 @@ namespace DefaultNamespace.UI
         public void ShowLevelUI(LevelUIInitData levelUIInitData)
         {
             if (levelUIPrefab == null) return;
-            if (levelUIInstance == null)
-                levelUIInstance = Instantiate(levelUIPrefab, uiRoot);
+            GetPanel(ref levelUIInstance, levelUIPrefab, uiRoot);
             levelUIInstance.PauseRequested -= HandleLevelPauseRequested;
             levelUIInstance.PauseRequested += HandleLevelPauseRequested;
             levelUIInstance.BoosterUseRequested -= HandleBoosterUseRequested;

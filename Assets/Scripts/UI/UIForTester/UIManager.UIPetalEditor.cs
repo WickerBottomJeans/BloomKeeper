@@ -15,30 +15,26 @@ namespace DefaultNamespace.UI
 
         public void ShowPetalEditorPopup(Vector2 screenPos)
         {
-            if (petalEditorInstance != null)
+            bool isNewPetalEditorInstance = petalEditorInstance == null;
+            GetPanel(ref petalEditorInstance, petalEditorPrefab, uiRoot);
+            if (isNewPetalEditorInstance)
             {
-                petalEditorInstance.gameObject.SetActive(true);
-                PositionPetalEditor(screenPos);
-                ShowBackdrop(HidePetalEditor, petalEditorInstance.transform);
-                return;
+                petalEditorInstance.OnConfirmed += (petalType, skillType) =>
+                {
+                    OnPetalEditConfirmed?.Invoke(petalType, skillType);
+                    HidePetalEditor();
+                };
+                petalEditorInstance.OnDismissed += HidePetalEditor;
             }
 
-            petalEditorInstance = Instantiate(petalEditorPrefab, uiRoot);
-            petalEditorInstance.OnConfirmed += (petalType, skillType) =>
-            {
-                OnPetalEditConfirmed?.Invoke(petalType, skillType);
-                HidePetalEditor();
-            };
-            petalEditorInstance.OnDismissed += HidePetalEditor;
             PositionPetalEditor(screenPos);
-            ShowBackdrop(HidePetalEditor, petalEditorInstance.transform);
+            petalEditorInstance.Show();
         }
 
         public void HidePetalEditor()
         {
             if (petalEditorInstance == null) return;
-            petalEditorInstance.gameObject.SetActive(false);
-            HideBackdrop();
+            petalEditorInstance.Hide();
         }
 
         private void PositionPetalEditor(Vector2 screenPos)

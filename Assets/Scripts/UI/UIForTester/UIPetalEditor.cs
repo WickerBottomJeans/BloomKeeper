@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DefaultNamespace;
+using DefaultNamespace.UI;
 using DefaultNamespace.Utility;
 using TMPro;
 using UnityEngine;
@@ -8,7 +9,7 @@ using UnityEngine.UI;
 
 namespace UI.UIForTester
 {
-    public class UIPetalEditor : MonoBehaviour
+    public class UIPetalEditor : UIPopup
     {
         [SerializeField] private ScrollRect tableScrollRect;
         [SerializeField] private RectTransform tableContent;
@@ -20,8 +21,9 @@ namespace UI.UIForTester
         public event Action<PetalType, SpecialSkillType> OnConfirmed;
         public event Action OnDismissed;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             ConfigureTable();
             BuildTable();
 

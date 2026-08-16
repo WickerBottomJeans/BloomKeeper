@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public class UIPauseMenu : MonoBehaviour
+    public class UIPauseMenu : UIPopup
     {
         [SerializeField] private Button resumeButton;
         [SerializeField] private Button settingsButton;
@@ -14,21 +14,12 @@ namespace DefaultNamespace.UI
         public event Action SettingsRequested;
         public event Action QuitRequested;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             resumeButton.onClick.AddListener(HandleResumeClicked);
             settingsButton.onClick.AddListener(HandleSettingsClicked);
             quitButton.onClick.AddListener(HandleQuitClicked);
-        }
-
-        public void Show()
-        {
-            gameObject.SetActive(true);
-        }
-
-        public void Hide()
-        {
-            gameObject.SetActive(false);
         }
 
         private void HandleResumeClicked()

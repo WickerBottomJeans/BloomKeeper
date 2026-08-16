@@ -14,9 +14,7 @@ namespace DefaultNamespace.UI
 
         public void ShowPauseMenu()
         {
-            if (pauseMenuInstance == null)
-                pauseMenuInstance = Instantiate(pauseMenuPrefab, uiRoot);
-
+            GetPanel(ref pauseMenuInstance, pauseMenuPrefab, uiRoot);
             UnbindPauseMenu();
             BindPauseMenu();
             pauseMenuInstance.Show();

@@ -27,10 +27,7 @@ namespace DefaultNamespace.UI
 
         private UILoading GetOrCreateLoading()
         {
-            if (loadingInstance == null)
-                loadingInstance = Instantiate(loadingPrefab, overlayRoot);
-
-            return loadingInstance;
+            return GetPanel(ref loadingInstance, loadingPrefab, overlayRoot);
         }
     }
 }

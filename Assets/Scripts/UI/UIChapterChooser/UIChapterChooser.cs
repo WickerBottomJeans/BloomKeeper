@@ -7,14 +7,13 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
-    public class UIChapterChooser : MonoBehaviour
+    public class UIChapterChooser : UIPopup
     {
         [SerializeField] private HorizontalSnapPool snapPool;
         [SerializeField] private RectTransform scrollRectTransform;
         [SerializeField] private UIChapterView chapterViewTemplate;
         [SerializeField] private Button closeButton;
         [SerializeField] private CanvasGroup visibilityGroup;
-        [SerializeField] private UIPopupEntranceAnimator entranceAnimator;
         [SerializeField, Min(0f)] private float edgeGap;
         [SerializeField] private int defaultPoolCapacity = 3;
         [SerializeField] private int maxPoolSize = 5;
@@ -33,8 +32,9 @@ namespace DefaultNamespace.UI
         public event Action<int> ChapterVisitRequested;
         public event Action CloseRequested;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             chapterViewTemplate.gameObject.SetActive(false);
             closeButton.onClick.AddListener(HandleCloseClicked);
         }
@@ -86,7 +86,7 @@ namespace DefaultNamespace.UI
             }
         }
 
-        public void Show()
+        public void ShowChapterChooser()
         {
             if (!isPrepared) throw new InvalidOperationException("Chapter chooser must finish preparation before it can be shown.");
             LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)scrollRectTransform.parent);
@@ -95,25 +95,35 @@ namespace DefaultNamespace.UI
             snapPool.JumpToIndex(preparedCurrentChapterIndex.Value);
             isHiddenForPreparation = false;
             SetVisibility(true);
-            entranceAnimator.enabled = true;
+            base.Show();
         }
 
-        public void Hide()
+        public void HideChapterChooser()
         {
             isHiddenForPreparation = false;
-            entranceAnimator.enabled = false;
-            SetVisibility(false);
-            ClearPoolAndPreparedState();
-            gameObject.SetActive(false);
+            if (!isPrepared)
+            {
+                SetVisibility(false);
+                ClearPoolAndPreparedState();
+                gameObject.SetActive(false);
+                return;
+            }
+
+            base.Hide();
         }
 
         public void HideForPreparation()
         {
             ClearPoolAndPreparedState();
             isHiddenForPreparation = true;
-            entranceAnimator.enabled = false;
             SetVisibility(false);
             gameObject.SetActive(true);
+        }
+
+        protected override void HandlePopupExitCompleted()
+        {
+            SetVisibility(false);
+            ClearPoolAndPreparedState();
         }
 
         private void PrepareView(UIChapterView view)

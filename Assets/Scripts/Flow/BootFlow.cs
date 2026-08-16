@@ -16,6 +16,7 @@ namespace DefaultNamespace
 
         public async UniTask Run()
         {
+            UIManager.Instance.ShowStartupScreen(string.Empty, StartupScreenState.Boot);
             ConfigureFrameRate();
             await addressableContentService.InitializeAsync();
             await ConfigManager.Instance.InitializeAsync();

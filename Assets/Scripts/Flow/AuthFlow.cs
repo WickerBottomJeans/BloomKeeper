@@ -32,7 +32,7 @@ namespace DefaultNamespace
         public void Enter()
         {
             UIManager.Instance.AuthPlayRequested += HandleAuthPlayRequested;
-            UIManager.Instance.ShowAuthScreen(GuestPlayButtonText);
+            UIManager.Instance.ShowStartupScreen(GuestPlayButtonText, StartupScreenState.AccountEntry);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace DefaultNamespace
         public void Exit()
         {
             UIManager.Instance.AuthPlayRequested -= HandleAuthPlayRequested;
-            UIManager.Instance.HideAuthScreen();
+            UIManager.Instance.HideStartupScreen();
         }
 
         private void HandleAuthPlayRequested()

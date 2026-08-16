@@ -237,7 +237,7 @@ namespace DefaultNamespace
         /// </summary>
         private async UniTask PrepareLevelResult(LevelSessionResult result, string levelAttemptId)
         {
-            await finishLevelFlow.CaptureBackground();
+            await finishLevelFlow.ShowLevelResultBackground();
             playLevelFlow.Exit();
             if (await finishLevelFlow.TryEnter(result, levelAttemptId))
             {

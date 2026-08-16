@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using Cysharp.Threading.Tasks;
 using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using UnityEngine;
@@ -9,18 +7,15 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    public class UIWinScreen : MonoBehaviour
+    public class UIWinScreen : UIPopup
     {
         [SerializeField] private Button homeButton;
         [SerializeField] private Button nextButton;
-        [SerializeField] private RawImage levelResultBackground;
         [SerializeField] private StarBoard starBoard;
         [SerializeField] private UIGiftBox giftBoxTemplate;
         [SerializeField] private RectTransform giftRoot;
         [SerializeField] private RewardPresentationConfig rewardPresentationConfig;
-        [SerializeField] private UIPopupEntranceAnimator entranceAnimator;
         [SerializeField] private GameObject[] entranceVfx = Array.Empty<GameObject>();
-        [SerializeField, Min(0f)] private float entranceVfxActivationSpan;
         [SerializeField] private float starRevealDuration = 0.6f;
         [SerializeField] private AudioCue winCue;
 
@@ -30,10 +25,9 @@ namespace UI
         public event Action HomeRequested;
         public event Action NextRequested;
 
-        private CancellationTokenSource entranceVfxCancellation;
-
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             homeButton.onClick.AddListener(OnHomeClick);
             nextButton.onClick.AddListener(OnNextClick);
             giftBoxTemplate.gameObject.SetActive(false);
@@ -43,36 +37,28 @@ namespace UI
         private void OnEnable()
         {
             AudioService.Instance.PlayStinger(winCue);
-            entranceVfxCancellation = new CancellationTokenSource();
-            OnEntranceDone(entranceVfxCancellation.Token).Forget();
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
-            entranceVfxCancellation?.Cancel();
-            entranceVfxCancellation?.Dispose();
-            entranceVfxCancellation = null;
+            base.OnDisable();
             SetEntranceVfxActive(false);
         }
 
-        public void Display(Texture levelResultBackgroundTexture, int stars, int starCap, bool showNext, IReadOnlyList<string> completionRewardPresentationKeys)
+        public void Display(int stars, int starCap, bool showNext, RewardDisplayData rewardDisplayData)
         {
-            levelResultBackground.texture = levelResultBackgroundTexture;
             starBoard.SetStarCap(starCap);
             pendingStarCount = stars;
             nextButton.gameObject.SetActive(showNext);
-            DisplayGiftBoxes(stars, completionRewardPresentationKeys);
+            DisplayGiftBoxes(rewardDisplayData);
         }
 
-        private void DisplayGiftBoxes(int giftBoxCount, IReadOnlyList<string> completionRewardPresentationKeys)
+        private void DisplayGiftBoxes(RewardDisplayData rewardDisplayData)
         {
-            if (completionRewardPresentationKeys == null) throw new ArgumentNullException(nameof(completionRewardPresentationKeys));
-            if (completionRewardPresentationKeys.Count > giftBoxCount) throw new ArgumentException("Completion rewards exceed the gift box count.", nameof(completionRewardPresentationKeys));
-
             ClearSpawnedGiftBoxes();
-            var giftRewardSprites = new List<Sprite>(giftBoxCount);
-            foreach (string completionRewardPresentationKey in completionRewardPresentationKeys) giftRewardSprites.Add(rewardPresentationConfig.GetRewardSprite(completionRewardPresentationKey));
-            while (giftRewardSprites.Count < giftBoxCount) giftRewardSprites.Add(null);
+            var giftRewardSprites = new List<Sprite>(rewardDisplayData.Amount);
+            foreach (string completionRewardPresentationKey in rewardDisplayData.CompletionRewardPresentationKeys) giftRewardSprites.Add(rewardPresentationConfig.GetRewardSprite(completionRewardPresentationKey));
+            while (giftRewardSprites.Count < rewardDisplayData.Amount) giftRewardSprites.Add(null);
             ShuffleGiftRewardSprites(giftRewardSprites);
 
             foreach (Sprite giftRewardSprite in giftRewardSprites)
@@ -104,36 +90,15 @@ namespace UI
             spawnedGiftBoxes.Clear();
         }
 
-        private async UniTask OnEntranceDone(CancellationToken cancellationToken)
+        protected override void HandlePopupEntranceCompleted()
         {
-            SetEntranceVfxActive(false);
-
-            try
-            {
-                await UniTask.Yield(cancellationToken);
-                await entranceAnimator.WaitForEntrance().AttachExternalCancellation(cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-
             starBoard.DisplayAnimated(pendingStarCount, starRevealDuration);
-            await PlayEntranceVfx(cancellationToken);
+            PlayEntranceVfx();
         }
 
-        private async UniTask PlayEntranceVfx(CancellationToken cancellationToken)
+        private void PlayEntranceVfx()
         {
-            if (entranceVfx.Length == 0) return;
-
-            float activationGap = entranceVfx.Length > 1 ? entranceVfxActivationSpan / (entranceVfx.Length - 1) : 0f;
-
-            for (int index = 0; index < entranceVfx.Length; index++)
-            {
-                entranceVfx[index].SetActive(true);
-                if (index < entranceVfx.Length - 1)
-                    await UniTask.Delay(TimeSpan.FromSeconds(activationGap), true, cancellationToken: cancellationToken);
-            }
+            SetEntranceVfxActive(true);
         }
 
         private void ValidateEntranceVfxInactive()
