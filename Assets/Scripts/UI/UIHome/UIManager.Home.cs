@@ -18,12 +18,12 @@ namespace DefaultNamespace.UI
         public event Action<int> ChapterVisitRequested;
         public event Action ChapterChooserCloseRequested;
 
-        public async UniTask ShowHome(ChapterContent chapter, PlayerProgressionData progression, PlayerLivesViewData lives)
+        public async UniTask ShowHome(string topperPrefabAddress, string bottomNavigationPrefabAddress, PlayerLivesViewData lives)
         {
             GetPanel(ref homeInstance, homePrefab, uiRoot);
             UnbindHome();
             BindHome();
-            await homeInstance.ShowAsync(chapter, progression, lives);
+            await homeInstance.ShowAsync(topperPrefabAddress, bottomNavigationPrefabAddress, lives);
         }
 
         public void DisplayHomeLives(PlayerLivesViewData lives)
@@ -32,10 +32,22 @@ namespace DefaultNamespace.UI
             homeInstance.DisplayLives(lives);
         }
 
-        public async UniTask DisplayHomeTabAsync(HomeMiddleTab tab)
+        public async UniTask DisplayHomeMapAsync(ChapterContent chapter, PlayerProgressionData progression)
         {
-            if (homeInstance == null) throw new InvalidOperationException("Cannot display a Home tab before UIHome has been shown.");
-            await homeInstance.DisplayMiddleTabAsync(tab);
+            if (homeInstance == null) throw new InvalidOperationException("Cannot display the Home Map before UIHome has been shown.");
+            await homeInstance.DisplayMapAsync(chapter, progression);
+        }
+
+        public void DisplayHomeFriends()
+        {
+            if (homeInstance == null) throw new InvalidOperationException("Cannot display Home Friends before UIHome has been shown.");
+            homeInstance.DisplayFriends();
+        }
+
+        public void DisplayHomeShop(LoadShopResponse mainShopResponse)
+        {
+            if (homeInstance == null) throw new InvalidOperationException("Cannot display the Home Shop before UIHome has been shown.");
+            homeInstance.DisplayShop(mainShopResponse);
         }
 
         public async UniTask PrepareChapterChooserAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)

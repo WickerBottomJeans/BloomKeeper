@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "revision": 1,
+  "offers": [
+    {
+      "offerId": "offer_bloom_wand_x1",
+      "displayName": "Bloom Wand",
+      "enabled": true,
+      "cost": {
+        "itemFriendlyId": "currency_diamonds",
+        "presentationKey": "currency_diamonds",
+        "quantity": 25
+      },
+      "grants": [
+        {
+          "grantId": "bloom_wand",
+          "kind": "InventoryItem",
+          "presentationKey": "booster_bloom_wand",
+          "inventoryItem": {
+            "itemFriendlyId": "booster_bloom_wand",
+            "quantity": 1
+          }
+        }
+      ]
+    },
+    {
+      "offerId": "offer_gardeners_glove_x1",
+      "displayName": "Gardener's Glove",
+      "enabled": true,
+      "cost": {
+        "itemFriendlyId": "currency_diamonds",
+        "presentationKey": "currency_diamonds",
+        "quantity": 40
+      },
+      "grants": [
+        {
+          "grantId": "gardeners_glove",
+          "kind": "InventoryItem",
+          "presentationKey": "booster_gardeners_glove",
+          "inventoryItem": {
+            "itemFriendlyId": "booster_gardeners_glove",
+            "quantity": 1
+          }
+        }
+      ]
+    },
+    {
+      "offerId": "offer_unlimited_lives_30m",
+      "displayName": "Unlimited Lives (30 min)",
+      "enabled": true,
+      "cost": {
+        "itemFriendlyId": "currency_diamonds",
+        "presentationKey": "currency_diamonds",
+        "quantity": 50
+      },
+      "grants": [
+        {
+          "grantId": "unlimited_lives_30m",
+          "kind": "UnlimitedLives",
+          "presentationKey": "unlimited_lives",
+          "unlimitedLives": {
+            "durationMinutes": 30
+          }
+        }
+      ]
+    }
+  ]
+}

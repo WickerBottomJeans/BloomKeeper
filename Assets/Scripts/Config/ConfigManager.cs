@@ -16,11 +16,14 @@ namespace DefaultNamespace
         private readonly ChapterIndexLoader chapterIndexLoader;
         private readonly ChapterDefinitionLoader chapterDefinitionLoader;
         private readonly LevelDataLoader levelDataLoader;
+        private readonly ShopCachePolicyLoader shopCachePolicyLoader;
         private readonly Dictionary<int, ChapterDefinition> chapterDefinitions = new();
         private readonly Dictionary<int, LevelData> levelDefinitions = new();
         private ChapterIndex chapterIndex;
+        private ShopCachePolicyConfig mainShopCachePolicy;
 
         public ChapterIndex ChapterIndex => chapterIndex ?? throw new InvalidOperationException("ConfigManager has not loaded the chapter index.");
+        public ShopCachePolicyConfig MainShopCachePolicy => mainShopCachePolicy ?? throw new InvalidOperationException("ConfigManager has not loaded the main shop cache policy.");
 
         private ConfigManager()
         {
@@ -28,11 +31,16 @@ namespace DefaultNamespace
             chapterIndexLoader = new ChapterIndexLoader(remoteJsonLoader);
             chapterDefinitionLoader = new ChapterDefinitionLoader(remoteJsonLoader);
             levelDataLoader = new LevelDataLoader(remoteJsonLoader);
+            shopCachePolicyLoader = new ShopCachePolicyLoader(remoteJsonLoader);
         }
 
         public async UniTask InitializeAsync()
         {
-            chapterIndex = await chapterIndexLoader.LoadAsync();
+            UniTask<ChapterIndex> chapterIndexTask = chapterIndexLoader.LoadAsync();
+            UniTask<ShopCachePolicyConfig> mainShopCachePolicyTask = shopCachePolicyLoader.LoadMainShopCachePolicyAsync();
+            chapterIndex = await chapterIndexTask;
+            mainShopCachePolicy = await mainShopCachePolicyTask;
+            ValidateShopCachePolicy(mainShopCachePolicy);
         }
 
         public async UniTask<ChapterDefinition> GetChapterDefinitionAsync(int chapterId)
@@ -84,6 +92,14 @@ namespace DefaultNamespace
 
             nextLevelId = currentLevel.nextLevelId.Value;
             return true;
+        }
+
+        private static void ValidateShopCachePolicy(ShopCachePolicyConfig shopCachePolicy)
+        {
+            if (shopCachePolicy == null) throw new InvalidOperationException("Main shop cache policy contains invalid JSON.");
+            if (shopCachePolicy.schemaVersion != ShopCachePolicyConfig.CurrentSchemaVersion) throw new InvalidOperationException($"Main shop cache policy schema version {shopCachePolicy.schemaVersion} is unsupported. Expected {ShopCachePolicyConfig.CurrentSchemaVersion}.");
+            if (shopCachePolicy.revision <= 0) throw new InvalidOperationException("Main shop cache policy revision must be greater than zero.");
+            if (shopCachePolicy.cacheLifetimeSeconds <= 0) throw new InvalidOperationException("Main shop cache policy lifetime must be greater than zero.");
         }
 
     }

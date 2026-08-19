@@ -74,6 +74,7 @@ Goal: prevent the first thirty seconds from looking like an unfinished engineeri
 - [ ] Ensure the first-time player can understand mouse/touch interaction and the current objective without developer explanation.
 - [ ] Perform one focused visual-consistency pass on loading, authentication, map, gameplay HUD, dialogs, win, and loss screens.
 - [ ] Audit every dimmer and modal overlay before release; verify that it blocks pointer interaction with all UI beneath it and prevents click-through for its entire visible lifetime.
+- [ ] Audit every player-facing failure dialog so it uses curated, localized player copy and never exposes an exception message, stack trace, PlayFab error report, cloud-function name, endpoint, or other technical diagnostic. Fix the known shop leak: `PlayFabShopService.LoadShop` currently creates `ShopLoadException($"PlayFab LoadShop request failed: {error.GenerateErrorReport()}", ...)`, and `HomeShopFlow.TryEnterShopAsync` passes `exception.Message` directly to `RunInformationDialog("Shop unavailable", exception.Message)`. Preserve technical diagnostics only for developer-visible logging or telemetry.
 - [x] Add a pause menu with Resume, Settings, and confirmed Quit Level actions. Pausing must stop level input and timer progress; quitting must abandon the attempt and return Home without submitting a result.
 - [ ] Add a Settings entry from Home and the pause menu with persistent music and SFX volume controls.
 - [ ] Add a minimal licensed audio pass if the current build is silent: one music loop plus clear swap, match, skill, win, loss, and button feedback routed through the persisted volume settings. Do not build a large audio feature set.
@@ -166,6 +167,8 @@ Goal: remove avoidable reasons for an interviewer to doubt the work.
 - [ ] Update `ARCHITECTURE.md` so it describes the implementation that is actually being released.
 - [x] Replace `GameFlowController`'s implicit flow state with an explicit `ApplicationStateMachine`. This goal came from reviewing `TryEnterLevel(..., Action commitSourceExit)`: Home, Result retry, and Next Level shared one level-entry pipeline but supplied different source-exit actions, revealing that the active flow and legal transitions were represented only implicitly.
 - [ ] Review the dialog system for robust lifecycle, cancellation, queueing, event binding, clean ownership, and SOLID boundaries; fix only confirmed issues.
+- [ ] Why the duck do we make so many exactly the same exception for everything?
+- [ ] Fix the shared retry-policy gap: shop loading, level-attempt requests, and level-completion submission capture `RetryAfterSeconds`, but every retry flow ignores it and allows another request immediately; booster failures do not capture it at all.
 - [ ] Mark `ROADMAP.md` clearly as long-term work so unchecked production features do not make the portfolio appear unfinished.
 - [ ] Review comments in representative gameplay, flow, authentication, and backend files; resolve, rewrite, or remove informal and stale TODO comments.
 - [ ] Remove Butterfly-specific objective data and target-assignment state from `SkillExecutionContext`; give Butterfly its own batch-scoped dependencies so unrelated skill executors receive only shared execution data.

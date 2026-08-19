@@ -18,6 +18,7 @@ namespace DefaultNamespace.UI
         private readonly IObjectPool<T> pool;
         private readonly Dictionary<int, T> visibleItems = new Dictionary<int, T>();
         private readonly int[] orderedIndices;
+        private readonly Vector3[] viewportWorldCorners = new Vector3[4];
         /// <summary>
         /// Number of extra viewports to pre-load.
         /// </summary>
@@ -89,11 +90,10 @@ namespace DefaultNamespace.UI
 
         private void OnScroll(Vector2 scrollPos)
         {
-            float viewportHeight = viewport.rect.height;
-            float scrolledY = scrollPos.y * (content.rect.height - viewportHeight);
-            float buffer = viewportHeight * bufferViewport;
-            int newStartRank = FindFirstRankWithEndAtOrAfter(scrolledY - buffer);
-            int newEndRankExclusive = FindFirstRankWithStartAfter(scrolledY + viewportHeight + buffer);
+            Rect viewportBounds = ScrollPoolViewportBounds.GetContentLocalRect(content, viewport, viewportWorldCorners);
+            float buffer = viewportBounds.height * bufferViewport;
+            int newStartRank = FindFirstRankWithEndAtOrAfter(viewportBounds.yMin - buffer);
+            int newEndRankExclusive = FindFirstRankWithStartAfter(viewportBounds.yMax + buffer);
             UpdateVisibleRange(newStartRank, newEndRankExclusive);
         }
 

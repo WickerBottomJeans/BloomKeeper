@@ -403,8 +403,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.UIManager
   jawCurtainPrefab: {fileID: 8017061069607916964, guid: eb32607b816c03a4faaf279531ba075d, type: 3}
   jawCurtainTipConfig: {fileID: 11400000, guid: ee582d7cfb7411d49ae195f43678ac96, type: 2}
-  authScreenPrefab: {fileID: 5937290179025323228, guid: 13346db061e46a14a993adfc16b7ac73, type: 3}
-  backdropPrefab: {fileID: 8339736254305832784, guid: eadd338566c53e543bbaf6d632391f75, type: 3}
   backgroundPrefab: {fileID: 3230237372720795873, guid: 470eff9f25c9cb349ae361af40338d49, type: 3}
   dialogPrefab: {fileID: 2063504911643791199, guid: f2d451a0803c8a84da3f2e0497da20c3, type: 3}
   petalEditorPrefab: {fileID: 8406235925533610904, guid: 46b455af4d951334595ff0b29c2f8dd7, type: 3}
@@ -417,6 +415,7 @@ MonoBehaviour:
   overlayRoot: {fileID: 1536116834}
   pauseMenuPrefab: {fileID: 2005328267664071053, guid: ccf3b7663b4c4ce479e17c261283628d, type: 3}
   settingsPrefab: {fileID: 715275403567547333, guid: ddc5b70845faad841ba66ae7ac4ca828, type: 3}
+  startupScreenPrefab: {fileID: 5937290179025323228, guid: 13346db061e46a14a993adfc16b7ac73, type: 3}
   testerTogglePrefab: {fileID: 7168729738933843627, guid: 3073f85176c8204478725179b3c68a8a, type: 3}
   winScreenPrefab: {fileID: 9033160764233551407, guid: e25a04012b8990848ab73dfc2c25368e, type: 3}
 --- !u!114 &438607906

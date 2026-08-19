@@ -14,6 +14,8 @@ namespace DefaultNamespace
     {
         private readonly AddressableContentService addressableContentService;
         private readonly PlayerLivesPresentationService playerLivesPresentationService;
+        private readonly HomeMapFlow homeMapFlow;
+        private readonly HomeShopFlow homeShopFlow;
         private HomeMiddleTab? activeMiddleTab;
         private int? currentChapterId;
         private CancellationTokenSource livesDisplayCancellation;
@@ -27,6 +29,8 @@ namespace DefaultNamespace
         {
             this.addressableContentService = addressableContentService ?? throw new ArgumentNullException(nameof(addressableContentService));
             this.playerLivesPresentationService = playerLivesPresentationService ?? throw new ArgumentNullException(nameof(playerLivesPresentationService));
+            homeMapFlow = new HomeMapFlow();
+            homeShopFlow = new HomeShopFlow();
         }
 
         /// <summary>
@@ -34,6 +38,7 @@ namespace DefaultNamespace
         /// </summary>
         public async UniTask Enter()
         {
+            // [Duong] Bind Home events.
             UIManager.Instance.LevelSelected += HandleLevelSelected;
             UIManager.Instance.HomeTabRequested += HandleHomeTabRequested;
             UIManager.Instance.ChapterVisitRequested += HandleChapterVisitRequested;
@@ -43,6 +48,8 @@ namespace DefaultNamespace
             UIManager.Instance.AddCurrencyRequested += HandleAddCurrencyRequested;
 
             playerLivesPresentationService.ServerLivesSnapshotChanged += HandleServerLivesSnapshotChanged;
+
+            // [Duong] Resolve the current chapter.
             PlayerAccount account = PlayerAccountContext.Instance.CurrentAccount;
             PlayerProgressionData progression = account.Progression;
             if (!currentChapterId.HasValue) currentChapterId = PlayerPrefsStore.LoadLastSelectedChapterId();
@@ -51,11 +58,18 @@ namespace DefaultNamespace
                 : ConfigManager.Instance.ChapterIndex.GetLatestUnlockedEntry(progression.highestUnlockedLevel);
             if (chapterEntry.unlockLevelId > progression.highestUnlockedLevel)
                 throw new InvalidOperationException($"Stored chapter {chapterEntry.chapterId} requires level {chapterEntry.unlockLevelId}, but the highest unlocked level is {progression.highestUnlockedLevel}.");
+
+            // [Duong] Prepare chapter content.
             await addressableContentService.EnsureDownloadedAsync(chapterEntry.downloadLabel);
             ChapterContent chapterContent = await ConfigManager.Instance.GetChapterContentAsync(chapterEntry.chapterId);
-            await UIManager.Instance.ShowHome(chapterContent, progression, playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
+
+            // [Duong] Enter the initial Map tab.
+            await UIManager.Instance.ShowHome(chapterContent.Definition.topperPrefabAddress, chapterContent.Definition.bottomNavigationPrefabAddress, playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
+            homeMapFlow.SetCurrentMapChapter(chapterContent);
             await ChangeTabAsync(HomeMiddleTab.Map);
             SetCurrentChapter(chapterEntry.chapterId);
+
+            // [Duong] Start the lives display loop.
             livesDisplayCancellation = new CancellationTokenSource();
             UpdateLivesDisplayLoop(livesDisplayCancellation.Token).Forget();
         }
@@ -142,7 +156,21 @@ namespace DefaultNamespace
 
         private async UniTask ChangeTabAsync(HomeMiddleTab tab)
         {
-            await UIManager.Instance.DisplayHomeTabAsync(tab);
+            switch (tab)
+            {
+                case HomeMiddleTab.Map:
+                    await homeMapFlow.EnterMapAsync();
+                    break;
+                case HomeMiddleTab.Friends:
+                    UIManager.Instance.DisplayHomeFriends();
+                    break;
+                case HomeMiddleTab.Shop:
+                    if (!await homeShopFlow.TryEnterShopAsync()) return;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(tab), tab, "Unknown Home middle tab.");
+            }
+
             activeMiddleTab = tab;
         }
 
@@ -153,8 +181,8 @@ namespace DefaultNamespace
             {
                 await addressableContentService.EnsureDownloadedAsync(chapterEntry.downloadLabel);
                 ChapterContent chapterContent = await ConfigManager.Instance.GetChapterContentAsync(chapterId);
-                PlayerProgressionData progression = PlayerAccountContext.Instance.GetCurrentProgression();
-                await UIManager.Instance.ShowHome(chapterContent, progression, playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
+                await UIManager.Instance.ShowHome(chapterContent.Definition.topperPrefabAddress, chapterContent.Definition.bottomNavigationPrefabAddress, playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
+                homeMapFlow.SetCurrentMapChapter(chapterContent);
                 await ChangeTabAsync(HomeMiddleTab.Map);
                 UIManager.Instance.HideChapterChooser();
                 SetCurrentChapter(chapterId);

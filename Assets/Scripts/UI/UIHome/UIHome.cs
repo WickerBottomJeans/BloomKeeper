@@ -14,7 +14,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private RectTransform fullScreenRoot;
         [SerializeField] private UILevelSelect levelSelectPrefab;
         [SerializeField] private UIFriendsView friendsPrefab;
-        [SerializeField] private UIShopView shopPrefab;
+        [SerializeField] private UIMainShopTab shopPrefab;
         [SerializeField] private UIChapterChooser chapterChooser;
 
         private AsyncOperationHandle<GameObject> topperInstanceHandle;
@@ -23,9 +23,7 @@ namespace DefaultNamespace.UI
         private ChapterBottomView bottomView;
         private UILevelSelect levelSelectInstance;
         private UIFriendsView friendsInstance;
-        private UIShopView shopInstance;
-        private ChapterContent displayedChapter;
-        private PlayerProgressionData displayedProgression;
+        private UIMainShopTab shopInstance;
         private string displayedTopperAddress;
         private string displayedBottomNavigationAddress;
         private int chapterDisplayRequestId;
@@ -45,46 +43,41 @@ namespace DefaultNamespace.UI
             chapterChooser.HideChapterChooser();
         }
 
-        public async UniTask ShowAsync(ChapterContent chapter, PlayerProgressionData progression, PlayerLivesViewData lives)
+        public async UniTask ShowAsync(string topperPrefabAddress, string bottomNavigationPrefabAddress, PlayerLivesViewData lives)
         {
-            if (chapter == null) throw new ArgumentNullException(nameof(chapter));
-            if (progression == null) throw new ArgumentNullException(nameof(progression));
             if (lives == null) throw new ArgumentNullException(nameof(lives));
 
             gameObject.SetActive(true);
-            ChapterDefinition definition = chapter.Definition;
-            if (displayedTopperAddress != definition.topperPrefabAddress || displayedBottomNavigationAddress != definition.bottomNavigationPrefabAddress)
-                await DisplayChapterViewsAsync(definition.topperPrefabAddress, definition.bottomNavigationPrefabAddress);
+            if (displayedTopperAddress != topperPrefabAddress || displayedBottomNavigationAddress != bottomNavigationPrefabAddress)
+                await DisplayChapterViewsAsync(topperPrefabAddress, bottomNavigationPrefabAddress);
 
-            displayedChapter = chapter;
-            displayedProgression = progression;
             topperView.DisplayLives(lives);
         }
 
-        public async UniTask DisplayMiddleTabAsync(HomeMiddleTab tab)
+        public async UniTask DisplayMapAsync(ChapterContent chapter, PlayerProgressionData progression)
         {
-            switch (tab)
-            {
-                case HomeMiddleTab.Map:
-                    friendsInstance?.Hide();
-                    shopInstance?.Hide();
-                    await ShowMapAsync();
-                    break;
-                case HomeMiddleTab.Friends:
-                    levelSelectInstance?.Hide();
-                    shopInstance?.Hide();
-                    if (friendsInstance == null) friendsInstance = Instantiate(friendsPrefab, middleSlot, false);
-                    friendsInstance.Show();
-                    break;
-                case HomeMiddleTab.Shop:
-                    levelSelectInstance?.Hide();
-                    friendsInstance?.Hide();
-                    if (shopInstance == null) shopInstance = Instantiate(shopPrefab, middleSlot, false);
-                    shopInstance.Show();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(tab), tab, "Unknown Home middle tab.");
-            }
+            if (chapter == null) throw new ArgumentNullException(nameof(chapter));
+            if (progression == null) throw new ArgumentNullException(nameof(progression));
+
+            friendsInstance?.Hide();
+            shopInstance?.Hide();
+            await ShowMapAsync(chapter, progression);
+        }
+
+        public void DisplayFriends()
+        {
+            levelSelectInstance?.Hide();
+            shopInstance?.Hide();
+            if (friendsInstance == null) friendsInstance = Instantiate(friendsPrefab, middleSlot, false);
+            friendsInstance.Show();
+        }
+
+        public void DisplayShop(LoadShopResponse mainShopResponse)
+        {
+            levelSelectInstance?.Hide();
+            friendsInstance?.Hide();
+            if (shopInstance == null) shopInstance = Instantiate(shopPrefab, middleSlot, false);
+            shopInstance.DisplayMainShop(mainShopResponse);
         }
 
         public async UniTask PrepareChapterChooserAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)
@@ -177,17 +170,15 @@ namespace DefaultNamespace.UI
             }
         }
 
-        private async UniTask ShowMapAsync()
+        private async UniTask ShowMapAsync(ChapterContent chapter, PlayerProgressionData progression)
         {
-            if (displayedChapter == null) throw new InvalidOperationException("UIHome cannot display the Map tab before receiving chapter content.");
-            if (displayedProgression == null) throw new InvalidOperationException("UIHome cannot display the Map tab before receiving progression data.");
             if (levelSelectInstance == null)
             {
                 levelSelectInstance = Instantiate(levelSelectPrefab, middleSlot, false);
                 levelSelectInstance.OnLevelSelected += HandleLevelSelected;
             }
 
-            await levelSelectInstance.Show(displayedChapter, displayedProgression);
+            await levelSelectInstance.Show(chapter, progression);
             await levelSelectInstance.WaitForInitialBackgroundLoaded();
         }
 
