@@ -16,7 +16,7 @@ namespace DefaultNamespace
 
         private readonly ConfigManager configManager;
         private readonly PlayFabLevelAttemptService levelAttemptService;
-        private readonly PlayFabBoosterInventoryService boosterInventoryService;
+        private readonly PlayFabInventoryService inventoryService;
         private readonly PlayerLivesPresentationService playerLivesPresentationService;
         private int? currentLevelId;
         private Texture2D capturedBackground;
@@ -26,11 +26,11 @@ namespace DefaultNamespace
         public event Action<int> RetryRequested;
         public event Action<int> NextLevelRequested;
 
-        public FinishLevelFlow(ConfigManager configManager, PlayFabLevelAttemptService levelAttemptService, PlayFabBoosterInventoryService boosterInventoryService, PlayerLivesPresentationService playerLivesPresentationService)
+        public FinishLevelFlow(ConfigManager configManager, PlayFabLevelAttemptService levelAttemptService, PlayFabInventoryService inventoryService, PlayerLivesPresentationService playerLivesPresentationService)
         {
             this.configManager = configManager ?? throw new ArgumentNullException(nameof(configManager));
             this.levelAttemptService = levelAttemptService ?? throw new ArgumentNullException(nameof(levelAttemptService));
-            this.boosterInventoryService = boosterInventoryService ?? throw new ArgumentNullException(nameof(boosterInventoryService));
+            this.inventoryService = inventoryService ?? throw new ArgumentNullException(nameof(inventoryService));
             this.playerLivesPresentationService = playerLivesPresentationService ?? throw new ArgumentNullException(nameof(playerLivesPresentationService));
         }
 
@@ -70,7 +70,7 @@ namespace DefaultNamespace
                 {
                     response = await SubmitLevelCompletion(result, levelAttemptId);
                 }
-                catch (LevelCompletionSubmissionException exception) when (exception.IsRetryable)
+                catch (PlayFabRequestException exception) when (exception.IsRetryable)
                 {
                     Debug.LogWarning(exception);
                     response = await RunLevelCompletionRetryDialog(result, levelAttemptId);
@@ -127,7 +127,7 @@ namespace DefaultNamespace
             if (response.outcome == CompleteLevelAttemptOutcome.Saved)
             {
                 account.ApplyConfirmedLevelProgress(response.levelId, response.levelProgress, response.highestUnlockedLevel);
-                if (result.DidWin) account.ReplaceBoosterInventory(boosterInventoryService.CreateBoosterInventory(response.boosterInventorySnapshot));
+                if (result.DidWin) account.ReplacePlayerInventory(inventoryService.CreatePlayerInventory(response.playerInventorySnapshot));
             }
             return response;
         }
@@ -148,7 +148,7 @@ namespace DefaultNamespace
                         response = await SubmitLevelCompletion(result, levelAttemptId);
                         return;
                     }
-                    catch (LevelCompletionSubmissionException exception) when (exception.IsRetryable)
+                    catch (PlayFabRequestException exception) when (exception.IsRetryable)
                     {
                         Debug.LogWarning(exception);
                     }

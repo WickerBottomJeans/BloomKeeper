@@ -3,13 +3,20 @@ using Newtonsoft.Json;
 
 namespace BloomKeeper.PlayFabFunctions.Services;
 
+/// <summary>
+/// Loads and validates shop config from R2.
+/// </summary>
 public class ShopConfigService
 {
     private const string RemoteConfigBaseUrlEnvironmentVariable = "REMOTE_CONFIG_BASE_URL";
     private const int CurrentSchemaVersion = 1;
+    private const int MaximumInventoryOperationsPerBatch = 50;
     private static readonly HttpClient HttpClient = new HttpClient();
     private readonly Uri remoteConfigBaseUri;
 
+    /// <summary>
+    /// Reads the R2 config base URL.
+    /// </summary>
     public ShopConfigService()
     {
         string remoteConfigBaseUrl = Environment.GetEnvironmentVariable(RemoteConfigBaseUrlEnvironmentVariable);
@@ -18,19 +25,44 @@ public class ShopConfigService
         remoteConfigBaseUri = parsedRemoteConfigBaseUri.AbsoluteUri.EndsWith('/') ? parsedRemoteConfigBaseUri : new Uri($"{parsedRemoteConfigBaseUri.AbsoluteUri}/");
     }
 
+    /// <summary>
+    /// Loads and validates one shop's offers and shopfront.
+    /// </summary>
     public async Task<ShopConfig> LoadShop(string shopId)
     {
         ValidateShopId(shopId);
+
+        // Load offers and shopfront together.
         Task<ShopOfferCatalogConfig> offerCatalogTask = LoadConfig<ShopOfferCatalogConfig>($"shops/{shopId}/offers.json");
         Task<ShopfrontConfig> shopfrontTask = LoadConfig<ShopfrontConfig>($"shops/{shopId}/shopfront.json");
         await Task.WhenAll(offerCatalogTask, shopfrontTask);
 
         ShopOfferCatalogConfig offerCatalog = await offerCatalogTask;
         ShopfrontConfig shopfront = await shopfrontTask;
+        // Validate both files as one shop.
         ValidateShop(offerCatalog, shopfront);
         return new ShopConfig(shopId, offerCatalog, shopfront);
     }
 
+    /// <summary>
+    /// Loads an offer that is currently displayed and enabled.
+    /// </summary>
+    public async Task<ShopOfferConfig> LoadPurchasableOffer(string shopId, string offerId)
+    {
+        ValidateOfferId(offerId);
+        ShopConfig shopConfig = await LoadShop(shopId);
+
+        if (!shopConfig.shopfront.offerIds.Contains(offerId)) throw new InvalidOperationException($"Shop {shopId} does not display offer {offerId}.");
+
+        ShopOfferConfig shopOffer = shopConfig.offerCatalog.offers.Single(offer => offer.offerId == offerId);
+        if (!shopOffer.enabled) throw new InvalidOperationException($"Shop offer {offerId} is disabled.");
+
+        return shopOffer;
+    }
+
+    /// <summary>
+    /// Loads one JSON config file from R2.
+    /// </summary>
     private async Task<T> LoadConfig<T>(string relativePath)
     {
         Uri configUri = new Uri(remoteConfigBaseUri, relativePath);
@@ -49,18 +81,35 @@ public class ShopConfigService
         }
     }
 
+    /// <summary>
+    /// Checks that a shop ID is valid for its R2 path.
+    /// </summary>
     private static void ValidateShopId(string shopId)
     {
         if (string.IsNullOrWhiteSpace(shopId)) throw new ArgumentException("Shop ID is missing.", nameof(shopId));
         if (!shopId.All(character => char.IsLower(character) || char.IsDigit(character) || character == '_')) throw new ArgumentException("Shop ID must contain only lowercase letters, digits, and underscores.", nameof(shopId));
     }
 
+    /// <summary>
+    /// Checks that an offer ID was provided.
+    /// </summary>
+    private static void ValidateOfferId(string offerId)
+    {
+        if (string.IsNullOrWhiteSpace(offerId)) throw new ArgumentException("Offer ID is missing.", nameof(offerId));
+    }
+
+    /// <summary>
+    /// Validates a shop's offers and shopfront.
+    /// </summary>
     private static void ValidateShop(ShopOfferCatalogConfig offerCatalog, ShopfrontConfig shopfront)
     {
         ValidateOfferCatalog(offerCatalog);
         ValidateShopfront(shopfront, offerCatalog.offers);
     }
 
+    /// <summary>
+    /// Validates all offers in a shop config.
+    /// </summary>
     private static void ValidateOfferCatalog(ShopOfferCatalogConfig offerCatalog)
     {
         if (offerCatalog == null) throw new InvalidOperationException("Shop offer catalog contains invalid JSON.");
@@ -68,7 +117,7 @@ public class ShopConfigService
         if (offerCatalog.revision <= 0) throw new InvalidOperationException("Shop offer catalog revision must be greater than zero.");
         if (offerCatalog.offers == null || offerCatalog.offers.Count == 0) throw new InvalidOperationException("Shop offer catalog must contain at least one offer.");
 
-        var observedOfferIds = new HashSet<string>(StringComparer.Ordinal);
+        var observedOfferIds = new HashSet<string>();
         foreach (ShopOfferConfig offer in offerCatalog.offers)
         {
             if (offer == null) throw new InvalidOperationException("Shop offer catalog contains a null offer.");
@@ -80,19 +129,27 @@ public class ShopConfigService
         }
     }
 
+    /// <summary>
+    /// Validates an offer's inventory cost.
+    /// </summary>
     private static void ValidateOfferCost(ShopOfferConfig offer)
     {
         if (offer.cost == null) throw new InvalidOperationException($"Shop offer {offer.offerId} has no cost.");
-        if (string.IsNullOrWhiteSpace(offer.cost.itemFriendlyId)) throw new InvalidOperationException($"Shop offer {offer.offerId} cost has no item Friendly ID.");
+        if (string.IsNullOrWhiteSpace(offer.cost.itemCatalogId)) throw new InvalidOperationException($"Shop offer {offer.offerId} cost has no item catalog ID.");
         if (string.IsNullOrWhiteSpace(offer.cost.presentationKey)) throw new InvalidOperationException($"Shop offer {offer.offerId} cost has no presentation key.");
         if (offer.cost.quantity <= 0) throw new InvalidOperationException($"Shop offer {offer.offerId} cost quantity must be greater than zero.");
     }
 
+    /// <summary>
+    /// Validates every grant in an offer.
+    /// </summary>
     private static void ValidateOfferGrants(ShopOfferConfig offer)
     {
         if (offer.grants == null || offer.grants.Count == 0) throw new InvalidOperationException($"Shop offer {offer.offerId} must contain at least one grant.");
+        int inventoryItemGrantCount = offer.grants.Count(grant => grant?.kind == ShopGrantKind.InventoryItem);
+        if (inventoryItemGrantCount + 1 > MaximumInventoryOperationsPerBatch) throw new InvalidOperationException($"Shop offer {offer.offerId} exceeds the {MaximumInventoryOperationsPerBatch}-operation inventory batch limit.");
 
-        var observedGrantIds = new HashSet<string>(StringComparer.Ordinal);
+        var observedGrantIds = new HashSet<string>();
         foreach (ShopGrantConfig grant in offer.grants)
         {
             if (grant == null) throw new InvalidOperationException($"Shop offer {offer.offerId} contains a null grant.");
@@ -118,19 +175,28 @@ public class ShopConfigService
         }
     }
 
+    /// <summary>
+    /// Validates an inventory-item grant.
+    /// </summary>
     private static void ValidateInventoryItemGrant(string offerId, ShopGrantConfig grant)
     {
         if (grant.inventoryItem == null) throw new InvalidOperationException($"Shop offer {offerId} grant {grant.grantId} kind does not match its payload.");
-        if (string.IsNullOrWhiteSpace(grant.inventoryItem.itemFriendlyId)) throw new InvalidOperationException($"Shop offer {offerId} grant {grant.grantId} has no inventory item Friendly ID.");
+        if (string.IsNullOrWhiteSpace(grant.inventoryItem.itemCatalogId)) throw new InvalidOperationException($"Shop offer {offerId} grant {grant.grantId} has no inventory item catalog ID.");
         if (grant.inventoryItem.quantity <= 0) throw new InvalidOperationException($"Shop offer {offerId} grant {grant.grantId} inventory item quantity must be greater than zero.");
     }
 
+    /// <summary>
+    /// Validates an unlimited-lives grant.
+    /// </summary>
     private static void ValidateUnlimitedLivesGrant(string offerId, ShopGrantConfig grant)
     {
         if (grant.unlimitedLives == null) throw new InvalidOperationException($"Shop offer {offerId} grant {grant.grantId} kind does not match its payload.");
         if (grant.unlimitedLives.durationMinutes <= 0) throw new InvalidOperationException($"Shop offer {offerId} grant {grant.grantId} unlimited lives duration must be greater than zero.");
     }
 
+    /// <summary>
+    /// Validates the offers and order in a shopfront.
+    /// </summary>
     private static void ValidateShopfront(ShopfrontConfig shopfront, IReadOnlyList<ShopOfferConfig> offers)
     {
         if (shopfront == null) throw new InvalidOperationException("Shopfront contains invalid JSON.");
@@ -138,8 +204,8 @@ public class ShopConfigService
         if (shopfront.revision <= 0) throw new InvalidOperationException("Shopfront revision must be greater than zero.");
         if (shopfront.offerIds == null || shopfront.offerIds.Count == 0) throw new InvalidOperationException("Shopfront must contain at least one offer ID.");
 
-        var offersById = new HashSet<string>(offers.Select(offer => offer.offerId), StringComparer.Ordinal);
-        var observedOfferIds = new HashSet<string>(StringComparer.Ordinal);
+        var offersById = new HashSet<string>(offers.Select(offer => offer.offerId));
+        var observedOfferIds = new HashSet<string>();
         foreach (string offerId in shopfront.offerIds)
         {
             if (string.IsNullOrWhiteSpace(offerId)) throw new InvalidOperationException("Shopfront contains an empty offer ID.");

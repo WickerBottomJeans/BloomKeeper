@@ -46,12 +46,12 @@ public class RewardConfigService
     {
         if (config == null) throw new InvalidOperationException("Completion reward config contains invalid JSON.");
         if (config.schemaVersion != RewardContract.CurrentSchemaVersion) throw new InvalidOperationException($"Completion reward config schema version {config.schemaVersion} is unsupported. Expected {RewardContract.CurrentSchemaVersion}.");
-        if (!string.Equals(config.tableId, CompletionRewardTableId, StringComparison.Ordinal)) throw new InvalidOperationException($"Completion reward config table ID must be {CompletionRewardTableId}.");
+        if (!string.Equals(config.tableId, CompletionRewardTableId)) throw new InvalidOperationException($"Completion reward config table ID must be {CompletionRewardTableId}.");
         if (string.IsNullOrWhiteSpace(config.revision)) throw new InvalidOperationException("Completion reward config revision is missing.");
         if (config.awardChanceBasisPoints < 0 || config.awardChanceBasisPoints > MaximumAwardChanceBasisPoints) throw new InvalidOperationException($"Completion reward config award chance must be between 0 and {MaximumAwardChanceBasisPoints} basis points.");
         if (config.entries == null || config.entries.Count == 0) throw new InvalidOperationException("Completion reward config must contain at least one weighted entry.");
 
-        var observedRewardIds = new HashSet<string>(StringComparer.Ordinal);
+        var observedRewardIds = new HashSet<string>();
         int totalWeight = 0;
         foreach (WeightedRewardEntry entry in config.entries)
         {
@@ -93,7 +93,7 @@ public class RewardConfigService
     private static void ValidateInventoryItemRewardGrant(RewardGrant grant)
     {
         if (grant.inventoryItem == null) throw new InvalidOperationException($"Completion reward {grant.rewardId} kind does not match its payload.");
-        if (string.IsNullOrWhiteSpace(grant.inventoryItem.itemFriendlyId)) throw new InvalidOperationException($"Completion reward {grant.rewardId} has no inventory item Friendly ID.");
+        if (string.IsNullOrWhiteSpace(grant.inventoryItem.itemCatalogId)) throw new InvalidOperationException($"Completion reward {grant.rewardId} has no inventory item catalog ID.");
         if (grant.inventoryItem.quantity <= 0) throw new InvalidOperationException($"Completion reward {grant.rewardId} inventory quantity must be greater than zero.");
     }
 

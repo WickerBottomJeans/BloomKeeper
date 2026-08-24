@@ -65,7 +65,7 @@ public class RewardFulfillmentService
 
         var economyApi = contextReader.CreateEconomyApi(context);
         var callerEntity = contextReader.GetCallerEconomyEntity(context);
-        await inventoryService.AddInventoryItem(economyApi, callerEntity, reward.inventoryItem.itemFriendlyId, reward.inventoryItem.quantity, rewardGrantIdempotencyKey);
+        await inventoryService.AddInventoryItem(economyApi, callerEntity, reward.inventoryItem.itemCatalogId, reward.inventoryItem.quantity, rewardGrantIdempotencyKey);
         return new InventoryItemRewardFulfillmentResult(reward);
     }
 }

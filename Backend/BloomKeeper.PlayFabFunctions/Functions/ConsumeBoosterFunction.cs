@@ -19,12 +19,12 @@ public class ConsumeBoosterFunction
         PlayFabFunctionExecutionContext context = await contextReader.ReadContext(request);
         ConsumeBoosterRequest consumeRequest = contextReader.GetFunctionArgument<ConsumeBoosterRequest>(context);
         if (!Guid.TryParseExact(consumeRequest.boosterConsumptionIdempotencyKey, "N", out Guid parsedBoosterConsumptionIdempotencyKey)) throw new InvalidOperationException("ConsumeBooster idempotency key is invalid.");
-        if (string.IsNullOrWhiteSpace(consumeRequest.boosterFriendlyId)) throw new InvalidOperationException("ConsumeBooster Friendly ID is missing.");
+        if (string.IsNullOrWhiteSpace(consumeRequest.boosterCatalogId)) throw new InvalidOperationException("ConsumeBooster catalog ID is missing.");
 
         var economyApi = contextReader.CreateEconomyApi(context);
         var callerEntity = contextReader.GetCallerEconomyEntity(context);
-        (ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, Dictionary<string, int> quantities) = await inventoryStore.ConsumeOne(economyApi, callerEntity, consumeRequest.boosterFriendlyId, parsedBoosterConsumptionIdempotencyKey.ToString("N"));
-        var response = new ConsumeBoosterResponse { outcome = outcome, rejectionReason = rejectionReason, quantitiesByFriendlyId = quantities };
+        (ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, PlayerInventorySnapshot playerInventorySnapshot) = await inventoryStore.ConsumeOne(economyApi, callerEntity, consumeRequest.boosterCatalogId, parsedBoosterConsumptionIdempotencyKey.ToString("N"));
+        var response = new ConsumeBoosterResponse { outcome = outcome, rejectionReason = rejectionReason, playerInventorySnapshot = playerInventorySnapshot };
         string json = JsonConvert.SerializeObject(response);
         return new ContentResult { Content = json, ContentType = "application/json", StatusCode = StatusCodes.Status200OK };
     }

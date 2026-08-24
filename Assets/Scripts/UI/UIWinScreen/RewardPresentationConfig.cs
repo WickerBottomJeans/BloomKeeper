@@ -16,7 +16,7 @@ namespace UI
             RewardPresentationMapping matchingRewardPresentationMapping = null;
             foreach (RewardPresentationMapping rewardPresentationMapping in rewardPresentationMappings)
             {
-                if (!string.Equals(rewardPresentationMapping.PresentationKey, presentationKey, StringComparison.Ordinal)) continue;
+                if (!string.Equals(rewardPresentationMapping.PresentationKey, presentationKey)) continue;
                 if (matchingRewardPresentationMapping != null) throw new InvalidOperationException($"RewardPresentationConfig contains duplicate presentation key {presentationKey}.");
                 matchingRewardPresentationMapping = rewardPresentationMapping;
             }

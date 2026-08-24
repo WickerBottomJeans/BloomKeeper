@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Newtonsoft.Json;
+using PlayFab.EconomyModels;
 
 namespace BloomKeeper.PlayFabFunctions.Functions;
 
@@ -25,14 +26,12 @@ public class CompleteLevelAttemptFunction
     private readonly LivesService livesService = new LivesService();
     private readonly RewardConfigService rewardConfigService = new RewardConfigService();
     private readonly RewardService rewardService = new RewardService();
+    private readonly PlayFabInventoryService inventoryService = new PlayFabInventoryService();
     private readonly RewardFulfillmentService rewardFulfillmentService;
-    private readonly PlayFabBoosterInventoryStore boosterInventoryStore;
 
     public CompleteLevelAttemptFunction()
     {
-        var inventoryService = new PlayFabInventoryService();
         rewardFulfillmentService = new RewardFulfillmentService(contextReader, inventoryService);
-        boosterInventoryStore = new PlayFabBoosterInventoryStore(inventoryService);
     }
 
     [Function("CompleteLevelAttempt")]
@@ -135,8 +134,8 @@ public class CompleteLevelAttemptFunction
 
             if (response.outcome == CompleteLevelAttemptOutcome.Saved && attemptRequest.didWin)
             {
-                Dictionary<string, int> boosterQuantitiesByFriendlyId = await boosterInventoryStore.LoadInventory(contextReader.CreateEconomyApi(context), contextReader.GetCallerEconomyEntity(context));
-                response.boosterInventorySnapshot = new BoosterInventorySnapshot { quantitiesByFriendlyId = boosterQuantitiesByFriendlyId };
+                IReadOnlyList<InventoryItem> inventoryItems = await inventoryService.LoadPlayerInventoryItems(contextReader.CreateEconomyApi(context), contextReader.GetCallerEconomyEntity(context));
+                response.playerInventorySnapshot = inventoryService.CreatePlayerInventorySnapshot(inventoryItems);
             }
 
             // Return completion response

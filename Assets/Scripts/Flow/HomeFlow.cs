@@ -46,6 +46,7 @@ namespace DefaultNamespace
             UIManager.Instance.SettingsRequested += HandleSettingsRequested;
             UIManager.Instance.AddLifeRequested += HandleAddLifeRequested;
             UIManager.Instance.AddCurrencyRequested += HandleAddCurrencyRequested;
+            homeShopFlow.Enter();
 
             playerLivesPresentationService.ServerLivesSnapshotChanged += HandleServerLivesSnapshotChanged;
 
@@ -64,7 +65,7 @@ namespace DefaultNamespace
             ChapterContent chapterContent = await ConfigManager.Instance.GetChapterContentAsync(chapterEntry.chapterId);
 
             // [Duong] Enter the initial Map tab.
-            await UIManager.Instance.ShowHome(chapterContent.Definition.topperPrefabAddress, chapterContent.Definition.bottomNavigationPrefabAddress, playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
+            await UIManager.Instance.ShowHome(chapterContent.Definition.topperPrefabAddress, chapterContent.Definition.bottomNavigationPrefabAddress, playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow), account.PlayerInventory.DiamondQuantity);
             homeMapFlow.SetCurrentMapChapter(chapterContent);
             await ChangeTabAsync(HomeMiddleTab.Map);
             SetCurrentChapter(chapterEntry.chapterId);
@@ -86,6 +87,7 @@ namespace DefaultNamespace
             UIManager.Instance.SettingsRequested -= HandleSettingsRequested;
             UIManager.Instance.AddLifeRequested -= HandleAddLifeRequested;
             UIManager.Instance.AddCurrencyRequested -= HandleAddCurrencyRequested;
+            homeShopFlow.Exit();
             playerLivesPresentationService.ServerLivesSnapshotChanged -= HandleServerLivesSnapshotChanged;
             livesDisplayCancellation.Cancel();
             livesDisplayCancellation.Dispose();
@@ -181,7 +183,7 @@ namespace DefaultNamespace
             {
                 await addressableContentService.EnsureDownloadedAsync(chapterEntry.downloadLabel);
                 ChapterContent chapterContent = await ConfigManager.Instance.GetChapterContentAsync(chapterId);
-                await UIManager.Instance.ShowHome(chapterContent.Definition.topperPrefabAddress, chapterContent.Definition.bottomNavigationPrefabAddress, playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
+                await UIManager.Instance.ShowHome(chapterContent.Definition.topperPrefabAddress, chapterContent.Definition.bottomNavigationPrefabAddress, playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow), PlayerAccountContext.Instance.GetCurrentPlayerInventory().DiamondQuantity);
                 homeMapFlow.SetCurrentMapChapter(chapterContent);
                 await ChangeTabAsync(HomeMiddleTab.Map);
                 UIManager.Instance.HideChapterChooser();

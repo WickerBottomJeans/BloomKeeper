@@ -41,13 +41,13 @@ namespace DefaultNamespace
                     PlayerAccount account = PlayerAccountContext.Instance.CurrentAccount;
                     response = await ApplicationPresentationService.Instance.RunWithLoading(() => levelAttemptService.AbandonLevelAttempt(account.AuthSession, levelAttemptId));
                 }
-                catch (LevelAttemptRequestException exception) when (exception.IsRetryable)
+                catch (PlayFabRequestException exception) when (exception.IsRetryable)
                 {
                     Debug.LogWarning(exception);
                     if (await RunRetryDecisionDialog(LevelAttemptDialogText.RetryTitle, LevelAttemptDialogText.AbandonRetryMessage)) continue;
                     return false;
                 }
-                catch (LevelAttemptRequestException exception)
+                catch (PlayFabRequestException exception)
                 {
                     Debug.LogWarning(exception);
                     await RunInformationDialog(LevelAttemptDialogText.AbandonRejectionTitle, LevelAttemptDialogText.AbandonRetryMessage);

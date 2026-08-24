@@ -42,17 +42,17 @@ namespace DefaultNamespace
             var guestLoginService = new PlayFabGuestLoginService(guestCustomIdStore);
             var playerStateService = new PlayFabPlayerStateService();
             var levelAttemptService = new PlayFabLevelAttemptService();
-            var boosterInventoryService = new PlayFabBoosterInventoryService();
+            var inventoryService = new PlayFabInventoryService();
             var playerLivesPresentationService = new PlayerLivesPresentationService();
             var addressableContentService = new AddressableContentService();
             var bootFlow = new BootFlow(addressableContentService);
-            var playerSessionLoader = new PlayerSessionLoader(playerStateService, boosterInventoryService);
+            var playerSessionLoader = new PlayerSessionLoader(playerStateService, inventoryService);
             var authFlow = new AuthFlow(guestLoginService, playerSessionLoader, playerLivesPresentationService);
             var homeFlow = new HomeFlow(addressableContentService, playerLivesPresentationService);
             var levelSetupFlow = new LevelSetupFlow(ConfigManager.Instance, levelAttemptService, playerLivesPresentationService);
             var playLevelFlow = new PlayLevelFlow(levelSessionRuntime);
             var quitLevelFlow = new QuitLevelFlow(levelAttemptService);
-            var finishLevelFlow = new FinishLevelFlow(ConfigManager.Instance, levelAttemptService, boosterInventoryService, playerLivesPresentationService);
+            var finishLevelFlow = new FinishLevelFlow(ConfigManager.Instance, levelAttemptService, inventoryService, playerLivesPresentationService);
             var settingsFlow = new SettingsFlow();
             return new ApplicationStateMachine(bootFlow, authFlow, homeFlow, levelSetupFlow, playLevelFlow, quitLevelFlow, finishLevelFlow, settingsFlow, musicStateController);
         }

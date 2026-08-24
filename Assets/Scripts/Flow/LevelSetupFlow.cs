@@ -65,13 +65,13 @@ namespace DefaultNamespace
                 {
                     response = await levelAttemptService.StartLevelAttempt(PlayerAccountContext.Instance.CurrentAccount.AuthSession, startLevelRequestIdempotencyKey, levelId);
                 }
-                catch (LevelAttemptRequestException exception) when (exception.IsRetryable)
+                catch (PlayFabRequestException exception) when (exception.IsRetryable)
                 {
                     Debug.LogWarning(exception);
                     if (await RunRetryDecisionDialog(LevelAttemptDialogText.RetryTitle, LevelAttemptDialogText.StartRetryMessage)) continue;
                     return null;
                 }
-                catch (LevelAttemptRequestException exception)
+                catch (PlayFabRequestException exception)
                 {
                     Debug.LogWarning(exception);
                     await RunInformationDialog(LevelAttemptDialogText.RejectionTitle, LevelAttemptDialogText.StartRetryMessage);

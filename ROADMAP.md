@@ -113,6 +113,7 @@ Currency, rewards, spending, boosters, inventory, and one real-money purchase fo
 - [ ] Require each newly introduced objective, constraint, or board mechanic to have a deliberate onboarding level before it appears in mixed or advanced levels.
 - [ ] Define schema and content versions for levels, scoring, economy, offers, and feature configuration.
 - [ ] Add a remote content manifest that identifies compatible content versions and files.
+- [ ] Publish level updates as immutable content revisions and make every new server-approved level attempt resolve and pin the active revision. A player who already has the game running must detect and download a newly published level JSON before starting their next attempt without rebooting, while an attempt already in progress must finish on its pinned revision.
 - [ ] Fetch published level and configuration content from the backend, synchronize and verify it before level selection or when a newer compatible version is available, and start levels only from the resulting verified client cache rather than bundled local configuration.
 - [ ] Make level, scoring, and manifest loading platform-safe, including Android StreamingAssets behavior.
 - [ ] Verify downloaded content with hashes or equivalent integrity metadata.

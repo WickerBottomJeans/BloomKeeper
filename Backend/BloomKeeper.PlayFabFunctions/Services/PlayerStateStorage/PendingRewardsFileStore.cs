@@ -34,7 +34,7 @@ public class PendingRewardsFileStore
         if (pendingRewards.schemaVersion != PendingRewardsData.CurrentSchemaVersion) throw new InvalidOperationException($"PlayFab pending-rewards file has unsupported schema version: {pendingRewards.schemaVersion}.");
         if (pendingRewards.batches == null) throw new InvalidOperationException("PlayFab pending-rewards file has no batches collection.");
 
-        var observedRewardBatchIds = new HashSet<string>(StringComparer.Ordinal);
+        var observedRewardBatchIds = new HashSet<string>();
         foreach (PendingRewardBatch batch in pendingRewards.batches)
         {
             if (batch == null) throw new InvalidOperationException("PlayFab pending-rewards file contains a null batch.");

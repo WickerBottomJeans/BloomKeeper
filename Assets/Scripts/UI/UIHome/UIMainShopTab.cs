@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
+    /// <summary>
+    /// Displays the main shop offer list.
+    /// </summary>
     public class UIMainShopTab : MonoBehaviour, IScrollPoolGeometrySource
     {
         [SerializeField] private RectTransform ShopCellRoot;
@@ -36,11 +39,20 @@ namespace DefaultNamespace.UI
 
         #region Public API
 
+        /// <summary>
+        /// Shop offer the player asked to buy.
+        /// </summary>
+        public event Action<string> BuyRequested;
+
+        /// <summary>
+        /// Displays offers from a LoadShop response.
+        /// </summary>
         public void DisplayMainShop(LoadShopResponse mainShopResponse)
         {
             if (mainShopResponse == null) throw new ArgumentNullException(nameof(mainShopResponse));
             if (mainShopResponse.offers == null) throw new ArgumentException("Main shop response has no offers.", nameof(mainShopResponse));
 
+            // Clear cells from the previous shop response.
             DisposeShopCellPool();
             displayedShopOffers = mainShopResponse.offers;
             shopCellHeight = ((RectTransform)shopCellTemplate.transform).rect.height;
@@ -48,9 +60,12 @@ namespace DefaultNamespace.UI
             ShopCellRoot.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, shopContentHeight);
             scrollRect.verticalNormalizedPosition = 1f;
             gameObject.SetActive(true);
-            shopCellPool = new VerticalScrollPool<UIMainShopCell>(ShopCellRoot, viewport, scrollRect, shopCellTemplate, this, null, DisplayShopCell, HideShopCell);
+            shopCellPool = new VerticalScrollPool<UIMainShopCell>(ShopCellRoot, viewport, scrollRect, shopCellTemplate, this, HandleShopCellCreated, DisplayShopCell, HideShopCell);
         }
 
+        /// <summary>
+        /// Hides the shop tab.
+        /// </summary>
         public void Hide()
         {
             gameObject.SetActive(false);
@@ -60,16 +75,41 @@ namespace DefaultNamespace.UI
 
         #region Private Methods
 
+        /// <summary>
+        /// Listens for Buy requests from a new shop cell.
+        /// </summary>
+        private void HandleShopCellCreated(UIMainShopCell shopCell)
+        {
+            shopCell.BuyRequested += HandleBuyRequested;
+        }
+
+        /// <summary>
+        /// Displays one offer in a visible shop cell.
+        /// </summary>
         private void DisplayShopCell(UIMainShopCell shopCell, int offerIndex)
         {
             shopCell.DisplayShopOffer(displayedShopOffers[offerIndex], shopSpriteCatalog);
         }
 
+        /// <summary>
+        /// Clears a shop cell that left the visible area.
+        /// </summary>
         private void HideShopCell(UIMainShopCell shopCell)
         {
             shopCell.ClearShopOffer();
         }
 
+        /// <summary>
+        /// Raises BuyRequested with the selected offer ID.
+        /// </summary>
+        private void HandleBuyRequested(string offerId)
+        {
+            BuyRequested?.Invoke(offerId);
+        }
+
+        /// <summary>
+        /// Clears the current shop cell pool.
+        /// </summary>
         private void DisposeShopCellPool()
         {
             if (shopCellPool == null) return;

@@ -22,7 +22,7 @@
     { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 5 }, { "type": 1, "petalType": 6 }, { "type": 1, "petalType": 7 }, { "type": 1, "petalType": 1 }
   ],
   "objectives": [
-    { "type": 1, "petals": [{ "petalType": 1, "amount": 15 }, { "petalType": 2, "amount": 15 }] }
+    { "type": 1, "petals": [{ "petalType": 1, "amount": 1 }] }
   ],
   "constrainers": [
     { "type": 1, "moveLimit": 24, "warningAtRemaining": 5 }

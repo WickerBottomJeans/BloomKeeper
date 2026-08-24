@@ -11,7 +11,7 @@
         "kind": "InventoryItem",
         "presentationKey": "booster_bloom_wand",
         "inventoryItem": {
-          "itemFriendlyId": "booster_bloom_wand",
+          "itemCatalogId": "02a80453-0253-42db-9c87-024cb12263b6",
           "quantity": 1
         }
       }
@@ -23,7 +23,19 @@
         "kind": "InventoryItem",
         "presentationKey": "booster_gardeners_glove",
         "inventoryItem": {
-          "itemFriendlyId": "booster_gardeners_glove",
+          "itemCatalogId": "3f47e126-b690-4408-a452-416868ca4d91",
+          "quantity": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "grant": {
+        "rewardId": "currency_diamonds_x1",
+        "kind": "InventoryItem",
+        "presentationKey": "currency_diamonds",
+        "inventoryItem": {
+          "itemCatalogId": "43dbe6b5-574b-43f7-88df-5ec3a5e564d0",
           "quantity": 1
         }
       }

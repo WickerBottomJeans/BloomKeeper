@@ -17,3 +17,5 @@ MonoBehaviour:
     rewardSprite: {fileID: -5157066442871290833, guid: d6ea09fd64e3efd40bab0c7920c30596, type: 3}
   - presentationKey: booster_gardeners_glove
     rewardSprite: {fileID: -8177052637498740470, guid: d6ea09fd64e3efd40bab0c7920c30596, type: 3}
+  - presentationKey: currency_diamonds
+    rewardSprite: {fileID: 7477859707906231974, guid: d6ea09fd64e3efd40bab0c7920c30596, type: 3}

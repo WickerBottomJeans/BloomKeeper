@@ -7,7 +7,7 @@
       "displayName": "Bloom Wand",
       "enabled": true,
       "cost": {
-        "itemFriendlyId": "currency_diamonds",
+        "itemCatalogId": "43dbe6b5-574b-43f7-88df-5ec3a5e564d0",
         "presentationKey": "currency_diamonds",
         "quantity": 25
       },
@@ -17,7 +17,7 @@
           "kind": "InventoryItem",
           "presentationKey": "booster_bloom_wand",
           "inventoryItem": {
-            "itemFriendlyId": "booster_bloom_wand",
+            "itemCatalogId": "02a80453-0253-42db-9c87-024cb12263b6",
             "quantity": 1
           }
         }
@@ -28,7 +28,7 @@
       "displayName": "Gardener's Glove",
       "enabled": true,
       "cost": {
-        "itemFriendlyId": "currency_diamonds",
+        "itemCatalogId": "43dbe6b5-574b-43f7-88df-5ec3a5e564d0",
         "presentationKey": "currency_diamonds",
         "quantity": 40
       },
@@ -38,8 +38,38 @@
           "kind": "InventoryItem",
           "presentationKey": "booster_gardeners_glove",
           "inventoryItem": {
-            "itemFriendlyId": "booster_gardeners_glove",
+            "itemCatalogId": "3f47e126-b690-4408-a452-416868ca4d91",
             "quantity": 1
+          }
+        }
+      ]
+    },
+    {
+      "offerId": "offer_garden_gremlins_grand_stash",
+      "displayName": "Garden Gremlin's Grand Stash",
+      "enabled": true,
+      "cost": {
+        "itemCatalogId": "43dbe6b5-574b-43f7-88df-5ec3a5e564d0",
+        "presentationKey": "currency_diamonds",
+        "quantity": 360
+      },
+      "grants": [
+        {
+          "grantId": "bloom_wand",
+          "kind": "InventoryItem",
+          "presentationKey": "booster_bloom_wand",
+          "inventoryItem": {
+            "itemCatalogId": "02a80453-0253-42db-9c87-024cb12263b6",
+            "quantity": 5
+          }
+        },
+        {
+          "grantId": "gardeners_glove",
+          "kind": "InventoryItem",
+          "presentationKey": "booster_gardeners_glove",
+          "inventoryItem": {
+            "itemCatalogId": "3f47e126-b690-4408-a452-416868ca4d91",
+            "quantity": 10
           }
         }
       ]
@@ -49,7 +79,7 @@
       "displayName": "Unlimited Lives (30 min)",
       "enabled": true,
       "cost": {
-        "itemFriendlyId": "currency_diamonds",
+        "itemCatalogId": "43dbe6b5-574b-43f7-88df-5ec3a5e564d0",
         "presentationKey": "currency_diamonds",
         "quantity": 50
       },

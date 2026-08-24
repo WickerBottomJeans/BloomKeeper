@@ -17,7 +17,7 @@ namespace DefaultNamespace
 
     public class InventoryItemRewardGrant
     {
-        public string itemFriendlyId;
+        public string itemCatalogId;
         public int quantity;
     }
 

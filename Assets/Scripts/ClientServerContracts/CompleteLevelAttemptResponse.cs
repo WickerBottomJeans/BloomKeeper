@@ -13,7 +13,7 @@ namespace DefaultNamespace
         public LevelProgressData levelProgress;
         public int highestUnlockedLevel;
         public PlayerLivesSnapshot lives;
-        public BoosterInventorySnapshot boosterInventorySnapshot;
+        public PlayerInventorySnapshot playerInventorySnapshot;
         public List<string> completionRewardPresentationKeys = new List<string>();
     }
 }

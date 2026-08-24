@@ -8,8 +8,14 @@ using EconomyEntityKey = PlayFab.EconomyModels.EntityKey;
 
 namespace BloomKeeper.PlayFabFunctions.Services;
 
+/// <summary>
+/// Reads PlayFab function data from Azure requests.
+/// </summary>
 public class PlayFabFunctionContextReader
 {
+    /// <summary>
+    /// Reads the PlayFab function context from an HTTP request.
+    /// </summary>
     public async Task<PlayFabFunctionExecutionContext> ReadContext(HttpRequest request)
     {
         string requestBody = await new StreamReader(request.Body).ReadToEndAsync();
@@ -21,6 +27,9 @@ public class PlayFabFunctionContextReader
         return context;
     }
 
+    /// <summary>
+    /// Gets the player entity for PlayFab Data calls.
+    /// </summary>
     public DataEntityKey GetCallerEntity(PlayFabFunctionExecutionContext context)
     {
         if (context == null) throw new InvalidOperationException("PlayFab function context is missing.");
@@ -32,12 +41,18 @@ public class PlayFabFunctionContextReader
         return new DataEntityKey { Id = context.CallerEntityProfile.Entity.Id, Type = context.CallerEntityProfile.Entity.Type };
     }
 
+    /// <summary>
+    /// Gets the player entity for PlayFab Economy calls.
+    /// </summary>
     public EconomyEntityKey GetCallerEconomyEntity(PlayFabFunctionExecutionContext context)
     {
         DataEntityKey callerEntity = GetCallerEntity(context);
         return new EconomyEntityKey { Id = callerEntity.Id, Type = callerEntity.Type };
     }
 
+    /// <summary>
+    /// Gets the function argument DTO from the function context.
+    /// </summary>
     public T GetFunctionArgument<T>(PlayFabFunctionExecutionContext context)
     {
         if (context == null) throw new InvalidOperationException("PlayFab function context is missing.");
@@ -50,6 +65,9 @@ public class PlayFabFunctionContextReader
         return argument;
     }
 
+    /// <summary>
+    /// Creates a PlayFab Data API for this function call.
+    /// </summary>
     public PlayFabDataInstanceAPI CreateDataApi(PlayFabFunctionExecutionContext context)
     {
         if (context == null) throw new InvalidOperationException("PlayFab function context is missing.");
@@ -62,6 +80,9 @@ public class PlayFabFunctionContextReader
         return new PlayFabDataInstanceAPI(apiSettings, authContext);
     }
 
+    /// <summary>
+    /// Creates a PlayFab Economy API for this function call.
+    /// </summary>
     public PlayFabEconomyInstanceAPI CreateEconomyApi(PlayFabFunctionExecutionContext context)
     {
         if (context == null) throw new InvalidOperationException("PlayFab function context is missing.");

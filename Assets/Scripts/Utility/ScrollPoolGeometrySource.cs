@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace DefaultNamespace.UI
 {
+    /// <summary>
+    /// Position and vertical size of one scroll item.
+    /// </summary>
     public readonly struct ScrollPoolItemGeometry
     {
         public Vector2 Position { get; }
@@ -14,14 +17,23 @@ namespace DefaultNamespace.UI
         }
     }
 
+    /// <summary>
+    /// Provides the position and size of scroll items.
+    /// </summary>
     public interface IScrollPoolGeometrySource
     {
         int Count { get; }
         ScrollPoolItemGeometry GetGeometry(int index);
     }
 
+    /// <summary>
+    /// Calculates viewport bounds inside scroll content.
+    /// </summary>
     public static class ScrollPoolViewportBounds
     {
+        /// <summary>
+        /// Gets viewport bounds in the scroll content's local space.
+        /// </summary>
         public static Rect GetContentLocalRect(RectTransform content, RectTransform viewport, Vector3[] viewportWorldCorners)
         {
             viewport.GetWorldCorners(viewportWorldCorners);

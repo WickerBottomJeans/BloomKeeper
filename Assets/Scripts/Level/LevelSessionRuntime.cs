@@ -98,7 +98,7 @@ namespace DefaultNamespace
             constrainerManager = new ConstrainerManager(constrainers);
             gameplayEventDispatcher.Register(objectiveManager);
             gameplayEventDispatcher.Register(constrainerManager);
-            boosterUseService = new BoosterUseService(currentLevelData.allowedBoosters, new PlayFabBoosterInventoryService());
+            boosterUseService = new BoosterUseService(currentLevelData.allowedBoosters, new PlayFabInventoryService());
             levelOutcomeDecider = new LevelOutcomeDecider();
             levelOutcomeDecider.WinDecided += HandleWinDecided;
             levelOutcomeDecider.LossDecided += HandleLossDecided;

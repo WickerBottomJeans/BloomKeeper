@@ -1,5 +1,8 @@
 namespace BloomKeeper.PlayFabFunctions.Models;
 
+/// <summary>
+/// Loaded offer and shopfront config for one shop.
+/// </summary>
 public class ShopConfig
 {
     public string shopId;
@@ -14,6 +17,9 @@ public class ShopConfig
     }
 }
 
+/// <summary>
+/// All offers configured for one shop.
+/// </summary>
 public class ShopOfferCatalogConfig
 {
     public int schemaVersion;
@@ -21,6 +27,9 @@ public class ShopOfferCatalogConfig
     public List<ShopOfferConfig> offers = new List<ShopOfferConfig>();
 }
 
+/// <summary>
+/// Config for one shop offer.
+/// </summary>
 public class ShopOfferConfig
 {
     public string offerId;
@@ -30,13 +39,20 @@ public class ShopOfferConfig
     public List<ShopGrantConfig> grants = new List<ShopGrantConfig>();
 }
 
+/// <summary>
+/// Inventory item and quantity required to buy an offer.
+/// </summary>
 public class ShopCostConfig
 {
-    public string itemFriendlyId;
+    public string itemCatalogId;
     public string presentationKey;
     public int quantity;
 }
 
+/// <summary>
+/// Config for one grant in a shop offer.
+/// </summary>
+// TODO: Split grant data by kind before adding more grant kinds.
 public class ShopGrantConfig
 {
     public string grantId;
@@ -46,17 +62,26 @@ public class ShopGrantConfig
     public ShopUnlimitedLivesGrantConfig unlimitedLives;
 }
 
+/// <summary>
+/// Inventory item and quantity granted by an offer.
+/// </summary>
 public class ShopInventoryItemGrantConfig
 {
-    public string itemFriendlyId;
+    public string itemCatalogId;
     public int quantity;
 }
 
+/// <summary>
+/// Duration granted by an unlimited-lives offer.
+/// </summary>
 public class ShopUnlimitedLivesGrantConfig
 {
     public int durationMinutes;
 }
 
+/// <summary>
+/// Offer IDs and order for one shopfront.
+/// </summary>
 public class ShopfrontConfig
 {
     public int schemaVersion;
@@ -64,6 +89,9 @@ public class ShopfrontConfig
     public List<string> offerIds = new List<string>();
 }
 
+/// <summary>
+/// Types of grants supported by shop offers.
+/// </summary>
 public enum ShopGrantKind
 {
     InventoryItem = 1,

@@ -35,6 +35,10 @@ namespace DefaultNamespace.UI
         public event Action AddCurrencyRequested;
         public event Action<int> ChapterVisitRequested;
         public event Action ChapterChooserCloseRequested;
+        /// <summary>
+        /// Shop offer selected in the shop UI.
+        /// </summary>
+        public event Action<string> ShopOfferBuyRequested;
 
         private void Awake()
         {
@@ -43,7 +47,7 @@ namespace DefaultNamespace.UI
             chapterChooser.HideChapterChooser();
         }
 
-        public async UniTask ShowAsync(string topperPrefabAddress, string bottomNavigationPrefabAddress, PlayerLivesViewData lives)
+        public async UniTask ShowAsync(string topperPrefabAddress, string bottomNavigationPrefabAddress, PlayerLivesViewData lives, int diamondQuantity)
         {
             if (lives == null) throw new ArgumentNullException(nameof(lives));
 
@@ -52,6 +56,7 @@ namespace DefaultNamespace.UI
                 await DisplayChapterViewsAsync(topperPrefabAddress, bottomNavigationPrefabAddress);
 
             topperView.DisplayLives(lives);
+            topperView.DisplayCurrency(diamondQuantity);
         }
 
         public async UniTask DisplayMapAsync(ChapterContent chapter, PlayerProgressionData progression)
@@ -72,11 +77,18 @@ namespace DefaultNamespace.UI
             friendsInstance.Show();
         }
 
+        /// <summary>
+        /// Shows the shop in the middle of Home.
+        /// </summary>
         public void DisplayShop(LoadShopResponse mainShopResponse)
         {
             levelSelectInstance?.Hide();
             friendsInstance?.Hide();
-            if (shopInstance == null) shopInstance = Instantiate(shopPrefab, middleSlot, false);
+            if (shopInstance == null)
+            {
+                shopInstance = Instantiate(shopPrefab, middleSlot, false);
+                shopInstance.BuyRequested += HandleShopOfferBuyRequested;
+            }
             shopInstance.DisplayMainShop(mainShopResponse);
         }
 
@@ -239,6 +251,14 @@ namespace DefaultNamespace.UI
             ChapterChooserCloseRequested?.Invoke();
         }
 
+        /// <summary>
+        /// Raises ShopOfferBuyRequested with the selected offer ID.
+        /// </summary>
+        private void HandleShopOfferBuyRequested(string offerId)
+        {
+            ShopOfferBuyRequested?.Invoke(offerId);
+        }
+
         private void ReleaseChapterViews()
         {
             UnbindChapterViews();
@@ -265,6 +285,7 @@ namespace DefaultNamespace.UI
             chapterChooser.ChapterVisitRequested -= HandleChapterVisitRequested;
             chapterChooser.CloseRequested -= HandleChapterChooserCloseRequested;
             if (levelSelectInstance != null) levelSelectInstance.OnLevelSelected -= HandleLevelSelected;
+            if (shopInstance != null) shopInstance.BuyRequested -= HandleShopOfferBuyRequested;
             ReleaseChapterViews();
         }
     }

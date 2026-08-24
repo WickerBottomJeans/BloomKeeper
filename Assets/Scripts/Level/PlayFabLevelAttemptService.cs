@@ -40,7 +40,7 @@ namespace DefaultNamespace
 
             var completion = new TaskCompletionSource<CompleteLevelAttemptResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             ExecuteFunctionRequest request = CreateExecuteFunctionRequest(authSession, CompleteLevelAttemptFunctionName, functionParameter);
-            PlayFabCloudScriptAPI.ExecuteFunction(request, result => HandleCompleteLevelAttemptResult(result, functionParameter.didWin, functionParameter.stars, completion), error => completion.SetException(new LevelCompletionSubmissionException($"PlayFab CompleteLevelAttempt request failed: {error.GenerateErrorReport()}", PlayFabRetryPolicy.IsRetryable(error), error.RetryAfterSeconds)));
+            PlayFabCloudScriptAPI.ExecuteFunction(request, result => HandleCompleteLevelAttemptResult(result, functionParameter.didWin, functionParameter.stars, completion), error => completion.SetException(new PlayFabRequestException($"PlayFab CompleteLevelAttempt request failed: {error.GenerateErrorReport()}", PlayFabRetryPolicy.IsRetryable(error), error.RetryAfterSeconds)));
             return completion.Task;
         }
 
@@ -48,7 +48,7 @@ namespace DefaultNamespace
         {
             var completion = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             ExecuteFunctionRequest request = CreateExecuteFunctionRequest(authSession, functionName, functionParameter);
-            PlayFabCloudScriptAPI.ExecuteFunction(request, result => HandleLevelAttemptResult(result, functionName, validateResponse, completion), error => completion.SetException(new LevelAttemptRequestException($"PlayFab {functionName} request failed: {error.GenerateErrorReport()}", PlayFabRetryPolicy.IsRetryable(error), error.RetryAfterSeconds)));
+            PlayFabCloudScriptAPI.ExecuteFunction(request, result => HandleLevelAttemptResult(result, functionName, validateResponse, completion), error => completion.SetException(new PlayFabRequestException($"PlayFab {functionName} request failed: {error.GenerateErrorReport()}", PlayFabRetryPolicy.IsRetryable(error), error.RetryAfterSeconds)));
             return completion.Task;
         }
 
@@ -67,7 +67,7 @@ namespace DefaultNamespace
         {
             try
             {
-                TResponse response = DeserializeFunctionResult<TResponse>(result, functionName, (message, isRetryable) => new LevelAttemptRequestException(message, isRetryable));
+                TResponse response = DeserializeFunctionResult<TResponse>(result, functionName, (message, isRetryable) => new PlayFabRequestException(message, isRetryable));
                 validateResponse(response);
                 completion.SetResult(response);
             }
@@ -81,7 +81,7 @@ namespace DefaultNamespace
         {
             try
             {
-                CompleteLevelAttemptResponse response = DeserializeFunctionResult<CompleteLevelAttemptResponse>(result, CompleteLevelAttemptFunctionName, (message, isRetryable) => new LevelCompletionSubmissionException(message, isRetryable));
+                CompleteLevelAttemptResponse response = DeserializeFunctionResult<CompleteLevelAttemptResponse>(result, CompleteLevelAttemptFunctionName, (message, isRetryable) => new PlayFabRequestException(message, isRetryable));
                 ValidateCompleteLevelAttemptResponse(response, didWin, earnedStars);
                 completion.SetResult(response);
             }
@@ -109,8 +109,8 @@ namespace DefaultNamespace
             if (response.schemaVersion != LevelAttemptContract.CurrentSchemaVersion) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned unsupported schema version {response.schemaVersion}.");
             if (response.outcome == StartLevelAttemptOutcome.Approved && (!Guid.TryParseExact(response.levelAttemptId, "N", out _) || response.rejectionReason.HasValue)) throw new InvalidOperationException("PlayFab StartLevelAttempt returned invalid started-attempt data.");
             if (response.outcome == StartLevelAttemptOutcome.Rejected && (!response.rejectionReason.HasValue || !string.IsNullOrEmpty(response.levelAttemptId))) throw new InvalidOperationException("PlayFab StartLevelAttempt returned invalid rejection data.");
-            if (response.outcome == StartLevelAttemptOutcome.Rejected && response.rejectionReason != StartLevelAttemptRejectionReason.LevelLocked && response.rejectionReason != StartLevelAttemptRejectionReason.InsufficientLives && response.rejectionReason != StartLevelAttemptRejectionReason.OperationConflict && response.rejectionReason != StartLevelAttemptRejectionReason.LevelUnavailable) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned unsupported rejection reason {response.rejectionReason}.");
-            if (response.outcome != StartLevelAttemptOutcome.Approved && response.outcome != StartLevelAttemptOutcome.Rejected) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned unsupported outcome {response.outcome}.");
+            if (response.rejectionReason.HasValue && !Enum.IsDefined(typeof(StartLevelAttemptRejectionReason), response.rejectionReason.Value)) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned undefined rejection reason {response.rejectionReason}.");
+            if (!Enum.IsDefined(typeof(StartLevelAttemptOutcome), response.outcome)) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned undefined outcome {response.outcome}.");
             PlayerLivesContract.ValidateSnapshot(response.lives);
         }
 
@@ -119,15 +119,15 @@ namespace DefaultNamespace
             if (response.schemaVersion != LevelAttemptContract.CurrentSchemaVersion) throw new InvalidOperationException($"PlayFab AbandonLevelAttempt returned unsupported schema version {response.schemaVersion}.");
             if (response.outcome == AbandonLevelAttemptOutcome.Abandoned && response.rejectionReason.HasValue) throw new InvalidOperationException("PlayFab AbandonLevelAttempt returned a rejection reason for an abandoned attempt.");
             if (response.outcome == AbandonLevelAttemptOutcome.Rejected && !response.rejectionReason.HasValue) throw new InvalidOperationException("PlayFab AbandonLevelAttempt rejected the attempt without a reason.");
-            if (response.outcome != AbandonLevelAttemptOutcome.Abandoned && response.outcome != AbandonLevelAttemptOutcome.Rejected) throw new InvalidOperationException($"PlayFab AbandonLevelAttempt returned unsupported outcome {response.outcome}.");
+            if (!Enum.IsDefined(typeof(AbandonLevelAttemptOutcome), response.outcome)) throw new InvalidOperationException($"PlayFab AbandonLevelAttempt returned undefined outcome {response.outcome}.");
         }
 
         private  void ValidateCompleteLevelAttemptResponse(CompleteLevelAttemptResponse response, bool didWin, int earnedStars)
         {
             if (response.outcome == CompleteLevelAttemptOutcome.Saved && (response.levelProgress == null || response.rejectionReason.HasValue)) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned invalid saved progression data.");
-            if (response.outcome == CompleteLevelAttemptOutcome.Saved && didWin && response.boosterInventorySnapshot == null) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned no booster inventory snapshot for a saved win.");
+            if (response.outcome == CompleteLevelAttemptOutcome.Saved && didWin && response.playerInventorySnapshot == null) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned no player inventory snapshot for a saved win.");
             if (response.outcome == CompleteLevelAttemptOutcome.Rejected && !response.rejectionReason.HasValue) throw new InvalidOperationException("PlayFab CompleteLevelAttempt rejected the attempt without a reason.");
-            if (response.outcome != CompleteLevelAttemptOutcome.Saved && response.outcome != CompleteLevelAttemptOutcome.Rejected) throw new InvalidOperationException($"PlayFab CompleteLevelAttempt returned unsupported outcome {response.outcome}.");
+            if (!Enum.IsDefined(typeof(CompleteLevelAttemptOutcome), response.outcome)) throw new InvalidOperationException($"PlayFab CompleteLevelAttempt returned undefined outcome {response.outcome}.");
             if (response.completionRewardPresentationKeys == null) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned no completion reward presentation keys collection.");
             if (response.outcome == CompleteLevelAttemptOutcome.Saved && didWin && response.completionRewardPresentationKeys.Count > earnedStars) throw new InvalidOperationException("PlayFab CompleteLevelAttempt returned more completion rewards than earned stars.");
             foreach (string completionRewardPresentationKey in response.completionRewardPresentationKeys)

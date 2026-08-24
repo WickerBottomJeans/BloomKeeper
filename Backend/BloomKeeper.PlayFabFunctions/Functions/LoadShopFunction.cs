@@ -13,20 +13,22 @@ public class LoadShopFunction
     private readonly PlayFabFunctionContextReader contextReader = new PlayFabFunctionContextReader();
     private readonly ShopConfigService shopConfigService = new ShopConfigService();
 
+    /// <summary>
+    /// [Duong] Loads shop config and returns its shop data
+    /// </summary>
     [Function("LoadShop")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest request)
     {
         PlayFabFunctionExecutionContext context = await contextReader.ReadContext(request);
         LoadShopRequest loadShopRequest = contextReader.GetFunctionArgument<LoadShopRequest>(context);
-
         ShopConfig shopConfig = await shopConfigService.LoadShop(loadShopRequest.shopId);
         LoadShopResponse response = CreateLoadShopResponse(shopConfig);
         return CreateJsonResult(response);
     }
-
+    
     private static LoadShopResponse CreateLoadShopResponse(ShopConfig shopConfig)
     {
-        var offersById = shopConfig.offerCatalog.offers.ToDictionary(offer => offer.offerId, StringComparer.Ordinal);
+        var offersById = shopConfig.offerCatalog.offers.ToDictionary(offer => offer.offerId);
         List<ShopOfferViewData> offers = CreateEnabledOffers(shopConfig.shopfront.offerIds, offersById);
 
         return new LoadShopResponse
@@ -58,12 +60,12 @@ public class LoadShopFunction
 
         return enabledOffers;
     }
-
+    
     private static ShopGrantViewData CreateShopGrantViewData(ShopGrantConfig grant)
     {
         return new ShopGrantViewData { grantId = grant.grantId, presentationKey = grant.presentationKey, displayQuantity = GetGrantDisplayQuantity(grant) };
     }
-
+    
     private static int? GetGrantDisplayQuantity(ShopGrantConfig grant)
     {
         return grant.kind switch
@@ -73,7 +75,7 @@ public class LoadShopFunction
             _ => throw new ArgumentOutOfRangeException(nameof(grant.kind), grant.kind, "Unsupported shop grant kind.")
         };
     }
-
+    
     private static ContentResult CreateJsonResult(LoadShopResponse response)
     {
         return new ContentResult { Content = JsonConvert.SerializeObject(response), ContentType = "application/json", StatusCode = StatusCodes.Status200OK };

@@ -5,6 +5,6 @@ namespace Boosters
 {
     public interface IBoosterConsumptionGateway
     {
-        Task<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, BoosterInventoryData inventory)> ConsumeBooster(PlayFabAuthSession authSession, string boosterConsumptionIdempotencyKey, BoosterType boosterType);
+        Task<(ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? rejectionReason, PlayerInventoryData playerInventory)> ConsumeBooster(PlayFabAuthSession authSession, string boosterConsumptionIdempotencyKey, BoosterType boosterType);
     }
 }

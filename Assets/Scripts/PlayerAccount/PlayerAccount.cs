@@ -2,22 +2,28 @@ using System;
 
 namespace DefaultNamespace
 {
+    /// <summary>
+    /// Current logged-in player's data.
+    /// </summary>
     public class PlayerAccount
     {
         public PlayFabAuthSession AuthSession { get; }
         public PlayerProgressionData Progression { get; }
-        public BoosterInventoryData BoosterInventory { get; private set; }
+        public PlayerInventoryData PlayerInventory { get; private set; }
 
-        public PlayerAccount(PlayFabAuthSession authSession, PlayerProgressionData progression, BoosterInventoryData boosterInventory)
+        public PlayerAccount(PlayFabAuthSession authSession, PlayerProgressionData progression, PlayerInventoryData playerInventory)
         {
             AuthSession = authSession;
             Progression = progression;
-            BoosterInventory = boosterInventory;
+            PlayerInventory = playerInventory;
         }
 
-        public void ReplaceBoosterInventory(BoosterInventoryData boosterInventory)
+        /// <summary>
+        /// Replaces the player's current inventory.
+        /// </summary>
+        public void ReplacePlayerInventory(PlayerInventoryData playerInventory)
         {
-            BoosterInventory = boosterInventory ?? throw new ArgumentNullException(nameof(boosterInventory));
+            PlayerInventory = playerInventory ?? throw new ArgumentNullException(nameof(playerInventory));
         }
 
         public void ApplyConfirmedLevelProgress(int levelId, LevelProgressData levelProgress, int highestUnlockedLevel)

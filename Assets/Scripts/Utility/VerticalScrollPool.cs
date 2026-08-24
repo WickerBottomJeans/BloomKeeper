@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
+    /// <summary>
+    /// Reuses item views in a vertical scrolling list.
+    /// </summary>
     public class VerticalScrollPool<T> where T : Component
     {
         private readonly RectTransform content;
@@ -20,13 +23,16 @@ namespace DefaultNamespace.UI
         private readonly int[] orderedIndices;
         private readonly Vector3[] viewportWorldCorners = new Vector3[4];
         /// <summary>
-        /// Number of extra viewports to pre-load.
+        /// Extra viewport areas loaded above and below the visible area.
         /// </summary>
         private readonly int bufferViewport;
 
         private int visibleStartRank;
         private int visibleEndRankExclusive;
 
+        /// <summary>
+        /// Creates the pool and displays the first visible items.
+        /// </summary>
         public VerticalScrollPool(RectTransform content, RectTransform viewport, ScrollRect scrollRect, T prefab, IScrollPoolGeometrySource geometrySource, Action<T> onCreate, Action<T, int> onShow, Action<T> onHide, int defaultCapacity = 10, int maxSize = 50, int bufferViewport = 1)
         {
             this.content = content;
@@ -54,6 +60,9 @@ namespace DefaultNamespace.UI
             OnScroll(scrollRect.normalizedPosition);
         }
 
+        /// <summary>
+        /// Sorts item indices by their vertical position.
+        /// </summary>
         private int[] BuildOrderedIndices()
         {
             int[] indices = new int[geometrySource.Count];
@@ -88,6 +97,9 @@ namespace DefaultNamespace.UI
             return geometry.Position.y + geometry.HalfExtent;
         }
 
+        /// <summary>
+        /// Updates visible items after scrolling.
+        /// </summary>
         private void OnScroll(Vector2 scrollPos)
         {
             Rect viewportBounds = ScrollPoolViewportBounds.GetContentLocalRect(content, viewport, viewportWorldCorners);
@@ -123,6 +135,9 @@ namespace DefaultNamespace.UI
             return low;
         }
 
+        /// <summary>
+        /// Hides old items and displays new items in the visible range.
+        /// </summary>
         private void UpdateVisibleRange(int newStartRank, int newEndRankExclusive)
         {
             for (int rank = visibleStartRank; rank < visibleEndRankExclusive; rank++)
@@ -150,6 +165,9 @@ namespace DefaultNamespace.UI
             visibleEndRankExclusive = newEndRankExclusive;
         }
 
+        /// <summary>
+        /// Displays current data again in all visible items.
+        /// </summary>
         public void Refresh()
         {
             foreach (var kvp in visibleItems)
@@ -158,6 +176,9 @@ namespace DefaultNamespace.UI
             OnScroll(scrollRect.normalizedPosition);
         }
 
+        /// <summary>
+        /// Stops listening to scrolling and clears the pool.
+        /// </summary>
         public void Dispose()
         {
             scrollRect.onValueChanged.RemoveListener(OnScroll);

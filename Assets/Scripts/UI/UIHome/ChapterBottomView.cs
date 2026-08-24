@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
+    /// <summary>
+    /// Home navigation buttons.
+    /// </summary>
     public class ChapterBottomView : MonoBehaviour
     {
         [SerializeField] private Button mapButton;
@@ -12,6 +15,9 @@ namespace DefaultNamespace.UI
         [SerializeField] private Button settingsButton;
         [SerializeField] private RectTransformEdgeBleed backgroundBleed;
 
+        /// <summary>
+        /// Home tab selected by the player.
+        /// </summary>
         public event Action<HomeMiddleTab> TabRequested;
         public event Action SettingsRequested;
 
@@ -45,7 +51,7 @@ namespace DefaultNamespace.UI
         {
             TabRequested?.Invoke(HomeMiddleTab.Friends);
         }
-
+        
         private void HandleShopClicked()
         {
             TabRequested?.Invoke(HomeMiddleTab.Shop);

@@ -8,6 +8,9 @@ using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
 {
+    /// <summary>
+    /// Displays one shop offer.
+    /// </summary>
     public class UIMainShopCell : MonoBehaviour
     {
         [SerializeField] private TMP_Text offerNameText;
@@ -45,8 +48,14 @@ namespace DefaultNamespace.UI
 
         #region Public API
 
+        /// <summary>
+        /// Offer the player asked to buy.
+        /// </summary>
         public event Action<string> BuyRequested;
 
+        /// <summary>
+        /// Displays an offer in this cell.
+        /// </summary>
         public void DisplayShopOffer(ShopOfferViewData shopOffer, ShopSpriteCatalog shopSpriteCatalog)
         {
             displayedOfferId = shopOffer.offerId;
@@ -54,6 +63,7 @@ namespace DefaultNamespace.UI
             costIcon.sprite = shopSpriteCatalog.GetSprite(shopOffer.cost.presentationKey);
             costQuantityText.text = shopOffer.cost.quantity.ToString(CultureInfo.InvariantCulture);
 
+            // Clear grants from the previous offer.
             ClearGrantItems();
             foreach (ShopGrantViewData shopGrant in shopOffer.grants)
             {
@@ -63,6 +73,9 @@ namespace DefaultNamespace.UI
             }
         }
 
+        /// <summary>
+        /// Clears the offer before this cell is reused.
+        /// </summary>
         public void ClearShopOffer()
         {
             displayedOfferId = null;
@@ -103,6 +116,9 @@ namespace DefaultNamespace.UI
             activeGrantItems.Clear();
         }
 
+        /// <summary>
+        /// Sends the displayed offer ID when Buy is clicked.
+        /// </summary>
         private void HandleBuyRequested()
         {
             BuyRequested?.Invoke(displayedOfferId);

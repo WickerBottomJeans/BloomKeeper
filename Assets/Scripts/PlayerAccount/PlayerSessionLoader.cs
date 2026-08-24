@@ -5,22 +5,22 @@ namespace DefaultNamespace
     public class PlayerSessionLoader
     {
         private readonly PlayFabPlayerStateService playerStateService;
-        private readonly PlayFabBoosterInventoryService boosterInventoryService;
+        private readonly PlayFabInventoryService inventoryService;
 
-        public PlayerSessionLoader(PlayFabPlayerStateService playerStateService, PlayFabBoosterInventoryService boosterInventoryService)
+        public PlayerSessionLoader(PlayFabPlayerStateService playerStateService, PlayFabInventoryService inventoryService)
         {
             this.playerStateService = playerStateService;
-            this.boosterInventoryService = boosterInventoryService;
+            this.inventoryService = inventoryService;
         }
 
         public async Task<(PlayerAccount account, PlayerLivesSnapshot livesSnapshot)> Load(PlayFabAuthSession authSession)
         {
             Task<LoadPlayerStateResponse> playerStateTask = playerStateService.LoadPlayerState(authSession);
-            Task<BoosterInventoryData> boosterInventoryTask = boosterInventoryService.LoadInventory(authSession);
+            Task<PlayerInventoryData> playerInventoryTask = inventoryService.LoadPlayerInventory(authSession);
 
             LoadPlayerStateResponse playerState = await playerStateTask;
-            BoosterInventoryData boosterInventory = await boosterInventoryTask;
-            var account = new PlayerAccount(authSession, playerState.progression, boosterInventory);
+            PlayerInventoryData playerInventory = await playerInventoryTask;
+            var account = new PlayerAccount(authSession, playerState.progression, playerInventory);
             return (account, playerState.lives);
         }
     }

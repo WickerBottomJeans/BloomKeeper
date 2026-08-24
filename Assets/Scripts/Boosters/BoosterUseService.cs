@@ -34,8 +34,8 @@ namespace Boosters
 
         public IReadOnlyList<BoosterViewData> GetViewData()
         {
-            BoosterInventoryData inventory = PlayerAccountContext.Instance.GetCurrentBoosterInventory();
-            return allowedBoosters.Select(boosterType => new BoosterViewData(boosterType, inventory.GetQuantity(boosterType))).ToList().AsReadOnly();
+            PlayerInventoryData playerInventory = PlayerAccountContext.Instance.GetCurrentPlayerInventory();
+            return allowedBoosters.Select(boosterType => new BoosterViewData(boosterType, playerInventory.GetBoosterQuantity(boosterType))).ToList().AsReadOnly();
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Boosters
         {
             if (pendingBoosterAuthorization != null) throw new InvalidOperationException("A booster authorization transaction is unresolved.");
             if (!allowedBoosters.Contains(boosterType)) throw new ArgumentOutOfRangeException(nameof(boosterType), boosterType, "Booster is not allowed for this level.");
-            int availableQuantity = PlayerAccountContext.Instance.GetCurrentBoosterInventory().GetQuantity(boosterType);
+            int availableQuantity = PlayerAccountContext.Instance.GetCurrentPlayerInventory().GetBoosterQuantity(boosterType);
             if (availableQuantity <= 0) throw new InvalidOperationException($"Player has no {boosterType} boosters available.");
         }
 
@@ -77,8 +77,8 @@ namespace Boosters
         {
             PendingBoosterAuthorization authorization = pendingBoosterAuthorization ?? throw new InvalidOperationException("Booster authorization requires a pending transaction.");
             PlayerAccount account = PlayerAccountContext.Instance.CurrentAccount;
-            (ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? _, BoosterInventoryData inventory) = await consumptionGateway.ConsumeBooster(account.AuthSession, authorization.BoosterConsumptionIdempotencyKey, authorization.BoosterType);
-            account.ReplaceBoosterInventory(inventory);
+            (ConsumeBoosterOutcome outcome, ConsumeBoosterRejectionReason? _, PlayerInventoryData playerInventory) = await consumptionGateway.ConsumeBooster(account.AuthSession, authorization.BoosterConsumptionIdempotencyKey, authorization.BoosterType);
+            account.ReplacePlayerInventory(playerInventory);
             var result = new BoosterAuthorizationResult(authorization.BoosterType, authorization.Targets, outcome == ConsumeBoosterOutcome.Consumed);
             pendingBoosterAuthorization = null;
             return result;

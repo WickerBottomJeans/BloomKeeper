@@ -163,7 +163,7 @@ namespace DefaultNamespace
             {
                 return await ApplicationPresentationService.Instance.RunWithLoading(() => boosterUseService.BeginBoosterAuthorization(boosterType, targets).AsTask());
             }
-            catch (BoosterConsumptionException exception) when (exception.IsRetryable)
+            catch (PlayFabRequestException exception) when (exception.IsRetryable)
             {
                 Debug.LogWarning(exception);
                 state = State.AwaitingAuthorizationRetry;
@@ -191,7 +191,7 @@ namespace DefaultNamespace
                         result = await ApplicationPresentationService.Instance.RunWithLoading(() => boosterUseService.RetryPendingBoosterAuthorization().AsTask());
                         return;
                     }
-                    catch (BoosterConsumptionException exception) when (exception.IsRetryable)
+                    catch (PlayFabRequestException exception) when (exception.IsRetryable)
                     {
                         Debug.LogWarning(exception);
                         state = State.AwaitingAuthorizationRetry;

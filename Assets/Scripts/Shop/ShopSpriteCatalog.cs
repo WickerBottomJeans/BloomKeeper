@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace DefaultNamespace
 {
+    /// <summary>
+    /// Stores shop sprites by presentation key.
+    /// </summary>
     [CreateAssetMenu(fileName = "ShopSpriteCatalog", menuName = "BloomKeeper/Shop/Shop Sprite Catalog")]
     public class ShopSpriteCatalog : ScriptableObject
     {
@@ -11,6 +14,9 @@ namespace DefaultNamespace
 
         private Dictionary<string, Sprite> spritesByPresentationKey;
 
+        /// <summary>
+        /// Gets the shop sprite for a presentation key.
+        /// </summary>
         public Sprite GetSprite(string presentationKey)
         {
             if (string.IsNullOrWhiteSpace(presentationKey)) throw new ArgumentException("Presentation key is missing.", nameof(presentationKey));
@@ -25,11 +31,14 @@ namespace DefaultNamespace
             spritesByPresentationKey = null;
         }
 
+        /// <summary>
+        /// Builds the presentation-key to sprite lookup.
+        /// </summary>
         private void BuildSpriteLookup()
         {
             if (spritesByPresentationKey != null) return;
 
-            spritesByPresentationKey = new Dictionary<string, Sprite>(entries.Count, StringComparer.Ordinal);
+            spritesByPresentationKey = new Dictionary<string, Sprite>(entries.Count);
             foreach (ShopSpriteEntry entry in entries)
             {
                 if (entry == null) throw new InvalidOperationException("Shop sprite catalog contains a null entry.");
@@ -40,6 +49,9 @@ namespace DefaultNamespace
         }
     }
 
+    /// <summary>
+    /// Maps one presentation key to one sprite.
+    /// </summary>
     [Serializable]
     public class ShopSpriteEntry
     {
