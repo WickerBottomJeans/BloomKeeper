@@ -25,5 +25,6 @@ namespace DefaultNamespace
         public int maximumLives;
         public int regenerationIntervalSeconds;
         public DateTimeOffset? regenerationAnchorUtc;
+        public DateTimeOffset? unlimitedLivesExpiresAtUtc;
     }
 }

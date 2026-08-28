@@ -121,16 +121,20 @@ namespace DefaultNamespace
         }
 
         /// <summary>
-        /// [Duong] Validate a BuyShopOfferResponse
+        /// Checks that a purchase response contains a consistent outcome and account snapshot.
         /// </summary>
         private static void ValidateBuyShopOfferResponse(BuyShopOfferResponse response)
         {
+            // Validate the purchase outcome.
             if (response.schemaVersion != ShopContract.CurrentSchemaVersion) throw new InvalidOperationException($"PlayFab BuyShopOffer returned unsupported schema version {response.schemaVersion}.");
             if (response.outcome == BuyShopOfferOutcome.Purchased && response.rejectionReason.HasValue) throw new InvalidOperationException("PlayFab BuyShopOffer returned a purchased result with a rejection reason.");
             if (response.outcome == BuyShopOfferOutcome.Rejected && !response.rejectionReason.HasValue) throw new InvalidOperationException("PlayFab BuyShopOffer rejected the purchase without a reason.");
             if (!Enum.IsDefined(typeof(BuyShopOfferOutcome), response.outcome)) throw new InvalidOperationException($"PlayFab BuyShopOffer returned undefined outcome {response.outcome}.");
             if (response.rejectionReason.HasValue && !Enum.IsDefined(typeof(BuyShopOfferRejectionReason), response.rejectionReason.Value)) throw new InvalidOperationException($"PlayFab BuyShopOffer returned undefined rejection reason {response.rejectionReason}.");
-            if (response.playerInventorySnapshot == null || response.playerInventorySnapshot.quantitiesByCatalogId == null) throw new InvalidOperationException("PlayFab BuyShopOffer returned no player inventory snapshot.");
+
+            // Validate the optional inventory snapshot.
+            if (response.playerInventorySnapshot != null && response.playerInventorySnapshot.quantitiesByCatalogId == null) throw new InvalidOperationException("PlayFab BuyShopOffer returned an invalid player inventory snapshot.");
+            if (response.lives != null) PlayerLivesContract.ValidateSnapshot(response.lives);
         }
 
         /// <summary>

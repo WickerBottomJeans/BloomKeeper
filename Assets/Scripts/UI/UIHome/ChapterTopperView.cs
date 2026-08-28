@@ -1,4 +1,5 @@
 using System;
+using DefaultNamespace.Utility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ namespace DefaultNamespace.UI
     {
         [SerializeField] private TMP_Text livesText;
         [SerializeField] private TMP_Text livesTimerText;
+        [SerializeField] private TMP_Text unlimitedLivesTimerText;
         [SerializeField] private TMP_Text currencyText;
         [SerializeField] private Image avatarImage;
         [SerializeField] private Button addLifeButton;
@@ -32,12 +34,26 @@ namespace DefaultNamespace.UI
 
         public void DisplayLives(PlayerLivesViewData lives)
         {
-            livesText.text = $"{lives.DisplayedLives}/{lives.MaximumLives}";
-            livesTimerText.gameObject.SetActive(lives.RegenerationTimeRemaining.HasValue);
-            if (!lives.RegenerationTimeRemaining.HasValue) return;
+            switch (lives.DisplayState)
+            {
+                case PlayerLivesDisplayState.Normal:
+                    livesText.gameObject.SetActive(true);
+                    livesText.text = $"{lives.DisplayedLives}/{lives.MaximumLives}";
+                    livesTimerText.gameObject.SetActive(lives.RegenerationTimeRemaining.HasValue);
+                    unlimitedLivesTimerText.gameObject.SetActive(false);
+                    if (!lives.RegenerationTimeRemaining.HasValue) return;
 
-            int remainingSeconds = Math.Max(1, (int)Math.Ceiling(lives.RegenerationTimeRemaining.Value.TotalSeconds));
-            livesTimerText.text = $"{remainingSeconds / 60}:{remainingSeconds % 60:00}";
+                    livesTimerText.text = TimeDisplayFormatter.FormatCountdown(lives.RegenerationTimeRemaining.Value);
+                    break;
+                case PlayerLivesDisplayState.Unlimited:
+                    livesText.gameObject.SetActive(false);
+                    livesTimerText.gameObject.SetActive(false);
+                    unlimitedLivesTimerText.gameObject.SetActive(true);
+                    unlimitedLivesTimerText.text = $"<size=50%>Unlimited</size>\n{TimeDisplayFormatter.FormatCountdown(lives.UnlimitedLivesTimeRemaining.Value)}";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lives.DisplayState), lives.DisplayState, "Unsupported player lives display state.");
+            }
         }
 
         public void DisplayCurrency(int value)

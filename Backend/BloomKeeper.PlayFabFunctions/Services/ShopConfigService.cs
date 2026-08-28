@@ -1,4 +1,5 @@
 using BloomKeeper.PlayFabFunctions.Models;
+using DefaultNamespace;
 using Newtonsoft.Json;
 
 namespace BloomKeeper.PlayFabFunctions.Services;
@@ -10,7 +11,6 @@ public class ShopConfigService
 {
     private const string RemoteConfigBaseUrlEnvironmentVariable = "REMOTE_CONFIG_BASE_URL";
     private const int CurrentSchemaVersion = 1;
-    private const int MaximumInventoryOperationsPerBatch = 50;
     private static readonly HttpClient HttpClient = new HttpClient();
     private readonly Uri remoteConfigBaseUri;
 
@@ -45,18 +45,17 @@ public class ShopConfigService
     }
 
     /// <summary>
-    /// Loads an offer that is currently displayed and enabled.
+    /// [Duong] Loads an enabled offer from the catalog.
     /// </summary>
     public async Task<ShopOfferConfig> LoadPurchasableOffer(string shopId, string offerId)
     {
-        ValidateOfferId(offerId);
+        if (string.IsNullOrWhiteSpace(offerId)) throw new ArgumentException("Offer ID is missing.", nameof(offerId));
+        
         ShopConfig shopConfig = await LoadShop(shopId);
 
-        if (!shopConfig.shopfront.offerIds.Contains(offerId)) throw new InvalidOperationException($"Shop {shopId} does not display offer {offerId}.");
-
-        ShopOfferConfig shopOffer = shopConfig.offerCatalog.offers.Single(offer => offer.offerId == offerId);
+        ShopOfferConfig shopOffer = shopConfig.offerCatalog.offers.SingleOrDefault(offer => offer.offerId == offerId);
+        if (shopOffer == null) throw new InvalidOperationException($"Shop {shopId} does not contain offer {offerId}.");
         if (!shopOffer.enabled) throw new InvalidOperationException($"Shop offer {offerId} is disabled.");
-
         return shopOffer;
     }
 
@@ -89,15 +88,7 @@ public class ShopConfigService
         if (string.IsNullOrWhiteSpace(shopId)) throw new ArgumentException("Shop ID is missing.", nameof(shopId));
         if (!shopId.All(character => char.IsLower(character) || char.IsDigit(character) || character == '_')) throw new ArgumentException("Shop ID must contain only lowercase letters, digits, and underscores.", nameof(shopId));
     }
-
-    /// <summary>
-    /// Checks that an offer ID was provided.
-    /// </summary>
-    private static void ValidateOfferId(string offerId)
-    {
-        if (string.IsNullOrWhiteSpace(offerId)) throw new ArgumentException("Offer ID is missing.", nameof(offerId));
-    }
-
+    
     /// <summary>
     /// Validates a shop's offers and shopfront.
     /// </summary>
@@ -135,9 +126,9 @@ public class ShopConfigService
     private static void ValidateOfferCost(ShopOfferConfig offer)
     {
         if (offer.cost == null) throw new InvalidOperationException($"Shop offer {offer.offerId} has no cost.");
-        if (string.IsNullOrWhiteSpace(offer.cost.itemCatalogId)) throw new InvalidOperationException($"Shop offer {offer.offerId} cost has no item catalog ID.");
+        if (!Enum.IsDefined(typeof(CurrencyKind), offer.cost.currencyKind)) throw new InvalidOperationException($"Shop offer {offer.offerId} cost has an unsupported currency kind {offer.cost.currencyKind}.");
         if (string.IsNullOrWhiteSpace(offer.cost.presentationKey)) throw new InvalidOperationException($"Shop offer {offer.offerId} cost has no presentation key.");
-        if (offer.cost.quantity <= 0) throw new InvalidOperationException($"Shop offer {offer.offerId} cost quantity must be greater than zero.");
+        if (offer.cost.amount <= 0) throw new InvalidOperationException($"Shop offer {offer.offerId} cost amount must be greater than zero.");
     }
 
     /// <summary>
@@ -146,8 +137,6 @@ public class ShopConfigService
     private static void ValidateOfferGrants(ShopOfferConfig offer)
     {
         if (offer.grants == null || offer.grants.Count == 0) throw new InvalidOperationException($"Shop offer {offer.offerId} must contain at least one grant.");
-        int inventoryItemGrantCount = offer.grants.Count(grant => grant?.kind == ShopGrantKind.InventoryItem);
-        if (inventoryItemGrantCount + 1 > MaximumInventoryOperationsPerBatch) throw new InvalidOperationException($"Shop offer {offer.offerId} exceeds the {MaximumInventoryOperationsPerBatch}-operation inventory batch limit.");
 
         var observedGrantIds = new HashSet<string>();
         foreach (ShopGrantConfig grant in offer.grants)
@@ -191,7 +180,7 @@ public class ShopConfigService
     private static void ValidateUnlimitedLivesGrant(string offerId, ShopGrantConfig grant)
     {
         if (grant.unlimitedLives == null) throw new InvalidOperationException($"Shop offer {offerId} grant {grant.grantId} kind does not match its payload.");
-        if (grant.unlimitedLives.durationMinutes <= 0) throw new InvalidOperationException($"Shop offer {offerId} grant {grant.grantId} unlimited lives duration must be greater than zero.");
+        if (grant.unlimitedLives.durationSeconds <= 0) throw new InvalidOperationException($"Shop offer {offerId} grant {grant.grantId} unlimited lives duration must be greater than zero.");
     }
 
     /// <summary>

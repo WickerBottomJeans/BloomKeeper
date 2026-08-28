@@ -5,4 +5,5 @@ public class PlayerLivesData
     public int schemaVersion = 1;
     public int availableLives;
     public DateTimeOffset? regenerationAnchorUtc;
+    public DateTimeOffset? unlimitedLivesExpiresAtUtc;
 }

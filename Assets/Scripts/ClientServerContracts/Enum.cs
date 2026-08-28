@@ -7,6 +7,11 @@ namespace DefaultNamespace
         TimedEntitlement = 3
     }
 
+    public enum CurrencyKind
+    {
+        Diamonds = 1
+    }
+
     public enum ConsumeBoosterOutcome
     {
         Consumed = 1,

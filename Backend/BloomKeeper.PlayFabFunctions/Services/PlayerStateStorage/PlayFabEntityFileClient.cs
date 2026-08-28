@@ -70,7 +70,7 @@ public class PlayFabEntityFileClient
         List<string> fileNames = files.Keys.ToList();
         var initiateRequest = new InitiateFileUploadsRequest
             { Entity = dataEntity, ProfileVersion = profileVersion, FileNames = fileNames };
-        PlayFabResult<InitiateFileUploadsResponse> initiateResult = await dataApi.InitiateFileUploadsAsync(initiateRequest);
+        PlayFabResult<InitiateFileUploadsResponse> initiateResult = await ExecutePlayFabDataUpdateWithRateLimitRetry(() => dataApi.InitiateFileUploadsAsync(initiateRequest));
         ThrowIfProfileVersionConflict(initiateResult, "InitiateFileUploads");
         InitiateFileUploadsResponse uploadResponse = GetRequiredPlayFabResult(initiateResult, "InitiateFileUploads");
 
@@ -88,7 +88,7 @@ public class PlayFabEntityFileClient
         // Finalize the uploads in PlayFab.
         var finalizeRequest = new FinalizeFileUploadsRequest
             { Entity = dataEntity, ProfileVersion = uploadResponse.ProfileVersion, FileNames = fileNames };
-        PlayFabResult<FinalizeFileUploadsResponse> finalizeResult = await dataApi.FinalizeFileUploadsAsync(finalizeRequest);
+        PlayFabResult<FinalizeFileUploadsResponse> finalizeResult = await ExecutePlayFabDataUpdateWithRateLimitRetry(() => dataApi.FinalizeFileUploadsAsync(finalizeRequest));
         ThrowIfProfileVersionConflict(finalizeResult, "FinalizeFileUploads");
         GetRequiredPlayFabResult(finalizeResult, "FinalizeFileUploads");
     }
@@ -96,6 +96,18 @@ public class PlayFabEntityFileClient
     #endregion
 
     #region Private Methods
+
+    /// <summary>
+    /// Retries one throttled PlayFab data update after its required delay.
+    /// </summary>
+    private async Task<PlayFabResult<T>> ExecutePlayFabDataUpdateWithRateLimitRetry<T>(Func<Task<PlayFabResult<T>>> playFabDataUpdate) where T : PlayFabResultCommon
+    {
+        PlayFabResult<T> result = await playFabDataUpdate();
+        if (result?.Error?.Error != PlayFabErrorCode.DataUpdateRateExceeded || !result.Error.RetryAfterSeconds.HasValue) return result;
+
+        await Task.Delay(TimeSpan.FromSeconds(result.Error.RetryAfterSeconds.Value));
+        return await playFabDataUpdate();
+    }
 
     /// <summary>
     /// [Duong] Gets the upload metadata for every requested file

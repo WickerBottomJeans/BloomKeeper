@@ -37,6 +37,7 @@ namespace DefaultNamespace
         public BuyShopOfferOutcome outcome;
         public BuyShopOfferRejectionReason? rejectionReason;
         public PlayerInventorySnapshot playerInventorySnapshot;
+        public PlayerLivesSnapshot lives;
     }
 
     /// <summary>
@@ -95,6 +96,9 @@ namespace DefaultNamespace
     /// </summary>
     public enum BuyShopOfferRejectionReason
     {
-        InsufficientCostItemQuantity = 1
+        InsufficientCurrencyAmount = 1,
+        GrantApplicationFailed = 2,
+        UnfinishedPurchase = 3
     }
+
 }

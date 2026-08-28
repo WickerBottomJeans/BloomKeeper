@@ -23,7 +23,7 @@ public class LivesFileStore
     public PlayerLivesData CreateDefault(int maximumLives)
     {
         if (maximumLives <= 0) throw new ArgumentOutOfRangeException(nameof(maximumLives), maximumLives, "Maximum lives must be positive.");
-        return new PlayerLivesData { availableLives = maximumLives, regenerationAnchorUtc = null };
+        return new PlayerLivesData { availableLives = maximumLives, regenerationAnchorUtc = null, unlimitedLivesExpiresAtUtc = null };
     }
 
     public byte[] Serialize(PlayerLivesData lives, int maximumLives)

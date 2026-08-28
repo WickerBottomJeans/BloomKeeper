@@ -53,7 +53,7 @@ public class LoadShopFunction
             {
                 offerId = offer.offerId,
                 displayName = offer.displayName,
-                cost = new ShopCostViewData { presentationKey = offer.cost.presentationKey, quantity = offer.cost.quantity },
+                cost = new ShopCostViewData { presentationKey = offer.cost.presentationKey, quantity = offer.cost.amount },
                 grants = offer.grants.Select(CreateShopGrantViewData).ToList()
             });
         }
@@ -71,7 +71,7 @@ public class LoadShopFunction
         return grant.kind switch
         {
             ShopGrantKind.InventoryItem => grant.inventoryItem.quantity,
-            ShopGrantKind.UnlimitedLives => grant.unlimitedLives.durationMinutes,
+            ShopGrantKind.UnlimitedLives => grant.unlimitedLives.durationSeconds,
             _ => throw new ArgumentOutOfRangeException(nameof(grant.kind), grant.kind, "Unsupported shop grant kind.")
         };
     }

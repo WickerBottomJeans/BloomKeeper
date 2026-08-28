@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
+using UnityEngine;
 
 namespace DefaultNamespace
 {
@@ -12,8 +13,17 @@ namespace DefaultNamespace
     {
         private const string MainShopId = "main";
         private readonly PlayFabShopService shopService = new PlayFabShopService();
+        private readonly PlayerLivesPresentationService playerLivesPresentationService;
         private LoadShopResponse cachedMainShopResponse;
         private CancellationTokenSource cachedMainShopExpiryCancellation;
+
+        /// <summary>
+        /// Creates the shop flow with lives presentation support.
+        /// </summary>
+        public HomeShopFlow(PlayerLivesPresentationService playerLivesPresentationService)
+        {
+            this.playerLivesPresentationService = playerLivesPresentationService ?? throw new ArgumentNullException(nameof(playerLivesPresentationService));
+        }
 
         /// <summary>
         /// Starts listening for shop purchase requests from UI.
@@ -49,11 +59,13 @@ namespace DefaultNamespace
                 }
                 catch (PlayFabRequestException exception) when (exception.IsRetryable)
                 {
-                    if (!await RunRetryDialog("Shop unavailable", "The shop could not be loaded. Please try again.")) return false;
+                    Debug.LogWarning(exception);
+                    if (!await RunRetryDialog(ShopDialogText.ShopUnavailableTitle, ShopDialogText.ShopLoadRetryMessage)) return false;
                 }
                 catch (PlayFabRequestException exception)
                 {
-                    await RunInformationDialog("Shop unavailable", exception.Message);
+                    Debug.LogWarning(exception);
+                    await RunInformationDialog(ShopDialogText.ShopUnavailableTitle, ShopDialogText.ShopLoadFailureMessage);
                     return false;
                 }
             }
@@ -68,7 +80,7 @@ namespace DefaultNamespace
         }
 
         /// <summary>
-        /// [Duong] Buys an offer and updates local inventory from the server response.
+        /// [Duong] Buys an offer and refreshes the affected local player state.
         /// </summary>
         private async UniTask TryBuyShopOfferAsync(string offerId)
         {
@@ -82,19 +94,23 @@ namespace DefaultNamespace
                     PlayerAccount account = PlayerAccountContext.Instance.CurrentAccount;
                     BuyShopOfferResponse response = await ApplicationPresentationService.Instance.RunWithLoading(() => shopService.BuyShopOffer(account.AuthSession, MainShopId, offerId, buyShopOfferIdempotencyKey));
 
-                    // [Duong] Update local inventory from the server response.
-                    var playerInventory = new PlayerInventoryData(response.playerInventorySnapshot.quantitiesByCatalogId);
-                    account.ReplacePlayerInventory(playerInventory);
-                    UIManager.Instance.DisplayHomeCurrency(playerInventory.DiamondQuantity);
-                    // [Duong] Show the purchase result.
+                    // Apply the returned player state.
+                    if (response.playerInventorySnapshot != null)
+                    {
+                        var playerInventoryData = new PlayerInventoryData(response.playerInventorySnapshot.quantitiesByCatalogId);
+                        account.ReplacePlayerInventory(playerInventoryData);
+                        UIManager.Instance.DisplayHomeCurrency(playerInventoryData.DiamondQuantity);
+                    }
+                    if (response.lives != null) playerLivesPresentationService.ReplaceServerLivesSnapshot(response.lives);
+
+                    // Show the purchase result.
                     switch (response.outcome)
                     {
                         case BuyShopOfferOutcome.Purchased:
-                            await RunInformationDialog("Thank you", "Your purchase was successful!");
+                            await RunInformationDialog(ShopDialogText.PurchaseSuccessTitle, ShopDialogText.PurchaseSuccessMessage);
                             return;
                         case BuyShopOfferOutcome.Rejected:
-                            if (response.rejectionReason != BuyShopOfferRejectionReason.InsufficientCostItemQuantity) throw new ArgumentOutOfRangeException(nameof(response.rejectionReason), response.rejectionReason, "Unsupported shop purchase rejection reason.");
-                            await RunInformationDialog("Purchase failed", "You do not have enough Diamonds.");
+                            await RunInformationDialog(ShopDialogText.PurchaseFailureTitle, ShopDialogText.GetPurchaseRejectionMessage(response.rejectionReason.Value));
                             return;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(response.outcome), response.outcome, "Unsupported shop purchase outcome.");
@@ -102,11 +118,13 @@ namespace DefaultNamespace
                 }
                 catch (PlayFabRequestException exception) when (exception.IsRetryable)
                 {
-                    if (!await RunRetryDialog("Purchase failed", "The purchase could not be completed. Please try again.")) return;
+                    Debug.LogWarning(exception);
+                    if (!await RunRetryDialog(ShopDialogText.PurchaseFailureTitle, ShopDialogText.PurchaseRetryMessage)) return;
                 }
                 catch (PlayFabRequestException exception)
                 {
-                    await RunInformationDialog("Purchase failed", exception.Message);
+                    Debug.LogWarning(exception);
+                    await RunInformationDialog(ShopDialogText.PurchaseFailureTitle, ShopDialogText.PurchaseFailureMessage);
                     return;
                 }
             }

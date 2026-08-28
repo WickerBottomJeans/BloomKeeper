@@ -50,19 +50,22 @@ public class StartLevelAttemptFunction
             var (levelAttempt, _) = await levelAttemptTask;
             var (lives, _) = await livesTask;
             
-            bool livesChanged = livesService.RegenerateLives(lives, livesConfig, operationTimeUtc);
+            bool livesChanged = livesService.UpdateLivesToCurrentTime(lives, livesConfig, operationTimeUtc);
             (StartLevelAttemptResponse response, LevelAttemptData updatedLevelAttempt, bool levelAttemptChanged) = levelAttemptService.TryStartLevelAttempt(progression, levelAttempt, startRequest, level);
 
             //[Duong] If another attempt is made, mean player play a new level => gonna try charging them lives
             if (levelAttemptChanged)
             {
-                if (!livesService.TryHandleNewLevelAttempt(lives, livesConfig, operationTimeUtc))
+                if (!livesService.TryHandleNewLevelAttempt(lives, livesConfig, operationTimeUtc, out bool didSpendLife))
                 {
                     response = levelAttemptService.CreateStartRejectedResponse(StartLevelAttemptRejectionReason.InsufficientLives);
-                    response.lives = livesService.CreateLivesSnapshot(lives, livesConfig);
-                    return CreateJsonResult(response);
+                    levelAttemptChanged = false;
                 }
-                livesChanged = true;
+                else
+                {
+                    updatedLevelAttempt.didSpendLife = didSpendLife;
+                    livesChanged |= didSpendLife;
+                }
             }
 
             //[Duong] Save changed player state files

@@ -92,10 +92,10 @@ public class CompleteLevelAttemptFunction
             }
 
             // [Duong] Apply lives rules for the ended level attempt
-            bool livesChanged = livesService.RegenerateLives(lives, livesConfig, operationTimeUtc);
+            bool livesChanged = livesService.UpdateLivesToCurrentTime(lives, livesConfig, operationTimeUtc);
             if (updatedLevelAttempt != null)
             {
-                livesService.HandleLevelAttemptEnded(lives, livesConfig, operationTimeUtc, attemptRequest.didWin);
+                livesService.HandleLevelAttemptEnded(lives, livesConfig, operationTimeUtc, attemptRequest.didWin, levelAttempt.didSpendLife);
                 livesChanged = true;
             }
 

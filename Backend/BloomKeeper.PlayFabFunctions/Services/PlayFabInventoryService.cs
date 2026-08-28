@@ -77,7 +77,7 @@ public class PlayFabInventoryService
     }
 
     /// <summary>
-    /// Subtracts an inventory item, or returns false when there is not enough.
+    /// [Duong] Subtracts an inventory item, or returns false when there is not enough.
     /// </summary>
     public async Task<bool> TrySubtractInventoryItem(PlayFabEconomyInstanceAPI economyApi, EntityKey callerEntity, string itemCatalogId, int amount, string inventoryMutationIdempotencyKey)
     {
@@ -100,46 +100,6 @@ public class PlayFabInventoryService
         }
 
         if (result.Result == null) throw new InvalidOperationException("PlayFab SubtractInventoryItems returned no response body.");
-        return true;
-    }
-
-    /// <summary>
-    /// [Duong] Subtracts a cost and adds all grants in one inventory operation.
-    /// </summary>
-    /// <returns>Whether the player had enough of the cost item.</returns>
-    public async Task<bool> TryExecuteInventoryItemExchange(PlayFabEconomyInstanceAPI economyApi, EntityKey callerEntity, string costItemCatalogId, int costAmount, IReadOnlyList<(string itemCatalogId, int amount)> grantItems, string shopPurchaseIdempotencyKey)
-    {
-        //[Duong] Safety checks
-        ValidateInventoryOperation(economyApi, callerEntity, costItemCatalogId, costAmount, shopPurchaseIdempotencyKey);
-        if (grantItems == null) throw new ArgumentNullException(nameof(grantItems));
-        if (grantItems.Count == 0) throw new ArgumentException("Inventory item exchange must contain at least one grant item.", nameof(grantItems));
-
-        //[Duong] Put the cost and grants in one operation list.
-        var operations = new List<InventoryOperation>
-        {
-            new InventoryOperation
-            {
-                Subtract = new SubtractInventoryItemsOperation { Amount = costAmount, DeleteEmptyStacks = false, Item = CreateInventoryItemReference(costItemCatalogId) }
-            }
-        };
-        foreach ((string itemCatalogId, int amount) grantItem in grantItems)
-        {
-            ValidateInventoryItem(grantItem.itemCatalogId, grantItem.amount);
-            operations.Add(new InventoryOperation { Add = new AddInventoryItemsOperation { Amount = grantItem.amount, Item = CreateInventoryItemReference(grantItem.itemCatalogId) } });
-        }
-
-        //[Duong] Ask Playfab to grant item and subtract cost
-        var request = new ExecuteInventoryOperationsRequest { Entity = callerEntity, IdempotencyId = shopPurchaseIdempotencyKey, Operations = operations };
-        PlayFabResult<ExecuteInventoryOperationsResponse> result = await economyApi.ExecuteInventoryOperationsAsync(request);
-        if (result == null) throw new InvalidOperationException("PlayFab ExecuteInventoryOperations returned no result.");
-        if (result.Error != null)
-        {
-            //[Duong] For now, only handle insufficient funds. Throw for every other error.
-            if (result.Error.Error == PlayFabErrorCode.InsufficientFunds) return false;
-            throw new InvalidOperationException($"PlayFab ExecuteInventoryOperations failed: {result.Error.GenerateErrorReport()}");
-        }
-
-        if (result.Result == null) throw new InvalidOperationException("PlayFab ExecuteInventoryOperations returned no response body.");
         return true;
     }
 

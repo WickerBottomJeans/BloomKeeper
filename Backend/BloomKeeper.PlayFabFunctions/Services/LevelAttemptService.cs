@@ -121,6 +121,7 @@ public class LevelAttemptService
             startLevelRequestIdempotencyKey = currentLevelAttempt.startLevelRequestIdempotencyKey,
             levelId = currentLevelAttempt.levelId,
             status = LevelAttemptStatus.Completed,
+            didSpendLife = currentLevelAttempt.didSpendLife,
             didWin = request.didWin,
             score = request.score,
             stars = request.stars

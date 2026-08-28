@@ -9,6 +9,9 @@ using Newtonsoft.Json;
 
 namespace BloomKeeper.PlayFabFunctions.Functions;
 
+/// <summary>
+/// Returns the player's current stored state.
+/// </summary>
 public class LoadPlayerStateFunction
 {
     private const int MaxWriteAttempts = 3;
@@ -20,6 +23,9 @@ public class LoadPlayerStateFunction
     private readonly LivesFileStore livesStore = new LivesFileStore();
     private readonly LivesService livesService = new LivesService();
 
+    /// <summary>
+    /// Updates timed lives and returns the current player state.
+    /// </summary>
     [Function("LoadPlayerState")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest request)
     {
@@ -37,7 +43,7 @@ public class LoadPlayerStateFunction
             await Task.WhenAll(progressionTask, livesTask);
             (PlayerProgressionData progression, bool progressionFileExists) = await progressionTask;
             (PlayerLivesData lives, bool livesFileExists) = await livesTask;
-            bool livesChanged = livesService.RegenerateLives(lives, livesConfig, operationTimeUtc);
+            bool livesChanged = livesService.UpdateLivesToCurrentTime(lives, livesConfig, operationTimeUtc);
 
             if (!progressionFileExists || !livesFileExists || livesChanged)
             {

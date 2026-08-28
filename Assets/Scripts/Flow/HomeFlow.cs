@@ -25,12 +25,15 @@ namespace DefaultNamespace
         public event Action AddLifeRequested;
         public event Action AddCurrencyRequested;
 
+        /// <summary>
+        /// Creates the home flow and its child flows.
+        /// </summary>
         public HomeFlow(AddressableContentService addressableContentService, PlayerLivesPresentationService playerLivesPresentationService)
         {
             this.addressableContentService = addressableContentService ?? throw new ArgumentNullException(nameof(addressableContentService));
             this.playerLivesPresentationService = playerLivesPresentationService ?? throw new ArgumentNullException(nameof(playerLivesPresentationService));
             homeMapFlow = new HomeMapFlow();
-            homeShopFlow = new HomeShopFlow();
+            homeShopFlow = new HomeShopFlow(playerLivesPresentationService);
         }
 
         /// <summary>

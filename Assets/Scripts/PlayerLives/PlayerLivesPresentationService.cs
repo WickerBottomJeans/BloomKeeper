@@ -8,6 +8,7 @@ namespace DefaultNamespace
         private int maximumLives;
         private int regenerationIntervalSeconds;
         private DateTimeOffset? regenerationAnchorUtc;
+        private DateTimeOffset? unlimitedLivesExpiresAtUtc;
         private bool hasServerLivesSnapshot;
 
         public event Action ServerLivesSnapshotChanged;
@@ -22,6 +23,7 @@ namespace DefaultNamespace
             maximumLives = serverLivesSnapshot.maximumLives;
             regenerationIntervalSeconds = serverLivesSnapshot.regenerationIntervalSeconds;
             regenerationAnchorUtc = serverLivesSnapshot.regenerationAnchorUtc;
+            unlimitedLivesExpiresAtUtc = serverLivesSnapshot.unlimitedLivesExpiresAtUtc;
             hasServerLivesSnapshot = true;
             ServerLivesSnapshotChanged?.Invoke();
         }
@@ -29,18 +31,20 @@ namespace DefaultNamespace
         public PlayerLivesViewData CreateCurrentLivesViewData(DateTimeOffset nowUtc)
         {
             if (!hasServerLivesSnapshot) throw new InvalidOperationException("Cannot create lives view data before receiving a server lives snapshot.");
-            if (!regenerationAnchorUtc.HasValue) return new PlayerLivesViewData(availableLives, maximumLives, null);
+            if (unlimitedLivesExpiresAtUtc.HasValue && nowUtc < unlimitedLivesExpiresAtUtc.Value)
+                return new PlayerLivesViewData(PlayerLivesDisplayState.Unlimited, availableLives, maximumLives, null, unlimitedLivesExpiresAtUtc.Value - nowUtc);
+            if (!regenerationAnchorUtc.HasValue) return new PlayerLivesViewData(PlayerLivesDisplayState.Normal, availableLives, maximumLives, null, null);
 
             DateTimeOffset anchorUtc = regenerationAnchorUtc.Value;
             DateTimeOffset projectionTimeUtc = nowUtc < anchorUtc ? anchorUtc : nowUtc;
             TimeSpan regenerationInterval = TimeSpan.FromSeconds(regenerationIntervalSeconds);
             long completedIntervals = (projectionTimeUtc - anchorUtc).Ticks / regenerationInterval.Ticks;
             int displayedLives = (int)Math.Min(maximumLives, availableLives + completedIntervals);
-            if (displayedLives == maximumLives) return new PlayerLivesViewData(displayedLives, maximumLives, null);
+            if (displayedLives == maximumLives) return new PlayerLivesViewData(PlayerLivesDisplayState.Normal, displayedLives, maximumLives, null, null);
 
             long elapsedIntervalTicks = (projectionTimeUtc - anchorUtc).Ticks % regenerationInterval.Ticks;
             TimeSpan regenerationTimeRemaining = TimeSpan.FromTicks(regenerationInterval.Ticks - elapsedIntervalTicks);
-            return new PlayerLivesViewData(displayedLives, maximumLives, regenerationTimeRemaining);
+            return new PlayerLivesViewData(PlayerLivesDisplayState.Normal, displayedLives, maximumLives, regenerationTimeRemaining, null);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace DefaultNamespace
     public class PlayerAccount
     {
         public PlayFabAuthSession AuthSession { get; }
-        public PlayerProgressionData Progression { get; }
+        public PlayerProgressionData Progression { get; private set; }
         public PlayerInventoryData PlayerInventory { get; private set; }
 
         public PlayerAccount(PlayFabAuthSession authSession, PlayerProgressionData progression, PlayerInventoryData playerInventory)
@@ -24,6 +24,14 @@ namespace DefaultNamespace
         public void ReplacePlayerInventory(PlayerInventoryData playerInventory)
         {
             PlayerInventory = playerInventory ?? throw new ArgumentNullException(nameof(playerInventory));
+        }
+
+        /// <summary>
+        /// Replaces the player's current progression.
+        /// </summary>
+        public void ReplacePlayerProgression(PlayerProgressionData progression)
+        {
+            Progression = progression ?? throw new ArgumentNullException(nameof(progression));
         }
 
         public void ApplyConfirmedLevelProgress(int levelId, LevelProgressData levelProgress, int highestUnlockedLevel)

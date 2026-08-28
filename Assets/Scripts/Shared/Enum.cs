@@ -107,6 +107,12 @@
         Shop = 3
     }
 
+    public enum PlayerLivesDisplayState
+    {
+        Normal = 1,
+        Unlimited = 2
+    }
+
     public enum StartupScreenState
     {
         Boot = 1,

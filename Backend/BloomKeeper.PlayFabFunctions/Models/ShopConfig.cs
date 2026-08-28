@@ -1,3 +1,5 @@
+using DefaultNamespace;
+
 namespace BloomKeeper.PlayFabFunctions.Models;
 
 /// <summary>
@@ -44,15 +46,14 @@ public class ShopOfferConfig
 /// </summary>
 public class ShopCostConfig
 {
-    public string itemCatalogId;
+    public CurrencyKind currencyKind;
     public string presentationKey;
-    public int quantity;
+    public int amount;
 }
 
 /// <summary>
 /// Config for one grant in a shop offer.
 /// </summary>
-// TODO: Split grant data by kind before adding more grant kinds.
 public class ShopGrantConfig
 {
     public string grantId;
@@ -76,7 +77,7 @@ public class ShopInventoryItemGrantConfig
 /// </summary>
 public class ShopUnlimitedLivesGrantConfig
 {
-    public int durationMinutes;
+    public int durationSeconds;
 }
 
 /// <summary>

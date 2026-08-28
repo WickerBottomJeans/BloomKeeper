@@ -36,8 +36,12 @@ namespace DefaultNamespace
 
         #region Private Methods
 
+        /// <summary>
+        /// Creates the application services, flows, and state machine.
+        /// </summary>
         private ApplicationStateMachine CreateApplicationStateMachine()
         {
+            // Create shared services.
             var guestCustomIdStore = new GuestCustomIdStore();
             var guestLoginService = new PlayFabGuestLoginService(guestCustomIdStore);
             var playerStateService = new PlayFabPlayerStateService();
@@ -45,6 +49,8 @@ namespace DefaultNamespace
             var inventoryService = new PlayFabInventoryService();
             var playerLivesPresentationService = new PlayerLivesPresentationService();
             var addressableContentService = new AddressableContentService();
+
+            // Create application flows.
             var bootFlow = new BootFlow(addressableContentService);
             var playerSessionLoader = new PlayerSessionLoader(playerStateService, inventoryService);
             var authFlow = new AuthFlow(guestLoginService, playerSessionLoader, playerLivesPresentationService);

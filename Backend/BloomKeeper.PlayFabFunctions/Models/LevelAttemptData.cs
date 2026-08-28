@@ -9,6 +9,7 @@ public class LevelAttemptData
     public string startLevelRequestIdempotencyKey;
     public int levelId;
     public LevelAttemptStatus status;
+    public bool didSpendLife;
     public bool? didWin;
     public int? score;
     public int? stars;
