@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -56,19 +55,19 @@ namespace DefaultNamespace.UI
         /// <summary>
         /// Displays an offer in this cell.
         /// </summary>
-        public void DisplayShopOffer(ShopOfferViewData shopOffer, ShopSpriteCatalog shopSpriteCatalog)
+        public void DisplayShopOffer(ShopOfferDisplayData shopOfferDisplayData, ShopSpriteCatalog shopSpriteCatalog)
         {
-            displayedOfferId = shopOffer.offerId;
-            offerNameText.text = shopOffer.displayName;
-            costIcon.sprite = shopSpriteCatalog.GetSprite(shopOffer.cost.presentationKey);
-            costQuantityText.text = shopOffer.cost.quantity.ToString(CultureInfo.InvariantCulture);
+            displayedOfferId = shopOfferDisplayData.OfferId;
+            offerNameText.text = shopOfferDisplayData.DisplayName;
+            costIcon.sprite = shopSpriteCatalog.GetSprite(shopOfferDisplayData.CostPresentationKey);
+            costQuantityText.text = shopOfferDisplayData.CostText;
 
             // Clear grants from the previous offer.
             ClearGrantItems();
-            foreach (ShopGrantViewData shopGrant in shopOffer.grants)
+            foreach (ShopGrantDisplayData shopGrantDisplayData in shopOfferDisplayData.Grants)
             {
                 UIMainShopGrantItem grantItem = grantItemPool.Get();
-                grantItem.DisplayShopGrant(shopGrant, shopSpriteCatalog);
+                grantItem.DisplayShopGrant(shopGrantDisplayData, shopSpriteCatalog);
                 activeGrantItems.Add(grantItem);
             }
         }

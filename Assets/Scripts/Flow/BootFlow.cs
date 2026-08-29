@@ -16,8 +16,8 @@ namespace DefaultNamespace
 
         public async UniTask Run()
         {
+            ConfigureDeviceFrameRate();
             UIManager.Instance.ShowStartupScreen(string.Empty, StartupScreenState.Boot);
-            ConfigureFrameRate();
             await addressableContentService.InitializeAsync();
             await ConfigManager.Instance.InitializeAsync();
             // TODO: Move the shared sprite atlases to remote Addressables.
@@ -28,11 +28,11 @@ namespace DefaultNamespace
 #endif
         }
 
-        private  void ConfigureFrameRate()
+        private void ConfigureDeviceFrameRate()
         {
-            // TODO: This is just temporary so i can test some stuff. MUST redo later
-            QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 60;
+#if UNITY_IOS && !UNITY_EDITOR
+            Application.targetFrameRate = (int)Screen.currentResolution.refreshRateRatio.value;
+#endif
         }
     }
 }

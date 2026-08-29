@@ -20,7 +20,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private float cellSpacing;
 
         private VerticalScrollPool<UIMainShopCell> shopCellPool;
-        private IReadOnlyList<ShopOfferViewData> displayedShopOffers;
+        private IReadOnlyList<ShopOfferDisplayData> displayedShopOfferDisplayDataList;
         private float shopCellHeight;
 
         #region Unity Lifecycle
@@ -45,18 +45,17 @@ namespace DefaultNamespace.UI
         public event Action<string> BuyRequested;
 
         /// <summary>
-        /// Displays offers from a LoadShop response.
+        /// Displays prepared shop offers.
         /// </summary>
-        public void DisplayMainShop(LoadShopResponse mainShopResponse)
+        public void DisplayMainShop(IReadOnlyList<ShopOfferDisplayData> shopOfferDisplayDataList)
         {
-            if (mainShopResponse == null) throw new ArgumentNullException(nameof(mainShopResponse));
-            if (mainShopResponse.offers == null) throw new ArgumentException("Main shop response has no offers.", nameof(mainShopResponse));
+            if (shopOfferDisplayDataList == null) throw new ArgumentNullException(nameof(shopOfferDisplayDataList));
 
-            // Clear cells from the previous shop response.
+            // Clear cells from the previous shop display.
             DisposeShopCellPool();
-            displayedShopOffers = mainShopResponse.offers;
+            displayedShopOfferDisplayDataList = shopOfferDisplayDataList;
             shopCellHeight = ((RectTransform)shopCellTemplate.transform).rect.height;
-            float shopContentHeight = topPadding + bottomPadding + displayedShopOffers.Count * shopCellHeight + Mathf.Max(0, displayedShopOffers.Count - 1) * cellSpacing;
+            float shopContentHeight = topPadding + bottomPadding + displayedShopOfferDisplayDataList.Count * shopCellHeight + Mathf.Max(0, displayedShopOfferDisplayDataList.Count - 1) * cellSpacing;
             ShopCellRoot.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, shopContentHeight);
             scrollRect.verticalNormalizedPosition = 1f;
             gameObject.SetActive(true);
@@ -88,7 +87,7 @@ namespace DefaultNamespace.UI
         /// </summary>
         private void DisplayShopCell(UIMainShopCell shopCell, int offerIndex)
         {
-            shopCell.DisplayShopOffer(displayedShopOffers[offerIndex], shopSpriteCatalog);
+            shopCell.DisplayShopOffer(displayedShopOfferDisplayDataList[offerIndex], shopSpriteCatalog);
         }
 
         /// <summary>
@@ -116,11 +115,11 @@ namespace DefaultNamespace.UI
 
             shopCellPool.Dispose();
             shopCellPool = null;
-            displayedShopOffers = null;
+            displayedShopOfferDisplayDataList = null;
             shopCellHeight = 0f;
         }
 
-        int IScrollPoolGeometrySource.Count => displayedShopOffers.Count;
+        int IScrollPoolGeometrySource.Count => displayedShopOfferDisplayDataList.Count;
 
         ScrollPoolItemGeometry IScrollPoolGeometrySource.GetGeometry(int index)
         {

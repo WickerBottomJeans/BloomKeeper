@@ -49,8 +49,6 @@ public class RewardFulfillmentService
                 return await FulfillInventoryItemReward(reward, context, rewardGrantIdempotencyKey);
             case RewardKind.Currency:
                 throw new NotSupportedException("Currency reward fulfillment is not implemented.");
-            case RewardKind.TimedEntitlement:
-                throw new NotSupportedException("Timed-entitlement reward fulfillment is not implemented.");
             default:
                 throw new ArgumentOutOfRangeException(nameof(reward.kind), reward.kind, "Unsupported reward kind.");
         }

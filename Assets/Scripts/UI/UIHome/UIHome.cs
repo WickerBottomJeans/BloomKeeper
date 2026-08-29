@@ -13,7 +13,6 @@ namespace DefaultNamespace.UI
         [SerializeField] private RectTransform middleSlot;
         [SerializeField] private RectTransform fullScreenRoot;
         [SerializeField] private UILevelSelect levelSelectPrefab;
-        [SerializeField] private UIFriendsView friendsPrefab;
         [SerializeField] private UIMainShopTab shopPrefab;
         [SerializeField] private UIChapterChooser chapterChooser;
 
@@ -22,7 +21,6 @@ namespace DefaultNamespace.UI
         private ChapterTopperView topperView;
         private ChapterBottomView bottomView;
         private UILevelSelect levelSelectInstance;
-        private UIFriendsView friendsInstance;
         private UIMainShopTab shopInstance;
         private string displayedTopperAddress;
         private string displayedBottomNavigationAddress;
@@ -64,32 +62,22 @@ namespace DefaultNamespace.UI
             if (chapter == null) throw new ArgumentNullException(nameof(chapter));
             if (progression == null) throw new ArgumentNullException(nameof(progression));
 
-            friendsInstance?.Hide();
             shopInstance?.Hide();
             await ShowMapAsync(chapter, progression);
-        }
-
-        public void DisplayFriends()
-        {
-            levelSelectInstance?.Hide();
-            shopInstance?.Hide();
-            if (friendsInstance == null) friendsInstance = Instantiate(friendsPrefab, middleSlot, false);
-            friendsInstance.Show();
         }
 
         /// <summary>
         /// Shows the shop in the middle of Home.
         /// </summary>
-        public void DisplayShop(LoadShopResponse mainShopResponse)
+        public void DisplayShop(IReadOnlyList<ShopOfferDisplayData> shopOfferDisplayDataList)
         {
             levelSelectInstance?.Hide();
-            friendsInstance?.Hide();
             if (shopInstance == null)
             {
                 shopInstance = Instantiate(shopPrefab, middleSlot, false);
                 shopInstance.BuyRequested += HandleShopOfferBuyRequested;
             }
-            shopInstance.DisplayMainShop(mainShopResponse);
+            shopInstance.DisplayMainShop(shopOfferDisplayDataList);
         }
 
         public async UniTask PrepareChapterChooserAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)

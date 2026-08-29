@@ -74,7 +74,7 @@ namespace DefaultNamespace
             SetCurrentChapter(chapterEntry.chapterId);
 
             // [Duong] Start the lives display loop.
-            livesDisplayCancellation = new CancellationTokenSource();
+            livesDisplayCancellation = CancellationTokenSource.CreateLinkedTokenSource(UnityEngine.Application.exitCancellationToken);
             UpdateLivesDisplayLoop(livesDisplayCancellation.Token).Forget();
         }
 
@@ -166,9 +166,6 @@ namespace DefaultNamespace
                 case HomeMiddleTab.Map:
                     await homeMapFlow.EnterMapAsync();
                     break;
-                case HomeMiddleTab.Friends:
-                    UIManager.Instance.DisplayHomeFriends();
-                    break;
                 case HomeMiddleTab.Shop:
                     if (!await homeShopFlow.TryEnterShopAsync()) return;
                     break;
@@ -220,6 +217,7 @@ namespace DefaultNamespace
             {
                 while (true)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     UIManager.Instance.DisplayHomeLives(playerLivesPresentationService.CreateCurrentLivesViewData(DateTimeOffset.UtcNow));
                     await UniTask.Delay(TimeSpan.FromSeconds(1), true, cancellationToken: cancellationToken);
                 }

@@ -1,10 +1,15 @@
 namespace DefaultNamespace
 {
+    public enum ShopDisplayValueKind
+    {
+        Count = 1,
+        DurationSeconds = 2
+    }
+
     public enum RewardKind
     {
         InventoryItem = 1,
-        Currency = 2,
-        TimedEntitlement = 3
+        Currency = 2
     }
 
     public enum CurrencyKind

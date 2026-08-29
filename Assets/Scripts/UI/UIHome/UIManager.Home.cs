@@ -48,19 +48,13 @@ namespace DefaultNamespace.UI
             await homeInstance.DisplayMapAsync(chapter, progression);
         }
 
-        public void DisplayHomeFriends()
-        {
-            if (homeInstance == null) throw new InvalidOperationException("Cannot display Home Friends before UIHome has been shown.");
-            homeInstance.DisplayFriends();
-        }
-
         /// <summary>
         /// Displays shop data in the Home panel.
         /// </summary>
-        public void DisplayHomeShop(LoadShopResponse mainShopResponse)
+        public void DisplayHomeShop(IReadOnlyList<ShopOfferDisplayData> shopOfferDisplayDataList)
         {
             if (homeInstance == null) throw new InvalidOperationException("Cannot display the Home Shop before UIHome has been shown.");
-            homeInstance.DisplayShop(mainShopResponse);
+            homeInstance.DisplayShop(shopOfferDisplayDataList);
         }
 
         public async UniTask PrepareChapterChooserAsync(IReadOnlyList<ChapterChooserItemState> chapterStates)

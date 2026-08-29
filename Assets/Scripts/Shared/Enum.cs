@@ -103,7 +103,6 @@
     public enum HomeMiddleTab
     {
         Map = 1,
-        Friends = 2,
         Shop = 3
     }
 

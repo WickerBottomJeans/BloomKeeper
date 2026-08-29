@@ -180,7 +180,8 @@ namespace DefaultNamespace
                     if (grant == null) throw new InvalidOperationException($"PlayFab LoadShop offer {offer.offerId} returned a null grant.");
                     if (string.IsNullOrWhiteSpace(grant.grantId)) throw new InvalidOperationException($"PlayFab LoadShop offer {offer.offerId} returned a grant without an ID.");
                     if (string.IsNullOrWhiteSpace(grant.presentationKey)) throw new InvalidOperationException($"PlayFab LoadShop offer {offer.offerId} grant {grant.grantId} has no presentation key.");
-                    if (grant.displayQuantity.HasValue && grant.displayQuantity.Value <= 0) throw new InvalidOperationException($"PlayFab LoadShop offer {offer.offerId} grant {grant.grantId} has an invalid display quantity.");
+                    if (!Enum.IsDefined(typeof(ShopDisplayValueKind), grant.displayValueKind)) throw new InvalidOperationException($"PlayFab LoadShop offer {offer.offerId} grant {grant.grantId} has undefined display value kind {grant.displayValueKind}.");
+                    if (grant.displayValue <= 0) throw new InvalidOperationException($"PlayFab LoadShop offer {offer.offerId} grant {grant.grantId} has an invalid display value.");
                 }
             }
         }

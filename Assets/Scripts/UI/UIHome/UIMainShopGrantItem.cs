@@ -1,4 +1,3 @@
-using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,16 +10,16 @@ namespace DefaultNamespace.UI
     public class UIMainShopGrantItem : MonoBehaviour
     {
         [SerializeField] private Image grantIcon;
-        [SerializeField] private TMP_Text grantQuantityText;
+        [SerializeField] private TMP_Text grantDisplayText;
 
         /// <summary>
-        /// Displays a shop grant's icon and quantity.
+        /// Displays a shop grant's icon and prepared text.
         /// </summary>
-        public void DisplayShopGrant(ShopGrantViewData shopGrant, ShopSpriteCatalog shopSpriteCatalog)
+        public void DisplayShopGrant(ShopGrantDisplayData shopGrantDisplayData, ShopSpriteCatalog shopSpriteCatalog)
         {
-            grantIcon.sprite = shopSpriteCatalog.GetSprite(shopGrant.presentationKey);
-            grantQuantityText.gameObject.SetActive(shopGrant.displayQuantity.HasValue);
-            if (shopGrant.displayQuantity.HasValue) grantQuantityText.text = shopGrant.displayQuantity.Value.ToString(CultureInfo.InvariantCulture);
+            grantIcon.sprite = shopSpriteCatalog.GetSprite(shopGrantDisplayData.PresentationKey);
+            grantDisplayText.gameObject.SetActive(true);
+            grantDisplayText.text = shopGrantDisplayData.DisplayText;
         }
     }
 }

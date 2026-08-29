@@ -79,7 +79,8 @@ namespace DefaultNamespace
     {
         public string grantId;
         public string presentationKey;
-        public int? displayQuantity;
+        public ShopDisplayValueKind displayValueKind;
+        public int displayValue;
     }
 
     /// <summary>

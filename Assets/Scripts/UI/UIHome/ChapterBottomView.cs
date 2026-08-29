@@ -10,7 +10,6 @@ namespace DefaultNamespace.UI
     public class ChapterBottomView : MonoBehaviour
     {
         [SerializeField] private Button mapButton;
-        [SerializeField] private Button socialButton;
         [SerializeField] private Button shopButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private RectTransformEdgeBleed backgroundBleed;
@@ -29,7 +28,6 @@ namespace DefaultNamespace.UI
         private void Awake()
         {
             mapButton.onClick.AddListener(HandleMapClicked);
-            socialButton.onClick.AddListener(HandleSocialClicked);
             shopButton.onClick.AddListener(HandleShopClicked);
             settingsButton.onClick.AddListener(HandleSettingsClicked);
         }
@@ -37,7 +35,6 @@ namespace DefaultNamespace.UI
         private void OnDestroy()
         {
             mapButton.onClick.RemoveListener(HandleMapClicked);
-            socialButton.onClick.RemoveListener(HandleSocialClicked);
             shopButton.onClick.RemoveListener(HandleShopClicked);
             settingsButton.onClick.RemoveListener(HandleSettingsClicked);
         }
@@ -47,11 +44,6 @@ namespace DefaultNamespace.UI
             TabRequested?.Invoke(HomeMiddleTab.Map);
         }
 
-        private void HandleSocialClicked()
-        {
-            TabRequested?.Invoke(HomeMiddleTab.Friends);
-        }
-        
         private void HandleShopClicked()
         {
             TabRequested?.Invoke(HomeMiddleTab.Shop);

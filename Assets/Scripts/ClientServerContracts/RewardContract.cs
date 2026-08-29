@@ -12,7 +12,6 @@ namespace DefaultNamespace
         public string presentationKey;
         public InventoryItemRewardGrant inventoryItem;
         public CurrencyRewardGrant currency;
-        public TimedEntitlementRewardGrant timedEntitlement;
     }
 
     public class InventoryItemRewardGrant
@@ -27,9 +26,4 @@ namespace DefaultNamespace
         public int amount;
     }
 
-    public class TimedEntitlementRewardGrant
-    {
-        public string entitlementId;
-        public int durationSeconds;
-    }
 }

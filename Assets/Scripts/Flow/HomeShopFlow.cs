@@ -13,6 +13,7 @@ namespace DefaultNamespace
     {
         private const string MainShopId = "main";
         private readonly PlayFabShopService shopService = new PlayFabShopService();
+        private readonly ShopPresentationService shopPresentationService = new ShopPresentationService();
         private readonly PlayerLivesPresentationService playerLivesPresentationService;
         private LoadShopResponse cachedMainShopResponse;
         private CancellationTokenSource cachedMainShopExpiryCancellation;
@@ -54,7 +55,7 @@ namespace DefaultNamespace
                     // [Duong] load shop data
                     if (cachedMainShopResponse == null) await LoadAndCacheMainShopAsync();
                     // [Duong] display shop
-                    UIManager.Instance.DisplayHomeShop(cachedMainShopResponse);
+                    UIManager.Instance.DisplayHomeShop(shopPresentationService.CreateShopOfferDisplayData(cachedMainShopResponse));
                     return true;
                 }
                 catch (PlayFabRequestException exception) when (exception.IsRetryable)

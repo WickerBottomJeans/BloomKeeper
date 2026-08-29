@@ -3,28 +3,26 @@
   "chapterId": 1,
   "nextLevelId": 2,
   "starScoreThresholds": [
-    { "starCount": 1, "score": 5000 },
-    { "starCount": 2, "score": 15000 },
-    { "starCount": 3, "score": 30000 }
+    { "starCount": 1, "score": 960 },
+    { "starCount": 2, "score": 1800 },
+    { "starCount": 3, "score": 3000 }
   ],
-  "boardWidth": 10,
-  "boardHeight": 10,
+  "boardWidth": 8,
+  "boardHeight": 8,
   "tiles": [
-    { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 1, "skillType": 1 }, { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 4, "skillType": 2 }, { "type": 1, "petalType": 5, "skillType": 3 }, { "type": 1, "petalType": 6, "skillType": 5 }, { "type": 1, "petalType": 7, "skillType": 2 }, { "type": 1, "petalType": 1, "skillType": 3 }, { "type": 1, "petalType": 2, "skillType": 5 }, { "type": 1, "petalType": 3, "skillType": 2 },
-    { "type": 1, "petalType": 3, "skillType": 2 }, { "type": 1, "petalType": 4, "skillType": 3 }, { "type": 1, "petalType": 1, "skillType": 5 }, { "type": 1, "petalType": 6, "skillType": 1 }, { "type": 1, "petalType": 7, "skillType": 2 }, { "type": 1, "petalType": 1, "skillType": 3 }, { "type": 1, "petalType": 2, "skillType": 5 }, { "type": 1, "petalType": 3, "skillType": 1 }, { "type": 1, "petalType": 4, "skillType": 2 }, { "type": 1, "petalType": 5, "skillType": 3 },
-    { "type": 1, "petalType": 5, "skillType": 3 }, { "type": 1, "petalType": 6, "skillType": 5 }, { "type": 1, "petalType": 7, "skillType": 1 }, { "type": 1, "petalType": 1, "skillType": 2 }, { "type": 1, "petalType": 2, "skillType": 3 }, { "type": 1, "petalType": 3, "skillType": 5 }, { "type": 1, "petalType": 4, "skillType": 1 }, { "type": 1, "petalType": 5, "skillType": 2 }, { "type": 1, "petalType": 6, "skillType": 3 }, { "type": 1, "petalType": 7, "skillType": 5 },
-    { "type": 1, "petalType": 7, "skillType": 5 }, { "type": 1, "petalType": 1, "skillType": 1 }, { "type": 1, "petalType": 2, "skillType": 2 }, { "type": 1, "petalType": 3, "skillType": 3 }, { "type": 1, "petalType": 4, "skillType": 5 }, { "type": 1, "petalType": 5, "skillType": 1 }, { "type": 1, "petalType": 6, "skillType": 2 }, { "type": 1, "petalType": 7, "skillType": 3 }, { "type": 1, "petalType": 1, "skillType": 5 }, { "type": 1, "petalType": 2, "skillType": 1 },
-    { "type": 1, "petalType": 2, "skillType": 1 }, { "type": 1, "petalType": 3, "skillType": 2 }, { "type": 1, "petalType": 4, "skillType": 3 }, { "type": 1, "petalType": 5, "skillType": 5 }, { "type": 1, "petalType": 6, "skillType": 1 }, { "type": 1, "petalType": 7, "skillType": 2 }, { "type": 1, "petalType": 1, "skillType": 3 }, { "type": 1, "petalType": 2, "skillType": 5 }, { "type": 1, "petalType": 3, "skillType": 1 }, { "type": 1, "petalType": 4, "skillType": 2 },
-    { "type": 1, "petalType": 4, "skillType": 2 }, { "type": 1, "petalType": 5, "skillType": 3 }, { "type": 1, "petalType": 6, "skillType": 5 }, { "type": 1, "petalType": 7, "skillType": 1 }, { "type": 1, "petalType": 1, "skillType": 2 }, { "type": 1, "petalType": 2, "skillType": 3 }, { "type": 1, "petalType": 3, "skillType": 5 }, { "type": 1, "petalType": 4, "skillType": 1 }, { "type": 1, "petalType": 5, "skillType": 2 }, { "type": 1, "petalType": 6, "skillType": 3 },
-    { "type": 1, "petalType": 6, "skillType": 3 }, { "type": 1, "petalType": 7, "skillType": 5 }, { "type": 1, "petalType": 1, "skillType": 1 }, { "type": 1, "petalType": 2, "skillType": 2 }, { "type": 1, "petalType": 3, "skillType": 3 }, { "type": 1, "petalType": 4, "skillType": 5 }, { "type": 1, "petalType": 5, "skillType": 1 }, { "type": 1, "petalType": 6, "skillType": 2 }, { "type": 1, "petalType": 7, "skillType": 3 }, { "type": 1, "petalType": 1, "skillType": 5 },
-    { "type": 1, "petalType": 1, "skillType": 5 }, { "type": 1, "petalType": 2, "skillType": 1 }, { "type": 1, "petalType": 3, "skillType": 2 }, { "type": 1, "petalType": 4, "skillType": 3 }, { "type": 1, "petalType": 5, "skillType": 5 }, { "type": 1, "petalType": 6, "skillType": 1 }, { "type": 1, "petalType": 7, "skillType": 2 }, { "type": 1, "petalType": 1, "skillType": 3 }, { "type": 1, "petalType": 2, "skillType": 5 }, { "type": 1, "petalType": 3, "skillType": 1 },
-    { "type": 1, "petalType": 3, "skillType": 1 }, { "type": 1, "petalType": 4, "skillType": 2 }, { "type": 1, "petalType": 5, "skillType": 3 }, { "type": 1, "petalType": 6, "skillType": 5 }, { "type": 1, "petalType": 7, "skillType": 1 }, { "type": 1, "petalType": 1, "skillType": 2 }, { "type": 1, "petalType": 2, "skillType": 3 }, { "type": 1, "petalType": 3, "skillType": 5 }, { "type": 1, "petalType": 4, "skillType": 1 }, { "type": 1, "petalType": 5, "skillType": 2 },
-    { "type": 1, "petalType": 5, "skillType": 2 }, { "type": 1, "petalType": 6, "skillType": 3 }, { "type": 1, "petalType": 7, "skillType": 5 }, { "type": 1, "petalType": 1, "skillType": 1 }, { "type": 1, "petalType": 2, "skillType": 2 }, { "type": 1, "petalType": 3, "skillType": 3 }, { "type": 1, "petalType": 4, "skillType": 5 }, { "type": 1, "petalType": 5, "skillType": 1 }, { "type": 1, "petalType": 6, "skillType": 2 }, { "type": 1, "petalType": 7, "skillType": 3 }
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
   ],
   "objectives": [
-    { "type": 1, "petals": [{ "petalType": 1, "amount": 99 }] }
+    { "type": 1, "petals": [{ "petalType": 1, "amount": 12 }, { "petalType": 2, "amount": 12 }] }
   ],
   "constrainers": [
-    { "type": 1, "moveLimit": 20, "warningAtRemaining": 5 }
+    { "type": 1, "moveLimit": 24, "warningAtRemaining": 5 }
   ]
 }

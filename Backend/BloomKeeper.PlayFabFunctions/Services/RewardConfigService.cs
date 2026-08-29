@@ -71,7 +71,7 @@ public class RewardConfigService
         if (!Enum.IsDefined(typeof(RewardKind), grant.kind)) throw new InvalidOperationException($"Completion reward config contains unsupported reward kind {grant.kind}.");
         if (string.IsNullOrWhiteSpace(grant.presentationKey)) throw new InvalidOperationException($"Completion reward {grant.rewardId} has no presentation key.");
 
-        int payloadCount = (grant.inventoryItem != null ? 1 : 0) + (grant.currency != null ? 1 : 0) + (grant.timedEntitlement != null ? 1 : 0);
+        int payloadCount = (grant.inventoryItem != null ? 1 : 0) + (grant.currency != null ? 1 : 0);
         if (payloadCount != 1) throw new InvalidOperationException($"Completion reward {grant.rewardId} must contain exactly one grant payload.");
 
         switch (grant.kind)
@@ -81,9 +81,6 @@ public class RewardConfigService
                 break;
             case RewardKind.Currency:
                 ValidateCurrencyRewardGrant(grant);
-                break;
-            case RewardKind.TimedEntitlement:
-                ValidateTimedEntitlementRewardGrant(grant);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(grant.kind), grant.kind, "Unsupported reward kind.");
@@ -104,10 +101,4 @@ public class RewardConfigService
         if (grant.currency.amount <= 0) throw new InvalidOperationException($"Completion reward {grant.rewardId} currency amount must be greater than zero.");
     }
 
-    private static void ValidateTimedEntitlementRewardGrant(RewardGrant grant)
-    {
-        if (grant.timedEntitlement == null) throw new InvalidOperationException($"Completion reward {grant.rewardId} kind does not match its payload.");
-        if (string.IsNullOrWhiteSpace(grant.timedEntitlement.entitlementId)) throw new InvalidOperationException($"Completion reward {grant.rewardId} has no entitlement ID.");
-        if (grant.timedEntitlement.durationSeconds <= 0) throw new InvalidOperationException($"Completion reward {grant.rewardId} duration must be greater than zero.");
-    }
 }

@@ -1684,7 +1684,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.UIMainShopGrantItem
   grantIcon: {fileID: 1231571228161579182}
-  grantQuantityText: {fileID: 4574816985412152001}
+  grantDisplayText: {fileID: 4574816985412152001}
 --- !u!1 &7828876142709631708
 GameObject:
   m_ObjectHideFlags: 0

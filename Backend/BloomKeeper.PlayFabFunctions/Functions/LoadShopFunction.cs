@@ -61,18 +61,13 @@ public class LoadShopFunction
         return enabledOffers;
     }
     
-    private static ShopGrantViewData CreateShopGrantViewData(ShopGrantConfig grant)
+    private static ShopGrantViewData CreateShopGrantViewData(ShopGrantConfig shopGrantConfig)
     {
-        return new ShopGrantViewData { grantId = grant.grantId, presentationKey = grant.presentationKey, displayQuantity = GetGrantDisplayQuantity(grant) };
-    }
-    
-    private static int? GetGrantDisplayQuantity(ShopGrantConfig grant)
-    {
-        return grant.kind switch
+        return shopGrantConfig.kind switch
         {
-            ShopGrantKind.InventoryItem => grant.inventoryItem.quantity,
-            ShopGrantKind.UnlimitedLives => grant.unlimitedLives.durationSeconds,
-            _ => throw new ArgumentOutOfRangeException(nameof(grant.kind), grant.kind, "Unsupported shop grant kind.")
+            ShopGrantKind.InventoryItem => new ShopGrantViewData { grantId = shopGrantConfig.grantId, presentationKey = shopGrantConfig.presentationKey, displayValueKind = ShopDisplayValueKind.Count, displayValue = shopGrantConfig.inventoryItem.quantity },
+            ShopGrantKind.UnlimitedLives => new ShopGrantViewData { grantId = shopGrantConfig.grantId, presentationKey = shopGrantConfig.presentationKey, displayValueKind = ShopDisplayValueKind.DurationSeconds, displayValue = shopGrantConfig.unlimitedLives.durationSeconds },
+            _ => throw new ArgumentOutOfRangeException(nameof(shopGrantConfig.kind), shopGrantConfig.kind, "Unsupported shop grant kind.")
         };
     }
     
