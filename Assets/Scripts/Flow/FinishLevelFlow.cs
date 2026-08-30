@@ -79,13 +79,13 @@ namespace DefaultNamespace
             catch (Exception exception)
             {
                 Debug.LogWarning(exception);
-                await RunInformationDialog(LevelCompletionDialogText.BackendFailureTitle, LevelCompletionDialogText.BackendFailureMessage);
+                await DialogManager.Instance.RunOkDialog(LevelCompletionDialogText.BackendFailureTitle, LevelCompletionDialogText.BackendFailureMessage);
                 return false;
             }
 
             if (response.outcome == CompleteLevelAttemptOutcome.Rejected)
             {
-                await RunInformationDialog(LevelCompletionDialogText.RejectionTitle, LevelCompletionDialogText.GetRejectionMessage(response.rejectionReason.Value));
+                await DialogManager.Instance.RunOkDialog(LevelCompletionDialogText.RejectionTitle, LevelCompletionDialogText.GetRejectionMessage(response.rejectionReason.Value));
                 return false;
             }
 
@@ -134,39 +134,21 @@ namespace DefaultNamespace
 
         private async UniTask<CompleteLevelAttemptResponse> RunLevelCompletionRetryDialog(LevelSessionResult result, string levelAttemptId)
         {
-            CompleteLevelAttemptResponse response = null;
             DialogOptionButton[] options = { DialogOptionButton.Retry };
-            await DialogManager.Instance.RunDialogWorkflow(LevelCompletionDialogText.RetryTitle, LevelCompletionDialogText.RetryMessage, async session =>
+            while (true)
             {
-                while (true)
+                DialogButtonType buttonType = await DialogManager.Instance.RunDialog(LevelCompletionDialogText.RetryTitle, LevelCompletionDialogText.RetryMessage, options);
+                if (buttonType != DialogButtonType.Retry) throw new ArgumentOutOfRangeException(nameof(buttonType), buttonType, "Unsupported level completion failure dialog button.");
+
+                try
                 {
-                    int buttonId = await session.WaitForButtonClick();
-                    if ((DialogButtonType)buttonId != DialogButtonType.Retry) throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported level completion failure dialog button.");
-
-                    try
-                    {
-                        response = await SubmitLevelCompletion(result, levelAttemptId);
-                        return;
-                    }
-                    catch (PlayFabRequestException exception) when (exception.IsRetryable)
-                    {
-                        Debug.LogWarning(exception);
-                    }
+                    return await SubmitLevelCompletion(result, levelAttemptId);
                 }
-            }, options);
-
-            if (response == null) throw new InvalidOperationException("Level completion retry dialog closed without a submission response.");
-            return response;
-        }
-
-        private  async UniTask RunInformationDialog(string title, string message)
-        {
-            DialogOptionButton[] options = { DialogOptionButton.Ok };
-            await DialogManager.Instance.RunDialogWorkflow(title, message, async session =>
-            {
-                int buttonId = await session.WaitForButtonClick();
-                if ((DialogButtonType)buttonId != DialogButtonType.Ok) throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported information dialog button.");
-            }, options);
+                catch (PlayFabRequestException exception) when (exception.IsRetryable)
+                {
+                    Debug.LogWarning(exception);
+                }
+            }
         }
 
         /// <summary>

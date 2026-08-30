@@ -9,21 +9,21 @@ namespace DefaultNamespace.UI
     {
         [SerializeField] private List<DialogButtonStyle> styles = new List<DialogButtonStyle>();
 
-        public DialogButtonStyle GetStyle(DialogButtonVariant variant)
+        public DialogButtonStyle GetStyle(DialogButtonColorVariant colorVariant)
         {
             foreach (DialogButtonStyle style in styles)
             {
-                if (style.variant == variant)
+                if (style.colorVariant == colorVariant)
                     return style;
             }
 
-            throw new InvalidOperationException($"DialogButtonStyleConfig has no style for dialog button variant: {variant}.");
+            throw new InvalidOperationException($"DialogButtonStyleConfig has no style for dialog button colorVariant: {colorVariant}.");
         }
 
         [Serializable]
         public class DialogButtonStyle
         {
-            public DialogButtonVariant variant;
+            public DialogButtonColorVariant colorVariant;
             public Sprite sprite;
         }
     }

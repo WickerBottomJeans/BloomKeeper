@@ -11,7 +11,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private Image targetImage;
         [SerializeField] private TextMeshProUGUI label;
         [SerializeField] private DialogButtonStyleConfig styleConfig;
-        [SerializeField] private DialogButtonVariant variant = DialogButtonVariant.Green;
+        [SerializeField] private DialogButtonColorVariant colorVariant = DialogButtonColorVariant.Green;
         [SerializeField] private UIButtonPressFeedback pressFeedback;
 
         public event Action Clicked;
@@ -19,16 +19,15 @@ namespace DefaultNamespace.UI
         private void Awake()
         {
             button.onClick.AddListener(HandleClicked);
-            targetImage.sprite = styleConfig.GetStyle(variant).sprite;
+            targetImage.sprite = styleConfig.GetStyle(colorVariant).sprite;
         }
 
-        public void Configure(string text, DialogButtonVariant variant, bool interactable = true)
+        public void Configure(string text, DialogButtonColorVariant colorVariant)
         {
             label.text = text;
-            this.variant = variant;
-            targetImage.sprite = styleConfig.GetStyle(variant).sprite;
-            button.interactable = interactable;
-            if (!interactable) pressFeedback.ResetImmediately();
+            this.colorVariant = colorVariant;
+            targetImage.sprite = styleConfig.GetStyle(colorVariant).sprite;
+            button.interactable = true;
         }
 
         public void SetInteractable(bool interactable)

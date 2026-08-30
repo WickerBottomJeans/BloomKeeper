@@ -13,52 +13,96 @@ namespace DefaultNamespace.UI
         private UIManager uiManager;
 
         /// <summary>
-        /// Queues the dialog, lets your workflow handle the clicks, then closes it when the workflow returns.
+        /// Queues the dialog and closes it after one button click.
         /// </summary>
-        /// <param name="title"></param>
-        /// <param name="message"></param>
-        /// <param name="cancellationToken"></param>
-        /// <param name="workflow">Handles button clicks. Return from it to close the session.</param>
-        /// <param name="options"></param>
-        public async UniTask RunDialogWorkflow(string title, string message, Func<IDialogSession, UniTask> workflow, DialogOptionButton[] options, CancellationToken cancellationToken = default)
+        /// <returns>The clicked button type.</returns>
+        public async UniTask<DialogButtonType> RunDialog(string title, string message, DialogOptionButton[] options, CancellationToken cancellationToken = default)
         {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options.Length == 0) throw new ArgumentException("A dialog requires at least one option.", nameof(options));
+            
             cancellationToken.ThrowIfCancellationRequested();
-            DialogSession session = EnqueueDialog(title, message, cancellationToken, options);
+            DialogRequest request = EnqueueDialog(title, message, options);
             try
             {
-                await workflow(session);
+                return await request.WaitForButtonClick().AttachExternalCancellation(cancellationToken);
             }
             finally
             {
-                CloseSession(session);
+                CloseRequest(request);
             }
         }
 
-        private DialogSession EnqueueDialog(string title, string message, CancellationToken cancellationToken, params DialogOptionButton[] options)
+        public async UniTask RunOkDialog(string title, string message, CancellationToken cancellationToken = default)
         {
-            DialogSession session = new DialogSession(HandleSessionButtonWaitStarted, cancellationToken);
-            DialogRequest request = new DialogRequest(title, message, options, session);
-            dialogQueue.Enqueue(request);
-            ShowNextDialogIfIdle();
-            return session;
+            DialogOptionButton[] options = { DialogOptionButton.Ok };
+            DialogButtonType buttonType = await RunDialog(title, message, options, cancellationToken);
+            if (buttonType != DialogButtonType.Ok) throw new ArgumentOutOfRangeException(nameof(buttonType), buttonType, "Unsupported OK dialog button.");
         }
 
-        private void ShowNextDialogIfIdle()
+        public async UniTask<bool> RunRetryOrCancelDialog(string title, string message, CancellationToken cancellationToken = default)
         {
+            DialogOptionButton[] options = { DialogOptionButton.Cancel, DialogOptionButton.Retry };
+            DialogButtonType buttonType = await RunDialog(title, message, options, cancellationToken);
+            switch (buttonType)
+            {
+                case DialogButtonType.Cancel:
+                    return false;
+                case DialogButtonType.Retry:
+                    return true;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(buttonType), buttonType, "Unsupported Retry or Cancel dialog button.");
+            }
+        }
+
+        private DialogRequest EnqueueDialog(string title, string message, params DialogOptionButton[] options)
+        {
+            DialogRequest request = new DialogRequest(title, message, options);
+            dialogQueue.Enqueue(request);
+            ProcessDialogQueue();
+            return request;
+        }
+
+        private void ProcessDialogQueue()
+        {
+            // [Duong] Wait for the active dialog to finish.
             if (activeRequest != null) return;
 
+            // [Duong] Find and present the next valid request.
             while (dialogQueue.Count > 0)
             {
                 DialogRequest request = dialogQueue.Dequeue();
-                if (request.Session.IsTerminal) continue;
 
+                // [Duong] Skip closed or failed requests.
+                if (request.IsTerminal) continue;
+
+                // [Duong] Present the request.
                 activeRequest = request;
-                uiManager = UIManager.Instance;
-                uiManager.PresentDialogView(activeRequest.Title, activeRequest.Message, activeRequest.Options);
-                BindDialogEvents();
-                activeRequest.Session.Activate();
-                uiManager.SetDialogButtonsInteractable(activeRequest.Session.IsWaitingForButtonClick);
-                return;
+                try
+                {
+                    uiManager = UIManager.Instance;
+                    uiManager.PresentDialogView(activeRequest.Title, activeRequest.Message, activeRequest.Options);
+                    BindDialogEvents();
+                    activeRequest.Activate();
+                    return;
+                }
+                catch (Exception presentationException)
+                {
+                    // [Duong] Roll back the failed presentation.
+                    Exception requestFailure = presentationException;
+                    try
+                    {
+                        uiManager?.DismissDialogView();
+                    }
+                    catch (Exception dismissalException)
+                    {
+                        requestFailure = new AggregateException("Dialog presentation and dismissal both failed.", presentationException, dismissalException);
+                    }
+
+                    UnbindDialogEvents();
+                    activeRequest = null;
+                    request.Fail(requestFailure);
+                }
             }
         }
 
@@ -75,34 +119,33 @@ namespace DefaultNamespace.UI
             uiManager = null;
         }
 
-        private void HandleDialogButtonClicked(int buttonId)
+        private void HandleDialogButtonClicked(DialogButtonType buttonType)
         {
             uiManager.SetDialogButtonsInteractable(false);
-            activeRequest.Session.PublishButtonClick(buttonId);
+            activeRequest.PublishButtonClick(buttonType);
         }
 
-        private void HandleSessionButtonWaitStarted(DialogSession session)
+        private void CloseRequest(DialogRequest request)
         {
-            if (activeRequest == null || activeRequest.Session != session) return;
+            if (request.IsTerminal) return;
 
-            uiManager.SetDialogButtonsInteractable(true);
-        }
-
-        private void CloseSession(DialogSession session)
-        {
-            if (session.IsTerminal) return;
-
-            if (activeRequest == null || activeRequest.Session != session)
+            if (activeRequest != request)
             {
-                session.CompleteClose();
+                request.CompleteClose();
                 return;
             }
 
             activeRequest = null;
-            uiManager.DismissDialogView();
-            UnbindDialogEvents();
-            session.CompleteClose();
-            ShowNextDialogIfIdle();
+            try
+            {
+                uiManager.DismissDialogView();
+            }
+            finally
+            {
+                UnbindDialogEvents();
+                request.CompleteClose();
+                ProcessDialogQueue();
+            }
         }
 
         private void OnDestroy()
@@ -110,11 +153,11 @@ namespace DefaultNamespace.UI
             UnbindDialogEvents();
             var exception = new ObjectDisposedException(nameof(DialogManager));
 
-            activeRequest?.Session.Fail(exception);
+            activeRequest?.Fail(exception);
             activeRequest = null;
 
             while (dialogQueue.Count > 0)
-                dialogQueue.Dequeue().Session.Fail(exception);
+                dialogQueue.Dequeue().Fail(exception);
         }
 
     }

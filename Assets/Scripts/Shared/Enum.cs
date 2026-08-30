@@ -126,12 +126,10 @@
         Ok = 1,
         Cancel = 2,
         Yes = 3,
-        No = 4,
-        Close = 5,
         Retry = 6
     }
 
-    public enum DialogButtonVariant
+    public enum DialogButtonColorVariant
     {
         Green = 1,
         Blue = 2,

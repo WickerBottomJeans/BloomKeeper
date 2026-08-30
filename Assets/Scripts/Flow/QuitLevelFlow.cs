@@ -44,73 +44,37 @@ namespace DefaultNamespace
                 catch (PlayFabRequestException exception) when (exception.IsRetryable)
                 {
                     Debug.LogWarning(exception);
-                    if (await RunRetryDecisionDialog(LevelAttemptDialogText.RetryTitle, LevelAttemptDialogText.AbandonRetryMessage)) continue;
+                    if (await DialogManager.Instance.RunRetryOrCancelDialog(LevelAttemptDialogText.RetryTitle, LevelAttemptDialogText.AbandonRetryMessage)) continue;
                     return false;
                 }
                 catch (PlayFabRequestException exception)
                 {
                     Debug.LogWarning(exception);
-                    await RunInformationDialog(LevelAttemptDialogText.AbandonRejectionTitle, LevelAttemptDialogText.AbandonRetryMessage);
+                    await DialogManager.Instance.RunOkDialog(LevelAttemptDialogText.AbandonRejectionTitle, LevelAttemptDialogText.AbandonRetryMessage);
                     return false;
                 }
 
                 if (response.outcome == AbandonLevelAttemptOutcome.Abandoned) return true;
-                await RunInformationDialog(LevelAttemptDialogText.AbandonRejectionTitle, LevelAttemptDialogText.GetAbandonRejectionMessage(response.rejectionReason.Value));
+                await DialogManager.Instance.RunOkDialog(LevelAttemptDialogText.AbandonRejectionTitle, LevelAttemptDialogText.GetAbandonRejectionMessage(response.rejectionReason.Value));
                 return false;
             }
         }
 
         private  async UniTask<bool> RunQuitConfirmationDialog()
         {
-            bool quitConfirmed = false;
-            var quitButton = new DialogOptionButton(DialogButtonType.Yes, "Quit", DialogButtonVariant.Orange);
+            var quitButton = new DialogOptionButton(DialogButtonType.Yes, "Quit", DialogButtonColorVariant.Orange);
             DialogOptionButton[] options = { DialogOptionButton.Cancel, quitButton };
-            await DialogManager.Instance.RunDialogWorkflow("Quit level?", "Your progress in this level will be lost.", async session =>
+            DialogButtonType buttonType = await DialogManager.Instance.RunDialog("Quit level?", "Your progress in this level will be lost.", options);
+            switch (buttonType)
             {
-                int buttonId = await session.WaitForButtonClick();
-                switch ((DialogButtonType)buttonId)
-                {
-                    case DialogButtonType.Cancel:
-                        return;
-                    case DialogButtonType.Yes:
-                        quitConfirmed = true;
-                        return;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported quit-level dialog button.");
-                }
-            }, options);
-            return quitConfirmed;
+                case DialogButtonType.Cancel:
+                    return false;
+                case DialogButtonType.Yes:
+                    return true;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(buttonType), buttonType, "Unsupported quit-level dialog button.");
+            }
         }
 
-        private  async UniTask<bool> RunRetryDecisionDialog(string title, string message)
-        {
-            bool shouldRetry = false;
-            DialogOptionButton[] options = { DialogOptionButton.Cancel, DialogOptionButton.Retry };
-            await DialogManager.Instance.RunDialogWorkflow(title, message, async session =>
-            {
-                int buttonId = await session.WaitForButtonClick();
-                switch ((DialogButtonType)buttonId)
-                {
-                    case DialogButtonType.Cancel:
-                        return;
-                    case DialogButtonType.Retry:
-                        shouldRetry = true;
-                        return;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported retry-decision dialog button.");
-                }
-            }, options);
-            return shouldRetry;
-        }
-
-        private  async UniTask RunInformationDialog(string title, string message)
-        {
-            DialogOptionButton[] options = { DialogOptionButton.Ok };
-            await DialogManager.Instance.RunDialogWorkflow(title, message, async session =>
-            {
-                int buttonId = await session.WaitForButtonClick();
-                if ((DialogButtonType)buttonId != DialogButtonType.Ok) throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported information dialog button.");
-            }, options);
-        }
     }
 }

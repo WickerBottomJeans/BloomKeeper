@@ -53,13 +53,7 @@ namespace DefaultNamespace
             Debug.LogException(exception);
             ApplicationInputController.Instance.SetGameBoardInputActive(false);
 
-            DialogOptionButton[] options = { DialogOptionButton.Ok };
-            await DialogManager.Instance.RunDialogWorkflow("Unexpected error", "BloomKeeper encountered an unexpected error and cannot continue safely. The game will close.", async session =>
-            {
-                int buttonId = await session.WaitForButtonClick();
-                if ((DialogButtonType)buttonId != DialogButtonType.Ok)
-                    throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported fatal error dialog button.");
-            }, options);
+            await DialogManager.Instance.RunOkDialog("Unexpected error", "BloomKeeper encountered an unexpected error and cannot continue safely. The game will close.");
 
             QuitApplication();
         }

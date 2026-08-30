@@ -61,12 +61,12 @@ namespace DefaultNamespace
                 catch (PlayFabRequestException exception) when (exception.IsRetryable)
                 {
                     Debug.LogWarning(exception);
-                    if (!await RunRetryDialog(ShopDialogText.ShopUnavailableTitle, ShopDialogText.ShopLoadRetryMessage)) return false;
+                    if (!await DialogManager.Instance.RunRetryOrCancelDialog(ShopDialogText.ShopUnavailableTitle, ShopDialogText.ShopLoadRetryMessage)) return false;
                 }
                 catch (PlayFabRequestException exception)
                 {
                     Debug.LogWarning(exception);
-                    await RunInformationDialog(ShopDialogText.ShopUnavailableTitle, ShopDialogText.ShopLoadFailureMessage);
+                    await DialogManager.Instance.RunOkDialog(ShopDialogText.ShopUnavailableTitle, ShopDialogText.ShopLoadFailureMessage);
                     return false;
                 }
             }
@@ -108,10 +108,10 @@ namespace DefaultNamespace
                     switch (response.outcome)
                     {
                         case BuyShopOfferOutcome.Purchased:
-                            await RunInformationDialog(ShopDialogText.PurchaseSuccessTitle, ShopDialogText.PurchaseSuccessMessage);
+                            await DialogManager.Instance.RunOkDialog(ShopDialogText.PurchaseSuccessTitle, ShopDialogText.PurchaseSuccessMessage);
                             return;
                         case BuyShopOfferOutcome.Rejected:
-                            await RunInformationDialog(ShopDialogText.PurchaseFailureTitle, ShopDialogText.GetPurchaseRejectionMessage(response.rejectionReason.Value));
+                            await DialogManager.Instance.RunOkDialog(ShopDialogText.PurchaseFailureTitle, ShopDialogText.GetPurchaseRejectionMessage(response.rejectionReason.Value));
                             return;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(response.outcome), response.outcome, "Unsupported shop purchase outcome.");
@@ -120,12 +120,12 @@ namespace DefaultNamespace
                 catch (PlayFabRequestException exception) when (exception.IsRetryable)
                 {
                     Debug.LogWarning(exception);
-                    if (!await RunRetryDialog(ShopDialogText.PurchaseFailureTitle, ShopDialogText.PurchaseRetryMessage)) return;
+                    if (!await DialogManager.Instance.RunRetryOrCancelDialog(ShopDialogText.PurchaseFailureTitle, ShopDialogText.PurchaseRetryMessage)) return;
                 }
                 catch (PlayFabRequestException exception)
                 {
                     Debug.LogWarning(exception);
-                    await RunInformationDialog(ShopDialogText.PurchaseFailureTitle, ShopDialogText.PurchaseFailureMessage);
+                    await DialogManager.Instance.RunOkDialog(ShopDialogText.PurchaseFailureTitle, ShopDialogText.PurchaseFailureMessage);
                     return;
                 }
             }
@@ -161,42 +161,5 @@ namespace DefaultNamespace
             }
         }
 
-        /// <summary>
-        /// Asks the player whether to retry a failed shop request.
-        /// </summary>
-        /// <returns>Whether the player chose Retry.</returns>
-        private async UniTask<bool> RunRetryDialog(string title, string message)
-        {
-            bool shouldRetry = false;
-            DialogOptionButton[] options = { DialogOptionButton.Cancel, DialogOptionButton.Retry };
-            await DialogManager.Instance.RunDialogWorkflow(title, message, async session =>
-            {
-                int buttonId = await session.WaitForButtonClick();
-                switch ((DialogButtonType)buttonId)
-                {
-                    case DialogButtonType.Cancel:
-                        return;
-                    case DialogButtonType.Retry:
-                        shouldRetry = true;
-                        return;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported shop retry dialog button.");
-                }
-            }, options);
-            return shouldRetry;
-        }
-
-        /// <summary>
-        /// Shows a shop message and waits for OK.
-        /// </summary>
-        private async UniTask RunInformationDialog(string title, string message)
-        {
-            DialogOptionButton[] options = { DialogOptionButton.Ok };
-            await DialogManager.Instance.RunDialogWorkflow(title, message, async session =>
-            {
-                int buttonId = await session.WaitForButtonClick();
-                if ((DialogButtonType)buttonId != DialogButtonType.Ok) throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported shop information dialog button.");
-            }, options);
-        }
     }
 }

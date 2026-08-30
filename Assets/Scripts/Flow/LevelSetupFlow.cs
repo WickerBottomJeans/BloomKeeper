@@ -48,7 +48,7 @@ namespace DefaultNamespace
             catch (IOException exception)
             {
                 Debug.LogWarning(exception);
-                await RunInformationDialog("Level unavailable", "This level is currently unavailable. Please try again later.");
+                await DialogManager.Instance.RunOkDialog("Level unavailable", "This level is currently unavailable. Please try again later.");
                 return null;
             }
         }
@@ -68,53 +68,23 @@ namespace DefaultNamespace
                 catch (PlayFabRequestException exception) when (exception.IsRetryable)
                 {
                     Debug.LogWarning(exception);
-                    if (await RunRetryDecisionDialog(LevelAttemptDialogText.RetryTitle, LevelAttemptDialogText.StartRetryMessage)) continue;
+                    if (await DialogManager.Instance.RunRetryOrCancelDialog(LevelAttemptDialogText.RetryTitle, LevelAttemptDialogText.StartRetryMessage)) continue;
                     return null;
                 }
                 catch (PlayFabRequestException exception)
                 {
                     Debug.LogWarning(exception);
-                    await RunInformationDialog(LevelAttemptDialogText.RejectionTitle, LevelAttemptDialogText.StartRetryMessage);
+                    await DialogManager.Instance.RunOkDialog(LevelAttemptDialogText.RejectionTitle, LevelAttemptDialogText.StartRetryMessage);
                     return null;
                 }
 
                 playerLivesPresentationService.ReplaceServerLivesSnapshot(response.lives);
                 if (response.outcome == StartLevelAttemptOutcome.Approved) return response.levelAttemptId;
 
-                await RunInformationDialog(LevelAttemptDialogText.RejectionTitle, LevelAttemptDialogText.GetStartRejectionMessage(response.rejectionReason.Value));
+                await DialogManager.Instance.RunOkDialog(LevelAttemptDialogText.RejectionTitle, LevelAttemptDialogText.GetStartRejectionMessage(response.rejectionReason.Value));
                 return null;
             }
         }
         
-        private  async UniTask<bool> RunRetryDecisionDialog(string title, string message)
-        {
-            bool shouldRetry = false;
-            DialogOptionButton[] options = { DialogOptionButton.Cancel, DialogOptionButton.Retry };
-            await DialogManager.Instance.RunDialogWorkflow(title, message, async session =>
-            {
-                int buttonId = await session.WaitForButtonClick();
-                switch ((DialogButtonType)buttonId)
-                {
-                    case DialogButtonType.Cancel:
-                        return;
-                    case DialogButtonType.Retry:
-                        shouldRetry = true;
-                        return;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported retry-decision dialog button.");
-                }
-            }, options);
-            return shouldRetry;
-        }
-        
-        private  async UniTask RunInformationDialog(string title, string message)
-        {
-            DialogOptionButton[] options = { DialogOptionButton.Ok };
-            await DialogManager.Instance.RunDialogWorkflow(title, message, async session =>
-            {
-                int buttonId = await session.WaitForButtonClick();
-                if ((DialogButtonType)buttonId != DialogButtonType.Ok) throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported information dialog button.");
-            }, options);
-        }
     }
 }

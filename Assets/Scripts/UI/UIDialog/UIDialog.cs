@@ -14,7 +14,7 @@ namespace DefaultNamespace.UI
 
         private readonly List<DialogButtonView> activeButtons = new();
         
-        public event Action<int> ButtonClicked;
+        public event Action<DialogButtonType> ButtonClicked;
 
         protected override void Awake()
         {
@@ -58,16 +58,16 @@ namespace DefaultNamespace.UI
         private void SpawnButton(DialogOptionButton optionButton)
         {
             DialogButtonView button = Instantiate(buttonPrefab, buttonRoot);
-            int buttonId = optionButton.Id;
-            button.Configure(optionButton.Label, optionButton.Variant);
-            button.Clicked += () => HandleButtonClicked(buttonId);
+            DialogButtonType buttonType = optionButton.ButtonType;
+            button.Configure(optionButton.Label, optionButton.ColorVariant);
+            button.Clicked += () => HandleButtonClicked(buttonType);
             activeButtons.Add(button);
             button.gameObject.SetActive(true);
         }
 
-        private void HandleButtonClicked(int buttonId)
+        private void HandleButtonClicked(DialogButtonType buttonType)
         {
-            ButtonClicked?.Invoke(buttonId);
+            ButtonClicked?.Invoke(buttonType);
         }
     }
 }

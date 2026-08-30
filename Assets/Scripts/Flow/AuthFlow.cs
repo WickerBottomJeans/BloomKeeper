@@ -69,12 +69,7 @@ namespace DefaultNamespace
             catch (Exception exception)
             {
                 Debug.LogWarning(exception);
-                DialogOptionButton[] options = { DialogOptionButton.Ok };
-                await DialogManager.Instance.RunDialogWorkflow("Account unavailable", "Unable to load your account. Check your connection and try again.", async dialogSession =>
-                {
-                    int buttonId = await dialogSession.WaitForButtonClick();
-                    if ((DialogButtonType)buttonId != DialogButtonType.Ok) throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported account-load failure dialog button.");
-                }, options);
+                await DialogManager.Instance.RunOkDialog("Account unavailable", "Unable to load your account. Check your connection and try again.");
                 return;
             }
             finally

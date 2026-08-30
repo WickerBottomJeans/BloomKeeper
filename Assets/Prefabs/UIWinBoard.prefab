@@ -2202,11 +2202,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6901743257751602871, guid: d16b93465d4d3a144ba25ffbf4c1a016, type: 3}
       propertyPath: m_SortingLayer
-      value: 0
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6901743257751602871, guid: d16b93465d4d3a144ba25ffbf4c1a016, type: 3}
       propertyPath: m_SortingLayerID
-      value: 604954585
+      value: -1619324423
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2333,11 +2333,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6901743257751602871, guid: 647ed457644648b42939c09fcc0e62d1, type: 3}
       propertyPath: m_SortingLayer
-      value: 0
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6901743257751602871, guid: 647ed457644648b42939c09fcc0e62d1, type: 3}
       propertyPath: m_SortingLayerID
-      value: 604954585
+      value: -1619324423
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2464,11 +2464,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6901743257751602871, guid: d16b93465d4d3a144ba25ffbf4c1a016, type: 3}
       propertyPath: m_SortingLayer
-      value: 0
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6901743257751602871, guid: d16b93465d4d3a144ba25ffbf4c1a016, type: 3}
       propertyPath: m_SortingLayerID
-      value: 604954585
+      value: -1619324423
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2591,11 +2591,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6901743257751602871, guid: 647ed457644648b42939c09fcc0e62d1, type: 3}
       propertyPath: m_SortingLayer
-      value: 0
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6901743257751602871, guid: 647ed457644648b42939c09fcc0e62d1, type: 3}
       propertyPath: m_SortingLayerID
-      value: 604954585
+      value: -1619324423
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

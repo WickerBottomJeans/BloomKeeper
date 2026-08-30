@@ -10,7 +10,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private UIDialog dialogPrefab;
         private UIDialog dialogInstance;
 
-        public event Action<int> DialogButtonClicked;
+        public event Action<DialogButtonType> DialogButtonClicked;
 
         public void PresentDialogView(string title, string message, IReadOnlyList<DialogOptionButton> options)
         {
@@ -35,9 +35,9 @@ namespace DefaultNamespace.UI
             dialogInstance.SetButtonsInteractable(interactable);
         }
 
-        private void HandleDialogButtonClicked(int buttonId)
+        private void HandleDialogButtonClicked(DialogButtonType buttonType)
         {
-            DialogButtonClicked?.Invoke(buttonId);
+            DialogButtonClicked?.Invoke(buttonType);
         }
     }
 }

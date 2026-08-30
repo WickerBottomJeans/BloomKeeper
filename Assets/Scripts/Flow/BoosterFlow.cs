@@ -176,30 +176,23 @@ namespace DefaultNamespace
         /// </summary>
         private async UniTask<BoosterAuthorizationResult> RunAuthorizationRetryDialog()
         {
-            BoosterAuthorizationResult result = null;
             DialogOptionButton[] options = { DialogOptionButton.Retry };
-            await DialogManager.Instance.RunDialogWorkflow("Connection interrupted", "The booster has not been applied yet. Retry to safely confirm the same use.", async session =>
+            while (true)
             {
-                while (true)
+                DialogButtonType buttonType = await DialogManager.Instance.RunDialog("Connection interrupted", "The booster has not been applied yet. Retry to safely confirm the same use.", options);
+                if (buttonType != DialogButtonType.Retry) throw new ArgumentOutOfRangeException(nameof(buttonType), buttonType, "Unsupported booster authorization retry button.");
+
+                state = State.Authorizing;
+                try
                 {
-                    int buttonId = await session.WaitForButtonClick();
-                    if ((DialogButtonType)buttonId != DialogButtonType.Retry) throw new ArgumentOutOfRangeException(nameof(buttonId), buttonId, "Unsupported booster authorization retry button.");
-
-                    state = State.Authorizing;
-                    try
-                    {
-                        result = await ApplicationPresentationService.Instance.RunWithLoading(() => boosterUseService.RetryPendingBoosterAuthorization().AsTask());
-                        return;
-                    }
-                    catch (PlayFabRequestException exception) when (exception.IsRetryable)
-                    {
-                        Debug.LogWarning(exception);
-                        state = State.AwaitingAuthorizationRetry;
-                    }
+                    return await ApplicationPresentationService.Instance.RunWithLoading(() => boosterUseService.RetryPendingBoosterAuthorization().AsTask());
                 }
-            }, options);
-
-            return result ?? throw new InvalidOperationException("Booster authorization retry ended without a terminal result.");
+                catch (PlayFabRequestException exception) when (exception.IsRetryable)
+                {
+                    Debug.LogWarning(exception);
+                    state = State.AwaitingAuthorizationRetry;
+                }
+            }
         }
     }
 }
