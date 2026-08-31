@@ -17,7 +17,7 @@ namespace DefaultNamespace
         public async UniTask Run()
         {
             ConfigureDeviceFrameRate();
-            UIManager.Instance.ShowStartupScreen(string.Empty, StartupScreenState.Boot);
+            UIManager.Instance.ShowStartupScreen(StartupScreenState.Boot);
             await addressableContentService.InitializeAsync();
             await ConfigManager.Instance.InitializeAsync();
             // TODO: Move the shared sprite atlases to remote Addressables.

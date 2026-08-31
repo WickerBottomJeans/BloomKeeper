@@ -144,6 +144,10 @@ PrefabInstance:
       propertyPath: addCurrencyButton
       value: 
       objectReference: {fileID: 1953997222855629031}
+    - target: {fileID: 4009777212810020312, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
+      propertyPath: m_PixelsPerUnitMultiplier
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 5748778450738585135, guid: 86004add7469eb84189c57b0460dcd51, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 54

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using DG.Tweening;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,8 +12,6 @@ namespace DefaultNamespace.UI
     public class UIStartupScreen : MonoBehaviour
     {
         [SerializeField] private Button playButton;
-        [SerializeField] private Button loginButton;
-        [SerializeField] private TextMeshProUGUI playButtonLabel;
         [SerializeField] private CanvasGroup bootVisualGroup;
         [SerializeField] private CanvasGroup accountEntryVisualGroup;
         [SerializeField] private Image bootLoadingImage;
@@ -56,9 +53,8 @@ namespace DefaultNamespace.UI
 
         #region Public API
 
-        public void Show(string playButtonText, StartupScreenState state)
+        public void Show(StartupScreenState state)
         {
-            playButtonLabel.text = playButtonText;
             ChangeState(state);
         }
 

@@ -10,8 +10,6 @@ namespace DefaultNamespace
     /// </summary>
     public class AuthFlow
     {
-        private const string GuestPlayButtonText = "<size=70%>Play as</size> <size=120%>Guest</size>";
-
         private readonly PlayFabGuestLoginService guestLoginService;
         private readonly PlayerSessionLoader playerSessionLoader;
         private readonly PlayerLivesPresentationService playerLivesPresentationService;
@@ -32,7 +30,7 @@ namespace DefaultNamespace
         public void Enter()
         {
             UIManager.Instance.AuthPlayRequested += HandleAuthPlayRequested;
-            UIManager.Instance.ShowStartupScreen(GuestPlayButtonText, StartupScreenState.AccountEntry);
+            UIManager.Instance.ShowStartupScreen(StartupScreenState.AccountEntry);
         }
 
         /// <summary>

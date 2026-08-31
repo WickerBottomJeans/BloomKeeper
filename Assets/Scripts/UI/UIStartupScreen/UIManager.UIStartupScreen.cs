@@ -10,12 +10,12 @@ namespace DefaultNamespace.UI
 
         public event Action AuthPlayRequested;
 
-        public void ShowStartupScreen(string playButtonText, StartupScreenState state)
+        public void ShowStartupScreen(StartupScreenState state)
         {
             GetPanel(ref startupScreenInstance, startupScreenPrefab, uiRoot);
             UnbindStartupScreen();
             BindStartupScreen();
-            startupScreenInstance.Show(playButtonText, state);
+            startupScreenInstance.Show(state);
             startupScreenInstance.gameObject.SetActive(true);
         }
 

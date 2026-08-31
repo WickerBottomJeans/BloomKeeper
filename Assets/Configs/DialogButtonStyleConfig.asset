@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: DialogButtonStyleConfig
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.DialogButtonStyleConfig
   styles:
-  - variant: 1
+  - colorVariant: 1
     sprite: {fileID: 8894201953851282084, guid: a52b38464ede3a24dbfddb09c2646258, type: 3}
-  - variant: 2
+  - colorVariant: 2
     sprite: {fileID: -5402412272178277761, guid: a52b38464ede3a24dbfddb09c2646258, type: 3}
-  - variant: 3
+  - colorVariant: 3
     sprite: {fileID: 2013261503205373015, guid: a52b38464ede3a24dbfddb09c2646258, type: 3}
-  - variant: 4
+  - colorVariant: 4
     sprite: {fileID: 7664807735657788756, guid: a52b38464ede3a24dbfddb09c2646258, type: 3}
