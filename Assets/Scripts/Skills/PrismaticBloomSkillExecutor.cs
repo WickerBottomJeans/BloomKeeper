@@ -143,7 +143,7 @@ namespace Skills
 
                 Petal before = grid[x, y].Petal;
                 Petal after = new Petal(targetType, newSkill);
-                grid[x, y].Petal = after;
+                grid[x, y].SetPetal(after);
                 changes.Add(new PetalChange(new Vector2Int(x, y), before, after));
             }
 

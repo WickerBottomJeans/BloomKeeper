@@ -162,7 +162,8 @@ public class GameBoard : MonoBehaviour
     private void HandleEditRequested(Vector2Int tile)
     {
         if (currentState != BoardState.Idle) return;
-        if (grid[tile.x, tile.y] == null) return;
+        Tile selectedTile = grid[tile.x, tile.y];
+        if (selectedTile == null || (!selectedTile.CanReceiveNewPetal() && !selectedTile.CanSwapPetal())) return;
 
         editingTile = tile;
 
@@ -177,7 +178,7 @@ public class GameBoard : MonoBehaviour
         if (grid[editingTile.x, editingTile.y] == null) return;
 
         Petal petal = new Petal(petalType, skillType);
-        grid[editingTile.x, editingTile.y].Petal = petal;
+        grid[editingTile.x, editingTile.y].SetPetal(petal);
         boardPresentationCoordinator.RefreshTile(editingTile, petal);
     }
 

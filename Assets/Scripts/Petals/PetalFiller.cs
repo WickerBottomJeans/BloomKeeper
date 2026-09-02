@@ -30,7 +30,7 @@ namespace Petals
                     if (tile == null || !tile.IsGravityAffected()) break;
                     if (!tile.CanReceiveNewPetal()) continue;
 
-                    tile.Petal = PetalFactory.CreateRandom();
+                    tile.SetPetal(PetalFactory.CreateRandom());
                     filled.Add(new Vector2Int(x, y));
                 }
             }

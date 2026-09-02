@@ -32,10 +32,7 @@ namespace DefaultNamespace
             return webLevel == 0;
         }
 
-        public override bool CanReceiveNewPetal()
-        {
-            return webLevel == 0 && Petal == null;
-        }
+        protected override bool CanContainPetal() => webLevel == 0;
 
         public override bool CanSwapPetal() => webLevel == 0 && Petal != null;
 
@@ -49,7 +46,7 @@ namespace DefaultNamespace
                 return;
 
             //Have no web to reduce aka the web tile dont have web and free to do normal petal stuff
-            Petal = null;
+            RemovePetal();
         } 
         
         //TODO: this doesnt look right, not controlled by boardVFX when affected by a skill. FIX THIS later :)

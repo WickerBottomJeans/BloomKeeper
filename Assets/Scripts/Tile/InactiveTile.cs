@@ -11,7 +11,7 @@ namespace DefaultNamespace
         }
         
         public override bool IsGravityAffected() => false;
-        public override bool CanReceiveNewPetal() => false;
+        protected override bool CanContainPetal() => false;
         public override bool CanSwapPetal() => false;
         public override bool CanClearPetal() => false;
         public override void ApplyClearEffect() { }

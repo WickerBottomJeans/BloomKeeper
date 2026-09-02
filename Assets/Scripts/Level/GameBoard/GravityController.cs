@@ -22,8 +22,9 @@ namespace DefaultNamespace.UI
                         if (grid[x, above] == null || !grid[x, above].IsGravityAffected()) break;
                         if (grid[x, above].Petal == null) continue;
 
-                        grid[x, y].Petal = grid[x, above].Petal;
-                        grid[x, above].Petal = null;
+                        Petal fallingPetal = grid[x, above].Petal;
+                        grid[x, y].SetPetal(fallingPetal);
+                        grid[x, above].RemovePetal();
                         moves.Add((new Vector2Int(x, above), new Vector2Int(x, y)));
                         break;
                     }

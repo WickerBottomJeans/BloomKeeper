@@ -33,11 +33,17 @@ namespace Utility
                     TileData tileData = index < data.tiles.Count ? data.tiles[index] : new TileData();
                     Tile tile = grid[x, y];
 
-                    if (tile == null || tile is InactiveTile) continue;
+                    if (tile == null) continue;
+                    if (!tile.CanReceiveNewPetal())
+                    {
+                        if (tileData.petalType != PetalType.None || tileData.skillType != SpecialSkillType.None)
+                            throw new System.InvalidOperationException($"Tile at ({x}, {y}) cannot contain configured petal data.");
+                        continue;
+                    }
 
-                    tile.Petal = tileData.petalType != PetalType.None
+                    tile.SetPetal(tileData.petalType != PetalType.None
                         ? PetalFactory.CreateForTileMap(tileData)
-                        : CreatePetalWithConstrained(grid, x, y);
+                        : CreatePetalWithConstrained(grid, x, y));
                 }
             }
 
@@ -51,10 +57,10 @@ namespace Utility
 
             foreach (PetalType type in allTypes)
             {
-                grid[x, y].Petal = PetalFactory.CreatePetal(type, SpecialSkillType.None);
+                grid[x, y].SetPetal(PetalFactory.CreatePetal(type, SpecialSkillType.None));
                 if (MatchDetector.WouldCompleteMatch(grid, x, y))
                     excluded.Add(type);
-                grid[x, y].Petal = null;
+                grid[x, y].RemovePetal();
             }
 
             PetalType[] candidates = System.Array.FindAll(allTypes, t => !excluded.Contains(t));

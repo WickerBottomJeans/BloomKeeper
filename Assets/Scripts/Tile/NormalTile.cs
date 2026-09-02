@@ -10,10 +10,10 @@ namespace DefaultNamespace
         }
         
         public override bool IsGravityAffected() => true;
-        public override bool CanReceiveNewPetal() => Petal == null;
+        protected override bool CanContainPetal() => true;
         public override bool CanSwapPetal() => Petal != null;
         public override bool CanClearPetal() => Petal != null;
         
-        public override void ApplyClearEffect() => Petal = null;
+        public override void ApplyClearEffect() => RemovePetal();
     }
 }

@@ -17,9 +17,10 @@ namespace DefaultNamespace.UI
 
         public static void ExecuteSwapPetal(Vector2Int tilePositionA, Vector2Int tilePositionB, Tile[,] grid)
         {
-            Petal temp = grid[tilePositionA.x, tilePositionA.y].Petal;
-            grid[tilePositionA.x, tilePositionA.y].Petal = grid[tilePositionB.x, tilePositionB.y].Petal;
-            grid[tilePositionB.x, tilePositionB.y].Petal = temp;
+            Petal petalA = grid[tilePositionA.x, tilePositionA.y].Petal;
+            Petal petalB = grid[tilePositionB.x, tilePositionB.y].Petal;
+            grid[tilePositionA.x, tilePositionA.y].SetPetal(petalB);
+            grid[tilePositionB.x, tilePositionB.y].SetPetal(petalA);
         }
     }
 }

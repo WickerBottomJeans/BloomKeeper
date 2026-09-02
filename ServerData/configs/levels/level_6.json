@@ -5,27 +5,27 @@
   "nextLevelId": 7,
   "allowedBoosters": [1, 2],
   "starScoreThresholds": [
-    { "starCount": 1, "score": 13800 },
-    { "starCount": 2, "score": 17500 },
-    { "starCount": 3, "score": 23000 }
+    { "starCount": 1, "score": 7200 },
+    { "starCount": 2, "score": 10400 },
+    { "starCount": 3, "score": 14200 }
   ],
   "boardWidth": 8,
   "boardHeight": 8,
   "tiles": [
-    { "type": 1, "petalType": 1, "skillType": 1 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 },
-    { "type": 1, "petalType": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1,"petalType": 2 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1,"petalType": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 },
+    { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 1, "skillType": 1 }, { "type": 1, "petalType": 2 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 1 },
+    { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 1 }, { "type": 1, "petalType": 2 }, { "type": 1, "petalType": 1 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 1 },
+    { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
   ],
   "objectives": [
-    { "type": 1, "petals": [{ "petalType": 1, "amount": 10 }, { "petalType": 2, "amount": 10 }] },
-    { "type": 3, "spiderWebsToClear": 13 }
+    { "type": 1, "petals": [{ "petalType": 1, "amount": 14 }, { "petalType": 2, "amount": 14 }] },
+    { "type": 3, "spiderWebsToClear": 24 }
   ],
   "constrainers": [
-    { "type": 1, "moveLimit": 24, "warningAtRemaining": 5 }
+    { "type": 1, "moveLimit": 30, "warningAtRemaining": 5 }
   ]
 }

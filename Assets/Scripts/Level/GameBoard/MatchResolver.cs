@@ -132,7 +132,7 @@ namespace DefaultNamespace.UI
         private static void ApplyPendingSpawns(Tile[,] grid, List<SkillPetalSpawn> pendingSpawns)
         {
             foreach (SkillPetalSpawn spawn in pendingSpawns)
-                grid[spawn.SpawnPosition.x, spawn.SpawnPosition.y].Petal = PetalFactory.CreatePetal(spawn.PetalType, spawn.SkillType);
+                grid[spawn.SpawnPosition.x, spawn.SpawnPosition.y].SetPetal(PetalFactory.CreatePetal(spawn.PetalType, spawn.SkillType));
         }
 
         /// <summary>

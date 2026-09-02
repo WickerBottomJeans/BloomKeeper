@@ -16,7 +16,7 @@ namespace DefaultNamespace.UI
                 for (int y = 0; y < rows; y++)
                 {
                     if (grid[x, y] == null || !grid[x, y].IsMatchable()) continue;
-                    grid[x, y].Petal = PetalFactory.CreateRandom();
+                    grid[x, y].SetPetal(PetalFactory.CreateRandom());
                     affected.Add(new Vector2Int(x, y));
                 }
             }
