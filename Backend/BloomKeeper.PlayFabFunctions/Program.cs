@@ -24,6 +24,8 @@ builder.Services.AddSingleton<PlayFabEntityFileClient>();
 builder.Services.AddSingleton<LivesFileStore>();
 builder.Services.AddSingleton<LivesService>();
 builder.Services.AddSingleton<ShopPurchaseStore>();
+// Register completion reward saga storage.
+builder.Services.AddSingleton<CompletionRewardStore>();
 builder.Services.AddSingleton<IShopGrantHandler, InventoryItemShopGrantHandler>();
 builder.Services.AddSingleton<IShopGrantHandler, UnlimitedLivesShopGrantHandler>();
 builder.Services.AddSingleton<ShopGrantDispatcher>();

@@ -66,7 +66,7 @@ public class BuyShopOfferFunction
         ETag shopPurchaseETag;
         if (existingShopPurchaseData == null)
         {
-            ETag? createdShopPurchaseETag = await shopPurchaseStore.TryCreatePurchase(callerDataEntity.Type, callerDataEntity.Id, shopPurchaseData);
+            ETag? createdShopPurchaseETag = await shopPurchaseStore.TryInsertPurchase(callerDataEntity.Type, callerDataEntity.Id, shopPurchaseData);
             if (!createdShopPurchaseETag.HasValue)
             {
                 storedShopPurchaseData = await shopPurchaseStore.LoadPurchase(callerDataEntity.Type, callerDataEntity.Id);

@@ -41,10 +41,10 @@ public class ShopPurchaseStore
     }
 
     /// <summary>
-    /// [Duong] Creates the player's purchase row.
+    /// [Duong] Insert the player's purchase row.
     /// </summary>
     /// <returns>The created row's ETag, or null if the row already exists.</returns>
-    public async Task<ETag?> TryCreatePurchase(string playerEntityType, string playerEntityId, ShopPurchaseData shopPurchaseData)
+    public async Task<ETag?> TryInsertPurchase(string playerEntityType, string playerEntityId, ShopPurchaseData shopPurchaseData)
     {
         string playerPartitionKey = CreatePlayerPartitionKey(playerEntityType, playerEntityId);
         ShopPurchaseData.ValidateShopPurchaseData(shopPurchaseData);

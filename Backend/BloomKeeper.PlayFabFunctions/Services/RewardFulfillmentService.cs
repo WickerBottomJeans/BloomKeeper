@@ -18,24 +18,6 @@ public class RewardFulfillmentService
     }
     
     /// <summary>
-    /// [Duong] Fulfills every grantable reward in a pending batch
-    /// </summary>
-    public async Task FulfillPendingRewardBatch(PendingRewardBatch pendingRewardBatch, PlayFabFunctionExecutionContext context)
-    {
-        if (pendingRewardBatch == null) throw new ArgumentNullException(nameof(pendingRewardBatch));
-        if (context == null) throw new ArgumentNullException(nameof(context));
-
-        for (int rewardIndex = 0; rewardIndex < pendingRewardBatch.rewardRolls.Count; rewardIndex++)
-        {
-            RewardGrant? reward = pendingRewardBatch.rewardRolls[rewardIndex];
-            if (reward == null) continue;
-
-            string rewardGrantIdempotencyKey = $"{pendingRewardBatch.rewardBatchId}-{rewardIndex}";
-            await FulfillReward(reward, context, rewardGrantIdempotencyKey);
-        }
-    }
-
-    /// <summary>
     /// [Duong] Grand a reward to player
     /// </summary>
     public async Task<RewardFulfillmentResult> FulfillReward(RewardGrant reward, PlayFabFunctionExecutionContext context, string rewardGrantIdempotencyKey)
