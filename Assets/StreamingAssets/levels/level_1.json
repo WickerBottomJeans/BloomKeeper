@@ -3,26 +3,26 @@
   "chapterId": 1,
   "nextLevelId": 2,
   "starScoreThresholds": [
-    { "starCount": 1, "score": 960 },
-    { "starCount": 2, "score": 1800 },
-    { "starCount": 3, "score": 3000 }
+    { "starCount": 1, "score": 100 },
+    { "starCount": 2, "score": 300 },
+    { "starCount": 3, "score": 1000 }
   ],
   "boardWidth": 8,
   "boardHeight": 8,
   "tiles": [
+    { "type": 1, "petalType": 4 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 4 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 4 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 4, "skillType": 4 }, { "type": 1, "petalType": 4, "skillType": 5 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
     { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
     { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 4 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
     { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
   ],
   "objectives": [
-    { "type": 1, "petals": [{ "petalType": 1, "amount": 12 }, { "petalType": 2, "amount": 12 }] }
+    { "type": 1, "petals": [{ "petalType": 1, "amount": 5 }] }
   ],
   "constrainers": [
-    { "type": 1, "moveLimit": 24, "warningAtRemaining": 5 }
+    { "type": 1, "moveLimit": 20, "warningAtRemaining": 5 }
   ]
 }

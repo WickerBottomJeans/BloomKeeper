@@ -1,5 +1,6 @@
 ﻿using Core;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace DefaultNamespace.UI
@@ -11,13 +12,18 @@ namespace DefaultNamespace.UI
 
         public void ShowTesterToggle()
         {
-            if (testerToggleInstance != null)
+#if UNITY_EDITOR
+            return;
+#else
+            if (testerToggleInstance == null)
             {
-                testerToggleInstance.gameObject.SetActive(true);
-                return;
+                testerToggleInstance = Instantiate(testerTogglePrefab, uiRoot);
+                testerToggleInstance.onValueChanged.AddListener(active => GlobalState.SetAdminMode(active));
             }
-            testerToggleInstance = Instantiate(testerTogglePrefab, uiRoot);
-            testerToggleInstance.onValueChanged.AddListener(active => GlobalState.SetAdminMode(active));
+
+            testerToggleInstance.SetIsOnWithoutNotify(GlobalState.IsAdminMode);
+            testerToggleInstance.gameObject.SetActive(true);
+#endif
         }
 
         public void HideTesterToggle()
@@ -25,5 +31,17 @@ namespace DefaultNamespace.UI
             if (testerToggleInstance == null) return;
             testerToggleInstance.gameObject.SetActive(false);
         }
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        private void Update()
+        {
+            Keyboard keyboard = Keyboard.current;
+            if (keyboard == null || !keyboard.tKey.wasPressedThisFrame) return;
+
+            GlobalState.SetAdminMode(!GlobalState.IsAdminMode);
+            if (testerToggleInstance != null)
+                testerToggleInstance.SetIsOnWithoutNotify(GlobalState.IsAdminMode);
+        }
+#endif
     }
 }
