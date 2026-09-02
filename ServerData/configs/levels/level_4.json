@@ -6,8 +6,8 @@
   "allowedBoosters": [1, 2],
   "starScoreThresholds": [
     { "starCount": 1, "score": 960 },
-    { "starCount": 2, "score": 1800 },
-    { "starCount": 3, "score": 3000 }
+    { "starCount": 2, "score": 2200 },
+    { "starCount": 3, "score": 3800 }
   ],
   "boardWidth": 8,
   "boardHeight": 8,

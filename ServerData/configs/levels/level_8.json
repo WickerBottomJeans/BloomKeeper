@@ -3,9 +3,9 @@
   "published": false,
   "allowedBoosters": [1, 2],
   "starScoreThresholds": [
-    { "starCount": 1, "score": 8800 },
+    { "starCount": 1, "score": 8720 },
     { "starCount": 2, "score": 12500 },
-    { "starCount": 3, "score": 16500 }
+    { "starCount": 3, "score": 17000 }
   ],
   "boardWidth": 8,
   "boardHeight": 8,
@@ -20,7 +20,7 @@
     { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
   ],
   "objectives": [
-    { "type": 1, "petals": [{ "petalType": 3, "amount": 20 }] },
+    { "type": 1, "petals": [{ "petalType": 3, "amount": 18 }] },
     { "type": 3, "spiderWebsToClear": 8 }
   ],
   "constrainers": [

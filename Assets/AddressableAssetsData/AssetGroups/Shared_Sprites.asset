@@ -10,14 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Default Local Group
+  m_Name: Shared_Sprites
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
-  m_GroupName: Default Local Group
-  m_GUID: 577a4e9dcbc7251429f0bf481d12a64b
-  m_SerializeEntries: []
+  m_GroupName: Shared_Sprites
+  m_GUID: 9ba8bad9733f2e149b859813b9d9f119
+  m_SerializeEntries:
+  - m_GUID: 3323c3c1d976c024d967eddfdf42fe06
+    m_Address: PetalSpriteSheet
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 14670934b649da043b447627c769272f, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: 9de4f463fde27644fbd2a58ba386cf48, type: 2}
-    - {fileID: 11400000, guid: cef41e1e35122534498ee822ddc75e8b, type: 2}
+    - {fileID: 11400000, guid: 4b681697585411d43b7540e47ec4dd9f, type: 2}
+    - {fileID: 11400000, guid: 89b91d9ecebb2cd4dbd674a58e0ab7ba, type: 2}

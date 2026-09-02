@@ -1286,7 +1286,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Effect
+  m_text: 'SFX
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 988f9c1a4fb7bfd4ea15d04635ada9e7, type: 2}
   m_sharedMaterial: {fileID: 8773637459940156084, guid: 988f9c1a4fb7bfd4ea15d04635ada9e7, type: 2}
