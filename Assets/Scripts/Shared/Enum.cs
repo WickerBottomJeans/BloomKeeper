@@ -112,12 +112,6 @@
         Unlimited = 2
     }
 
-    public enum StartupScreenState
-    {
-        Boot = 1,
-        AccountEntry = 2
-    }
-
     /// <summary>
     /// Convenient IDs for common dialog buttons, with no attached logic.
     /// </summary>

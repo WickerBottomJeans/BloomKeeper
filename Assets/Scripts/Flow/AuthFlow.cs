@@ -30,7 +30,7 @@ namespace DefaultNamespace
         public void Enter()
         {
             UIManager.Instance.AuthPlayRequested += HandleAuthPlayRequested;
-            UIManager.Instance.ShowStartupScreen(StartupScreenState.AccountEntry);
+            UIManager.Instance.ShowStartupScreen();
         }
 
         /// <summary>

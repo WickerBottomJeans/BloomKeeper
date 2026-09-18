@@ -17,11 +17,22 @@ namespace DefaultNamespace
         public async UniTask Run()
         {
             ConfigureDeviceFrameRate();
-            UIManager.Instance.ShowStartupScreen(StartupScreenState.Boot);
-            await addressableContentService.InitializeAsync();
-            await ConfigManager.Instance.InitializeAsync();
-            // TODO: Move the shared sprite atlases to remote Addressables.
-            await SpriteLoader.Instance.LoadAll();
+            UIManager.Instance.ShowStartupScreen();
+            UIManager.Instance.SetStartupAccountEntryVisible(false);
+            UIManager.Instance.ShowLoading();
+            try
+            {
+                await addressableContentService.InitializeAsync();
+                await ConfigManager.Instance.InitializeAsync();
+                // TODO: Move the shared sprite atlases to remote Addressables.
+                await SpriteLoader.Instance.LoadAll();
+            }
+            finally
+            {
+                UIManager.Instance.HideLoading();
+            }
+
+            UIManager.Instance.SetStartupAccountEntryVisible(true);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             UIManager.Instance.ShowTesterToggle();
