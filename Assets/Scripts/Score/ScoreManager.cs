@@ -6,7 +6,7 @@ namespace DefaultNamespace
 {
     public class ScoreManager : IGameplayEventHandler<BoardResolutionStepCompletedEvent>
     {
-        private readonly List<ScoreRuleJson> rules;
+        private readonly ScoreConfig scoreConfig;
         private readonly List<StarScoreThresholdJson> starScoreThresholds;
 
         public event Action<int, int> OnScoreChanged;
@@ -14,7 +14,7 @@ namespace DefaultNamespace
 
         public ScoreManager(List<StarScoreThresholdJson> starScoreThresholds)
         {
-            rules = ScoreLoader.Load().rules;
+            scoreConfig = ConfigManager.Instance.ScoreConfig;
             this.starScoreThresholds = starScoreThresholds;
         }
 
@@ -70,54 +70,19 @@ namespace DefaultNamespace
                     clearedSpiderWebCount++;
             }
 
-            int score = clearedPetalCount * GetRuleScore(ScoreRuleType.PetalCleared);
-            score += clearedPetalCount * e.CascadeDepth * GetRuleScore(ScoreRuleType.CascadeDepthPetalBonus);
-            score += clearedSpiderWebCount * GetRuleScore(ScoreRuleType.SpiderWebCleared);
+            int score = clearedPetalCount * scoreConfig.GetRuleScore(ScoreRuleType.PetalCleared);
+            score += clearedPetalCount * e.CascadeDepth * scoreConfig.GetRuleScore(ScoreRuleType.CascadeDepthPetalBonus);
+            score += clearedSpiderWebCount * scoreConfig.GetRuleScore(ScoreRuleType.SpiderWebCleared);
 
             foreach (var groupResult in e.Result.GroupResults)
             {
-                score += GetRuleScore(ScoreRuleType.MatchShapeBonus, groupResult.SourceMatchGroup.Shape);
+                score += scoreConfig.GetRuleScore(ScoreRuleType.MatchShapeBonus, groupResult.SourceMatchGroup.Shape);
                 SpecialSkillType skillType = groupResult.SourceMatchGroup.Causer?.Skill ?? SpecialSkillType.None;
-                if (skillType != SpecialSkillType.None) score += GetRuleScore(ScoreRuleType.SkillActivation, skillType);
+                if (skillType != SpecialSkillType.None) score += scoreConfig.GetRuleScore(ScoreRuleType.SkillActivation, skillType);
             }
 
             return score;
         }
 
-        private int GetRuleScore(ScoreRuleType type)
-        {
-            int score = 0;
-            foreach (ScoreRuleJson rule in rules)
-            {
-                if (rule.type == type)
-                    score += rule.score;
-            }
-
-            return score;
-        }
-
-        private int GetRuleScore(ScoreRuleType type, MatchShape matchShape)
-        {
-            int score = 0;
-            foreach (ScoreRuleJson rule in rules)
-            {
-                if (rule.type == type && rule.matchShape == matchShape)
-                    score += rule.score;
-            }
-
-            return score;
-        }
-
-        private int GetRuleScore(ScoreRuleType type, SpecialSkillType skillType)
-        {
-            int score = 0;
-            foreach (ScoreRuleJson rule in rules)
-            {
-                if (rule.type == type && rule.skillType == skillType)
-                    score += rule.score;
-            }
-
-            return score;
-        }
     }
 }

@@ -17,13 +17,16 @@ namespace DefaultNamespace
         private readonly ChapterDefinitionLoader chapterDefinitionLoader;
         private readonly LevelDataLoader levelDataLoader;
         private readonly ShopCachePolicyLoader shopCachePolicyLoader;
+        private readonly ScoreLoader scoreLoader;
         private readonly Dictionary<int, ChapterDefinition> chapterDefinitions = new();
         private readonly Dictionary<int, LevelData> levelDefinitions = new();
         private ChapterIndex chapterIndex;
         private ShopCachePolicyConfig mainShopCachePolicy;
+        private ScoreConfig scoreConfig;
 
         public ChapterIndex ChapterIndex => chapterIndex ?? throw new InvalidOperationException("ConfigManager has not loaded the chapter index.");
         public ShopCachePolicyConfig MainShopCachePolicy => mainShopCachePolicy ?? throw new InvalidOperationException("ConfigManager has not loaded the main shop cache policy.");
+        public ScoreConfig ScoreConfig => scoreConfig ?? throw new InvalidOperationException("ConfigManager has not loaded the score config.");
 
         private ConfigManager()
         {
@@ -32,15 +35,19 @@ namespace DefaultNamespace
             chapterDefinitionLoader = new ChapterDefinitionLoader(remoteJsonLoader);
             levelDataLoader = new LevelDataLoader(remoteJsonLoader);
             shopCachePolicyLoader = new ShopCachePolicyLoader(remoteJsonLoader);
+            scoreLoader = new ScoreLoader(remoteJsonLoader);
         }
 
         public async UniTask InitializeAsync()
         {
             UniTask<ChapterIndex> chapterIndexTask = chapterIndexLoader.LoadAsync();
             UniTask<ShopCachePolicyConfig> mainShopCachePolicyTask = shopCachePolicyLoader.LoadMainShopCachePolicyAsync();
-            chapterIndex = await chapterIndexTask;
-            mainShopCachePolicy = await mainShopCachePolicyTask;
+            UniTask<ScoreConfigJson> scoreConfigTask = scoreLoader.LoadScoreConfigAsync();
+            var loadedConfigs = await UniTask.WhenAll(chapterIndexTask, mainShopCachePolicyTask, scoreConfigTask);
+            chapterIndex = loadedConfigs.Item1;
+            mainShopCachePolicy = loadedConfigs.Item2;
             ValidateShopCachePolicy(mainShopCachePolicy);
+            scoreConfig = new ScoreConfig(loadedConfigs.Item3);
         }
 
         public async UniTask<ChapterDefinition> GetChapterDefinitionAsync(int chapterId)

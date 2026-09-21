@@ -1,18 +1,20 @@
-using System.IO;
-using Newtonsoft.Json;
-using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 namespace DefaultNamespace
 {
-    public static class ScoreLoader
+    public class ScoreLoader
     {
-        private static string ConfigPath => Path.Combine(Application.streamingAssetsPath, "score_config.json");
+        private const string ScoreConfigPath = "score_config.json";
+        private readonly RemoteJsonLoader remoteJsonLoader;
 
-        public static ScoreConfigJson Load()
+        public ScoreLoader(RemoteJsonLoader remoteJsonLoader)
         {
-            // TODO: Score config is still local, which isn't ideal. Load it online when there's time.
-            string json = File.ReadAllText(ConfigPath);
-            return JsonConvert.DeserializeObject<ScoreConfigJson>(json);
+            this.remoteJsonLoader = remoteJsonLoader;
+        }
+
+        public UniTask<ScoreConfigJson> LoadScoreConfigAsync()
+        {
+            return remoteJsonLoader.LoadAsync<ScoreConfigJson>(ScoreConfigPath);
         }
     }
 }
