@@ -10,6 +10,7 @@ namespace DefaultNamespace
 
         public static ScoreConfigJson Load()
         {
+            // TODO: Score config is still local, which isn't ideal. Load it online when there's time.
             string json = File.ReadAllText(ConfigPath);
             return JsonConvert.DeserializeObject<ScoreConfigJson>(json);
         }

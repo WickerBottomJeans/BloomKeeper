@@ -1,124 +1,22 @@
 fileFormatVersion: 2
-guid: 5ac4067a81193bd4b8c67aacaab1e667
+guid: 4e84c82c149cf88449157aadc67e1fcf
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5263177223324661382
-    second: LoadingCircle_0
+      213: 5600071295533762713
+    second: SharedItemIcon_0
   - first:
-      213: 7284005098737000140
-    second: LoadingCircle_1
+      213: 869502715370592572
+    second: SharedItemIcon_1
   - first:
-      213: -452167891170400977
-    second: LoadingCircle_2
+      213: -3927524111657162276
+    second: SharedItemIcon_2
   - first:
-      213: -2274638870112081573
-    second: LoadingCircle_3
+      213: 485661365900244204
+    second: SharedItemIcon_3
   - first:
-      213: -5544292132465641621
-    second: LoadingCircle_4
-  - first:
-      213: 197560908246237486
-    second: LoadingCircle_5
-  - first:
-      213: -7659296032016746
-    second: LoadingCircle_6
-  - first:
-      213: -5574144899298048026
-    second: LoadingCircle_7
-  - first:
-      213: 9194830009321964887
-    second: LoadingCircle_8
-  - first:
-      213: 338592587235727980
-    second: LoadingCircle_9
-  - first:
-      213: 3636686589170416867
-    second: LoadingCircle_10
-  - first:
-      213: 8510694775058361217
-    second: LoadingCircle_11
-  - first:
-      213: -7699946650064321995
-    second: LoadingCircle_12
-  - first:
-      213: 7584081874994664629
-    second: LoadingCircle_13
-  - first:
-      213: 3442742124746893901
-    second: LoadingCircle_14
-  - first:
-      213: -2686967855805292634
-    second: LoadingCircle_15
-  - first:
-      213: -1721808424005187276
-    second: LoadingCircle_16
-  - first:
-      213: -6929123969768986985
-    second: LoadingCircle_17
-  - first:
-      213: -4474594425198709822
-    second: LoadingCircle_18
-  - first:
-      213: 7480943788821756512
-    second: LoadingCircle_19
-  - first:
-      213: -2666099821489092080
-    second: LoadingCircle_20
-  - first:
-      213: -7168266863619645209
-    second: LoadingCircle_21
-  - first:
-      213: -3745139604934080177
-    second: LoadingCircle_22
-  - first:
-      213: -2305235039991583257
-    second: LoadingCircle_23
-  - first:
-      213: 5605088870975504291
-    second: LoadingCircle_24
-  - first:
-      213: 2835032512535786533
-    second: LoadingCircle_25
-  - first:
-      213: 1123750478010777301
-    second: LoadingCircle_26
-  - first:
-      213: 2369982980426320928
-    second: LoadingCircle_27
-  - first:
-      213: 1991297329216631213
-    second: LoadingCircle_28
-  - first:
-      213: 3372800352153452461
-    second: LoadingCircle_29
-  - first:
-      213: -7765032551166469191
-    second: LoadingCircle_30
-  - first:
-      213: 8930154493632913645
-    second: LoadingCircle_31
-  - first:
-      213: -4272632125753299982
-    second: LoadingCircle_32
-  - first:
-      213: 4044083086457724018
-    second: LoadingCircle_33
-  - first:
-      213: -4377726889555414349
-    second: LoadingCircle_34
-  - first:
-      213: -5370811154198237684
-    second: LoadingCircle_35
-  - first:
-      213: -7975514756348002774
-    second: LoadingCircle_36
-  - first:
-      213: 290942238940880572
-    second: LoadingCircle_37
-  - first:
-      213: 3275712280842616385
-    second: LoadingCircle_38
+      213: -7837777693830360491
+    second: SharedItemIcon_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -253,133 +151,111 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: LoadingCircle_0
+      name: SharedItemIcon_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 1024
-        width: 512
-        height: 512
+        x: 336
+        y: 394
+        width: 266
+        height: 546
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 68671329ccf8a0940800000000000000
-      internalID: 5263177223324661382
+      spriteID: 998c62f3c2377bd40800000000000000
+      internalID: 5600071295533762713
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: LoadingCircle_1
+      name: SharedItemIcon_1
       rect:
         serializedVersion: 2
-        x: 512
-        y: 1024
-        width: 512
-        height: 512
+        x: 803
+        y: 400
+        width: 349
+        height: 505
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cce5a548b0cf51560800000000000000
-      internalID: 7284005098737000140
+      spriteID: c39d6e0ec18111c00800000000000000
+      internalID: 869502715370592572
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: LoadingCircle_2
+      name: SharedItemIcon_2
       rect:
         serializedVersion: 2
-        x: 0
-        y: 512
-        width: 512
-        height: 512
+        x: 237
+        y: 81
+        width: 308
+        height: 273
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f2563fbd2b399b9f0800000000000000
-      internalID: -452167891170400977
+      spriteID: cd9a4ed11a1ae79c0800000000000000
+      internalID: -3927524111657162276
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: LoadingCircle_3
+      name: SharedItemIcon_3
       rect:
         serializedVersion: 2
-        x: 512
-        y: 512
-        width: 512
-        height: 512
+        x: 641
+        y: 80
+        width: 321
+        height: 269
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b596caacffbde60e0800000000000000
-      internalID: -2274638870112081573
+      spriteID: ce47d9b607a6db600800000000000000
+      internalID: 485661365900244204
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: LoadingCircle_4
+      name: SharedItemIcon_4
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 512
-        height: 512
+        x: 1051
+        y: 80
+        width: 330
+        height: 277
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b6774613ea7be03b0800000000000000
-      internalID: -5544292132465641621
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: LoadingCircle_5
-      rect:
-        serializedVersion: 2
-        x: 512
-        y: 0
-        width: 512
-        height: 512
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e21458d6990edb200800000000000000
-      internalID: 197560908246237486
+      spriteID: 552d2cab6be9a3390800000000000000
+      internalID: -7837777693830360491
       vertices: []
       indices: 
       edges: []
@@ -388,7 +264,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 6ee145d63230379478a0c46f09471ed0
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -396,16 +272,13 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":2.0,"y":3.0},"gridSpriteSize":{"x":512.0,"y":512.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      LoadingCircle_0: 5263177223324661382
-      LoadingCircle_1: 7284005098737000140
-      LoadingCircle_2: -452167891170400977
-      LoadingCircle_3: -2274638870112081573
-      LoadingCircle_4: -5544292132465641621
-      LoadingCircle_5: 197560908246237486
+      SharedItemIcon_0: 5600071295533762713
+      SharedItemIcon_1: 869502715370592572
+      SharedItemIcon_2: -3927524111657162276
+      SharedItemIcon_3: 485661365900244204
+      SharedItemIcon_4: -7837777693830360491
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -54,12 +54,12 @@ MonoBehaviour:
   label: {fileID: 4083638689488608747}
   spriteChangeButton: {fileID: 8111845033130514013}
   sprites:
-  - {fileID: 7284005098737000140, guid: 5ac4067a81193bd4b8c67aacaab1e667, type: 3}
-  - {fileID: -452167891170400977, guid: 5ac4067a81193bd4b8c67aacaab1e667, type: 3}
-  - {fileID: -2274638870112081573, guid: 5ac4067a81193bd4b8c67aacaab1e667, type: 3}
-  - {fileID: -5544292132465641621, guid: 5ac4067a81193bd4b8c67aacaab1e667, type: 3}
-  - {fileID: 197560908246237486, guid: 5ac4067a81193bd4b8c67aacaab1e667, type: 3}
-  - {fileID: 5263177223324661382, guid: 5ac4067a81193bd4b8c67aacaab1e667, type: 3}
+  - {fileID: 5263177223324661382, guid: bede6210d593c384e84174d11df874d3, type: 3}
+  - {fileID: 7284005098737000140, guid: bede6210d593c384e84174d11df874d3, type: 3}
+  - {fileID: -452167891170400977, guid: bede6210d593c384e84174d11df874d3, type: 3}
+  - {fileID: -2274638870112081573, guid: bede6210d593c384e84174d11df874d3, type: 3}
+  - {fileID: -5544292132465641621, guid: bede6210d593c384e84174d11df874d3, type: 3}
+  - {fileID: 197560908246237486, guid: bede6210d593c384e84174d11df874d3, type: 3}
   collapsedScale: 0
   animationPhaseDuration: 0.08
   secondsPerRotation: 5
@@ -575,11 +575,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5b07fd9e261faf544bf878b8bd170b0e, type: 3}
---- !u!225 &6721341487679904770 stripped
-CanvasGroup:
-  m_CorrespondingSourceObject: {fileID: 8132006187810120167, guid: 5b07fd9e261faf544bf878b8bd170b0e, type: 3}
-  m_PrefabInstance: {fileID: 3286977857233026533}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &8038111629863557216 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4760492833994368389, guid: 5b07fd9e261faf544bf878b8bd170b0e, type: 3}
