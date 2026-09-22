@@ -48,6 +48,7 @@ namespace UI
         public void Display(int stars, int starCap, bool showNext, RewardDisplayData rewardDisplayData)
         {
             starBoard.SetStarCap(starCap);
+            starBoard.DisplayImmediate(0);
             pendingStarCount = stars;
             nextButton.gameObject.SetActive(showNext);
             DisplayGiftBoxes(rewardDisplayData);

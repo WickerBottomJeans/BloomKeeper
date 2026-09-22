@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: 6aff3bd7a55c16740911d17ad844dee2
+guid: 49daa8b98e4753c4e887062589e892f9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2745253900550441283
-    second: Tip_4_0
-  - first:
-      213: -1548685264587686475
-    second: Tip_4_1
+      213: 4641679222726507614
+    second: UILoadingBG_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,7 +97,33 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
     buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -116,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Tip_4_0
+      name: UILoadingBG_0
       rect:
         serializedVersion: 2
-        x: 20
-        y: 61
-        width: 1179
-        height: 1179
+        x: 0
+        y: 0
+        width: 1254
+        height: 1254
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -131,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3498098a0e9191620800000000000000
-      internalID: 2745253900550441283
+      spriteID: e5cbcef09ae8a6040800000000000000
+      internalID: 4641679222726507614
       vertices: []
       indices: 
       edges: []
@@ -141,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: c29a4de2ef244174682e992927c75979
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -151,8 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Tip_4_0: 2745253900550441283
-      Tip_4_1: -1548685264587686475
+      UILoadingBG_0: 4641679222726507614
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

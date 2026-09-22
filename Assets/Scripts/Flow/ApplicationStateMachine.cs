@@ -94,11 +94,11 @@ namespace DefaultNamespace
         }
 
         /// <summary>
-        /// [Duong] Closes Auth behind the curtain, then enters Home.
+        /// Keeps loading visible while leaving Auth and preparing Home.
         /// </summary>
         private async UniTask EnterHomeFromAuth()
         {
-            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.General, async () =>
+            await ApplicationPresentationService.Instance.RunWithLoading(async () =>
             {
                 authFlow.Exit();
                 await EnterHome();
@@ -123,7 +123,7 @@ namespace DefaultNamespace
             if (state == State.SettingUpLevel) return;
             if (state != State.Home) throw new InvalidOperationException($"Cannot start a Home level while the application is {state}.");
 
-            BeginLevelSetup(levelId, State.Home, UIJawCurtainTipCategory.LevelStart);
+            BeginLevelSetup(levelId, State.Home);
         }
 
         private void HandleResultRetryRequested(int levelId)
@@ -131,7 +131,7 @@ namespace DefaultNamespace
             if (state == State.SettingUpLevel) return;
             if (state != State.LevelResult) throw new InvalidOperationException($"Cannot retry a level while the application is {state}.");
 
-            BeginLevelSetup(levelId, State.LevelResult, UIJawCurtainTipCategory.Retry);
+            BeginLevelSetup(levelId, State.LevelResult);
         }
 
         private void HandleResultNextLevelRequested(int levelId)
@@ -139,25 +139,25 @@ namespace DefaultNamespace
             if (state == State.SettingUpLevel) return;
             if (state != State.LevelResult) throw new InvalidOperationException($"Cannot start the next level while the application is {state}.");
 
-            BeginLevelSetup(levelId, State.LevelResult, UIJawCurtainTipCategory.LevelStart);
+            BeginLevelSetup(levelId, State.LevelResult);
         }
 
         /// <summary>
         /// [Duong] Begin ... the level setup
         /// </summary>
-        private void BeginLevelSetup(int levelId, State sourceState, UIJawCurtainTipCategory tipCategory)
+        private void BeginLevelSetup(int levelId, State sourceState)
         {
             state = State.SettingUpLevel;
-            ApplicationOperationRunner.Instance.Run(() => TrySetupLevel(levelId, sourceState, tipCategory));
+            ApplicationOperationRunner.Instance.Run(() => TrySetupLevel(levelId, sourceState));
         }
 
         /// <summary>
         /// [Duong] Loads the level config and gets server approval, then exits the source flow and starts gameplay
         /// </summary>
-        private async UniTask TrySetupLevel(int levelId, State sourceState, UIJawCurtainTipCategory tipCategory)
+        private async UniTask TrySetupLevel(int levelId, State sourceState)
         {
             (LevelData levelData, string levelAttemptId)? setup = null;
-            await ApplicationPresentationService.Instance.RunWithCurtain(tipCategory, async () =>
+            await ApplicationPresentationService.Instance.RunWithLoading(async () =>
             {
                 setup = await levelSetupFlow.TrySetup(levelId);
                 if (!setup.HasValue)
@@ -169,12 +169,11 @@ namespace DefaultNamespace
                 ExitLevelSetupSource(sourceState, setup.Value.levelData.chapterId);
                 playLevelFlow.Prepare(setup.Value.levelData, setup.Value.levelAttemptId);
                 musicStateController.EnterLevel();
-            }, () =>
-            {
-                if (!setup.HasValue) return;
-                playLevelFlow.BeginGameplay();
-                state = State.PlayingLevel;
             });
+
+            if (!setup.HasValue) return;
+            playLevelFlow.BeginGameplay();
+            state = State.PlayingLevel;
         }
         
         /// <summary>
@@ -216,7 +215,7 @@ namespace DefaultNamespace
                 return;
             }
 
-            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.ReturnHome, async () =>
+            await ApplicationPresentationService.Instance.RunWithLoading(async () =>
             {
                 playLevelFlow.Exit();
                 state = State.LoadingHome;
@@ -247,7 +246,7 @@ namespace DefaultNamespace
 
             finishLevelFlow.Exit();
             state = State.LoadingHome;
-            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.ReturnHome, EnterHome);
+            await ApplicationPresentationService.Instance.RunWithLoading(EnterHome);
         }
 
         private void HandleResultHomeRequested()
@@ -261,7 +260,7 @@ namespace DefaultNamespace
 
         private async UniTask ReturnHomeFromResult()
         {
-            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.ReturnHome, async () =>
+            await ApplicationPresentationService.Instance.RunWithLoading(async () =>
             {
                 finishLevelFlow.Exit();
                 await EnterHome();

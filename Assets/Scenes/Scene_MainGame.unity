@@ -401,8 +401,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e745d875c4334a038ad0bf645bcb4ace, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.UIManager
-  jawCurtainPrefab: {fileID: 8017061069607916964, guid: eb32607b816c03a4faaf279531ba075d, type: 3}
-  jawCurtainTipConfig: {fileID: 11400000, guid: ee582d7cfb7411d49ae195f43678ac96, type: 2}
   backgroundPrefab: {fileID: 3230237372720795873, guid: 470eff9f25c9cb349ae361af40338d49, type: 3}
   dialogPrefab: {fileID: 2063504911643791199, guid: f2d451a0803c8a84da3f2e0497da20c3, type: 3}
   petalEditorPrefab: {fileID: 8406235925533610904, guid: 46b455af4d951334595ff0b29c2f8dd7, type: 3}

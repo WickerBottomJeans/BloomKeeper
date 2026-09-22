@@ -19,9 +19,9 @@ namespace DefaultNamespace
             ConfigureDeviceFrameRate();
             UIManager.Instance.ShowStartupScreen();
             UIManager.Instance.SetStartupAccountEntryVisible(false);
-            UIManager.Instance.ShowLoading();
             try
             {
+                await UIManager.Instance.ShowLoading();
                 await addressableContentService.InitializeAsync();
                 await ConfigManager.Instance.InitializeAsync();
                 // TODO: Move the shared sprite atlases to remote Addressables.
@@ -29,7 +29,7 @@ namespace DefaultNamespace
             }
             finally
             {
-                UIManager.Instance.HideLoading();
+                await UIManager.Instance.HideLoading();
             }
 
             UIManager.Instance.SetStartupAccountEntryVisible(true);

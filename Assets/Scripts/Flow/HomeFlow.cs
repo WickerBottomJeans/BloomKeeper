@@ -179,7 +179,7 @@ namespace DefaultNamespace
         private async UniTask ChangeChapterAsync(int chapterId)
         {
             ChapterIndexEntry chapterEntry = ConfigManager.Instance.ChapterIndex.GetEntry(chapterId);
-            await ApplicationPresentationService.Instance.RunWithCurtain(UIJawCurtainTipCategory.General, async () =>
+            await ApplicationPresentationService.Instance.RunWithLoading(async () =>
             {
                 await addressableContentService.EnsureDownloadedAsync(chapterEntry.downloadLabel);
                 ChapterContent chapterContent = await ConfigManager.Instance.GetChapterContentAsync(chapterId);

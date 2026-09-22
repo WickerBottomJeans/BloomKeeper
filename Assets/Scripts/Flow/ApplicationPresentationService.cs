@@ -11,7 +11,6 @@ namespace DefaultNamespace
 
         private int activeBlockingOperationCount;
         private int activeLoadingOperationCount;
-        private bool isCurtainTransitionRunning;
 
         private ApplicationPresentationService()
         {
@@ -21,14 +20,14 @@ namespace DefaultNamespace
         {
             if (operation == null) throw new ArgumentNullException(nameof(operation));
 
-            BeginLoadingOperation();
+            await BeginLoadingOperation();
             try
             {
                 await operation();
             }
             finally
             {
-                EndLoadingOperation();
+                await EndLoadingOperation();
             }
         }
 
@@ -36,39 +35,14 @@ namespace DefaultNamespace
         {
             if (operation == null) throw new ArgumentNullException(nameof(operation));
 
-            BeginLoadingOperation();
+            await BeginLoadingOperation();
             try
             {
                 return await operation();
             }
             finally
             {
-                EndLoadingOperation();
-            }
-        }
-
-        public async UniTask RunWithCurtain(UIJawCurtainTipCategory tipCategory, Func<UniTask> whileClosedOperation, Action afterOpenedOperation = null)
-        {
-            if (whileClosedOperation == null) throw new ArgumentNullException(nameof(whileClosedOperation));
-
-            BeginCurtainTransition();
-            try
-            {
-                await UIManager.Instance.CloseJawCurtain(tipCategory);
-                try
-                {
-                    await whileClosedOperation();
-                }
-                finally
-                {
-                    await UIManager.Instance.OpenJawCurtain();
-                }
-
-                afterOpenedOperation?.Invoke();
-            }
-            finally
-            {
-                EndCurtainTransition();
+                await EndLoadingOperation();
             }
         }
 
@@ -90,24 +64,22 @@ namespace DefaultNamespace
                 ApplicationInputController.Instance.SetInputSuspended(false);
         }
 
-        private void BeginLoadingOperation()
+        private async UniTask BeginLoadingOperation()
         {
             BeginBlockingOperation();
+            activeLoadingOperationCount++;
             try
             {
-                if (activeLoadingOperationCount == 0)
-                    UIManager.Instance.ShowLoading();
-
-                activeLoadingOperationCount++;
+                await UIManager.Instance.ShowLoading();
             }
             catch
             {
-                EndBlockingOperation();
+                await EndLoadingOperation();
                 throw;
             }
         }
 
-        private void EndLoadingOperation()
+        private async UniTask EndLoadingOperation()
         {
             if (activeLoadingOperationCount <= 0)
                 throw new InvalidOperationException("Cannot end a loading presentation when none is running.");
@@ -116,7 +88,7 @@ namespace DefaultNamespace
             {
                 activeLoadingOperationCount--;
                 if (activeLoadingOperationCount == 0)
-                    UIManager.Instance.HideLoading();
+                    await UIManager.Instance.HideLoading();
             }
             finally
             {
@@ -124,25 +96,5 @@ namespace DefaultNamespace
             }
         }
 
-        private void BeginCurtainTransition()
-        {
-            if (isCurtainTransitionRunning)
-                throw new InvalidOperationException("Cannot start a curtain transition while another curtain transition is running.");
-
-            BeginBlockingOperation();
-            isCurtainTransitionRunning = true;
-        }
-
-        private void EndCurtainTransition()
-        {
-            try
-            {
-                EndBlockingOperation();
-            }
-            finally
-            {
-                isCurtainTransitionRunning = false;
-            }
-        }
     }
 }

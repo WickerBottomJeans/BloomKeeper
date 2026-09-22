@@ -55,13 +55,15 @@ namespace DefaultNamespace
             if (isAccountLoadInProgress) return;
 
             isAccountLoadInProgress = true;
-            (PlayerAccount account, PlayerLivesSnapshot livesSnapshot) playerSession;
             try
             {
-                playerSession = await ApplicationPresentationService.Instance.RunWithLoading(async () =>
+                await ApplicationPresentationService.Instance.RunWithLoading(async () =>
                 {
                     PlayFabAuthSession playFabAuthSession = await guestLoginService.LoginAsGuest();
-                    return await playerSessionLoader.Load(playFabAuthSession);
+                    (PlayerAccount account, PlayerLivesSnapshot livesSnapshot) playerSession = await playerSessionLoader.Load(playFabAuthSession);
+                    PlayerAccountContext.Instance.SetCurrentAccount(playerSession.account);
+                    playerLivesPresentationService.ReplaceServerLivesSnapshot(playerSession.livesSnapshot);
+                    AccountReady?.Invoke();
                 });
             }
             catch (Exception exception)
@@ -74,10 +76,6 @@ namespace DefaultNamespace
             {
                 isAccountLoadInProgress = false;
             }
-
-            PlayerAccountContext.Instance.SetCurrentAccount(playerSession.account);
-            playerLivesPresentationService.ReplaceServerLivesSnapshot(playerSession.livesSnapshot);
-            AccountReady?.Invoke();
         }
     }
 }
