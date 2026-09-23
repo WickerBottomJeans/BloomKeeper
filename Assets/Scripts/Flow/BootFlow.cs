@@ -41,9 +41,7 @@ namespace DefaultNamespace
 
         private void ConfigureDeviceFrameRate()
         {
-#if UNITY_IOS && !UNITY_EDITOR
             Application.targetFrameRate = (int)Screen.currentResolution.refreshRateRatio.value;
-#endif
         }
     }
 }

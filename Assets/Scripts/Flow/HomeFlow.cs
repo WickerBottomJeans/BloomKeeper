@@ -22,8 +22,6 @@ namespace DefaultNamespace
 
         public event Action<int> StartLevelRequested;
         public event Action SettingsRequested;
-        public event Action AddLifeRequested;
-        public event Action AddCurrencyRequested;
 
         /// <summary>
         /// Creates the home flow and its child flows.
@@ -198,12 +196,12 @@ namespace DefaultNamespace
 
         private void HandleAddLifeRequested()
         {
-            AddLifeRequested?.Invoke();
+            ApplicationOperationRunner.Instance.Run(() => ChangeTabAsync(HomeMiddleTab.Shop));
         }
 
         private void HandleAddCurrencyRequested()
         {
-            AddCurrencyRequested?.Invoke();
+            ApplicationOperationRunner.Instance.Run(() => DialogManager.Instance.RunOkDialog("Earn diamonds", "You can earn diamonds just by playing the game. Keep playing to collect more!"));
         }
 
         private void HandleServerLivesSnapshotChanged()
