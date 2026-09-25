@@ -11,6 +11,7 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEngine;
+using UnityEngine.ResourceManagement.Util;
 
 namespace DefaultNamespace.Editor   
 {
@@ -38,6 +39,9 @@ namespace DefaultNamespace.Editor
         private int selectedLevelIndex = -1;
         private string existingChapterPath = "";
         private Vector2 chunkListScroll;
+        private int selectedChapterTab;
+        private Vector2 chapterTabScroll;
+        private int chapterUnlockLevelId = 1;
 
         private class ChunkRegistration
         {
@@ -59,18 +63,42 @@ namespace DefaultNamespace.Editor
         private void OnGUI()
         {
             EditorGUILayout.LabelField("Chapter Definition Editor", EditorStyles.boldLabel);
+            DrawChapterFileField();
             EditorGUILayout.Space();
-            EditorGUILayout.BeginHorizontal();
-            DrawChapterSidebar();
-            DrawMapWorkspace();
-            DrawLevelSidebar();
-            EditorGUILayout.EndHorizontal();
+            int requestedChapterTab = GUILayout.Toolbar(selectedChapterTab, new[] { "Chapter Details", "Map Background", "Level Layout", "Chapter Appearance" });
+            if (requestedChapterTab != selectedChapterTab)
+            {
+                selectedChapterTab = requestedChapterTab;
+                chapterTabScroll = Vector2.zero;
+                isPlacingLevel = false;
+                draggedLevelIndex = -1;
+            }
+            EditorGUILayout.Space();
+            if (selectedChapterTab == 2)
+            {
+                EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
+                DrawMapWorkspace();
+                DrawLevelSidebar();
+                EditorGUILayout.EndHorizontal();
+            }
+            else
+            {
+                chapterTabScroll = EditorGUILayout.BeginScrollView(chapterTabScroll, GUILayout.ExpandHeight(true));
+                switch (selectedChapterTab)
+                {
+                    case 0: DrawChapterDetailsTab(); break;
+                    case 1: DrawMapBackgroundTab(); break;
+                    case 3: DrawChapterAppearanceTab(); break;
+                }
+                EditorGUILayout.EndScrollView();
+            }
+            EditorGUILayout.Space();
+            if (GUILayout.Button(string.IsNullOrWhiteSpace(existingChapterPath) ? "Create Chapter JSON" : "Save Chapter")) SaveChapter();
         }
 
-        private void DrawChapterSidebar()
+        private void DrawChapterDetailsTab()
         {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.Width(290f), GUILayout.ExpandHeight(true));
-            DrawChapterFileField();
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             bool hasExistingChapter = !string.IsNullOrWhiteSpace(existingChapterPath);
             if (!hasExistingChapter)
             {
@@ -80,6 +108,7 @@ namespace DefaultNamespace.Editor
                 if (newChapterId != previousChapterId && chapterDownloadLabel == $"chapter_{previousChapterId}") chapterDownloadLabel = $"chapter_{newChapterId}";
             }
             newChapterName = EditorGUILayout.TextField("Chapter Name", newChapterName);
+            chapterUnlockLevelId = EditorGUILayout.IntField("Unlock Level ID", chapterUnlockLevelId);
             chapterDownloadLabel = EditorGUILayout.TextField("Label", chapterDownloadLabel);
             EditorGUILayout.LabelField("Description");
             chapterDescription = EditorGUILayout.TextArea(chapterDescription, GUILayout.MinHeight(54f));
@@ -87,17 +116,26 @@ namespace DefaultNamespace.Editor
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Chapter Chooser Image", EditorStyles.boldLabel);
             chooserImage = (Sprite)EditorGUILayout.ObjectField(chooserImage, typeof(Sprite), false);
+            EditorGUILayout.EndVertical();
+        }
 
-            EditorGUILayout.Space();
+        private void DrawMapBackgroundTab()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Background Chunks (bottom to top)", EditorStyles.boldLabel);
             DrawTextureDropArea();
             DrawChunkList();
+            if (GUILayout.Button("Update Chunk Data (Includes Addressables)")) UpdateChunkData();
 
             EditorGUILayout.Space();
             EditorGUILayout.HelpBox("Warning: removing all chunk data immediately clears the selected chapter JSON and removes this chapter's Addressables registrations. Source PNG files are not deleted.", MessageType.Warning);
             if (GUILayout.Button("Remove All Chunk Data (Includes Addressables)")) RemoveAllChunkData();
+            EditorGUILayout.EndVertical();
+        }
 
-            EditorGUILayout.Space();
+        private void DrawChapterAppearanceTab()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Level Button Prefab", EditorStyles.boldLabel);
             levelButtonPrefab = (LevelButton)EditorGUILayout.ObjectField(levelButtonPrefab, typeof(LevelButton), false);
             if (GUILayout.Button("Update Level Button Prefab (Includes Addressables)")) UpdateLevelButtonPrefab();
@@ -108,9 +146,6 @@ namespace DefaultNamespace.Editor
             _bottomPrefab = (ChapterBottomView)EditorGUILayout.ObjectField("Bottom Navigation", _bottomPrefab, typeof(ChapterBottomView), false);
             if (GUILayout.Button("Update Chapter UI Prefabs (Includes Addressables)")) UpdateChapterUiPrefabs();
 
-            EditorGUILayout.Space();
-            if (GUILayout.Button(hasExistingChapter ? "Save Chapter" : "Create Chapter JSON")) SaveChapter();
-            if (GUILayout.Button("Update Chunk Data (Includes Addressables)")) UpdateChunkData();
             EditorGUILayout.EndVertical();
         }
 
@@ -583,7 +618,7 @@ namespace DefaultNamespace.Editor
                 if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
                 string chooserImageAddress = RegisterChooserImage(chapter);
                 File.WriteAllText(chapterPath, JsonConvert.SerializeObject(chapter, Formatting.Indented));
-                UpdateChapterIndex(chapter, chapterPath, chooserImageAddress, chapterDescription);
+                UpdateChapterIndex(chapter, chapterPath, chooserImageAddress, chapterDescription, chapterUnlockLevelId);
                 ApplyChapterLabelToExistingEntries(chapter.downloadLabel);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
@@ -610,15 +645,17 @@ namespace DefaultNamespace.Editor
             if (index == null || index.chapters == null) throw new InvalidDataException($"'{ChapterIndexPath}' does not contain a chapter index.");
             ChapterIndexEntry indexEntry = index.chapters.SingleOrDefault(entry => entry.chapterId == chapterId);
             if (indexEntry == null) return;
+            chapterUnlockLevelId = indexEntry.unlockLevelId;
             chapterDescription = indexEntry.description ?? "";
             if (string.IsNullOrWhiteSpace(indexEntry.chooserImageAddress)) return;
 
-            AddressableAssetEntry addressableEntry = FindEntryByAddress(settings, indexEntry.chooserImageAddress);
+            bool hasSpriteName = ResourceManagerConfig.ExtractKeyAndSubKey(indexEntry.chooserImageAddress, out string imageAddress, out string spriteName);
+            AddressableAssetEntry addressableEntry = FindEntryByAddress(settings, hasSpriteName ? imageAddress : indexEntry.chooserImageAddress);
             if (addressableEntry == null)
                 throw new InvalidDataException($"Chapter {chapterId} references missing chooser image Addressables entry '{indexEntry.chooserImageAddress}'.");
-            chooserImage = AssetDatabase.LoadAssetAtPath<Sprite>(addressableEntry.AssetPath);
+            chooserImage = hasSpriteName ? AssetDatabase.LoadAllAssetsAtPath(addressableEntry.AssetPath).OfType<Sprite>().SingleOrDefault(sprite => sprite.name == spriteName) : AssetDatabase.LoadAssetAtPath<Sprite>(addressableEntry.AssetPath);
             if (chooserImage == null)
-                throw new InvalidDataException($"Addressables entry '{indexEntry.chooserImageAddress}' does not point to a Sprite asset.");
+                throw new InvalidDataException($"Chooser image '{indexEntry.chooserImageAddress}' does not resolve to a Sprite asset.");
         }
 
         private string RegisterChooserImage(ChapterDefinition chapter)
@@ -638,7 +675,9 @@ namespace DefaultNamespace.Editor
 
             ChapterIndex index = LoadOrCreateChapterIndex();
             ChapterIndexEntry previousIndexEntry = index.chapters.SingleOrDefault(entry => entry.chapterId == chapter.chapterId);
-            AddressableAssetEntry previousAddressableEntry = previousIndexEntry == null || string.IsNullOrWhiteSpace(previousIndexEntry.chooserImageAddress) ? null : FindEntryByAddress(settings, previousIndexEntry.chooserImageAddress);
+            string previousImageAddress = previousIndexEntry?.chooserImageAddress;
+            if (ResourceManagerConfig.ExtractKeyAndSubKey(previousImageAddress, out string previousMainAddress, out _)) previousImageAddress = previousMainAddress;
+            AddressableAssetEntry previousAddressableEntry = string.IsNullOrWhiteSpace(previousImageAddress) ? null : FindEntryByAddress(settings, previousImageAddress);
             if (addressOwner != null && addressOwner.guid != imageGuid) settings.RemoveAssetEntry(addressOwner.guid);
             if (previousAddressableEntry != null && previousAddressableEntry.guid != imageGuid && previousAddressableEntry != addressOwner) settings.RemoveAssetEntry(previousAddressableEntry.guid);
 
@@ -647,10 +686,10 @@ namespace DefaultNamespace.Editor
             imageEntry.address = address;
             ApplyChapterDownloadLabel(imageEntry, chapter.downloadLabel);
             EditorUtility.SetDirty(settings);
-            return address;
+            return $"{address}[{chooserImage.name}]";
         }
 
-        private static void UpdateChapterIndex(ChapterDefinition chapter, string chapterPath, string chooserImageAddress, string description)
+        private static void UpdateChapterIndex(ChapterDefinition chapter, string chapterPath, string chooserImageAddress, string description, int unlockLevelId)
         {
             ChapterIndex index = LoadOrCreateChapterIndex();
             ChapterIndexEntry entry = index.chapters.SingleOrDefault(candidate => candidate.chapterId == chapter.chapterId);
@@ -667,7 +706,7 @@ namespace DefaultNamespace.Editor
             entry.configPath = chapterPath.Substring(ConfigOutputRootPath.Length).Replace('\\', '/');
             entry.chooserImageAddress = chooserImageAddress;
             entry.downloadLabel = chapter.downloadLabel;
-            entry.unlockLevelId = chapter.levels.Min(level => level.levelId);
+            entry.unlockLevelId = unlockLevelId;
             Directory.CreateDirectory(Path.GetDirectoryName(ChapterIndexPath));
             File.WriteAllText(ChapterIndexPath, JsonConvert.SerializeObject(index, Formatting.Indented));
         }
@@ -683,9 +722,6 @@ namespace DefaultNamespace.Editor
 
         private static void ValidateLevelButtons(ChapterDefinition chapter)
         {
-            if (chapter.levels.Count == 0)
-                throw new InvalidDataException($"Chapter {chapter.chapterId} must contain at least one level.");
-
             var levelIds = new HashSet<int>();
             foreach (ChapterLevelDisplayData level in chapter.levels)
             {

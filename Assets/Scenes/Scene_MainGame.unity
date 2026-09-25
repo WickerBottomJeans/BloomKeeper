@@ -389,6 +389,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.GameFlowController
   musicStateController: {fileID: 438607911}
   levelSessionRuntime: {fileID: 438607906}
+  gameEnvironmentConfig: {fileID: 11400000, guid: e3c05fb192031394a8b59fb8a44087d9, type: 2}
 --- !u!114 &438607905
 MonoBehaviour:
   m_ObjectHideFlags: 0

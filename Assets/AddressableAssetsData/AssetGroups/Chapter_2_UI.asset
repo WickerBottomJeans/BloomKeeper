@@ -15,19 +15,19 @@ MonoBehaviour:
   m_GroupName: Chapter_2_UI
   m_GUID: 022db95130670ef49aa8a5ebb663cc1d
   m_SerializeEntries:
-  - m_GUID: 1e267b344577ca24cbb9a63d004e2000
-    m_Address: chapter/2/ui/topper
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - chapter_2
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 78284a87d2aa4b34888b5f95be68423c
+  - m_GUID: 1f2802813c1760b499f0e4431ebf9cf0
     m_Address: chapter/2/ui/chooser-image
     m_ReadOnly: 0
     m_SerializedLabels:
     - chapter_2
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b4c5ffedde1a3034393ea7a7ddf643a8
+  - m_GUID: dae8176e277106a47822462cf44664bc
+    m_Address: chapter/2/ui/topper
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_2
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f7055114b27470841bedacc363e6d748
     m_Address: chapter/2/ui/bottom-navigation
     m_ReadOnly: 0
     m_SerializedLabels:

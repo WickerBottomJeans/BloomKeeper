@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb1b638360068d44ab22994ed5934eea, type: 3}
+  m_Name: Production
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.GameEnvironmentConfig
+  environment: 1
+  contentRootUrl: https://pub-0c44830712634164b82cd8831286a159.r2.dev
+  addressablesProfileId: 70ce86546ac8b6947897453086bcc59c

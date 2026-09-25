@@ -15,26 +15,26 @@ MonoBehaviour:
   m_GroupName: Chapter_1_UI
   m_GUID: 483de212c5a4e8141966a71e9c16372a
   m_SerializeEntries:
-  - m_GUID: 29d7b84c1d458db47864650df584ac1e
-    m_Address: chapter/1/ui/bottom-navigation
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Chapter_1
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d9cd7487f1c3a5648af8e13a1a259c8b
+  - m_GUID: 1c8ee1e5fbc3b4143863ca1f79e4487b
     m_Address: chapter/1/ui/topper
     m_ReadOnly: 0
     m_SerializedLabels:
     - Chapter_1
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dca77b33012974c449646219461a5d45
-    m_Address: chapter/1/ui/chooser-image
+  - m_GUID: 38c2bb3cd9320e74985b5152016cf56e
+    m_Address: chapter/1/ui/level-button
     m_ReadOnly: 0
     m_SerializedLabels:
     - Chapter_1
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e1590e7ab8376c64bb1bb7006e774229
-    m_Address: chapter/1/ui/level-button
+  - m_GUID: 5a54830dbcd16cf49827dd1b947c2baf
+    m_Address: chapter/1/ui/bottom-navigation
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Chapter_1
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6a7a6a8413712fd4dbee6413806a150d
+    m_Address: chapter/1/ui/chooser-image
     m_ReadOnly: 0
     m_SerializedLabels:
     - Chapter_1

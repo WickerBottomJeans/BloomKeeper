@@ -27,7 +27,7 @@ namespace DefaultNamespace.UI
             GetPanel(ref homeInstance, homePrefab, uiRoot);
             UnbindHome();
             BindHome();
-            await homeInstance.ShowAsync(topperPrefabAddress, bottomNavigationPrefabAddress, lives, diamondQuantity);
+            await homeInstance.ShowAsync(topperPrefabAddress, bottomNavigationPrefabAddress, lives, diamondQuantity, canvas);
         }
 
         public void DisplayHomeLives(PlayerLivesViewData lives)

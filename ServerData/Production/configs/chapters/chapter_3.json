@@ -1,0 +1,60 @@
+{
+  "chapterId": 3,
+  "chapterName": "Rosa Alvarez",
+  "downloadLabel": "chapter_3",
+  "topperPrefabAddress": "chapter/3/ui/topper",
+  "bottomNavigationPrefabAddress": "chapter/3/ui/bottom-navigation",
+  "levelButtonPrefabAddress": "chapter/3/ui/level-button",
+  "levels": [
+    {
+      "levelId": 9,
+      "levelName": "9",
+      "pixelX": -0.741945744,
+      "pixelY": 306.885345
+    },
+    {
+      "levelId": 10,
+      "levelName": "10",
+      "pixelX": 2.076474E-05,
+      "pixelY": 1279.66284
+    },
+    {
+      "levelId": 11,
+      "levelName": "11",
+      "pixelX": 2.96802258,
+      "pixelY": 2158.94678
+    },
+    {
+      "levelId": 12,
+      "levelName": "12",
+      "pixelX": -2.967981,
+      "pixelY": 3151.0166
+    }
+  ],
+  "backgroundChunks": [
+    {
+      "address": "chapter/3/background/Chapter3_1",
+      "previewAddress": "chapter/3/background-preview/Chapter3_LowResolution_1",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/3/background/Chapter3_2",
+      "previewAddress": "chapter/3/background-preview/Chapter3_LowResolution_2",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/3/background/Chapter3_3",
+      "previewAddress": "chapter/3/background-preview/Chapter3_LowResolution_3",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/3/background/Chapter3_4",
+      "previewAddress": "chapter/3/background-preview/Chapter3_LowResolution_4",
+      "width": 1254,
+      "height": 794
+    }
+  ]
+}

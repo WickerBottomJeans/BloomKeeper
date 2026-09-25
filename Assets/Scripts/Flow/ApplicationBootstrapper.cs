@@ -10,6 +10,7 @@ namespace DefaultNamespace
     {
         [SerializeField] private MusicStateController musicStateController;
         [SerializeField] private LevelSessionRuntime levelSessionRuntime;
+        [SerializeField] private GameEnvironmentConfig gameEnvironmentConfig;
 
         private ApplicationStateMachine applicationStateMachine;
 
@@ -17,6 +18,7 @@ namespace DefaultNamespace
 
         private void Awake()
         {
+            ConfigManager.InitializeConfigManager(gameEnvironmentConfig);
             applicationStateMachine = CreateApplicationStateMachine();
         }
 

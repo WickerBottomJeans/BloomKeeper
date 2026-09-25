@@ -1,0 +1,31 @@
+{
+  "levelId": 9,
+  "published": true,
+  "chapterId": 2,
+  "nextLevelId": 10,
+  "allowedBoosters": [1, 2],
+  "starScoreThresholds": [
+    { "starCount": 1, "score": 500 },
+    { "starCount": 2, "score": 2000 },
+    { "starCount": 3, "score": 4000 }
+  ],
+  "boardWidth": 8,
+  "boardHeight": 8,
+  "tiles": [
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
+  ],
+  "objectives": [
+    { "type": 1, "petals": [{ "petalType": 1, "amount": 12 }] }
+  ],
+  "constrainers": [
+    { "type": 1, "moveLimit": 25, "warningAtRemaining": 5 },
+    { "type": 2, "timeLimitSeconds": 180, "warningAtRemaining": 20 }
+  ]
+}

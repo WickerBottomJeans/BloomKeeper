@@ -9,9 +9,9 @@ namespace DefaultNamespace
     /// </summary>
     public class ConfigManager
     {
-        private const string RemoteConfigBaseUrl = "https://pub-600516f978894a4ba6eeac168a341d46.r2.dev/configs/";
+        private static ConfigManager instance;
 
-        public static ConfigManager Instance { get; } = new ConfigManager();
+        public static ConfigManager Instance => instance ?? throw new InvalidOperationException("ConfigManager has not been initialized with an environment config.");
 
         private readonly ChapterIndexLoader chapterIndexLoader;
         private readonly ChapterDefinitionLoader chapterDefinitionLoader;
@@ -28,14 +28,30 @@ namespace DefaultNamespace
         public ShopCachePolicyConfig MainShopCachePolicy => mainShopCachePolicy ?? throw new InvalidOperationException("ConfigManager has not loaded the main shop cache policy.");
         public ScoreConfig ScoreConfig => scoreConfig ?? throw new InvalidOperationException("ConfigManager has not loaded the score config.");
 
-        private ConfigManager()
+        private ConfigManager(GameEnvironmentConfig gameEnvironmentConfig)
         {
-            var remoteJsonLoader = new RemoteJsonLoader(RemoteConfigBaseUrl);
+            var remoteJsonLoader = new RemoteJsonLoader(gameEnvironmentConfig.ConfigBaseUrl);
             chapterIndexLoader = new ChapterIndexLoader(remoteJsonLoader);
             chapterDefinitionLoader = new ChapterDefinitionLoader(remoteJsonLoader);
             levelDataLoader = new LevelDataLoader(remoteJsonLoader);
             shopCachePolicyLoader = new ShopCachePolicyLoader(remoteJsonLoader);
             scoreLoader = new ScoreLoader(remoteJsonLoader);
+        }
+
+        /// <summary>
+        /// Creates the session's config loaders without downloading content.
+        /// </summary>
+        public static void InitializeConfigManager(GameEnvironmentConfig gameEnvironmentConfig)
+        {
+            if (instance != null) throw new InvalidOperationException("ConfigManager is already initialized for this session.");
+            gameEnvironmentConfig.ValidateEnvironmentConfig();
+            instance = new ConfigManager(gameEnvironmentConfig);
+        }
+
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetConfigManager()
+        {
+            instance = null;
         }
 
         public async UniTask InitializeAsync()

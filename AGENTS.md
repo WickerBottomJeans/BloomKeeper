@@ -34,7 +34,7 @@
 - Only begin editing after the user clearly approves the architecture and asks for implementation.
 - If the architecture changes during implementation, stop editing and return to architecture discussion for renewed approval.
 - Unity serialized assets, editor-authored setup files, project settings, package files, generated Unity files, and `.meta` files may be created, edited, moved, or deleted when they are inside the explicitly approved implementation scope.
-- Never assign or reassign Inspector fields for the user, whether through Unity automation or by directly editing serialized references. When Inspector assignment is required, give the user the exact manual field-assignment steps.
+- When prefab or scene setup is authorized, assign the required Inspector fields and serialized references directly instead of leaving those assignments to the user.
 - Never preserve a misleading name, weak responsibility boundary, or inferior architecture merely to avoid breaking serialized Unity references. Make the clean code change, allow the references to break, and give the user exact manual Editor steps to reassign the affected scripts, prefabs, or fields.
 - Never use serialization-preservation mechanisms such as `[FormerlySerializedAs]`. When a rename breaks a serialized reference or field value, leave it broken and give the user the exact manual Inspector reassignment steps instead.
 

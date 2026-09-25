@@ -68,10 +68,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 56f7313312587b548b55bd2a25a3e22b, type: 2}
   - {fileID: 11400000, guid: 58e278e773548d54da5250682f76bba1, type: 2}
   - {fileID: 11400000, guid: b96dc25a4ddea144090fb1eae1fb84fc, type: 2}
+  - {fileID: 11400000, guid: 998f1f84b9c3fb44e89723a9e913e8f4, type: 2}
   - {fileID: 11400000, guid: 8b8b82d7c8c4b9e42bf048893bafb963, type: 2}
   - {fileID: 11400000, guid: 4174476f36c4de744b0fbf50be76fb4f, type: 2}
   - {fileID: 11400000, guid: 3ad70bbafd5733b478574a72cc3ae47f, type: 2}
+  - {fileID: 11400000, guid: 93757a04790f7ea43ba0de05d9c80d37, type: 2}
   - {fileID: 11400000, guid: 0cbe12af551a3a044b75983fbd8c5937, type: 2}
+  - {fileID: 11400000, guid: 23f0a53aed884cb46806f3922377dab5, type: 2}
   m_BuildSettings:
     m_LogResourceManagerExceptions: 1
     m_ContentDirectoryBuildPath: Temp/com.unity.addressables/ContentDirectories
@@ -80,7 +83,21 @@ MonoBehaviour:
     m_Profiles:
     - m_InheritedParent: 
       m_Id: 70ce86546ac8b6947897453086bcc59c
-      m_ProfileName: Default
+      m_ProfileName: Production
+      m_Values:
+      - m_Id: 2007465022afb584d99c18ba230564f4
+        m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
+      - m_Id: 2ee9e9e0dc8c953409d73d58be99cf34
+        m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
+      - m_Id: 3d10ffd73b0aa1a488b1aad01da48bf6
+        m_Value: 'https://pub-0c44830712634164b82cd8831286a159.r2.dev/addressables/[BuildTarget]'
+      - m_Id: 7541f7401767ad145ab6efa3dbc66b38
+        m_Value: 'ServerData/Production/addressables/[BuildTarget]'
+      - m_Id: c88f3bc3030fe9145a2a8586b3cab230
+        m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
+    - m_InheritedParent: 
+      m_Id: 96c2ef2d7e810a644b65cae9cff8a864
+      m_ProfileName: Development
       m_Values:
       - m_Id: 2007465022afb584d99c18ba230564f4
         m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
@@ -89,7 +106,7 @@ MonoBehaviour:
       - m_Id: 3d10ffd73b0aa1a488b1aad01da48bf6
         m_Value: 'https://pub-600516f978894a4ba6eeac168a341d46.r2.dev/addressables/[BuildTarget]'
       - m_Id: 7541f7401767ad145ab6efa3dbc66b38
-        m_Value: 'ServerData/addressables/[BuildTarget] '
+        m_Value: 'ServerData/Development/addressables/[BuildTarget]'
       - m_Id: c88f3bc3030fe9145a2a8586b3cab230
         m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
     m_ProfileEntryNames:
@@ -114,6 +131,7 @@ MonoBehaviour:
     - default
     - Chapter_1
     - chapter_2
+    - chapter_3
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: bbea8a563fdfb3c4cafc44a204a2653e, type: 2}

@@ -1,0 +1,30 @@
+{
+  "levelId": 6,
+  "published": true,
+  "chapterId": 2,
+  "nextLevelId": 7,
+  "allowedBoosters": [1, 2],
+  "starScoreThresholds": [
+    { "starCount": 1, "score": 3000 },
+    { "starCount": 2, "score": 4800 },
+    { "starCount": 3, "score": 6800 }
+  ],
+  "boardWidth": 8,
+  "boardHeight": 8,
+  "tiles": [
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
+    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
+  ],
+  "objectives": [
+    { "type": 3, "spiderWebsToClear": 3 }
+  ],
+  "constrainers": [
+    { "type": 1, "moveLimit": 20, "warningAtRemaining": 5 }
+  ]
+}

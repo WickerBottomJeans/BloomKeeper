@@ -11,7 +11,6 @@ namespace DefaultNamespace.UI
     {
         [SerializeField] private RectTransform content;
         [SerializeField] private RectTransform middleSlot;
-        [SerializeField] private RectTransform fullScreenRoot;
         [SerializeField] private UILevelSelect levelSelectPrefab;
         [SerializeField] private UIMainShopTab shopPrefab;
         [SerializeField] private UIChapterChooser chapterChooser;
@@ -45,13 +44,13 @@ namespace DefaultNamespace.UI
             chapterChooser.HideChapterChooser();
         }
 
-        public async UniTask ShowAsync(string topperPrefabAddress, string bottomNavigationPrefabAddress, PlayerLivesViewData lives, int diamondQuantity)
+        public async UniTask ShowAsync(string topperPrefabAddress, string bottomNavigationPrefabAddress, PlayerLivesViewData lives, int diamondQuantity, Canvas uiCanvas)
         {
             if (lives == null) throw new ArgumentNullException(nameof(lives));
 
             gameObject.SetActive(true);
             if (displayedTopperAddress != topperPrefabAddress || displayedBottomNavigationAddress != bottomNavigationPrefabAddress)
-                await DisplayChapterViewsAsync(topperPrefabAddress, bottomNavigationPrefabAddress);
+                await DisplayChapterViewsAsync(topperPrefabAddress, bottomNavigationPrefabAddress, uiCanvas);
 
             topperView.DisplayLives(lives);
             topperView.DisplayCurrency(diamondQuantity);
@@ -88,6 +87,7 @@ namespace DefaultNamespace.UI
 
         public void ShowChapterChooser()
         {
+            chapterChooser.transform.SetAsLastSibling();
             chapterChooser.ShowChapterChooser();
         }
 
@@ -120,7 +120,7 @@ namespace DefaultNamespace.UI
             topperView.DisplayAvatar(avatar);
         }
 
-        private async UniTask DisplayChapterViewsAsync(string topperAddress, string bottomNavigationAddress)
+        private async UniTask DisplayChapterViewsAsync(string topperAddress, string bottomNavigationAddress, Canvas uiCanvas)
         {
             if (string.IsNullOrWhiteSpace(topperAddress)) throw new ArgumentException("A Topper Addressables address is required.", nameof(topperAddress));
             if (string.IsNullOrWhiteSpace(bottomNavigationAddress)) throw new ArgumentException("A Bottom Navigation Addressables address is required.", nameof(bottomNavigationAddress));
@@ -144,8 +144,8 @@ namespace DefaultNamespace.UI
                 if (newBottomView == null)
                     throw new InvalidOperationException($"Addressable prefab '{bottomNavigationAddress}' does not contain ChapterBottomView on its root.");
 
-                newTopperView.SetBleedTarget(fullScreenRoot);
-                newBottomView.SetBleedTarget(fullScreenRoot);
+                newTopperView.InitializeSafeAreaContent(uiCanvas);
+                newBottomView.InitializeSafeAreaContent(uiCanvas);
 
                 ReleaseChapterViews();
                 newTopperObject.transform.SetSiblingIndex(0);

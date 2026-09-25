@@ -12,7 +12,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private Button mapButton;
         [SerializeField] private Button shopButton;
         [SerializeField] private Button settingsButton;
-        [SerializeField] private RectTransformEdgeBleed backgroundBleed;
+        [SerializeField] private SafeAreaContentFitter[] safeAreaContentFitters = Array.Empty<SafeAreaContentFitter>();
 
         /// <summary>
         /// Home tab selected by the player.
@@ -20,9 +20,10 @@ namespace DefaultNamespace.UI
         public event Action<HomeMiddleTab> TabRequested;
         public event Action SettingsRequested;
 
-        public void SetBleedTarget(RectTransform targetRect)
+        public void InitializeSafeAreaContent(Canvas uiCanvas)
         {
-            backgroundBleed.SetTarget(targetRect);
+            foreach (SafeAreaContentFitter safeAreaContentFitter in safeAreaContentFitters)
+                safeAreaContentFitter.InitializeSafeAreaContent(uiCanvas);
         }
 
         private void Awake()

@@ -15,7 +15,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private Image avatarImage;
         [SerializeField] private Button addLifeButton;
         [SerializeField] private Button addCurrencyButton;
-        [SerializeField] private RectTransformEdgeBleed backgroundBleed;
+        [SerializeField] private SafeAreaContentFitter[] safeAreaContentFitters = Array.Empty<SafeAreaContentFitter>();
 
         public event Action AddLifeRequested;
         public event Action AddCurrencyRequested;
@@ -66,9 +66,10 @@ namespace DefaultNamespace.UI
             avatarImage.sprite = avatar;
         }
 
-        public void SetBleedTarget(RectTransform targetRect)
+        public void InitializeSafeAreaContent(Canvas uiCanvas)
         {
-            backgroundBleed.SetTarget(targetRect);
+            foreach (SafeAreaContentFitter safeAreaContentFitter in safeAreaContentFitters)
+                safeAreaContentFitter.InitializeSafeAreaContent(uiCanvas);
         }
 
         private void HandleAddLifeClicked()

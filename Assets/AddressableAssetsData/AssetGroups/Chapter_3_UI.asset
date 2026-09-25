@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Chapter_3_UI
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Chapter_3_UI
+  m_GUID: ba022888973a5f445b107f832abbd25d
+  m_SerializeEntries:
+  - m_GUID: 1e502ce3b7900bd4baacecf3001dc64c
+    m_Address: chapter/3/ui/level-button
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_3
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4ce6eff73007bda4db181e58488eb587
+    m_Address: chapter/3/ui/topper
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_3
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77c32ec007925504ab23cf3a304b5f8d
+    m_Address: chapter/3/ui/chooser-image
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_3
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 985324991b4dd4443ae47ffea9dd5c3b
+    m_Address: chapter/3/ui/bottom-navigation
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - chapter_3
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 14670934b649da043b447627c769272f, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: fd62aad05cd027340a03941b30e32be1, type: 2}
+    - {fileID: 11400000, guid: f52513987a68cd944bbe11fb5e6f6786, type: 2}

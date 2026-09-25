@@ -1,0 +1,66 @@
+{
+  "chapterId": 2,
+  "chapterName": "Max Black's Garden",
+  "downloadLabel": "chapter_2",
+  "topperPrefabAddress": "chapter/2/ui/topper",
+  "bottomNavigationPrefabAddress": "chapter/2/ui/bottom-navigation",
+  "levelButtonPrefabAddress": "chapter/2/ui/level-button",
+  "levels": [
+    {
+      "levelId": 5,
+      "levelName": "5",
+      "pixelX": 8.553479,
+      "pixelY": 498.322021
+    },
+    {
+      "levelId": 6,
+      "levelName": "6",
+      "pixelX": 7.809616,
+      "pixelY": 1440.68127
+    },
+    {
+      "levelId": 7,
+      "levelName": "7",
+      "pixelX": 8.553479,
+      "pixelY": 2385.27222
+    },
+    {
+      "levelId": 8,
+      "levelName": "8",
+      "pixelX": 8.553479,
+      "pixelY": 3182.59619
+    }
+  ],
+  "backgroundChunks": [
+    {
+      "address": "chapter/2/background/MaxBlack_1",
+      "previewAddress": "chapter/2/background-preview/MaxBlack_LowResolution_1",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/2/background/MaxBlack_2",
+      "previewAddress": "chapter/2/background-preview/MaxBlack_LowResolution_2",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/2/background/MaxBlack_3",
+      "previewAddress": "chapter/2/background-preview/MaxBlack_LowResolution_3",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/2/background/MaxBlack_4",
+      "previewAddress": "chapter/2/background-preview/MaxBlack_LowResolution_4",
+      "width": 1254,
+      "height": 941
+    },
+    {
+      "address": "chapter/2/background/MaxBlack_5",
+      "previewAddress": "chapter/2/background-preview/MaxBlack_LowResolution_5",
+      "width": 1254,
+      "height": 281
+    }
+  ]
+}
