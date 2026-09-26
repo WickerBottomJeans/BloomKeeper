@@ -109,8 +109,8 @@ namespace DefaultNamespace.UI
 
                 foreach (TileChange change in result.TileChanges)
                 {
-                    if (!change.ObstacleWasCleared) continue;
-                    boardAudioManager.PlayObstacleCleared(change.Before.TileType.Value);
+                    if (!change.FeatureWasRemoved) continue;
+                    boardAudioManager.PlayFeatureCleared(change.Before.FeatureState.FeatureType);
                     break;
                 }
 

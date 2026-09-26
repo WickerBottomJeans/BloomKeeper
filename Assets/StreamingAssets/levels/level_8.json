@@ -8,14 +8,14 @@
   "boardWidth": 8,
   "boardHeight": 8,
   "tiles": [
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 3, "webLevel": 2 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 3 }, { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1 },
-    { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1, "petalType": 4 }, { "type": 1, "petalType": 3 }, { "type": 1, "petalType": 4 }, { "type": 1 }, { "type": 3, "webLevel": 2 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }
   ],
   "objectives": [
     { "type": 1, "petals": [{ "petalType": 3, "amount": 20 }] },

@@ -49,12 +49,12 @@ namespace DefaultNamespace.Audio
             AudioService.Instance.PlaySfx(bubblePrepareCue, audioScope);
         }
 
-        public void PlayObstacleCleared(TileType tileType)
+        public void PlayFeatureCleared(TileFeatureType tileFeatureType)
         {
-            AudioCue cue = tileType switch
+            AudioCue cue = tileFeatureType switch
             {
-                TileType.Web => spiderWebClearCue,
-                _ => throw new ArgumentOutOfRangeException(nameof(tileType), tileType, "Obstacle clear audio is not configured for this tile type.")
+                TileFeatureType.Web => spiderWebClearCue,
+                _ => throw new ArgumentOutOfRangeException(nameof(tileFeatureType), tileFeatureType, "Clear audio is not configured for this feature.")
             };
 
             AudioService.Instance.PlaySfx(cue);

@@ -2,13 +2,21 @@ using System;
 
 namespace DefaultNamespace
 {
-    public abstract class Tile
+    public class Tile
     {
         private Petal petal;
 
-        public abstract TileType TileType { get; }
-        public virtual int ObstacleLayerCount => 0;
+        public bool IsPlayable { get; }
+        public TileFeature Feature { get; private set; }
         public Petal Petal => petal;
+
+        public Tile(bool isPlayable, TileFeature tileFeature = null)
+        {
+            if (!isPlayable && tileFeature != null) throw new ArgumentException("An inactive tile cannot contain a feature.", nameof(tileFeature));
+            if (tileFeature != null && tileFeature.IsRemoved) throw new ArgumentException("A removed feature cannot be attached to a tile.", nameof(tileFeature));
+            IsPlayable = isPlayable;
+            Feature = tileFeature;
+        }
 
         public void SetPetal(Petal petal)
         {
@@ -20,32 +28,54 @@ namespace DefaultNamespace
         public void RemovePetal() => petal = null;
 
         /// <summary>
-        /// Would this be consider in match detecting phase in Match detector?
+        /// Whether this tile's flower can participate in a match.
         /// </summary>
         /// <returns></returns>
-        public abstract bool IsMatchable();
+        public bool IsMatchable() => CanContainPetal() && Petal != null && Petal.IsMatchable();
 
         /// <summary>
-        /// Will the petal in it be affected by gravity
+        /// Whether flowers can fall through this tile.
         /// </summary>
         /// <returns></returns>
-        public abstract bool IsGravityAffected();
+        public bool IsGravityAffected() => IsPlayable && (Feature == null || Feature.AllowsGravity);
 
-        public virtual bool CanReceiveNewPetal() => Petal == null && CanContainPetal();
+        public bool CanReceiveNewPetal() => Petal == null && CanContainPetal();
 
-        protected abstract bool CanContainPetal();
+        private bool CanContainPetal() => IsPlayable && (Feature == null || Feature.AllowsPetals);
 
-        public abstract bool CanSwapPetal();
+        public bool CanSwapPetal() => CanContainPetal() && Petal != null;
 
-        public abstract bool CanClearPetal();
+        public bool CanClearPetal() => CanContainPetal() && Petal != null;
 
-        public virtual int GetClearEffectCapacity() => CanClearPetal() ? 1 : 0;
+        public int GetClearEffectCapacity() => Feature != null ? Feature.GetFeatureClearEffectCapacity() : CanClearPetal() ? 1 : 0;
 
         /// <summary>
         /// Applies an effect that attempts to clear this tile's petal.
         /// </summary>
-        public abstract void ApplyClearEffect();
+        public void ApplyClearEffect()
+        {
+            if (!IsPlayable) return;
 
-        public virtual void OnAdjacentTileMatched() { }
+            if (Feature != null)
+            {
+                bool absorbed = Feature.TryAbsorbClearEffect();
+                RemoveCompletedFeature();
+                if (absorbed) return;
+            }
+
+            if (CanClearPetal()) RemovePetal();
+        }
+
+        public void HandleAdjacentTileMatched()
+        {
+            if (Feature == null) return;
+            Feature.HandleAdjacentTileMatched();
+            RemoveCompletedFeature();
+        }
+
+        private void RemoveCompletedFeature()
+        {
+            if (Feature.IsRemoved) Feature = null;
+        }
     }
 }

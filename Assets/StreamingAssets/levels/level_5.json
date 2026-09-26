@@ -10,14 +10,14 @@
   "boardWidth": 8,
   "boardHeight": 8,
   "tiles": [
-    { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true },
-    { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true },
-    { "isVoid": true }, { "isVoid": true }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "isVoid": true }, { "isVoid": true }
+    { "isVoid": true, "isPlayable": false }, { "isVoid": true, "isPlayable": false }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isVoid": true, "isPlayable": false }, { "isVoid": true, "isPlayable": false },
+    { "isVoid": true, "isPlayable": false }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isVoid": true, "isPlayable": false },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isVoid": true, "isPlayable": false }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isVoid": true, "isPlayable": false },
+    { "isVoid": true, "isPlayable": false }, { "isVoid": true, "isPlayable": false }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isVoid": true, "isPlayable": false }, { "isVoid": true, "isPlayable": false }
   ],
   "objectives": [
     { "type": 1, "petals": [{ "petalType": 3, "amount": 15 }, { "petalType": 4, "amount": 15 }, { "petalType": 5, "amount": 15 }] }

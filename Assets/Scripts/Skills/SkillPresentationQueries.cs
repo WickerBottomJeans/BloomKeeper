@@ -43,7 +43,7 @@ namespace Skills
             var positions = new HashSet<Vector2Int>();
             foreach (var tileChange in resolution.TileChanges)
             {
-                if (tileChange.ObstacleLayerChanged)
+                if (tileChange.FeatureChanged)
                     positions.Add(tileChange.Position);
             }
             return positions;

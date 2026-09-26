@@ -10,14 +10,14 @@
   "boardWidth": 8,
   "boardHeight": 8,
   "tiles": [
-    { "type": 1, "petalType": 4 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 4 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 4 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 4, "skillType": 4 }, { "type": 1, "petalType": 4, "skillType": 5 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1, "petalType": 4 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
+    { "isPlayable": true, "petalType": 4 }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "petalType": 4, "skillType": 4 }, { "isPlayable": true, "petalType": 4, "skillType": 5 }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }
   ],
   "objectives": [
     { "type": 1, "petals": [{ "petalType": 1, "amount": 5 }] }

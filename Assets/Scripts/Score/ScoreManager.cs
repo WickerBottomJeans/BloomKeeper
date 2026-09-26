@@ -66,7 +66,7 @@ namespace DefaultNamespace
             {
                 if (change.PetalWasRemoved)
                     clearedPetalCount++;
-                if (change.Before.TileType == TileType.Web && change.ObstacleWasCleared)
+                if (change.Before.FeatureState?.FeatureType == TileFeatureType.Web && change.FeatureWasRemoved)
                     clearedSpiderWebCount++;
             }
 

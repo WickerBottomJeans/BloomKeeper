@@ -22,7 +22,7 @@ namespace Utility
                 int x = i % cols;
                 int y = rows - 1 - (i / cols);
                 TileData tileData = data.tiles[i];
-                grid[x, y] = tileData.isVoid ? null : TileFactory.Create(tileData);
+                grid[x, y] = TileFactory.Create(tileData);
             }
 
             for (int y = rows - 1; y >= 0; y--)

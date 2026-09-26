@@ -6,20 +6,20 @@ namespace DefaultNamespace
     {
         public Vector2Int Position { get; }
         public bool IsVoid { get; }
-        public TileType? TileType { get; }
+        public bool IsPlayable { get; }
         public PetalType? PetalType { get; }
         public SpecialSkillType SkillType { get; }
-        public int ObstacleLayerCount { get; }
+        public TileFeatureState FeatureState { get; }
         public bool CanClearPetal { get; }
 
-        public TileState(Vector2Int position, bool isVoid, TileType? tileType, PetalType? petalType, SpecialSkillType skillType, int obstacleLayerCount, bool canClearPetal)
+        public TileState(Vector2Int position, bool isVoid, bool isPlayable, PetalType? petalType, SpecialSkillType skillType, TileFeatureState featureState, bool canClearPetal)
         {
             Position = position;
             IsVoid = isVoid;
-            TileType = tileType;
+            IsPlayable = isPlayable;
             PetalType = petalType;
             SkillType = skillType;
-            ObstacleLayerCount = obstacleLayerCount;
+            FeatureState = featureState;
             CanClearPetal = canClearPetal;
         }
     }

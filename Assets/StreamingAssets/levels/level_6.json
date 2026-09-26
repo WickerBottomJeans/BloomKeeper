@@ -10,14 +10,14 @@
   "boardWidth": 8,
   "boardHeight": 8,
   "tiles": [
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 3, "webLevel": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 },
-    { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }, { "type": 1 }
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":1}} }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":1}} }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":1}} }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
+    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }
   ],
   "objectives": [
     { "type": 3, "spiderWebsToClear": 3 }

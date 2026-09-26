@@ -44,7 +44,7 @@ namespace Skills
             var changes = new List<TileChange>();
             foreach (TileChange change in resolution.TileChanges)
             {
-                if (change.ObstacleLayerChanged)
+                if (change.FeatureChanged)
                     changes.Add(change);
             }
             if (!representation.Target.HasValue)

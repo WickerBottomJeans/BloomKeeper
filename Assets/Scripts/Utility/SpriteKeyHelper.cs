@@ -14,23 +14,6 @@ namespace DefaultNamespace.Utility
             return $"{type}_{skillName}";
         }
         
-        public static string GetTileSpriteKey(TileType type)
-        {
-            return $"Tile_{type}";
-        }
-        
-        public static string GetTileOverlayKey(TileType tileType, int obstacleLayerCount)
-        {
-            if (obstacleLayerCount <= 0)
-                return null;
-
-            return tileType switch
-            {
-                TileType.Web => $"Overlay_Web_{obstacleLayerCount}",
-                _ => throw new System.ArgumentOutOfRangeException(nameof(tileType), tileType, "Tile overlay sprite is not configured for this obstacle-bearing tile type.")
-            };
-        }
-
         public static string GetObjectiveSpriteKey(ObjectiveType objectiveType)
         {
             return $"Objective_{objectiveType}";

@@ -114,6 +114,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.TileViewManager
   _tileViewPrefab: {fileID: 3171136553859467040, guid: fba785c9e7b48414b9ebf792fbe5c6f0, type: 3}
+  tileFeaturePrefabs:
+  - {fileID: 3171136553859467040, guid: 2285ffae57dd4ebb8c44a3db298b01fa, type: 3}
 --- !u!114 &5176382947618204359
 MonoBehaviour:
   m_ObjectHideFlags: 0

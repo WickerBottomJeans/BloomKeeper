@@ -18,6 +18,6 @@ MonoBehaviour:
     guidanceText: "Choose any tile\u2014the Bloom Wand will strike whatever is there
       with a powerful burst of petals!"
   - boosterType: 2
-    icon: {fileID: 102785524858115614, guid: f7bf9e3c95bbec248b89d4a748f7ef1b, type: 3}
+    icon: {fileID: 102785524858115614, guid: a19e15c37ee062c40956125355f7569b, type: 3}
     guidanceText: "Choose two petals to swap places\u2014they don\u2019t need to
       make a match"

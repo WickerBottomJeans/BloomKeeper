@@ -78,15 +78,15 @@ namespace Skills
                     triggeredSkillPositions.Add(position);
             }
 
-            var obstacleChanges = new List<TileChange>();
+            var featureChanges = new List<TileChange>();
             foreach (TileChange change in resolution.TileChanges)
             {
-                if (change.ObstacleLayerChanged)
-                    obstacleChanges.Add(change);
+                if (change.FeatureChanged)
+                    featureChanges.Add(change);
             }
 
             petalViewManager.ReleasePetalViewsImmediately(ownedRemovedPositions, accessKeys);
-            await UniTask.WhenAll(horizontalBeam.Finish(FinishDuration), verticalBeam.Finish(FinishDuration), halo.Finish(FinishDuration), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(obstacleChanges));
+            await UniTask.WhenAll(horizontalBeam.Finish(FinishDuration), verticalBeam.Finish(FinishDuration), halo.Finish(FinishDuration), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(featureChanges));
         }
     }
 }

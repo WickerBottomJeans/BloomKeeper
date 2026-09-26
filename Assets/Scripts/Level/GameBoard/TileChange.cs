@@ -8,13 +8,12 @@ namespace DefaultNamespace
         public TileState After { get; }
         public Vector2Int Position => Before.Position;
         public bool PetalChanged => Before.PetalType != After.PetalType || Before.SkillType != After.SkillType;
-        public bool TileTypeChanged => Before.TileType != After.TileType;
-        public bool ObstacleLayerChanged => Before.ObstacleLayerCount != After.ObstacleLayerCount;
-        public bool HasAnyChange => Before.IsVoid != After.IsVoid || PetalChanged || TileTypeChanged || ObstacleLayerChanged;
+        public bool FeatureChanged => !TileFeatureState.AreFeatureStatesEqual(Before.FeatureState, After.FeatureState);
+        public bool HasAnyChange => Before.IsVoid != After.IsVoid || Before.IsPlayable != After.IsPlayable || PetalChanged || FeatureChanged;
         public bool PetalWasRemoved => Before.PetalType.HasValue && !After.PetalType.HasValue;
         public PetalType RemovedPetalType => PetalWasRemoved ? Before.PetalType.Value : PetalType.None;
         public SpecialSkillType RemovedSkillType => PetalWasRemoved ? Before.SkillType : SpecialSkillType.None;
-        public bool ObstacleWasCleared => Before.ObstacleLayerCount > 0 && After.ObstacleLayerCount == 0;
+        public bool FeatureWasRemoved => Before.FeatureState != null && After.FeatureState == null;
 
         public TileChange(TileState before, TileState after)
         {

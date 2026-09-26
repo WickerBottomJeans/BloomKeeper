@@ -205,7 +205,7 @@ namespace DefaultNamespace.UI
                     Tile tile = grid[neighborPos.x, neighborPos.y];
                     TileState before = BoardSnapshotBuilder.CaptureTile(grid, neighborPos);
                     if (tile != null)
-                        tile.OnAdjacentTileMatched();
+                        tile.HandleAdjacentTileMatched();
                     TileState after = BoardSnapshotBuilder.CaptureTile(grid, neighborPos);
                     var change = new TileChange(before, after);
                     if (change.HasAnyChange)

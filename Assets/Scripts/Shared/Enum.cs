@@ -32,16 +32,8 @@
         Daisy = 7
     }
 
-    public enum TileType
+    public enum TileFeatureType
     {
-        Normal = 1,
-        Inactive = 2,
-        Web = 3
-    }
-    
-    public enum TileOverlay
-    {
-        None = 0,
         Web = 1
     }
 

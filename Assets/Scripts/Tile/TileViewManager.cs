@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.UI;
-using DefaultNamespace.Utility;
 using UnityEngine;
 
 namespace DefaultNamespace
@@ -10,16 +9,37 @@ namespace DefaultNamespace
     public class TileViewManager : MonoBehaviour
     {
         [SerializeField] private TileView _tileViewPrefab;
+        [SerializeField] private TileFeatureView[] tileFeaturePrefabs;
 
         private TileView[,] _views;
+        private TileFeatureState[,] displayedFeatureStates;
+        private readonly Dictionary<TileFeatureType, TileFeatureView> tileFeaturePrefabsByType = new();
+        private readonly Dictionary<Vector2Int, List<(TileChange tileChange, UniTaskCompletionSource completionSource)>> pendingFeatureChanges = new();
+        private readonly HashSet<Vector2Int> animatingFeaturePositions = new();
+        private Exception featurePresentationFailure;
         private readonly List<TileView> _activeBoosterTargetViews = new List<TileView>();
         private bool _boosterTargetsShown;
 
+        #region Unity Lifecycle
+        private void OnDestroy()
+        {
+            FailPendingFeatureChanges(new OperationCanceledException("The board was destroyed during feature presentation."));
+        }
+        #endregion
+
+        #region Public API
         public void Init(Tile[,] grid, BoardLayout layout)
         {
+            foreach (TileFeatureView tileFeaturePrefab in tileFeaturePrefabs)
+            {
+                if (!Enum.IsDefined(typeof(TileFeatureType), tileFeaturePrefab.FeatureType)) throw new InvalidOperationException($"Unknown feature prefab type: {tileFeaturePrefab.FeatureType}.");
+                tileFeaturePrefabsByType.Add(tileFeaturePrefab.FeatureType, tileFeaturePrefab);
+            }
+
             int cols = grid.GetLength(0);
             int rows = grid.GetLength(1);
             _views = new TileView[cols, rows];
+            displayedFeatureStates = new TileFeatureState[cols, rows];
 
             for (int col = 0; col < cols; col++)
             {
@@ -30,31 +50,12 @@ namespace DefaultNamespace
 
                     Vector3 worldPos = layout.GetTileWorldPos(col, row);
                     TileView view = Instantiate(_tileViewPrefab, worldPos, Quaternion.identity, transform);
-                    view.Init(layout.TileSize, -row);
+                    TileFeatureState tileFeatureState = tile.Feature?.CaptureFeatureState();
+                    view.Init(layout.TileSize, -row, tile.IsPlayable, tileFeatureState, tileFeaturePrefabsByType);
                     _views[col, row] = view;
-                    RefreshView(col, row, tile);
+                    displayedFeatureStates[col, row] = tileFeatureState;
                 }
             }
-        }
-
-        public void RefreshOverlay(int col, int row, Tile tile)
-        {
-            if (_views[col, row] == null || tile == null) return;
-
-            string overlayKey = SpriteKeyHelper.GetTileOverlayKey(tile.TileType, tile.ObstacleLayerCount);
-            if (overlayKey != null)
-                _views[col, row].SetOverlay(SpriteLoader.Instance.GetSprite(overlayKey));
-            else
-                _views[col, row].ClearOverlay();
-        }
-
-        public void RefreshBase(int col, int row, Tile tile)
-        {
-            if (_views[col, row] == null || tile == null) return;
-
-            string key = SpriteKeyHelper.GetTileSpriteKey(tile.TileType);
-            Sprite sprite = SpriteLoader.Instance.GetSprite(key);
-            _views[col, row].SetBase(sprite);
         }
 
         public void ShowBoosterTargets(IReadOnlyList<Vector2Int> positions, Material material)
@@ -130,50 +131,92 @@ namespace DefaultNamespace
         }
         
         /// <summary>
-        /// Refresh both base tile and its overlay
-        /// </summary>
-        /// <param name="col"></param>
-        /// <param name="row"></param>
-        /// <param name="tile"></param>
-        private void RefreshView(int col, int row, Tile tile)
-        {
-            RefreshBase(col, row, tile);
-            RefreshOverlay(col, row, tile);
-        }
-        
-        /// <summary>
-        /// Refreshes tile views for all tiles that changed state during match resolution
+        /// Plays feature changes in snapshot order on each tile.
         /// </summary>
         /// <param name="changes"></param>
         public async UniTask PlayTileChanges(IReadOnlyList<TileChange> changes)
         {
+            if (featurePresentationFailure != null) throw new InvalidOperationException("Feature presentation has already failed.", featurePresentationFailure);
             var transitionTasks = new List<UniTask>();
+            var changedPositions = new HashSet<Vector2Int>();
 
             foreach (TileChange change in changes)
             {
-                Vector2Int pos = change.Position;
-                TileView view = _views[pos.x, pos.y];
-                if (view == null || change.After.IsVoid) continue;
+                if (!change.FeatureChanged) continue;
+                Vector2Int position = change.Position;
+                if (_views[position.x, position.y] == null || change.After.IsVoid) throw new InvalidOperationException($"Feature change at {position} requires a tile view.");
+                if (!pendingFeatureChanges.TryGetValue(position, out var tileFeatureChanges))
+                {
+                    tileFeatureChanges = new List<(TileChange, UniTaskCompletionSource)>();
+                    pendingFeatureChanges.Add(position, tileFeatureChanges);
+                }
 
-                string newOverlayKey = SpriteKeyHelper.GetTileOverlayKey(change.After.TileType.Value, change.After.ObstacleLayerCount);
-
-                if (view.HasOverlay && newOverlayKey != null)
-                {
-                    Sprite incoming = SpriteLoader.Instance.GetSprite(newOverlayKey);
-                    transitionTasks.Add(view.PlayOverlayTransition(incoming));
-                }
-                else if (view.HasOverlay && newOverlayKey == null)
-                {
-                    transitionTasks.Add(view.PlayOverlayDespawn());
-                }
-                else if (!view.HasOverlay && newOverlayKey != null)
-                {
-                    view.SetOverlay(SpriteLoader.Instance.GetSprite(newOverlayKey));
-                    transitionTasks.Add(view.PlayOverlaySpawn());
-                }
+                var completionSource = new UniTaskCompletionSource();
+                tileFeatureChanges.Add((change, completionSource));
+                transitionTasks.Add(completionSource.Task);
+                changedPositions.Add(position);
             }
+
+            foreach (Vector2Int position in changedPositions)
+                PlayPendingTileFeatureChanges(position).Forget();
 
             await UniTask.WhenAll(transitionTasks);
         }
+        #endregion
+
+        #region Private Methods
+        private async UniTask PlayPendingTileFeatureChanges(Vector2Int position)
+        {
+            if (featurePresentationFailure != null || !animatingFeaturePositions.Add(position)) return;
+
+            try
+            {
+                List<(TileChange tileChange, UniTaskCompletionSource completionSource)> tileFeatureChanges = pendingFeatureChanges[position];
+                while (tileFeatureChanges.Count > 0)
+                {
+                    TileFeatureState displayedFeatureState = displayedFeatureStates[position.x, position.y];
+                    int nextChangeIndex = tileFeatureChanges.FindIndex(change => TileFeatureState.AreFeatureStatesEqual(displayedFeatureState, change.tileChange.Before.FeatureState));
+
+                    // Wait for the earlier impact to arrive.
+                    if (nextChangeIndex < 0) return;
+
+                    var nextChange = tileFeatureChanges[nextChangeIndex];
+                    await _views[position.x, position.y].PlayTileFeatureChange(nextChange.tileChange.Before.FeatureState, nextChange.tileChange.After.FeatureState);
+                    if (featurePresentationFailure != null) return;
+                    displayedFeatureStates[position.x, position.y] = nextChange.tileChange.After.FeatureState;
+                    tileFeatureChanges.RemoveAt(nextChangeIndex);
+                    nextChange.completionSource.TrySetResult();
+                }
+
+                pendingFeatureChanges.Remove(position);
+            }
+            catch (Exception exception)
+            {
+                FailPendingFeatureChanges(exception);
+            }
+            finally
+            {
+                animatingFeaturePositions.Remove(position);
+            }
+        }
+
+        private void FailPendingFeatureChanges(Exception exception)
+        {
+            featurePresentationFailure = exception;
+            var completionSources = new List<UniTaskCompletionSource>();
+            foreach (var tileFeatureChanges in pendingFeatureChanges.Values)
+            foreach (var tileFeatureChange in tileFeatureChanges)
+                completionSources.Add(tileFeatureChange.completionSource);
+            pendingFeatureChanges.Clear();
+
+            foreach (UniTaskCompletionSource completionSource in completionSources)
+            {
+                if (exception is OperationCanceledException cancellationException)
+                    completionSource.TrySetCanceled(cancellationException.CancellationToken);
+                else
+                    completionSource.TrySetException(exception);
+            }
+        }
+        #endregion
     }
 }

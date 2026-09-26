@@ -38,15 +38,18 @@ namespace DefaultNamespace.Editor
 
                     if (!Enum.IsDefined(typeof(PetalType), tileData.petalType)) errors.Add($"{location}: unknown flower type.");
                     if (!Enum.IsDefined(typeof(SpecialSkillType), tileData.skillType)) errors.Add($"{location}: unknown skill type.");
-                    if (!tileData.isVoid && !Enum.IsDefined(typeof(TileType), tileData.type)) errors.Add($"{location}: unknown tile type.");
-                    if (tileData.webLevel < 0) errors.Add($"{location}: web layers cannot be negative.");
-                    if ((tileData.isVoid || tileData.type != TileType.Web) && tileData.webLevel != 0) errors.Add($"{location}: only web tiles may have web layers.");
+                    try
+                    {
+                        Tile tile = TileFactory.Create(tileData);
+                        if (tile != null && tile.CanReceiveNewPetal()) playableTileCount++;
+                        if (tile?.Feature?.FeatureType == TileFeatureType.Web) webTileCount++;
+                    }
+                    catch (ArgumentException exception)
+                    {
+                        errors.Add($"{location}: {exception.Message}");
+                    }
 
-                    bool canContainPetal = !tileData.isVoid && (tileData.type == TileType.Normal || tileData.type == TileType.Web && tileData.webLevel == 0);
-                    if (canContainPetal) playableTileCount++;
-                    if (!canContainPetal && (tileData.petalType != PetalType.None || tileData.skillType != SpecialSkillType.None)) errors.Add($"{location}: this tile cannot contain a flower or skill.");
                     if (tileData.petalType == PetalType.None && tileData.skillType != SpecialSkillType.None) errors.Add($"{location}: choose a fixed flower for the skill; random initialization does not preserve a configured skill.");
-                    if (!tileData.isVoid && tileData.type == TileType.Web && tileData.webLevel > 0) webTileCount++;
                 }
             }
             if (playableTileCount == 0) errors.Add("The board needs at least one tile that can initially contain a flower.");

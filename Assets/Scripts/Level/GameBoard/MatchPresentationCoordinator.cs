@@ -51,7 +51,7 @@ namespace DefaultNamespace.UI
 
             foreach (TileChange change in adjacenttileChanges)
             {
-                if (change.ObstacleLayerChanged)
+                if (change.FeatureChanged)
                     normalTileChanges.Add(change);
             }
 
@@ -97,7 +97,7 @@ namespace DefaultNamespace.UI
 
             foreach (var impact in groupResult.TileChanges)
             {
-                if (impact.ObstacleLayerChanged)
+                if (impact.FeatureChanged)
                     normalTileChanges.Add(impact);
             }
         }

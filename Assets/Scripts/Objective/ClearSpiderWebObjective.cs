@@ -23,7 +23,7 @@ namespace DefaultNamespace
             int clearedWebCount = 0;
             foreach (TileChange change in changes)
             {
-                if (change.Before.TileType == TileType.Web && change.ObstacleWasCleared)
+                if (change.Before.FeatureState?.FeatureType == TileFeatureType.Web && change.FeatureWasRemoved)
                     clearedWebCount++;
             }
 
@@ -50,7 +50,7 @@ namespace DefaultNamespace
 
             foreach (TileState tile in boardSnapshot)
             {
-                if (tile.TileType == TileType.Web && tile.ObstacleLayerCount > 0)
+                if (tile.FeatureState?.FeatureType == TileFeatureType.Web)
                     obstaclePositions.Add(tile.Position);
             }
 

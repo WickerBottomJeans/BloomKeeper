@@ -8,7 +8,7 @@
 
 ## Paint the board
 
-1. Under **TILE BRUSH**, choose **Tile**. Select **Normal**, **Inactive**, or **Web**. For **Web**, enter **Web layers**. Enable **Empty board space** to paint holes in the board.
+1. Under **TILE BRUSH**, enable **Playable tile** for ordinary cells or disable it for inactive cells. Enable **Empty board space** to paint holes. For a web on a playable tile, enable **Has feature**, select **Web** under **Feature**, and enter a positive **Web layers** value. Disable **Has feature** to paint a tile without a feature.
 2. For a tile that can contain a flower, choose **Flower (None = random)**. Select **None** to let the game initialize the flower, or select a fixed flower. A fixed flower also enables **Skill**. Blocked tiles do not receive flower or skill data when painted.
 3. Click or drag over the board to replace cells with the brush. Right click a cell to copy its settings into the brush. One drag is one undo operation. Use the toolbar's **Undo** and **Redo** buttons to revise edits.
 4. To change dimensions, enter **Columns** and **Rows** above the board, then click **Resize**. Existing cells stay aligned to the top left; new cells are normal tiles with random flowers. Shrinking asks before removing cells.

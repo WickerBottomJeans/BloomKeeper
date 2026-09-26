@@ -28,11 +28,11 @@ public static class SpriteRenamer
         SpecialSkillType.Butterfly
     };
 
-    private static readonly TileType[] TileTypes =
+    private static readonly string[] TileSpriteNames =
     {
-        TileType.Normal,
-        TileType.Web,
-        TileType.Inactive
+        "Tile_Normal",
+        "Tile_Web",
+        "Tile_Inactive"
     };
 
     [MenuItem("Assets/Rename Petal Sprite Slices", false, 2000)]
@@ -105,11 +105,11 @@ public static class SpriteRenamer
             .OrderBy(spriteRect => spriteRect.rect.center.x)
             .ToArray();
 
-        if (spriteRects.Length != TileTypes.Length)
-            throw new InvalidOperationException($"Selected texture must contain exactly {TileTypes.Length} slices, but contains {spriteRects.Length}: {path}");
+        if (spriteRects.Length != TileSpriteNames.Length)
+            throw new InvalidOperationException($"Selected texture must contain exactly {TileSpriteNames.Length} slices, but contains {spriteRects.Length}: {path}");
 
-        for (int index = 0; index < TileTypes.Length; index++)
-            spriteRects[index].name = SpriteKeyHelper.GetTileSpriteKey(TileTypes[index]);
+        for (int index = 0; index < TileSpriteNames.Length; index++)
+            spriteRects[index].name = TileSpriteNames[index];
 
         dataProvider.SetSpriteRects(spriteRects);
         dataProvider.Apply();
@@ -135,8 +135,8 @@ public static class SpriteRenamer
         dataProvider.InitSpriteEditorDataProvider();
 
         SpriteRect[] spriteRects = dataProvider.GetSpriteRects();
-        if (spriteRects.Length != TileTypes.Length)
-            throw new InvalidOperationException($"Selected texture must contain exactly {TileTypes.Length} slices, but contains {spriteRects.Length}: {path}");
+        if (spriteRects.Length != TileSpriteNames.Length)
+            throw new InvalidOperationException($"Selected texture must contain exactly {TileSpriteNames.Length} slices, but contains {spriteRects.Length}: {path}");
 
         foreach (SpriteRect spriteRect in spriteRects)
         {

@@ -6,13 +6,18 @@ namespace DefaultNamespace
     {
         public static Tile Create(TileData data)
         {
-            Tile tile = data.type switch
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (data.isVoid)
             {
-                TileType.Normal   => new NormalTile(),
-                TileType.Inactive => new InactiveTile(),
-                TileType.Web      => new WebTile(data.webLevel),
-                _                 => throw new Exception($"Unknown tile type: {data.type}")
-            };
+                if (data.isPlayable || data.feature != null || data.petalType != PetalType.None || data.skillType != SpecialSkillType.None)
+                    throw new ArgumentException("A board hole cannot contain playable tile data.", nameof(data));
+                return null;
+            }
+
+            TileFeature tileFeature = data.feature == null ? null : TileFeatureFactory.CreateTileFeature(data.feature);
+            var tile = new Tile(data.isPlayable, tileFeature);
+            if (!tile.CanReceiveNewPetal() && (data.petalType != PetalType.None || data.skillType != SpecialSkillType.None))
+                throw new ArgumentException("This tile cannot contain configured flower or skill data.", nameof(data));
             return tile;
         }
     }
