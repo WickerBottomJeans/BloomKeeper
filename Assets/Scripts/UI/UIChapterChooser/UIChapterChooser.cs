@@ -14,6 +14,8 @@ namespace DefaultNamespace.UI
         [SerializeField] private UIChapterView chapterViewTemplate;
         [SerializeField] private Button closeButton;
         [SerializeField] private CanvasGroup visibilityGroup;
+        [SerializeField] private UITutorialTarget chaptersTutorialTarget;
+        [SerializeField] private UITutorialTarget closeTutorialTarget;
         [SerializeField, Min(0f)] private float edgeGap;
         [SerializeField] private int defaultPoolCapacity = 3;
         [SerializeField] private int maxPoolSize = 5;
@@ -31,6 +33,19 @@ namespace DefaultNamespace.UI
 
         public event Action<int> ChapterVisitRequested;
         public event Action CloseRequested;
+        public event Action ChapterChooserShown;
+        public event Action ChapterChooserHidden;
+
+        public UITutorialTarget GetChapterTutorialTarget(HomeTutorialTarget tutorialTarget)
+        {
+            if (!Enum.IsDefined(typeof(HomeTutorialTarget), tutorialTarget)) throw new ArgumentOutOfRangeException(nameof(tutorialTarget));
+            switch (tutorialTarget)
+            {
+                case HomeTutorialTarget.Chapters: return chaptersTutorialTarget;
+                case HomeTutorialTarget.ChapterClose: return closeTutorialTarget;
+                default: throw new ArgumentException("This tutorial target is not in the chapter chooser.", nameof(tutorialTarget));
+            }
+        }
 
         protected override void Awake()
         {
@@ -124,6 +139,12 @@ namespace DefaultNamespace.UI
         {
             SetVisibility(false);
             ClearPoolAndPreparedState();
+            ChapterChooserHidden?.Invoke();
+        }
+
+        protected override void HandlePopupEntranceCompleted()
+        {
+            ChapterChooserShown?.Invoke();
         }
 
         private void PrepareView(UIChapterView view)

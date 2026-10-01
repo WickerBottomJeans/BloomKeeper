@@ -20,7 +20,7 @@ namespace DefaultNamespace
 
             LoadPlayerStateResponse playerState = await playerStateTask;
             PlayerInventoryData playerInventory = await playerInventoryTask;
-            var account = new PlayerAccount(authSession, playerState.progression, playerInventory);
+            var account = new PlayerAccount(authSession, playerState.progression, playerInventory, playerState.playerTutorialProgressData);
             return (account, playerState.lives);
         }
     }

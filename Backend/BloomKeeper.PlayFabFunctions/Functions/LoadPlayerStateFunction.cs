@@ -21,6 +21,7 @@ public class LoadPlayerStateFunction
     private readonly PlayFabEntityFileClient fileClient = new PlayFabEntityFileClient();
     private readonly ProgressionFileStore progressionStore = new ProgressionFileStore();
     private readonly LivesFileStore livesStore = new LivesFileStore();
+    private readonly TutorialProgressFileStore tutorialProgressFileStore = new TutorialProgressFileStore();
     private readonly LivesService livesService = new LivesService();
 
     /// <summary>
@@ -40,18 +41,21 @@ public class LoadPlayerStateFunction
             var fileMetadata = await fileClient.LoadEntityFileMetadata(dataApi, dataEntity);
             Task<(PlayerProgressionData progression, bool fileExists)> progressionTask = progressionStore.Load(fileClient, fileMetadata);
             Task<(PlayerLivesData lives, bool fileExists)> livesTask = livesStore.Load(fileClient, fileMetadata, livesConfig.maximumLives);
-            await Task.WhenAll(progressionTask, livesTask);
+            Task<(PlayerTutorialProgressData playerTutorialProgressData, bool fileExists)> tutorialProgressTask = tutorialProgressFileStore.LoadTutorialProgress(fileClient, fileMetadata);
+            await Task.WhenAll(progressionTask, livesTask, tutorialProgressTask);
             (PlayerProgressionData progression, bool progressionFileExists) = await progressionTask;
             (PlayerLivesData lives, bool livesFileExists) = await livesTask;
+            (PlayerTutorialProgressData playerTutorialProgressData, bool tutorialProgressFileExists) = await tutorialProgressTask;
             bool livesChanged = livesService.UpdateLivesToCurrentTime(lives, livesConfig, operationTimeUtc);
 
-            if (!progressionFileExists || !livesFileExists || livesChanged)
+            if (!progressionFileExists || !livesFileExists || livesChanged || !tutorialProgressFileExists)
             {
                 try
                 {
                     var filesToUpload = new Dictionary<string, byte[]>();
                     if (!progressionFileExists) filesToUpload.Add(progressionStore.FileName, progressionStore.Serialize(progression));
                     if (!livesFileExists || livesChanged) filesToUpload.Add(livesStore.FileName, livesStore.Serialize(lives, livesConfig.maximumLives));
+                    if (!tutorialProgressFileExists) filesToUpload.Add(tutorialProgressFileStore.FileName, tutorialProgressFileStore.SerializeTutorialProgress(playerTutorialProgressData));
                     await fileClient.UploadFiles(dataApi, dataEntity, filesToUpload, fileMetadata.ProfileVersion);
                 }
                 catch (EntityProfileVersionConflictException) when (writeAttempt < MaxWriteAttempts)
@@ -68,7 +72,7 @@ public class LoadPlayerStateFunction
 
             PlayerLivesSnapshot livesSnapshot = livesService.CreateLivesSnapshot(lives, livesConfig);
             // TODO: Return pending rewards as unopened gifts so the client can show them in a gift box.
-            var response = new LoadPlayerStateResponse { progression = progression, lives = livesSnapshot };
+            var response = new LoadPlayerStateResponse { progression = progression, lives = livesSnapshot, playerTutorialProgressData = playerTutorialProgressData };
             return new ContentResult { Content = JsonConvert.SerializeObject(response), ContentType = "application/json", StatusCode = StatusCodes.Status200OK };
         }
 

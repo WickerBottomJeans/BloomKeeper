@@ -16,6 +16,7 @@ namespace DefaultNamespace
         private readonly PlayerLivesPresentationService playerLivesPresentationService;
         private readonly HomeMapFlow homeMapFlow;
         private readonly HomeShopFlow homeShopFlow;
+        private readonly HomeTutorialFlow homeTutorialFlow;
         private HomeMiddleTab? activeMiddleTab;
         private int? currentChapterId;
         private CancellationTokenSource livesDisplayCancellation;
@@ -26,12 +27,13 @@ namespace DefaultNamespace
         /// <summary>
         /// Creates the home flow and its child flows.
         /// </summary>
-        public HomeFlow(AddressableContentService addressableContentService, PlayerLivesPresentationService playerLivesPresentationService)
+        public HomeFlow(AddressableContentService addressableContentService, PlayerLivesPresentationService playerLivesPresentationService, HomeTutorialConfig homeTutorialConfig)
         {
             this.addressableContentService = addressableContentService ?? throw new ArgumentNullException(nameof(addressableContentService));
             this.playerLivesPresentationService = playerLivesPresentationService ?? throw new ArgumentNullException(nameof(playerLivesPresentationService));
             homeMapFlow = new HomeMapFlow();
             homeShopFlow = new HomeShopFlow(playerLivesPresentationService);
+            homeTutorialFlow = new HomeTutorialFlow(homeTutorialConfig);
         }
 
         /// <summary>
@@ -44,6 +46,8 @@ namespace DefaultNamespace
             UIManager.Instance.HomeTabRequested += HandleHomeTabRequested;
             UIManager.Instance.ChapterVisitRequested += HandleChapterVisitRequested;
             UIManager.Instance.ChapterChooserCloseRequested += HandleChapterChooserCloseRequested;
+            UIManager.Instance.HomeChapterChooserShown += homeTutorialFlow.HandleHomeChapterChooserShown;
+            UIManager.Instance.HomeChapterChooserHidden += homeTutorialFlow.HandleHomeChapterChooserHidden;
             UIManager.Instance.SettingsRequested += HandleSettingsRequested;
             UIManager.Instance.AddLifeRequested += HandleAddLifeRequested;
             UIManager.Instance.AddCurrencyRequested += HandleAddCurrencyRequested;
@@ -74,6 +78,12 @@ namespace DefaultNamespace
             // [Duong] Start the lives display loop.
             livesDisplayCancellation = CancellationTokenSource.CreateLinkedTokenSource(UnityEngine.Application.exitCancellationToken);
             UpdateLivesDisplayLoop(livesDisplayCancellation.Token).Forget();
+
+            // Start the Home introduction.
+            homeTutorialFlow.StartHomeTutorial();
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            UIManager.Instance.HomeTutorialReplayRequested += HandleHomeTutorialReplayRequested;
+#endif
         }
 
         /// <summary>
@@ -81,10 +91,16 @@ namespace DefaultNamespace
         /// </summary>
         public void Exit()
         {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            UIManager.Instance.HomeTutorialReplayRequested -= HandleHomeTutorialReplayRequested;
+#endif
+            homeTutorialFlow.StopHomeTutorial();
             UIManager.Instance.LevelSelected -= HandleLevelSelected;
             UIManager.Instance.HomeTabRequested -= HandleHomeTabRequested;
             UIManager.Instance.ChapterVisitRequested -= HandleChapterVisitRequested;
             UIManager.Instance.ChapterChooserCloseRequested -= HandleChapterChooserCloseRequested;
+            UIManager.Instance.HomeChapterChooserShown -= homeTutorialFlow.HandleHomeChapterChooserShown;
+            UIManager.Instance.HomeChapterChooserHidden -= homeTutorialFlow.HandleHomeChapterChooserHidden;
             UIManager.Instance.SettingsRequested -= HandleSettingsRequested;
             UIManager.Instance.AddLifeRequested -= HandleAddLifeRequested;
             UIManager.Instance.AddCurrencyRequested -= HandleAddCurrencyRequested;
@@ -111,6 +127,7 @@ namespace DefaultNamespace
         /// </summary>
         private void HandleLevelSelected(int levelId)
         {
+            if (homeTutorialFlow.IsHomeTutorialActive) return;
             StartLevelRequested?.Invoke(levelId);
         }
 
@@ -119,6 +136,7 @@ namespace DefaultNamespace
         /// </summary>
         private void HandleHomeTabRequested(HomeMiddleTab tab)
         {
+            if (!homeTutorialFlow.TryBeginHomeTutorialTabNavigation(tab)) return;
             //[Duong] Clicking the active Map tab opens the chapter chooser
             if (tab == HomeMiddleTab.Map && activeMiddleTab == HomeMiddleTab.Map)
             {
@@ -128,6 +146,18 @@ namespace DefaultNamespace
 
             ApplicationOperationRunner.Instance.Run(() => ChangeTabAsync(tab));
         }
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        private void HandleHomeTutorialReplayRequested()
+        {
+            ApplicationOperationRunner.Instance.Run(async () =>
+            {
+                homeTutorialFlow.StopHomeTutorial();
+                await ChangeTabAsync(HomeMiddleTab.Map);
+                homeTutorialFlow.StartHomeTutorialPreview();
+            });
+        }
+#endif
 
         private async UniTask OpenChapterChooserAsync()
         {
@@ -143,6 +173,7 @@ namespace DefaultNamespace
 
         private void HandleChapterVisitRequested(int chapterId)
         {
+            if (homeTutorialFlow.IsHomeTutorialActive) return;
             if (currentChapterId == chapterId)
             {
                 UnityEngine.Debug.LogWarning($"Chapter {chapterId} is already active.");
@@ -154,6 +185,7 @@ namespace DefaultNamespace
 
         private  void HandleChapterChooserCloseRequested()
         {
+            if (!homeTutorialFlow.TryBeginHomeTutorialChapterClose()) return;
             UIManager.Instance.HideChapterChooser();
         }
 
@@ -165,7 +197,10 @@ namespace DefaultNamespace
                     await homeMapFlow.EnterMapAsync();
                     break;
                 case HomeMiddleTab.Shop:
-                    if (!await homeShopFlow.TryEnterShopAsync()) return;
+                    bool shopDisplayed = await homeShopFlow.TryEnterShopAsync();
+                    if (shopDisplayed) activeMiddleTab = HomeMiddleTab.Shop;
+                    homeTutorialFlow.HandleHomeShopNavigationFinished(shopDisplayed);
+                    if (!shopDisplayed) return;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(tab), tab, "Unknown Home middle tab.");
@@ -191,16 +226,19 @@ namespace DefaultNamespace
 
         private void HandleSettingsRequested()
         {
+            if (homeTutorialFlow.IsHomeTutorialActive) return;
             SettingsRequested?.Invoke();
         }
 
         private void HandleAddLifeRequested()
         {
+            if (homeTutorialFlow.IsHomeTutorialActive) return;
             ApplicationOperationRunner.Instance.Run(() => ChangeTabAsync(HomeMiddleTab.Shop));
         }
 
         private void HandleAddCurrencyRequested()
         {
+            if (homeTutorialFlow.IsHomeTutorialActive) return;
             ApplicationOperationRunner.Instance.Run(() => DialogManager.Instance.RunOkDialog("Earn diamonds", "You can earn diamonds just by playing the game. Keep playing to collect more!"));
         }
 

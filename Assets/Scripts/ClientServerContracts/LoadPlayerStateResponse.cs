@@ -10,5 +10,6 @@ namespace DefaultNamespace
         public int schemaVersion = LoadPlayerStateContract.CurrentSchemaVersion;
         public PlayerProgressionData progression;
         public PlayerLivesSnapshot lives;
+        public PlayerTutorialProgressData playerTutorialProgressData;
     }
 }

@@ -198,6 +198,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8409020897143694708}
   - component: {fileID: 9182917855229479208}
+  - component: {fileID: 71000001}
+  - component: {fileID: 71000002}
+  - component: {fileID: 71000003}
   m_Layer: 5
   m_Name: UIMainShopTab
   m_TagString: Untagged
@@ -244,6 +247,7 @@ MonoBehaviour:
   scrollRect: {fileID: 1914544970137712268}
   shopCellTemplate: {fileID: 3399841061427747012}
   shopSpriteCatalog: {fileID: 11400000, guid: af600aa2065c19647be2bf02e36ada48, type: 2}
+  shopTutorialTarget: {fileID: 71000003}
   topPadding: 50
   bottomPadding: 50
   cellSpacing: 25
@@ -1806,3 +1810,59 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9079013945234416429}
   m_CullTransparentMesh: 1
+--- !u!223 &71000001
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 799671996702759127}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: -1619324423
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!114 &71000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 799671996702759127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &71000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 799671996702759127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2394d16e77dd454f8dfd09da156e62d3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.UI.UITutorialTarget
+  targetRectTransform: {fileID: 8409020897143694708}
+  targetCanvas: {fileID: 71000001}
+  targetGraphicRaycaster: {fileID: 71000002}

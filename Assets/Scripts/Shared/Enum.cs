@@ -90,6 +90,17 @@
         Shop = 3
     }
 
+    public enum HomeTutorialTarget
+    {
+        Lives,
+        Diamonds,
+        Map,
+        Chapters,
+        ChapterClose,
+        Shop,
+        ShopContent
+    }
+
     public enum PlayerLivesDisplayState
     {
         Normal = 1,

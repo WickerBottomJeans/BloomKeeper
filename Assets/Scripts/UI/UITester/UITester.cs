@@ -33,10 +33,14 @@ namespace DefaultNamespace.UI
         }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
+        public event System.Action HomeTutorialReplayRequested;
+
         private void Update()
         {
             Keyboard keyboard = Keyboard.current;
-            if (keyboard == null || !keyboard.tKey.wasPressedThisFrame) return;
+            if (keyboard == null) return;
+            if (keyboard.hKey.wasPressedThisFrame) HomeTutorialReplayRequested?.Invoke();
+            if (!keyboard.tKey.wasPressedThisFrame) return;
 
             GlobalState.SetAdminMode(!GlobalState.IsAdminMode);
             if (testerToggleInstance != null)

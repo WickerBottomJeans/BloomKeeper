@@ -24,6 +24,8 @@ namespace DefaultNamespace.UI
         private string displayedTopperAddress;
         private string displayedBottomNavigationAddress;
         private int chapterDisplayRequestId;
+        private bool tutorialInteractionRestricted;
+        private HomeTutorialTarget? permittedTutorialTarget;
 
         public event Action<int> LevelSelected;
         public event Action<HomeMiddleTab> TabRequested;
@@ -32,6 +34,8 @@ namespace DefaultNamespace.UI
         public event Action AddCurrencyRequested;
         public event Action<int> ChapterVisitRequested;
         public event Action ChapterChooserCloseRequested;
+        public event Action ChapterChooserShown;
+        public event Action ChapterChooserHidden;
         /// <summary>
         /// Shop offer selected in the shop UI.
         /// </summary>
@@ -41,6 +45,8 @@ namespace DefaultNamespace.UI
         {
             chapterChooser.ChapterVisitRequested += HandleChapterVisitRequested;
             chapterChooser.CloseRequested += HandleChapterChooserCloseRequested;
+            chapterChooser.ChapterChooserShown += HandleChapterChooserShown;
+            chapterChooser.ChapterChooserHidden += HandleChapterChooserHidden;
             chapterChooser.HideChapterChooser();
         }
 
@@ -118,6 +124,44 @@ namespace DefaultNamespace.UI
         {
             if (topperView == null) throw new InvalidOperationException("UIHome cannot display an avatar before its chapter Topper has loaded.");
             topperView.DisplayAvatar(avatar);
+        }
+
+        public UITutorialTarget GetHomeTutorialTarget(HomeTutorialTarget tutorialTarget)
+        {
+            if (!Enum.IsDefined(typeof(HomeTutorialTarget), tutorialTarget)) throw new ArgumentOutOfRangeException(nameof(tutorialTarget));
+            switch (tutorialTarget)
+            {
+                case HomeTutorialTarget.Lives:
+                case HomeTutorialTarget.Diamonds:
+                    return topperView.GetTopperTutorialTarget(tutorialTarget);
+                case HomeTutorialTarget.Map:
+                case HomeTutorialTarget.Shop:
+                    return bottomView.GetBottomTutorialTarget(tutorialTarget);
+                case HomeTutorialTarget.Chapters:
+                case HomeTutorialTarget.ChapterClose:
+                    return chapterChooser.GetChapterTutorialTarget(tutorialTarget);
+                case HomeTutorialTarget.ShopContent:
+                    if (shopInstance == null || !shopInstance.gameObject.activeInHierarchy) throw new InvalidOperationException("The shop must be displayed before highlighting its content.");
+                    return shopInstance.ShopTutorialTarget;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(tutorialTarget));
+            }
+        }
+
+        /// <summary>
+        /// Restricts Home input to the supplied target, or blocks all Home actions.
+        /// </summary>
+        public void SetHomeTutorialInteraction(HomeTutorialTarget? permittedTutorialTarget)
+        {
+            if (permittedTutorialTarget.HasValue && !Enum.IsDefined(typeof(HomeTutorialTarget), permittedTutorialTarget.Value)) throw new ArgumentOutOfRangeException(nameof(permittedTutorialTarget));
+            tutorialInteractionRestricted = true;
+            this.permittedTutorialTarget = permittedTutorialTarget;
+        }
+
+        public void ClearHomeTutorialInteraction()
+        {
+            tutorialInteractionRestricted = false;
+            permittedTutorialTarget = null;
         }
 
         private async UniTask DisplayChapterViewsAsync(string topperAddress, string bottomNavigationAddress, Canvas uiCanvas)
@@ -206,37 +250,55 @@ namespace DefaultNamespace.UI
 
         private void HandleTabRequested(HomeMiddleTab tab)
         {
+            if (!Enum.IsDefined(typeof(HomeMiddleTab), tab)) throw new ArgumentOutOfRangeException(nameof(tab));
+            if (tutorialInteractionRestricted && !((tab == HomeMiddleTab.Map && permittedTutorialTarget == HomeTutorialTarget.Map) || (tab == HomeMiddleTab.Shop && permittedTutorialTarget == HomeTutorialTarget.Shop))) return;
             TabRequested?.Invoke(tab);
         }
 
         private void HandleLevelSelected(int levelId)
         {
+            if (tutorialInteractionRestricted) return;
             LevelSelected?.Invoke(levelId);
         }
 
         private void HandleSettingsRequested()
         {
+            if (tutorialInteractionRestricted) return;
             SettingsRequested?.Invoke();
         }
 
         private void HandleAddLifeRequested()
         {
+            if (tutorialInteractionRestricted) return;
             AddLifeRequested?.Invoke();
         }
 
         private void HandleAddCurrencyRequested()
         {
+            if (tutorialInteractionRestricted) return;
             AddCurrencyRequested?.Invoke();
         }
 
         private void HandleChapterVisitRequested(int chapterId)
         {
+            if (tutorialInteractionRestricted) return;
             ChapterVisitRequested?.Invoke(chapterId);
         }
 
         private void HandleChapterChooserCloseRequested()
         {
+            if (tutorialInteractionRestricted && permittedTutorialTarget != HomeTutorialTarget.ChapterClose) return;
             ChapterChooserCloseRequested?.Invoke();
+        }
+
+        private void HandleChapterChooserShown()
+        {
+            ChapterChooserShown?.Invoke();
+        }
+
+        private void HandleChapterChooserHidden()
+        {
+            ChapterChooserHidden?.Invoke();
         }
 
         /// <summary>
@@ -244,6 +306,7 @@ namespace DefaultNamespace.UI
         /// </summary>
         private void HandleShopOfferBuyRequested(string offerId)
         {
+            if (tutorialInteractionRestricted) return;
             ShopOfferBuyRequested?.Invoke(offerId);
         }
 
@@ -272,6 +335,8 @@ namespace DefaultNamespace.UI
             chapterDisplayRequestId++;
             chapterChooser.ChapterVisitRequested -= HandleChapterVisitRequested;
             chapterChooser.CloseRequested -= HandleChapterChooserCloseRequested;
+            chapterChooser.ChapterChooserShown -= HandleChapterChooserShown;
+            chapterChooser.ChapterChooserHidden -= HandleChapterChooserHidden;
             if (levelSelectInstance != null) levelSelectInstance.OnLevelSelected -= HandleLevelSelected;
             if (shopInstance != null) shopInstance.BuyRequested -= HandleShopOfferBuyRequested;
             ReleaseChapterViews();

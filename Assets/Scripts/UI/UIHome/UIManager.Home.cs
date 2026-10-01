@@ -17,6 +17,8 @@ namespace DefaultNamespace.UI
         public event Action AddCurrencyRequested;
         public event Action<int> ChapterVisitRequested;
         public event Action ChapterChooserCloseRequested;
+        public event Action HomeChapterChooserShown;
+        public event Action HomeChapterChooserHidden;
         /// <summary>
         /// Shop offer the player asked to buy.
         /// </summary>
@@ -80,6 +82,26 @@ namespace DefaultNamespace.UI
             homeInstance?.Hide();
         }
 
+        public void ShowHomeTutorialStep(HomeTutorialTarget tutorialTarget, string message, string continueButtonLabel, bool allowTargetInput)
+        {
+            if (homeInstance == null) throw new InvalidOperationException("Home must be displayed before its introduction.");
+            UITutorialTarget highlightTarget = homeInstance.GetHomeTutorialTarget(tutorialTarget);
+            homeInstance.SetHomeTutorialInteraction(allowTargetInput ? tutorialTarget : (HomeTutorialTarget?)null);
+            DisplayTutorial(highlightTarget, message, continueButtonLabel, allowTargetInput);
+        }
+
+        public void BlockHomeTutorialInteraction()
+        {
+            if (homeInstance == null || tutorialInstance == null) throw new InvalidOperationException("The Home introduction must be displayed before blocking its interaction.");
+            homeInstance.SetHomeTutorialInteraction(null);
+            tutorialInstance.BlockTutorialInteraction();
+        }
+
+        public void ClearHomeTutorialInteraction()
+        {
+            if (homeInstance != null) homeInstance.ClearHomeTutorialInteraction();
+        }
+
         private void BindHome()
         {
             homeInstance.LevelSelected += HandleHomeLevelSelected;
@@ -89,6 +111,8 @@ namespace DefaultNamespace.UI
             homeInstance.AddCurrencyRequested += HandleHomeAddCurrencyRequested;
             homeInstance.ChapterVisitRequested += HandleChapterVisitRequested;
             homeInstance.ChapterChooserCloseRequested += HandleChapterChooserCloseRequested;
+            homeInstance.ChapterChooserShown += HandleHomeChapterChooserShown;
+            homeInstance.ChapterChooserHidden += HandleHomeChapterChooserHidden;
             homeInstance.ShopOfferBuyRequested += HandleHomeShopOfferBuyRequested;
         }
 
@@ -103,6 +127,8 @@ namespace DefaultNamespace.UI
             homeInstance.AddCurrencyRequested -= HandleHomeAddCurrencyRequested;
             homeInstance.ChapterVisitRequested -= HandleChapterVisitRequested;
             homeInstance.ChapterChooserCloseRequested -= HandleChapterChooserCloseRequested;
+            homeInstance.ChapterChooserShown -= HandleHomeChapterChooserShown;
+            homeInstance.ChapterChooserHidden -= HandleHomeChapterChooserHidden;
             homeInstance.ShopOfferBuyRequested -= HandleHomeShopOfferBuyRequested;
         }
 
@@ -139,6 +165,16 @@ namespace DefaultNamespace.UI
         private void HandleChapterChooserCloseRequested()
         {
             ChapterChooserCloseRequested?.Invoke();
+        }
+
+        private void HandleHomeChapterChooserShown()
+        {
+            HomeChapterChooserShown?.Invoke();
+        }
+
+        private void HandleHomeChapterChooserHidden()
+        {
+            HomeChapterChooserHidden?.Invoke();
         }
 
         /// <summary>

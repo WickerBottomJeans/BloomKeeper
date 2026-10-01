@@ -12,6 +12,8 @@ namespace DefaultNamespace.UI
         [SerializeField] private Button mapButton;
         [SerializeField] private Button shopButton;
         [SerializeField] private Button settingsButton;
+        [SerializeField] private UITutorialTarget mapTutorialTarget;
+        [SerializeField] private UITutorialTarget shopTutorialTarget;
         [SerializeField] private SafeAreaContentFitter[] safeAreaContentFitters = Array.Empty<SafeAreaContentFitter>();
 
         /// <summary>
@@ -19,6 +21,17 @@ namespace DefaultNamespace.UI
         /// </summary>
         public event Action<HomeMiddleTab> TabRequested;
         public event Action SettingsRequested;
+
+        public UITutorialTarget GetBottomTutorialTarget(HomeTutorialTarget tutorialTarget)
+        {
+            if (!Enum.IsDefined(typeof(HomeTutorialTarget), tutorialTarget)) throw new ArgumentOutOfRangeException(nameof(tutorialTarget));
+            switch (tutorialTarget)
+            {
+                case HomeTutorialTarget.Map: return mapTutorialTarget;
+                case HomeTutorialTarget.Shop: return shopTutorialTarget;
+                default: throw new ArgumentException("This tutorial target is not in the Home bottom navigation.", nameof(tutorialTarget));
+            }
+        }
 
         public void InitializeSafeAreaContent(Canvas uiCanvas)
         {

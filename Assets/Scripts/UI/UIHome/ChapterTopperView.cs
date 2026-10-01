@@ -15,6 +15,8 @@ namespace DefaultNamespace.UI
         [SerializeField] private Image avatarImage;
         [SerializeField] private Button addLifeButton;
         [SerializeField] private Button addCurrencyButton;
+        [SerializeField] private UITutorialTarget livesTutorialTarget;
+        [SerializeField] private UITutorialTarget diamondsTutorialTarget;
         [SerializeField] private SafeAreaContentFitter[] safeAreaContentFitters = Array.Empty<SafeAreaContentFitter>();
 
         public event Action AddLifeRequested;
@@ -64,6 +66,17 @@ namespace DefaultNamespace.UI
         public void DisplayAvatar(Sprite avatar)
         {
             avatarImage.sprite = avatar;
+        }
+
+        public UITutorialTarget GetTopperTutorialTarget(HomeTutorialTarget tutorialTarget)
+        {
+            if (!Enum.IsDefined(typeof(HomeTutorialTarget), tutorialTarget)) throw new ArgumentOutOfRangeException(nameof(tutorialTarget));
+            switch (tutorialTarget)
+            {
+                case HomeTutorialTarget.Lives: return livesTutorialTarget;
+                case HomeTutorialTarget.Diamonds: return diamondsTutorialTarget;
+                default: throw new ArgumentException("This tutorial target is not in the Home topper.", nameof(tutorialTarget));
+            }
         }
 
         public void InitializeSafeAreaContent(Canvas uiCanvas)

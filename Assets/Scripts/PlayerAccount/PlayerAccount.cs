@@ -10,12 +10,24 @@ namespace DefaultNamespace
         public PlayFabAuthSession AuthSession { get; }
         public PlayerProgressionData Progression { get; private set; }
         public PlayerInventoryData PlayerInventory { get; private set; }
+        public PlayerTutorialProgressData PlayerTutorialProgressData { get; private set; }
 
-        public PlayerAccount(PlayFabAuthSession authSession, PlayerProgressionData progression, PlayerInventoryData playerInventory)
+        public PlayerAccount(PlayFabAuthSession authSession, PlayerProgressionData progression, PlayerInventoryData playerInventory, PlayerTutorialProgressData playerTutorialProgressData)
         {
             AuthSession = authSession;
             Progression = progression;
             PlayerInventory = playerInventory;
+            TutorialProgressContract.ValidateTutorialProgress(playerTutorialProgressData);
+            PlayerTutorialProgressData = playerTutorialProgressData;
+        }
+
+        /// <summary>
+        /// Merges confirmed tutorial completions into this account.
+        /// </summary>
+        public void ApplyConfirmedTutorialProgress(PlayerTutorialProgressData playerTutorialProgressData)
+        {
+            TutorialProgressContract.ValidateTutorialProgress(playerTutorialProgressData);
+            PlayerTutorialProgressData.completedTutorialIds.UnionWith(playerTutorialProgressData.completedTutorialIds);
         }
 
         /// <summary>

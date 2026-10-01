@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b529056d1a2476d8f4f03d45797b7bd, type: 3}
+  m_Name: HomeTutorialConfig
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.HomeTutorialConfig
+  livesMessage: 'Use a life to enter a level and get it back when you win. Lives refill over time, and unlimited lives let you play without using them.'
+  diamondsMessage: 'These are your diamonds. Earn them by playing and use them in the shop.'
+  mapMessage: 'Tap Map to see your chapters.'
+  chaptersMessage: 'Your adventure is split into chapters. Keep completing levels to unlock more chapters.'
+  closeChaptersMessage: 'Close the chapter chooser. Let''s visit the shop next.'
+  shopMessage: 'Tap Shop to take a look.'
+  shopExplanationMessage: 'Browse the shop for helpful items. Each offer shows what you get and its price.'
+  continueLabel: 'Next'
+  doneLabel: 'Done'
+  saveFailureTitle: 'Introduction progress'
+  saveRetryMessage: 'We couldn''t confirm that your introduction was saved. Retry, or cancel to continue. The introduction may appear again if you cancel.'
+  saveFailureMessage: 'We couldn''t confirm that your introduction was saved. You can continue playing, but the introduction may appear again.'

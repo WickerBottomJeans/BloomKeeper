@@ -390,6 +390,7 @@ MonoBehaviour:
   musicStateController: {fileID: 438607911}
   levelSessionRuntime: {fileID: 438607906}
   gameEnvironmentConfig: {fileID: 11400000, guid: e3c05fb192031394a8b59fb8a44087d9, type: 2}
+  homeTutorialConfig: {fileID: 11400000, guid: 9faa32d180b84aa1be4f9570e1990629, type: 2}
 --- !u!114 &438607905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -416,6 +417,7 @@ MonoBehaviour:
   settingsPrefab: {fileID: 715275403567547333, guid: ddc5b70845faad841ba66ae7ac4ca828, type: 3}
   startupScreenPrefab: {fileID: 5937290179025323228, guid: 13346db061e46a14a993adfc16b7ac73, type: 3}
   testerTogglePrefab: {fileID: 7168729738933843627, guid: 3073f85176c8204478725179b3c68a8a, type: 3}
+  tutorialPrefab: {fileID: 1002, guid: 4fa885faa8e84baab8df4612c076e81c, type: 3}
   winScreenPrefab: {fileID: 9033160764233551407, guid: e25a04012b8990848ab73dfc2c25368e, type: 3}
 --- !u!114 &438607906
 MonoBehaviour:

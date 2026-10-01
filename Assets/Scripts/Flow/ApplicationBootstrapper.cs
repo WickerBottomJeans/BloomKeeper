@@ -11,6 +11,7 @@ namespace DefaultNamespace
         [SerializeField] private MusicStateController musicStateController;
         [SerializeField] private LevelSessionRuntime levelSessionRuntime;
         [SerializeField] private GameEnvironmentConfig gameEnvironmentConfig;
+        [SerializeField] private HomeTutorialConfig homeTutorialConfig;
 
         private ApplicationStateMachine applicationStateMachine;
 
@@ -56,7 +57,7 @@ namespace DefaultNamespace
             var bootFlow = new BootFlow(addressableContentService);
             var playerSessionLoader = new PlayerSessionLoader(playerStateService, inventoryService);
             var authFlow = new AuthFlow(guestLoginService, playerSessionLoader, playerLivesPresentationService);
-            var homeFlow = new HomeFlow(addressableContentService, playerLivesPresentationService);
+            var homeFlow = new HomeFlow(addressableContentService, playerLivesPresentationService, homeTutorialConfig);
             var levelSetupFlow = new LevelSetupFlow(ConfigManager.Instance, levelAttemptService, playerLivesPresentationService);
             var playLevelFlow = new PlayLevelFlow(levelSessionRuntime);
             var quitLevelFlow = new QuitLevelFlow(levelAttemptService);

@@ -15,6 +15,7 @@ namespace DefaultNamespace.UI
         [SerializeField] private ScrollRect scrollRect;
         [SerializeField] private UIMainShopCell shopCellTemplate;
         [SerializeField] private ShopSpriteCatalog shopSpriteCatalog;
+        [SerializeField] private UITutorialTarget shopTutorialTarget;
         [SerializeField] private float topPadding;
         [SerializeField] private float bottomPadding;
         [SerializeField] private float cellSpacing;
@@ -38,6 +39,8 @@ namespace DefaultNamespace.UI
         #endregion
 
         #region Public API
+
+        public UITutorialTarget ShopTutorialTarget => shopTutorialTarget;
 
         /// <summary>
         /// Shop offer the player asked to buy.
