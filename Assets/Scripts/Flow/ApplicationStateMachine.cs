@@ -89,30 +89,23 @@ namespace DefaultNamespace
             if (state == State.LoadingHome) return;
             if (state != State.Auth) throw new InvalidOperationException($"Cannot accept a ready account while the application is {state}.");
 
-            state = State.LoadingHome;
-            ApplicationOperationRunner.Instance.Run(EnterHomeFromAuth);
+            ApplicationOperationRunner.Instance.Run(() => EnterHome(authFlow.Exit));
         }
 
         /// <summary>
-        /// Keeps loading visible while leaving Auth and preparing Home.
+        /// Transitions to Home under loading, then runs Home's ready step.
         /// </summary>
-        private async UniTask EnterHomeFromAuth()
+        private async UniTask EnterHome(Action exitCurrentFlow)
         {
+            state = State.LoadingHome;
             await ApplicationPresentationService.Instance.RunWithLoading(async () =>
             {
-                authFlow.Exit();
-                await EnterHome();
+                exitCurrentFlow();
+                musicStateController.EnterHome();
+                await homeFlow.Enter();
+                state = State.Home;
             });
-        }
-
-        /// <summary>
-        /// [Duong] Starts Home music, enters HomeFlow, and commits the Home state.
-        /// </summary>
-        private async UniTask EnterHome()
-        {
-            musicStateController.EnterHome();
-            await homeFlow.Enter();
-            state = State.Home;
+            await homeFlow.HandleHomeReadyAsync();
         }
 
         /// <summary>
@@ -215,12 +208,7 @@ namespace DefaultNamespace
                 return;
             }
 
-            await ApplicationPresentationService.Instance.RunWithLoading(async () =>
-            {
-                playLevelFlow.Exit();
-                state = State.LoadingHome;
-                await EnterHome();
-            });
+            await EnterHome(playLevelFlow.Exit);
         }
 
         private void HandleLevelFinished(LevelSessionResult result, string levelAttemptId)
@@ -244,9 +232,7 @@ namespace DefaultNamespace
                 return;
             }
 
-            finishLevelFlow.Exit();
-            state = State.LoadingHome;
-            await ApplicationPresentationService.Instance.RunWithLoading(EnterHome);
+            await EnterHome(finishLevelFlow.Exit);
         }
 
         private void HandleResultHomeRequested()
@@ -254,17 +240,7 @@ namespace DefaultNamespace
             if (state == State.LoadingHome) return;
             if (state != State.LevelResult) throw new InvalidOperationException($"Cannot leave a level result while the application is {state}.");
 
-            state = State.LoadingHome;
-            ApplicationOperationRunner.Instance.Run(ReturnHomeFromResult);
-        }
-
-        private async UniTask ReturnHomeFromResult()
-        {
-            await ApplicationPresentationService.Instance.RunWithLoading(async () =>
-            {
-                finishLevelFlow.Exit();
-                await EnterHome();
-            });
+            ApplicationOperationRunner.Instance.Run(() => EnterHome(finishLevelFlow.Exit));
         }
 
         private void HandleSettingsRequested()

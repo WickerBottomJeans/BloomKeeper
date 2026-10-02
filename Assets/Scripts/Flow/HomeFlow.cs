@@ -17,9 +17,11 @@ namespace DefaultNamespace
         private readonly HomeMapFlow homeMapFlow;
         private readonly HomeShopFlow homeShopFlow;
         private readonly HomeTutorialFlow homeTutorialFlow;
+        private readonly AutomaticGooglePlayReviewFlow automaticGooglePlayReviewFlow = new();
         private HomeMiddleTab? activeMiddleTab;
         private int? currentChapterId;
         private CancellationTokenSource livesDisplayCancellation;
+        private CancellationTokenSource automaticGooglePlayReviewCancellation;
 
         public event Action<int> StartLevelRequested;
         public event Action SettingsRequested;
@@ -41,6 +43,8 @@ namespace DefaultNamespace
         /// </summary>
         public async UniTask Enter()
         {
+            automaticGooglePlayReviewCancellation = CancellationTokenSource.CreateLinkedTokenSource(UnityEngine.Application.exitCancellationToken);
+
             // [Duong] Bind Home events.
             UIManager.Instance.LevelSelected += HandleLevelSelected;
             UIManager.Instance.HomeTabRequested += HandleHomeTabRequested;
@@ -91,6 +95,10 @@ namespace DefaultNamespace
         /// </summary>
         public void Exit()
         {
+            CancelPendingAutomaticGooglePlayReview();
+            automaticGooglePlayReviewCancellation.Dispose();
+            automaticGooglePlayReviewCancellation = null;
+
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             UIManager.Instance.HomeTutorialReplayRequested -= HandleHomeTutorialReplayRequested;
 #endif
@@ -114,6 +122,32 @@ namespace DefaultNamespace
         }
 
         /// <summary>
+        /// Checks the automatic review opportunity after Home loading has finished.
+        /// </summary>
+        public async UniTask HandleHomeReadyAsync()
+        {
+            if (homeTutorialFlow.IsHomeTutorialActive) return;
+
+            CancellationToken cancellationToken = automaticGooglePlayReviewCancellation.Token;
+            try
+            {
+                await automaticGooglePlayReviewFlow.TryRequestAutomaticGooglePlayReviewAsync(cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+            }
+            catch (Exception exception)
+            {
+                UnityEngine.Debug.LogException(exception);
+            }
+        }
+
+        private void CancelPendingAutomaticGooglePlayReview()
+        {
+            automaticGooglePlayReviewCancellation?.Cancel();
+        }
+
+        /// <summary>
         /// [Duong] Sets the current Home chapter and saves it to PlayerPrefs.
         /// </summary>
         public void SetCurrentChapter(int chapterId)
@@ -128,6 +162,7 @@ namespace DefaultNamespace
         private void HandleLevelSelected(int levelId)
         {
             if (homeTutorialFlow.IsHomeTutorialActive) return;
+            CancelPendingAutomaticGooglePlayReview();
             StartLevelRequested?.Invoke(levelId);
         }
 
@@ -137,6 +172,7 @@ namespace DefaultNamespace
         private void HandleHomeTabRequested(HomeMiddleTab tab)
         {
             if (!homeTutorialFlow.TryBeginHomeTutorialTabNavigation(tab)) return;
+            CancelPendingAutomaticGooglePlayReview();
             //[Duong] Clicking the active Map tab opens the chapter chooser
             if (tab == HomeMiddleTab.Map && activeMiddleTab == HomeMiddleTab.Map)
             {
@@ -150,6 +186,7 @@ namespace DefaultNamespace
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         private void HandleHomeTutorialReplayRequested()
         {
+            CancelPendingAutomaticGooglePlayReview();
             ApplicationOperationRunner.Instance.Run(async () =>
             {
                 homeTutorialFlow.StopHomeTutorial();
@@ -180,6 +217,7 @@ namespace DefaultNamespace
                 return;
             }
 
+            CancelPendingAutomaticGooglePlayReview();
             ApplicationOperationRunner.Instance.Run(() => ChangeChapterAsync(chapterId));
         }
 
@@ -227,18 +265,21 @@ namespace DefaultNamespace
         private void HandleSettingsRequested()
         {
             if (homeTutorialFlow.IsHomeTutorialActive) return;
+            CancelPendingAutomaticGooglePlayReview();
             SettingsRequested?.Invoke();
         }
 
         private void HandleAddLifeRequested()
         {
             if (homeTutorialFlow.IsHomeTutorialActive) return;
+            CancelPendingAutomaticGooglePlayReview();
             ApplicationOperationRunner.Instance.Run(() => ChangeTabAsync(HomeMiddleTab.Shop));
         }
 
         private void HandleAddCurrencyRequested()
         {
             if (homeTutorialFlow.IsHomeTutorialActive) return;
+            CancelPendingAutomaticGooglePlayReview();
             ApplicationOperationRunner.Instance.Run(() => DialogManager.Instance.RunOkDialog("Earn diamonds", "You can earn diamonds just by playing the game. Keep playing to collect more!"));
         }
 

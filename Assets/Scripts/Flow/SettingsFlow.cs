@@ -1,4 +1,6 @@
 using System;
+using Cysharp.Threading.Tasks;
+using DefaultNamespace.Reviews;
 using DefaultNamespace.Settings;
 using DefaultNamespace.UI;
 
@@ -6,7 +8,9 @@ namespace DefaultNamespace
 {
     public class SettingsFlow
     {
+        private readonly GooglePlayReviewService googlePlayReviewService = new();
         private bool isActive;
+        private bool isReviewPending;
 
         public void Open()
         {
@@ -17,11 +21,12 @@ namespace DefaultNamespace
             UIManager.Instance.SettingsMusicVolumeChanged += HandleMusicVolumeChanged;
             UIManager.Instance.SettingsSfxVolumeChanged += HandleSfxVolumeChanged;
             UIManager.Instance.SettingsCloseRequested += HandleCloseRequested;
+            UIManager.Instance.SettingsReviewRequested += HandleReviewRequested;
 
             try
             {
                 UserSettingsService settings = UserSettingsService.Instance;
-                UIManager.Instance.ShowSettings(settings.MusicVolume, settings.SfxVolume);
+                UIManager.Instance.ShowSettings(settings.MusicVolume, settings.SfxVolume, googlePlayReviewService.IsGooglePlayReviewSupported);
             }
             catch
             {
@@ -43,6 +48,8 @@ namespace DefaultNamespace
 
         private void HandleCloseRequested()
         {
+            if (isReviewPending) return;
+
             UserSettingsService.Instance.Commit();
             UIManager.Instance.HideSettings();
             Unbind();
@@ -54,6 +61,37 @@ namespace DefaultNamespace
             UIManager.Instance.SettingsMusicVolumeChanged -= HandleMusicVolumeChanged;
             UIManager.Instance.SettingsSfxVolumeChanged -= HandleSfxVolumeChanged;
             UIManager.Instance.SettingsCloseRequested -= HandleCloseRequested;
+            UIManager.Instance.SettingsReviewRequested -= HandleReviewRequested;
+        }
+
+        private void HandleReviewRequested()
+        {
+            if (isReviewPending) return;
+
+            ApplicationOperationRunner.Instance.Run(RequestAppReviewAsync);
+        }
+
+        private async UniTask RequestAppReviewAsync()
+        {
+            isReviewPending = true;
+            try
+            {
+                UIManager.Instance.SetSettingsReviewPending(true);
+                if (!googlePlayReviewService.IsGooglePlayReviewSupported)
+                {
+                    await DialogManager.Instance.RunOkDialog("Review unavailable", "Reviews aren't available on this device.");
+                    return;
+                }
+
+                bool didReviewOperationComplete = await googlePlayReviewService.TryRequestAppReviewAsync();
+                if (!didReviewOperationComplete)
+                    await DialogManager.Instance.RunOkDialog("Review unavailable", "We couldn't open Google Play reviews. Please try again later.");
+            }
+            finally
+            {
+                isReviewPending = false;
+                UIManager.Instance.SetSettingsReviewPending(false);
+            }
         }
     }
 }

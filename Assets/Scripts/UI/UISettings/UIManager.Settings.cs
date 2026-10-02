@@ -11,13 +11,14 @@ namespace DefaultNamespace.UI
         public event Action<float> SettingsMusicVolumeChanged;
         public event Action<float> SettingsSfxVolumeChanged;
         public event Action SettingsCloseRequested;
+        public event Action SettingsReviewRequested;
 
-        public void ShowSettings(float musicVolume, float sfxVolume)
+        public void ShowSettings(float musicVolume, float sfxVolume, bool isGooglePlayReviewSupported)
         {
             GetPanel(ref settingsInstance, settingsPrefab, uiRoot);
             UnbindSettings();
             BindSettings();
-            settingsInstance.Show(musicVolume, sfxVolume);
+            settingsInstance.Show(musicVolume, sfxVolume, isGooglePlayReviewSupported);
         }
 
         public void HideSettings()
@@ -26,11 +27,17 @@ namespace DefaultNamespace.UI
             settingsInstance?.Hide();
         }
 
+        public void SetSettingsReviewPending(bool isReviewPending)
+        {
+            settingsInstance.SetReviewPending(isReviewPending);
+        }
+
         private void BindSettings()
         {
             settingsInstance.MusicVolumeChanged += HandleSettingsMusicVolumeChanged;
             settingsInstance.SfxVolumeChanged += HandleSettingsSfxVolumeChanged;
             settingsInstance.CloseRequested += HandleSettingsCloseRequested;
+            settingsInstance.ReviewRequested += HandleSettingsReviewRequested;
         }
 
         private void UnbindSettings()
@@ -40,6 +47,12 @@ namespace DefaultNamespace.UI
             settingsInstance.MusicVolumeChanged -= HandleSettingsMusicVolumeChanged;
             settingsInstance.SfxVolumeChanged -= HandleSettingsSfxVolumeChanged;
             settingsInstance.CloseRequested -= HandleSettingsCloseRequested;
+            settingsInstance.ReviewRequested -= HandleSettingsReviewRequested;
+        }
+
+        private void HandleSettingsReviewRequested()
+        {
+            SettingsReviewRequested?.Invoke();
         }
 
         private void HandleSettingsMusicVolumeChanged(float value)
