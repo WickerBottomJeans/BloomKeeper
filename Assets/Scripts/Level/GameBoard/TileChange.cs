@@ -2,8 +2,10 @@ using UnityEngine;
 
 namespace DefaultNamespace
 {
-    public readonly struct TileChange
+    // One occurrence of a change. Reference identity distinguishes repeated hits on the same tile.
+    public sealed class TileChange
     {
+        public TileChange ImmediateCause { get; }
         public TileState Before { get; }
         public TileState After { get; }
         public Vector2Int Position => Before.Position;
@@ -15,13 +17,14 @@ namespace DefaultNamespace
         public SpecialSkillType RemovedSkillType => PetalWasRemoved ? Before.SkillType : SpecialSkillType.None;
         public bool FeatureWasRemoved => Before.FeatureState != null && After.FeatureState == null;
 
-        public TileChange(TileState before, TileState after)
+        public TileChange(TileState before, TileState after, TileChange immediateCause = null)
         {
             if (before.Position != after.Position)
                 throw new System.ArgumentException("A board tile change must describe the same position before and after.");
 
             Before = before;
             After = after;
+            ImmediateCause = immediateCause;
         }
     }
 }

@@ -45,7 +45,7 @@ namespace Boosters
         {
             await boardVFXManager.PlayBloomWandUntilImpact(representation.TargetPosition);
 
-            Vector2 impactWorldPosition = boardLayout.GetTileWorldPos(representation.TargetPosition.x, representation.TargetPosition.y);
+            Vector2 impactWorldPosition = boardLayout.GetTileWorldPosition(representation.TargetPosition.x, representation.TargetPosition.y);
             tileViewManager.PlayRipple(impactWorldPosition, RippleStrengthInTiles * boardLayout.TileSize, RippleRadiusInTiles * boardLayout.TileSize, RippleTravelDuration, RippleTileMoveDuration);
         }
     }

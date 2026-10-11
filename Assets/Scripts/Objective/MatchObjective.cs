@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using DefaultNamespace.UI;
 using DefaultNamespace.Utility;
-using Petals;
 using UnityEngine;
 
 namespace DefaultNamespace

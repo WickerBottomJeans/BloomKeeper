@@ -1,0 +1,4 @@
+root = true
+
+[*.cs]
+resharper_csharp_naming_rule.private_instance_fields = AaBb:do_not_check

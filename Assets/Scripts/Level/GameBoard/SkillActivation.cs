@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+    using System.Collections.Generic;
 using Skills;
 using System;
 using UnityEngine;
@@ -76,7 +76,7 @@ namespace DefaultNamespace.UI
     }
     
     /// <summary>
-    /// Some skill executor directly edit Tile[,]
+    /// [Duong] Describes a petal transformation to apply and present.
     /// </summary>
     public readonly struct PetalChange
     {
@@ -92,24 +92,24 @@ namespace DefaultNamespace.UI
         }
     }
 
-    public class SkillUseResult
+    /// <summary>
+    /// [Duong] Stores what the skill intends to do (logic + visual data)
+    /// </summary>
+    public class SkillPlan
     {
-        public MatchGroup InputMatchGroup { get; }
-        public MatchGroup MatchGroup { get; }
+        public IReadOnlyList<Vector2Int> AffectedPositions { get; }
+        public IReadOnlyList<Vector2Int> ConsumedPositions { get; }
+        public IReadOnlyList<PetalChange> PetalChanges { get; }
+        public Petal Causer { get; }
         public SkillRepresentationData Representation { get; }
 
-        public SkillUseResult(MatchGroup matchGroup, SkillRepresentationData representation = null, MatchGroup inputMatchGroup = null)
+        public SkillPlan(IReadOnlyList<Vector2Int> affectedPositions, Petal causer, SkillRepresentationData representation, IReadOnlyList<Vector2Int> consumedPositions = null, IReadOnlyList<PetalChange> petalChanges = null)
         {
-            InputMatchGroup = inputMatchGroup;
-            MatchGroup = matchGroup;
+            AffectedPositions = affectedPositions;
+            ConsumedPositions = consumedPositions ?? Array.Empty<Vector2Int>();
+            PetalChanges = petalChanges ?? Array.Empty<PetalChange>();
+            Causer = causer;
             Representation = representation;
-        }
-
-        public IEnumerable<MatchGroup> GetMatchGroups()
-        {
-            if (InputMatchGroup != null)
-                yield return InputMatchGroup;
-            yield return MatchGroup;
         }
     }
 

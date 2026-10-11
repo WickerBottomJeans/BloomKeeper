@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public class PrismaticBloomSkillPresenter : SkillRepresentationPresenter<PrismaticBloomRepresentationData>
+    public class PrismaticBloomSkillPresenter : SkillAnimation<PrismaticBloomRepresentationData>
     {
         private const float PrepareDuration = 0.2f;
         private const float FireDuration = 0.3f;
@@ -30,72 +30,69 @@ namespace Skills
             this.finishCue = finishCue;
         }
 
-        protected override void AcquireAdditionalVitalViews(PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        protected override IEnumerable<Vector2Int> AdditionalViews(PrismaticBloomRepresentationData representation, BoardChangeGroup effect)
         {
-            var requiredPositions = new HashSet<Vector2Int>(GetTargets(representation, resolution));
-            foreach (Vector2Int position in requiredPositions)
-            {
-                if (accessKeys.ContainsKey(position)) continue;
-                if (!petalViewManager.TryAcquireView(position, nameof(PrismaticBloomSkillPresenter), out ViewAccessKey accessKey))
-                    throw new InvalidOperationException($"Petal view at {position} cannot be acquired by {nameof(PrismaticBloomSkillPresenter)}.");
-                accessKeys.Add(position, accessKey);
-            }
+            return GetTargets(representation, effect);
         }
 
-        protected override async UniTask Play(PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
+        protected override async UniTask Play(PrismaticBloomRepresentationData representation, SkillPresentationContext skillPresentationContext)
         {
-            List<Vector2Int> targets = GetTargets(representation, resolution);
-            await Prepare(representation.Source, accessKeys, audioScope);
-            await Fire(representation, resolution, targets, accessKeys, audioScope);
+            List<Vector2Int> targets = GetTargets(representation, skillPresentationContext.BoardChangeGroup);
+            await Prepare(representation.Source, skillPresentationContext.Views, skillPresentationContext.AudioPlaybackScope);
+            await Fire(representation, targets, skillPresentationContext);
         }
 
-        private UniTask Prepare(Vector2Int source, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
+        private UniTask Prepare(Vector2Int source, PetalViewScope views, AudioPlaybackScope audioScope)
         {
             AudioService.Instance.PlaySfx(audioCue, audioScope);
-            return petalViewManager.PlayPrismaticBloomPrepareSpin(source, PrepareDuration, MaximumSpinSpeed, accessKeys);
+            return petalViewManager.PlayPrismaticBloomPrepareSpin(source, PrepareDuration, MaximumSpinSpeed, views);
         }
 
-        private async UniTask Fire(PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution, IReadOnlyList<Vector2Int> targets, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
+        private async UniTask Fire(PrismaticBloomRepresentationData representation, IReadOnlyList<Vector2Int> targets, SkillPresentationContext skillPresentationContext)
         {
+            PetalViewScope views = skillPresentationContext.Views;
             Vector2Int source = representation.Source;
-            Vector3 origin = layout.GetTileWorldPos(source.x, source.y);
-            UniTask spinTask = petalViewManager.PlayPrismaticBloomFireSpin(source, FireDuration, MaximumSpinSpeed, accessKeys);
+            Vector3 origin = layout.GetTileWorldPosition(source.x, source.y);
+            UniTask spinTask = petalViewManager.PlayPrismaticBloomFireSpin(source, FireDuration, MaximumSpinSpeed, views);
             var projectileTasks = new List<UniTask>(targets.Count);
 
             foreach (Vector2Int target in targets)
             {
-                Vector3 targetWorldPosition = layout.GetTileWorldPos(target.x, target.y);
-                projectileTasks.Add(PlayProjectile(origin, targetWorldPosition, target, FireDuration, representation, resolution, accessKeys));
+                Vector3 targetWorldPosition = layout.GetTileWorldPosition(target.x, target.y);
+                projectileTasks.Add(PlayProjectile(origin, targetWorldPosition, target, FireDuration, representation, skillPresentationContext));
             }
 
             await spinTask;
-            AudioService.Instance.PlaySfx(finishCue, audioScope);
+            AudioService.Instance.PlaySfx(finishCue, skillPresentationContext.AudioPlaybackScope);
             boardVFXManager.PlayPrismaticBloomFinisher(origin);
-            UniTask sourceDisappearTask = petalViewManager.PlayNormalRemovals(new[] { source }, accessKeys);
+            UniTask sourceDisappearTask = petalViewManager.PlayNormalRemovals(new[] { source }, views);
+            skillPresentationContext.HandleConsumedInputPresented(source);
             projectileTasks.Add(sourceDisappearTask);
             await UniTask.WhenAll(projectileTasks);
         }
 
-        private async UniTask PlayProjectile(Vector3 origin, Vector3 targetWorldPosition, Vector2Int target, float duration, PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        private async UniTask PlayProjectile(Vector3 origin, Vector3 targetWorldPosition, Vector2Int target, float duration, PrismaticBloomRepresentationData representation, SkillPresentationContext skillPresentationContext)
         {
             await boardVFXManager.ShootPrismaticBloomProjectile(origin, targetWorldPosition, duration);
-            await PlayTargetImpact(target, representation, resolution, accessKeys);
+            await PlayTargetImpact(target, representation, skillPresentationContext);
         }
 
-        private async UniTask PlayTargetImpact(Vector2Int target, PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        private async UniTask PlayTargetImpact(Vector2Int target, PrismaticBloomRepresentationData representation, SkillPresentationContext skillPresentationContext)
         {
+            BoardChangeGroup resolution = skillPresentationContext.BoardChangeGroup;
+            PetalViewScope views = skillPresentationContext.Views;
             if (representation.ReplacementSkill != SpecialSkillType.None)
             {
                 PetalChange change = GetChangeAt(representation, target);
-                await petalViewManager.PlayPetalChange(change, layout, accessKeys);
-                await petalViewManager.PlayAboutToExecute(new[] { target }, accessKeys);
+                await petalViewManager.PlayPetalChange(change, layout, views);
+                await petalViewManager.PlayAboutToExecute(new[] { target }, views);
+                skillPresentationContext.HandleTileImpactPresented(target);
                 return;
             }
 
-            if (resolution.IsTriggeredSkillInputPosition(target))
-                await petalViewManager.PlayAboutToExecute(new[] { target }, accessKeys);
-            else
-                await petalViewManager.PlayNormalRemovals(new[] { target }, accessKeys);
+            UniTask impactTask = resolution.IsTriggeredSkillInputPosition(target) ? petalViewManager.PlayAboutToExecute(new[] { target }, views) : petalViewManager.PlayNormalRemovals(new[] { target }, views);
+            skillPresentationContext.HandleTileImpactPresented(target);
+            await impactTask;
         }
 
         private  PetalChange GetChangeAt(PrismaticBloomRepresentationData representation, Vector2Int target)
@@ -109,7 +106,7 @@ namespace Skills
             throw new InvalidOperationException($"Prismatic Bloom has no petal change for target {target}.");
         }
 
-        private  List<Vector2Int> GetTargets(PrismaticBloomRepresentationData representation, MatchGroupResolveResult resolution)
+        private  List<Vector2Int> GetTargets(PrismaticBloomRepresentationData representation, BoardChangeGroup resolution)
         {
             List<Vector2Int> targets;
             if (representation.ReplacementSkill == SpecialSkillType.None)

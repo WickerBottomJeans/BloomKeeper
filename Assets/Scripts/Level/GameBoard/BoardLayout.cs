@@ -8,19 +8,19 @@ namespace DefaultNamespace.UI
         /// Size of a single square tile in world units.
         /// </summary>
         public readonly float TileSize;
-        public readonly Vector2 OriginWorldPos;
-        public readonly int Cols;
-        public readonly int Rows;
+        public readonly Vector2 OriginWorldPosition;
+        public readonly int ColumnCount;
+        public readonly int RowCount;
 
-        public BoardLayout(float tileSize, Vector2 originWorldPos, int cols, int rows)
+        public BoardLayout(float tileSize, Vector2 originWorldPosition, int columnCount, int rowCount)
         {
             TileSize = tileSize;
-            OriginWorldPos = originWorldPos;
-            Cols = cols;
-            Rows = rows;
+            OriginWorldPosition = originWorldPosition;
+            ColumnCount = columnCount;
+            RowCount = rowCount;
         }
 
-        public Vector2 GetTileWorldPos(int x, int y) =>
-            OriginWorldPos + new Vector2(x * TileSize, y * TileSize);
+        public Vector2 GetTileWorldPosition(int x, int y) =>
+            OriginWorldPosition + new Vector2(x * TileSize, y * TileSize);
     }
 }

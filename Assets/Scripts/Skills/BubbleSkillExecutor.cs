@@ -5,11 +5,11 @@ using UnityEngine;
 
 namespace Skills
 {
-    public class BubbleSkillExecutor : ISkillExecutor
+    public static class BubbleSkillExecutor
     {
         private const int Range = 1;
 
-        public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
+        public static SkillPlan Execute(SkillExecutionContext context, SkillActivation activation)
         {
             SkillParticipant consumedInput = activation.GetOnlyConsumedInput();
             Tile[,] grid = context.Grid;
@@ -25,9 +25,8 @@ namespace Skills
                 positions.Add(new Vector2Int(x, y));
             }
 
-            var matchGroup = new MatchGroup(positions, MatchShape.None, new Petal(consumedInput.Petal));
             var representation = new BubbleRepresentationData(center, positions, activation.GetConsumedInputPositions());
-            return new SkillUseResult(matchGroup, representation);
+            return new SkillPlan(positions, new Petal(consumedInput.Petal), representation);
         }
     }
 }

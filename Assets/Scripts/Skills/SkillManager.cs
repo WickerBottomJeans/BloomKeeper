@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using DefaultNamespace;
 using DefaultNamespace.UI;
 
@@ -7,29 +6,18 @@ namespace Skills
 {
     public static class SkillManager
     {
-        private static readonly IReadOnlyDictionary<SkillExecutionType, ISkillExecutor> Executors = new Dictionary<SkillExecutionType, ISkillExecutor>
+        public static SkillPlan UseSkill(SkillExecutionContext context, SkillActivation activation)
         {
-            { SkillExecutionType.StripedHorizontal, new StripedSkillExecutor() },
-            { SkillExecutionType.StripedVertical, new StripedSkillExecutor() },
-            { SkillExecutionType.Bubble, new BubbleSkillExecutor() },
-            { SkillExecutionType.PrismaticBloom, new PrismaticBloomSkillExecutor() },
-            { SkillExecutionType.Butterfly, new ButterflySkillExecutor() },
-            { SkillExecutionType.StripeStripeFusion, new StripeStripeFusionExecutor() }
-        };
-
-        public static List<SkillUseResult> UseSkills(Tile[,] grid, IReadOnlyList<SkillActivation> activations, IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups)
-        {
-            var results = new List<SkillUseResult>(activations.Count);
-            var context = new SkillExecutionContext(grid, objectiveTargetGroups);
-
-            foreach (SkillActivation activation in activations)
+            return activation.EffectType switch
             {
-                if (!Executors.TryGetValue(activation.EffectType, out ISkillExecutor executor))
-                    throw new ArgumentException("Skill not implemented.", nameof(activation.EffectType));
-
-                results.Add(executor.Execute(context, activation));
-            }
-            return results;
+                SkillExecutionType.StripedHorizontal => StripedSkillExecutor.Execute(context, activation),
+                SkillExecutionType.StripedVertical => StripedSkillExecutor.Execute(context, activation),
+                SkillExecutionType.Bubble => BubbleSkillExecutor.Execute(context, activation),
+                SkillExecutionType.PrismaticBloom => PrismaticBloomSkillExecutor.Execute(context, activation),
+                SkillExecutionType.Butterfly => ButterflySkillExecutor.Execute(context, activation),
+                SkillExecutionType.StripeStripeFusion => StripeStripeFusionExecutor.Execute(context, activation),
+                _ => throw new ArgumentException("Skill not implemented.", nameof(activation.EffectType))
+            };
         }
     }
 }

@@ -13,11 +13,11 @@ namespace DefaultNamespace
 
     public class BoardResolutionStepCompletedEvent : IGameplayEvent
     {
-        public MatchResolveResult Result { get; }
+        public BoardResolution Result { get; }
         public int CascadeDepth { get; }
         public bool IsPlayerInitiated { get; }
 
-        public BoardResolutionStepCompletedEvent(MatchResolveResult result, int cascadeDepth, bool isPlayerInitiated)
+        public BoardResolutionStepCompletedEvent(BoardResolution result, int cascadeDepth, bool isPlayerInitiated)
         {
             Result = result;
             CascadeDepth = cascadeDepth;

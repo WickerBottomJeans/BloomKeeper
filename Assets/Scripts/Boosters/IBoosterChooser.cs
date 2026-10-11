@@ -15,3 +15,4 @@ namespace Boosters
         void Cancel();
     }
 }
+            

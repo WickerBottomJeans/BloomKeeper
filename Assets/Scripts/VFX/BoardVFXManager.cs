@@ -186,7 +186,7 @@ namespace DefaultNamespace.VFX
             boardVFXLifetimeCancellation.Token.ThrowIfCancellationRequested();
 
             VFXStripeBeamAxis beamAxis = stripedBeamAxisPool.Get();
-            beamAxis.transform.position = layout.GetTileWorldPos(source.x, source.y);
+            beamAxis.transform.position = layout.GetTileWorldPosition(source.x, source.y);
             beamAxis.Configure(layout.TileSize);
             return beamAxis;
         }
@@ -198,7 +198,7 @@ namespace DefaultNamespace.VFX
             boardVFXLifetimeCancellation.Token.ThrowIfCancellationRequested();
 
             VFXStripeHalo halo = stripedHaloPool.Get();
-            halo.transform.position = layout.GetTileWorldPos(source.x, source.y);
+            halo.transform.position = layout.GetTileWorldPosition(source.x, source.y);
             halo.Configure(layout.TileSize);
             return halo;
         }
@@ -207,15 +207,15 @@ namespace DefaultNamespace.VFX
         {
             boardVFXLifetimeCancellation.Token.ThrowIfCancellationRequested();
             int negativeSideLengthInTiles = isVertical ? source.y : source.x;
-            int positiveSideLengthInTiles = isVertical ? layout.Rows - source.y - 1 : layout.Cols - source.x - 1;
+            int positiveSideLengthInTiles = isVertical ? layout.RowCount - source.y - 1 : layout.ColumnCount - source.x - 1;
             int longerSideLengthInTiles = Mathf.Max(negativeSideLengthInTiles, positiveSideLengthInTiles);
             float secondsPerTile = longerSideLengthInTiles > 0 ? duration / longerSideLengthInTiles : 0f;
 
             Vector2Int negativeDestination = isVertical ? new Vector2Int(source.x, 0) : new Vector2Int(0, source.y);
-            Vector2Int positiveDestination = isVertical ? new Vector2Int(source.x, layout.Rows - 1) : new Vector2Int(layout.Cols - 1, source.y);
+            Vector2Int positiveDestination = isVertical ? new Vector2Int(source.x, layout.RowCount - 1) : new Vector2Int(layout.ColumnCount - 1, source.y);
             Vector2 endpointOffset = (isVertical ? Vector2.up : Vector2.right) * layout.TileSize * 0.5f;
-            Vector2 negativeEndWorld = layout.GetTileWorldPos(negativeDestination.x, negativeDestination.y) - endpointOffset;
-            Vector2 positiveEndWorld = layout.GetTileWorldPos(positiveDestination.x, positiveDestination.y) + endpointOffset;
+            Vector2 negativeEndWorld = layout.GetTileWorldPosition(negativeDestination.x, negativeDestination.y) - endpointOffset;
+            Vector2 positiveEndWorld = layout.GetTileWorldPosition(positiveDestination.x, positiveDestination.y) + endpointOffset;
             float negativeDuration = negativeSideLengthInTiles * secondsPerTile;
             float positiveDuration = positiveSideLengthInTiles * secondsPerTile;
             return beamAxis.Fire(negativeEndWorld, positiveEndWorld, negativeDuration, positiveDuration).AttachExternalCancellation(boardVFXLifetimeCancellation.Token);
@@ -403,7 +403,7 @@ namespace DefaultNamespace.VFX
             VFXBloomWand wand = bloomWandPool.Get();
             try
             {
-                Vector2 targetWorldPosition = layout.GetTileWorldPos(target.x, target.y);
+                Vector2 targetWorldPosition = layout.GetTileWorldPosition(target.x, target.y);
                 float viewportDepth = gameplayCamera.WorldToViewportPoint(new Vector3(targetWorldPosition.x, targetWorldPosition.y, wand.transform.position.z)).z;
                 Vector3 screenBottomLeft = gameplayCamera.ViewportToWorldPoint(new Vector3(0f, 0f, viewportDepth));
                 Vector3 screenTopRight = gameplayCamera.ViewportToWorldPoint(new Vector3(1f, 1f, viewportDepth));
@@ -490,7 +490,7 @@ namespace DefaultNamespace.VFX
             CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
             try
             {
-                particles.transform.position = layout.GetTileWorldPos(position.x, position.y);
+                particles.transform.position = layout.GetTileWorldPosition(position.x, position.y);
                 particles.Configure(layout.TileSize, inflatedScaleMultiplier);
                 await particles.Play(audioScope, cancellationToken);
             }
@@ -526,7 +526,7 @@ namespace DefaultNamespace.VFX
             CancellationToken cancellationToken = boardVFXLifetimeCancellation.Token;
             cancellationToken.ThrowIfCancellationRequested();
 
-            Vector2 origin = layout.OriginWorldPos + originPosition * layout.TileSize;
+            Vector2 origin = layout.OriginWorldPosition + originPosition * layout.TileSize;
             await UniTask.Delay(TimeSpan.FromSeconds(chargeUpDuration), cancellationToken: cancellationToken);
             await PlayLasers(origin, targetPositions, duration - chargeUpDuration, cancellationToken);
         }
@@ -537,7 +537,7 @@ namespace DefaultNamespace.VFX
 
             foreach (Vector2Int targetPosition in targetPositions)
             {
-                Vector2 target = layout.GetTileWorldPos(targetPosition.x, targetPosition.y);
+                Vector2 target = layout.GetTileWorldPosition(targetPosition.x, targetPosition.y);
                 tasks.Add(PlayLaser(origin, target, duration, cancellationToken));
             }
 

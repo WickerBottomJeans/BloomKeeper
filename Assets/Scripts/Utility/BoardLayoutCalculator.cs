@@ -5,14 +5,17 @@ namespace Utility
 {
     public static class BoardLayoutCalculator
     {
-        public static BoardLayout Calculate(int cols, int rows, Camera cam, float paddingX, float paddingY, Rect playAreaScreenRect)
+        // Leave five percent of the play area on each edge.
+        private const float EdgePaddingRatio = 0.05f;
+
+        public static BoardLayout Calculate(int cols, int rows, Camera cam, Rect playAreaScreenRect)
         {
             float cameraDistance = Mathf.Abs(cam.transform.position.z);
             Vector3 bottomLeft = cam.ScreenToWorldPoint(new Vector3(playAreaScreenRect.xMin, playAreaScreenRect.yMin, cameraDistance));
             Vector3 topRight = cam.ScreenToWorldPoint(new Vector3(playAreaScreenRect.xMax, playAreaScreenRect.yMax, cameraDistance));
 
-            float availableWidth = (topRight.x - bottomLeft.x) * (1f - paddingX * 2f);
-            float availableHeight = (topRight.y - bottomLeft.y) * (1f - paddingY * 2f);
+            float availableWidth = (topRight.x - bottomLeft.x) * (1f - EdgePaddingRatio * 2f);
+            float availableHeight = (topRight.y - bottomLeft.y) * (1f - EdgePaddingRatio * 2f);
 
             float tileSize    = Mathf.Min(availableWidth / cols, availableHeight / rows);
             float totalWidth  = cols * tileSize;

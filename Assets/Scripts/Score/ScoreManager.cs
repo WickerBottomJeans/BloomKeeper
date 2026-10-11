@@ -74,10 +74,10 @@ namespace DefaultNamespace
             score += clearedPetalCount * e.CascadeDepth * scoreConfig.GetRuleScore(ScoreRuleType.CascadeDepthPetalBonus);
             score += clearedSpiderWebCount * scoreConfig.GetRuleScore(ScoreRuleType.SpiderWebCleared);
 
-            foreach (var groupResult in e.Result.GroupResults)
+            foreach (var groupResult in e.Result.Effects)
             {
-                score += scoreConfig.GetRuleScore(ScoreRuleType.MatchShapeBonus, groupResult.SourceMatchGroup.Shape);
-                SpecialSkillType skillType = groupResult.SourceMatchGroup.Causer?.Skill ?? SpecialSkillType.None;
+                score += scoreConfig.GetRuleScore(ScoreRuleType.MatchShapeBonus, groupResult.MatchShape);
+                SpecialSkillType skillType = groupResult.CausingSkill;
                 if (skillType != SpecialSkillType.None) score += scoreConfig.GetRuleScore(ScoreRuleType.SkillActivation, skillType);
             }
 

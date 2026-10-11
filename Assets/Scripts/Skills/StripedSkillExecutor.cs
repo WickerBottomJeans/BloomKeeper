@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace Skills
 {
-    public class StripedSkillExecutor : ISkillExecutor
+    public static class StripedSkillExecutor
     {
-        public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
+        public static SkillPlan Execute(SkillExecutionContext context, SkillActivation activation)
         {
             SkillParticipant consumedInput = activation.GetOnlyConsumedInput();
             Tile[,] grid = context.Grid;
@@ -33,9 +33,8 @@ namespace Skills
                 throw new ArgumentException("Not a striped skill type.", nameof(activation.EffectType));
             }
 
-            var matchGroup = new MatchGroup(positions, MatchShape.None, new Petal(consumedInput.Petal));
             var representation = new StripedRepresentationData(skillPosition, direction, positions, activation.GetConsumedInputPositions());
-            return new SkillUseResult(matchGroup, representation);
+            return new SkillPlan(positions, new Petal(consumedInput.Petal), representation);
         }
     }
 }

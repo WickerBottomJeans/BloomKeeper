@@ -11,7 +11,7 @@ namespace Skills
         /// </summary>
         /// <param name="resolution"></param>
         /// <returns></returns>
-        public static HashSet<Vector2Int> GetRemovedPositions(MatchGroupResolveResult resolution)
+        public static HashSet<Vector2Int> GetRemovedPositions(BoardChangeGroup resolution)
         {
             var positions = new HashSet<Vector2Int>();
             foreach (var tileChange in resolution.TileChanges)
@@ -27,7 +27,7 @@ namespace Skills
         /// </summary>
         /// <param name="resolution"></param>
         /// <returns></returns>
-        public static HashSet<Vector2Int> GetRemovedPetalPositionsExcludingTriggeredSkills(MatchGroupResolveResult resolution)
+        public static HashSet<Vector2Int> GetRemovedPetalPositionsExcludingTriggeredSkills(BoardChangeGroup resolution)
         {
             var positions = new HashSet<Vector2Int>();
             foreach (var tileChange in resolution.TileChanges)
@@ -38,7 +38,7 @@ namespace Skills
             return positions;
         }
 
-        public static HashSet<Vector2Int> GetChangedPositions(MatchGroupResolveResult resolution)
+        public static HashSet<Vector2Int> GetChangedPositions(BoardChangeGroup resolution)
         {
             var positions = new HashSet<Vector2Int>();
             foreach (var tileChange in resolution.TileChanges)
@@ -49,7 +49,7 @@ namespace Skills
             return positions;
         }
 
-        public static bool WasPetalRemovedAt(MatchGroupResolveResult resolution, Vector2Int position)
+        public static bool WasPetalRemovedAt(BoardChangeGroup resolution, Vector2Int position)
         {
             foreach (var tileChange in resolution.TileChanges)
             {

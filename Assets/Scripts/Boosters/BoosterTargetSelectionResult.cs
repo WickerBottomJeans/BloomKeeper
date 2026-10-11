@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Boosters
 {
     /// <summary>
-    /// [Duong] Result after the player chooses booster targets, with an explicit outcome.
+    /// [Duong] skillPlan after the player chooses booster targets, with an explicit outcome.
     /// </summary>
     public class BoosterTargetSelectionResult
     {

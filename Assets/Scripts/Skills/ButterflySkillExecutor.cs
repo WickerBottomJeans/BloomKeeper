@@ -6,11 +6,9 @@ using UnityEngine;
 
 namespace Skills
 {
-    public class ButterflySkillExecutor : ISkillExecutor
+    public static class ButterflySkillExecutor
     {
-        private static readonly System.Random Random = new System.Random();
-
-        public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
+        public static SkillPlan Execute(SkillExecutionContext context, SkillActivation activation)
         {
             SkillParticipant consumedInput = activation.GetOnlyConsumedInput();
             Vector2Int source = consumedInput.Position;
@@ -21,18 +19,15 @@ namespace Skills
             if (!target.HasValue)
             {
                 Debug.LogWarning("ButterFly have no place to fly to");
-                var emptyMatch = new MatchGroup(new List<Vector2Int>(), MatchShape.None, causer);
                 var emptyRepresentation = new ButterflyRepresentationData(source, null, causer.PetalType, consumedInputPositions);
-                return new SkillUseResult(emptyMatch, emptyRepresentation);
+                return new SkillPlan(Array.Empty<Vector2Int>(), causer, emptyRepresentation);
             }
 
-            ReserveTarget(context, target.Value);
-            var matchGroup = new MatchGroup(new List<Vector2Int> { target.Value }, MatchShape.None, causer);
             var representation = new ButterflyRepresentationData(source, target.Value, causer.PetalType, consumedInputPositions);
-            return new SkillUseResult(matchGroup, representation);
+            return new SkillPlan(new[] { target.Value }, causer, representation);
         }
 
-        private  Vector2Int? FindObjectiveTarget(SkillExecutionContext context)
+        private static Vector2Int? FindObjectiveTarget(SkillExecutionContext context)
         {
             var objectiveWebTargets = new HashSet<Vector2Int>();
             var objectiveMatchTargets = new HashSet<Vector2Int>();
@@ -57,10 +52,10 @@ namespace Skills
                 }
             }
 
-            return SelectRandomTarget(new List<Vector2Int>(objectiveWebTargets)) ?? SelectRandomTarget(new List<Vector2Int>(objectiveMatchTargets));
+            return SelectRandomTarget(new List<Vector2Int>(objectiveWebTargets), context.Random) ?? SelectRandomTarget(new List<Vector2Int>(objectiveMatchTargets), context.Random);
         }
 
-        private  Vector2Int? FindFallbackTarget(SkillExecutionContext context)
+        private static Vector2Int? FindFallbackTarget(SkillExecutionContext context)
         {
             Tile[,] grid = context.Grid;
             var obstacleTargets = new List<Vector2Int>();
@@ -78,25 +73,18 @@ namespace Skills
                     obstacleTargets.Add(position);
             }
 
-            return SelectRandomTarget(obstacleTargets) ?? SelectRandomTarget(petalTargets);
+            return SelectRandomTarget(obstacleTargets, context.Random) ?? SelectRandomTarget(petalTargets, context.Random);
         }
 
-        private  Vector2Int? SelectRandomTarget(IReadOnlyList<Vector2Int> targets)
+        private static Vector2Int? SelectRandomTarget(IReadOnlyList<Vector2Int> targets, System.Random random)
         {
-            return targets.Count > 0 ? targets[Random.Next(targets.Count)] : null;
+            return targets.Count > 0 ? targets[random.Next(targets.Count)] : null;
         }
 
-        private  void ReserveTarget(SkillExecutionContext context, Vector2Int target)
+        private static bool CanAssignTarget(SkillExecutionContext context, Vector2Int position)
         {
-            context.AssignedButterflyCounts.TryGetValue(target, out int assignedCount);
-            context.AssignedButterflyCounts[target] = assignedCount + 1;
-        }
-
-        private  bool CanAssignTarget(SkillExecutionContext context, Vector2Int position)
-        {
-            context.AssignedButterflyCounts.TryGetValue(position, out int assignedCount);
             Tile tile = context.Grid[position.x, position.y];
-            return tile != null && assignedCount < tile.GetClearEffectCapacity();
+            return tile != null && tile.GetClearEffectCapacity() > 0;
         }
     }
 }

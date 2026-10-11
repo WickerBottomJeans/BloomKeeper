@@ -8,24 +8,22 @@ using UnityEngine;
 
 namespace Skills
 {
-    public class StripeStripeFusionPresenter : SkillRepresentationPresenter<StripeStripeFusionRepresentationData>
+    public class StripeStripeFusionPresenter : SkillAnimation<StripeStripeFusionRepresentationData>
     {
         private const float PrepareDuration = 0.15f;
         private const float FireDuration = 0.2f;
         private const float FinishDuration = 0.1f;
 
         private readonly PetalViewManager petalViewManager;
-        private readonly TileViewManager tileViewManager;
         private readonly BoardVFXManager boardVFXManager;
 
-        public StripeStripeFusionPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager)
+        public StripeStripeFusionPresenter(PetalViewManager petalViewManager, BoardVFXManager boardVFXManager)
         {
             this.petalViewManager = petalViewManager;
-            this.tileViewManager = tileViewManager;
             this.boardVFXManager = boardVFXManager;
         }
 
-        protected override async UniTask Play(StripeStripeFusionRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
+        protected override async UniTask Play(StripeStripeFusionRepresentationData representation, SkillPresentationContext skillPresentationContext)
         {
             VFXStripeHalo halo = boardVFXManager.RentStripedHaloVFX(representation.Anchor);
             VFXStripeBeamAxis horizontalBeam = boardVFXManager.RentStripedBeamAxisVFX(representation.Anchor);
@@ -33,9 +31,9 @@ namespace Skills
 
             try
             {
-                await Prepare(halo, representation.ConsumedInputPositions, accessKeys, audioScope);
+                await Prepare(halo, representation.ConsumedInputPositions, skillPresentationContext);
                 await Fire(horizontalBeam, verticalBeam, representation.Anchor);
-                await Finish(horizontalBeam, verticalBeam, halo, representation, resolution, accessKeys);
+                await Finish(horizontalBeam, verticalBeam, halo, representation, skillPresentationContext);
             }
             finally
             {
@@ -45,9 +43,13 @@ namespace Skills
             }
         }
 
-        private UniTask Prepare(VFXStripeHalo halo, IReadOnlyList<Vector2Int> consumedInputPositions, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
+        private UniTask Prepare(VFXStripeHalo halo, IReadOnlyList<Vector2Int> consumedInputPositions, SkillPresentationContext skillPresentationContext)
         {
-            return UniTask.WhenAll(halo.Prepare(PrepareDuration, audioScope), petalViewManager.PlayNormalRemovals(consumedInputPositions, accessKeys));
+            UniTask haloTask = halo.Prepare(PrepareDuration, skillPresentationContext.AudioPlaybackScope);
+            UniTask removalTask = petalViewManager.PlayNormalRemovals(consumedInputPositions, skillPresentationContext.Views);
+            foreach (Vector2Int position in consumedInputPositions)
+                skillPresentationContext.HandleConsumedInputPresented(position);
+            return UniTask.WhenAll(haloTask, removalTask);
         }
 
         private UniTask Fire(VFXStripeBeamAxis horizontalBeam, VFXStripeBeamAxis verticalBeam, Vector2Int anchor)
@@ -57,36 +59,10 @@ namespace Skills
                 boardVFXManager.FireStripedBeamAxisVFX(verticalBeam, anchor, true, FireDuration));
         }
 
-        private async UniTask Finish(VFXStripeBeamAxis horizontalBeam, VFXStripeBeamAxis verticalBeam, VFXStripeHalo halo, StripeStripeFusionRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys)
+        private async UniTask Finish(VFXStripeBeamAxis horizontalBeam, VFXStripeBeamAxis verticalBeam, VFXStripeHalo halo, StripeStripeFusionRepresentationData representation, SkillPresentationContext skillPresentationContext)
         {
-            HashSet<Vector2Int> removedPositions = SkillPresentationQueries.GetRemovedPetalPositionsExcludingTriggeredSkills(resolution);
-            var ownedRemovedPositions = new List<Vector2Int>();
-            foreach (Vector2Int position in removedPositions)
-            {
-                if (!accessKeys.ContainsKey(position) && petalViewManager.TryAcquireView(position, nameof(StripeStripeFusionPresenter), out ViewAccessKey accessKey))
-                    accessKeys.Add(position, accessKey);
-                if (accessKeys.ContainsKey(position))
-                    ownedRemovedPositions.Add(position);
-            }
-
-            var triggeredSkillPositions = new List<Vector2Int>();
-            foreach (Vector2Int position in resolution.GetTriggeredSkillInputPositions())
-            {
-                if (!accessKeys.ContainsKey(position) && petalViewManager.TryAcquireView(position, nameof(StripeStripeFusionPresenter), out ViewAccessKey accessKey))
-                    accessKeys.Add(position, accessKey);
-                if (accessKeys.ContainsKey(position))
-                    triggeredSkillPositions.Add(position);
-            }
-
-            var featureChanges = new List<TileChange>();
-            foreach (TileChange change in resolution.TileChanges)
-            {
-                if (change.FeatureChanged)
-                    featureChanges.Add(change);
-            }
-
-            petalViewManager.ReleasePetalViewsImmediately(ownedRemovedPositions, accessKeys);
-            await UniTask.WhenAll(horizontalBeam.Finish(FinishDuration), verticalBeam.Finish(FinishDuration), halo.Finish(FinishDuration), petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys), tileViewManager.PlayTileChanges(featureChanges));
+            await skillPresentationContext.ClearImmediately(petalViewManager);
+            await UniTask.WhenAll(horizontalBeam.Finish(FinishDuration), verticalBeam.Finish(FinishDuration), halo.Finish(FinishDuration));
         }
     }
 }

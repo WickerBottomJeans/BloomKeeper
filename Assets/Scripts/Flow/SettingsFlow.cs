@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace.Reviews;
 using DefaultNamespace.Settings;
+using DefaultNamespace.Sharing;
 using DefaultNamespace.UI;
 
 namespace DefaultNamespace
@@ -9,8 +10,10 @@ namespace DefaultNamespace
     public class SettingsFlow
     {
         private readonly GooglePlayReviewService googlePlayReviewService = new();
+        private readonly AppShareService appShareService = new();
         private bool isActive;
         private bool isReviewPending;
+        private bool isSharePending;
 
         public void Open()
         {
@@ -22,11 +25,12 @@ namespace DefaultNamespace
             UIManager.Instance.SettingsSfxVolumeChanged += HandleSfxVolumeChanged;
             UIManager.Instance.SettingsCloseRequested += HandleCloseRequested;
             UIManager.Instance.SettingsReviewRequested += HandleReviewRequested;
+            UIManager.Instance.SettingsShareAppRequested += HandleShareAppRequested;
 
             try
             {
                 UserSettingsService settings = UserSettingsService.Instance;
-                UIManager.Instance.ShowSettings(settings.MusicVolume, settings.SfxVolume, googlePlayReviewService.IsGooglePlayReviewSupported);
+                UIManager.Instance.ShowSettings(settings.MusicVolume, settings.SfxVolume, googlePlayReviewService.IsGooglePlayReviewSupported, appShareService.IsAppSharingSupported);
             }
             catch
             {
@@ -48,7 +52,7 @@ namespace DefaultNamespace
 
         private void HandleCloseRequested()
         {
-            if (isReviewPending) return;
+            if (isReviewPending || isSharePending) return;
 
             UserSettingsService.Instance.Commit();
             UIManager.Instance.HideSettings();
@@ -62,13 +66,44 @@ namespace DefaultNamespace
             UIManager.Instance.SettingsSfxVolumeChanged -= HandleSfxVolumeChanged;
             UIManager.Instance.SettingsCloseRequested -= HandleCloseRequested;
             UIManager.Instance.SettingsReviewRequested -= HandleReviewRequested;
+            UIManager.Instance.SettingsShareAppRequested -= HandleShareAppRequested;
         }
 
         private void HandleReviewRequested()
         {
-            if (isReviewPending) return;
+            if (isReviewPending || isSharePending) return;
 
             ApplicationOperationRunner.Instance.Run(RequestAppReviewAsync);
+        }
+
+        private void HandleShareAppRequested()
+        {
+            if (isReviewPending || isSharePending) return;
+
+            ApplicationOperationRunner.Instance.Run(ShareAppAsync);
+        }
+
+        private async UniTask ShareAppAsync()
+        {
+            isSharePending = true;
+            try
+            {
+                UIManager.Instance.SetSettingsSharePending(true);
+                if (!appShareService.IsAppSharingSupported)
+                {
+                    await DialogManager.Instance.RunOkDialog("Sharing unavailable", "App sharing isn't available on this device.");
+                    return;
+                }
+
+                bool didShareSheetOpen = await appShareService.TryShareAppAsync();
+                if (!didShareSheetOpen)
+                    await DialogManager.Instance.RunOkDialog("Sharing unavailable", "We couldn't open app sharing. Please try again later.");
+            }
+            finally
+            {
+                isSharePending = false;
+                UIManager.Instance.SetSettingsSharePending(false);
+            }
         }
 
         private async UniTask RequestAppReviewAsync()

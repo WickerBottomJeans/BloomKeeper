@@ -12,13 +12,14 @@ namespace DefaultNamespace.UI
         public event Action<float> SettingsSfxVolumeChanged;
         public event Action SettingsCloseRequested;
         public event Action SettingsReviewRequested;
+        public event Action SettingsShareAppRequested;
 
-        public void ShowSettings(float musicVolume, float sfxVolume, bool isGooglePlayReviewSupported)
+        public void ShowSettings(float musicVolume, float sfxVolume, bool isGooglePlayReviewSupported, bool isAppSharingSupported)
         {
             GetPanel(ref settingsInstance, settingsPrefab, uiRoot);
             UnbindSettings();
             BindSettings();
-            settingsInstance.Show(musicVolume, sfxVolume, isGooglePlayReviewSupported);
+            settingsInstance.Show(musicVolume, sfxVolume, isGooglePlayReviewSupported, isAppSharingSupported);
         }
 
         public void HideSettings()
@@ -32,12 +33,18 @@ namespace DefaultNamespace.UI
             settingsInstance.SetReviewPending(isReviewPending);
         }
 
+        public void SetSettingsSharePending(bool isSharePending)
+        {
+            settingsInstance.SetSharePending(isSharePending);
+        }
+
         private void BindSettings()
         {
             settingsInstance.MusicVolumeChanged += HandleSettingsMusicVolumeChanged;
             settingsInstance.SfxVolumeChanged += HandleSettingsSfxVolumeChanged;
             settingsInstance.CloseRequested += HandleSettingsCloseRequested;
             settingsInstance.ReviewRequested += HandleSettingsReviewRequested;
+            settingsInstance.ShareAppRequested += HandleSettingsShareAppRequested;
         }
 
         private void UnbindSettings()
@@ -48,6 +55,12 @@ namespace DefaultNamespace.UI
             settingsInstance.SfxVolumeChanged -= HandleSettingsSfxVolumeChanged;
             settingsInstance.CloseRequested -= HandleSettingsCloseRequested;
             settingsInstance.ReviewRequested -= HandleSettingsReviewRequested;
+            settingsInstance.ShareAppRequested -= HandleSettingsShareAppRequested;
+        }
+
+        private void HandleSettingsShareAppRequested()
+        {
+            SettingsShareAppRequested?.Invoke();
         }
 
         private void HandleSettingsReviewRequested()

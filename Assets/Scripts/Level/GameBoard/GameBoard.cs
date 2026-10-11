@@ -1,461 +1,209 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Boosters;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
 using DefaultNamespace.Audio;
 using DefaultNamespace.UI;
 using DefaultNamespace.VFX;
-using Petals;
 using Skills;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine;
 using Utility;
 
-[RequireComponent(typeof(BoosterRepresentationOrchestrator))]
+/// <summary>
+/// The board's orchestrator and composition root. Wires its collaborators, gates input,
+/// and sequences swap/booster, resolve, presentation, gravity, refill, and shuffle.
+/// Keep the turn sequence here. Delegate gameplay rules and grid mutations to BoardLogic,
+/// animations to BoardVisual, booster interaction to BoardBoosterInteraction,
+/// and admin editing to BoardPetalEditor. Do not implement those details in this class.
+/// Board state describes availability only (Idle/Busy); booster phases belong to its interaction.
+/// </summary>
+[RequireComponent(typeof(BoosterPresenter))]
 public class GameBoard : MonoBehaviour
 {
-    //TODO: maybe make the about to active petal to like blink blink or sth
-    [SerializeField] private float paddingX = 0.05f;
-    [SerializeField] private float paddingY = 0.05f;
     [SerializeField] private PetalViewManager petalViewManager;
     [SerializeField] private TileViewManager tileViewManager;
     [SerializeField] private BoardVFXManager boardVFXManager;
-    [SerializeField] private SkillRepresentationOrchestrator skillRepresentationOrchestrator;
+    [SerializeField] private SkillAnimationLibrary skillAnimationLibrary;
     [SerializeField] private BoardAudioManager boardAudioManager;
-
     [SerializeField] private BoardInputHandler boardInputHandler;
 
-    private Camera cam;
-    private BoardLayout layout;
-    private Tile[,] grid;
+    private BoardLogic boardLogic;
+    private BoardVisual boardVisual;
 
-    /// <summary>
-    /// Use for tester's petal editor
-    /// </summary>
-    private Vector2Int editingTile;
-
-    private BoardState currentState = BoardState.Idle;
-    private Vector2Int swapOrigin;
-    private Vector2Int swapTarget;
-    private List<MatchGroup> pendingMatches;
-    private List<(Vector2Int from, Vector2Int to)> pendingMoves;
-    private List<SkillActivation> pendingSkillActivations = new List<SkillActivation>();
-    private IReadOnlyList<Vector2Int> pendingPreferredSkillSpawnPositions = Array.Empty<Vector2Int>();
-    private BoardPresentationCoordinator boardPresentationCoordinator;
-    private BoosterRepresentationOrchestrator boosterRepresentationOrchestrator;
-    private BoosterUseResult pendingBoosterUseResult;
+    private BoardState availabilityState = BoardState.Idle;
+    private BoardBoosterInteraction boardBoosterInteraction;
+    private BoardPetalEditor boardPetalEditor;
     private Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets;
-    private bool isResolvingPlayerInitiatedAction;
-    private int currentCascadeDepth;
-    private IBoosterChooser activeBoosterChooser;
-    private BoosterType? activeBoosterType;
 
     private enum BoardState
     {
         Idle,
-        Swapping,
-        SwappingBack,
-        Resolving,
-        Gravity,
-        Filling,
-        Cascade,
-        Shuffling,
-        BoosterTargeting,
-        BoosterAuthorization
+        Busy
     }
 
     public event Action<IGameplayEvent> OnGameplayEvent;
     public event Action<bool> IdleStateChanged;
 
-    public bool IsIdle => currentState == BoardState.Idle;
+    public bool IsIdle => availabilityState == BoardState.Idle;
 
-    public void Init(Tile[,] grid, Rect playAreaScreenRect,
-        Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets)
+    public void Init(Tile[,] boardGrid, Rect playAreaScreenRect, Func<IReadOnlyList<TileState>, IReadOnlyList<ObjectiveTileTargetGroup>> resolveObjectiveTargets)
     {
-        cam = Camera.main;
-        this.grid = grid;
+        Camera camera = Camera.main;
+        boardLogic = new BoardLogic(boardGrid);
         this.resolveObjectiveTargets = resolveObjectiveTargets;
 
-        layout = BoardLayoutCalculator.Calculate(grid.GetLength(0), grid.GetLength(1), cam, paddingX, paddingY,
-            playAreaScreenRect);
+        BoardLayout boardLayout = BoardLayoutCalculator.Calculate(boardGrid.GetLength(0), boardGrid.GetLength(1), camera, playAreaScreenRect);
 
-        petalViewManager.Init(grid, layout);
-        tileViewManager.Init(grid, layout);
-        boardVFXManager.Init(layout, cam);
-        skillRepresentationOrchestrator.Init(petalViewManager, tileViewManager, boardVFXManager, boardAudioManager,
-            layout);
-        boosterRepresentationOrchestrator = GetComponent<BoosterRepresentationOrchestrator>();
-        boardPresentationCoordinator = new BoardPresentationCoordinator(petalViewManager, tileViewManager, boardVFXManager, skillRepresentationOrchestrator, boosterRepresentationOrchestrator, boardAudioManager, layout, grid);
+        petalViewManager.Init(boardGrid, boardLayout);
+        tileViewManager.Init(boardGrid, boardLayout);
+        boardVFXManager.Init(boardLayout, camera);
+        skillAnimationLibrary.Init(petalViewManager, boardVFXManager, boardAudioManager, boardLayout);
+        BoosterPresenter boosterPresenter = GetComponent<BoosterPresenter>();
+        boardVisual = new BoardVisual(petalViewManager, tileViewManager, boardVFXManager, skillAnimationLibrary, boosterPresenter, boardAudioManager, boardLayout);
 
-        boardInputHandler.Init(layout, cam);
+        boardInputHandler.Init(boardLayout, camera);
 
         boardInputHandler.OnSwapRequested += HandleSwap;
-        boardInputHandler.OnEditRequested += HandleEditRequested;
-        UIManager.Instance.OnPetalEditConfirmed += HandlePetalEditConfirmed;
-
+        boardBoosterInteraction = new BoardBoosterInteraction(boardGrid, boardInputHandler, boardVisual);
+        boardPetalEditor = new BoardPetalEditor(boardLogic, boardLayout, camera, boardInputHandler, boardVisual, UIManager.Instance, () => IsIdle);
     }
 
     public async UniTask<BoosterTargetSelectionResult> TrySelectBoosterTargets(BoosterType boosterType)
     {
-        if (currentState != BoardState.Idle) return BoosterTargetSelectionResult.Unavailable;
-        if (activeBoosterChooser != null) throw new InvalidOperationException("A booster is already targeting the board.");
-
-        activeBoosterType = boosterType;
-        TransitionTo(BoardState.BoosterTargeting);
-        return await RunBoosterTargetSelection();
-    }
-
-    public void CancelBoosterTargeting()
-    {
-        if (activeBoosterChooser == null) return;
-
-        activeBoosterChooser.Cancel();
-    }
-
-    public void ExecuteApprovedBooster(BoosterType boosterType, IReadOnlyList<Vector2Int> targets)
-    {
-        if (currentState != BoardState.BoosterAuthorization) throw new InvalidOperationException("A booster can only execute while waiting for authorization.");
-        if (!activeBoosterType.HasValue || activeBoosterType.Value != boosterType) throw new InvalidOperationException("Approved booster does not match the active booster use.");
-        if (targets == null) throw new ArgumentNullException(nameof(targets));
-
+        if (!IsIdle) return BoosterTargetSelectionResult.Unavailable;
+        SetState(BoardState.Busy);
         try
         {
-            pendingBoosterUseResult = BoosterManager.Execute(boosterType, grid, targets);
-            activeBoosterType = null;
-            LoadResolutionInput(pendingBoosterUseResult.ResolutionInput);
-            isResolvingPlayerInitiatedAction = true;
-            currentCascadeDepth = 0;
-            TransitionTo(BoardState.Resolving);
+            BoosterTargetSelectionResult boosterTargetSelectionResult = await boardBoosterInteraction.Select(boosterType);
+            if (boosterTargetSelectionResult.IsCanceled || boosterTargetSelectionResult.IsUnavailable) ResolveBoard().Forget();
+            return boosterTargetSelectionResult;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch
         {
-            activeBoosterType = null;
-            pendingBoosterUseResult = null;
-            TransitionTo(BoardState.Idle);
+            ResolveBoard().Forget();
             throw;
         }
+    }
+
+    public void CancelBoosterTargeting() => boardBoosterInteraction.Cancel();
+
+    public void ExecuteApprovedBooster(BoosterType boosterType, IReadOnlyList<Vector2Int> targets)
+    {
+        boardBoosterInteraction.ValidateApproval(boosterType, targets);
+        BoosterUseResult boosterUseResult;
+        try
+        {
+            boosterUseResult = boardLogic.BeginBooster(boosterType, targets);
+        }
+        catch
+        {
+            boardBoosterInteraction.Complete();
+            ResolveBoard().Forget();
+            throw;
+        }
+        boardBoosterInteraction.Complete();
+        SetState(BoardState.Busy);
+        RunBooster(boosterUseResult).Forget();
     }
 
     public void RejectPendingBoosterUse()
     {
-        if (currentState != BoardState.BoosterAuthorization) throw new InvalidOperationException("A booster rejection requires pending authorization.");
-        if (!activeBoosterType.HasValue) throw new InvalidOperationException("A booster rejection requires an active booster type.");
-
-        activeBoosterType = null;
-        TransitionTo(BoardState.Idle);
+        boardBoosterInteraction.Complete();
+        ResolveBoard().Forget();
     }
 
-    private void HandleSwap(Vector2Int tileA, Vector2Int tileB)
+    private void HandleSwap(Vector2Int tileAPosition, Vector2Int tileBPosition)
     {
-        if (currentState != BoardState.Idle) return;
-        if (!PetalSwapper.Validate(tileA, tileB, grid)) return;
-
-        swapOrigin = tileA;
-        swapTarget = tileB;
-        TransitionTo(BoardState.Swapping);
+        if (availabilityState != BoardState.Idle) return;
+        RunSwap(tileAPosition, tileBPosition).Forget();
     }
 
-    private void HandleEditRequested(Vector2Int tile)
+    private void SetState(BoardState newState)
     {
-        if (currentState != BoardState.Idle) return;
-        Tile selectedTile = grid[tile.x, tile.y];
-        if (selectedTile == null || (!selectedTile.CanReceiveNewPetal() && !selectedTile.CanSwapPetal())) return;
-
-        editingTile = tile;
-
-        Vector2 worldPos = layout.GetTileWorldPos(tile.x, tile.y);
-        Vector2 screenPos = cam.WorldToScreenPoint(worldPos);
-
-        UIManager.Instance.ShowPetalEditorPopup(screenPos);
+        bool wasIdle = availabilityState == BoardState.Idle;
+        availabilityState = newState;
+        if (wasIdle != IsIdle)
+            IdleStateChanged?.Invoke(IsIdle);
     }
 
-    private void HandlePetalEditConfirmed(PetalType petalType, SpecialSkillType skillType)
+    private async UniTask RunSwap(Vector2Int swapOrigin, Vector2Int swapTarget)
     {
-        if (grid[editingTile.x, editingTile.y] == null) return;
-
-        Petal petal = new Petal(petalType, skillType);
-        grid[editingTile.x, editingTile.y].SetPetal(petal);
-        boardPresentationCoordinator.RefreshTile(editingTile, petal);
-    }
-
-    private void TransitionTo(BoardState newState)
-    {
-        bool wasIdle = currentState == BoardState.Idle;
-        currentState = newState;
-        if (wasIdle && newState != BoardState.Idle)
-            IdleStateChanged?.Invoke(false);
-
-        switch (newState)
-        {
-            case BoardState.Swapping: EnterSwapping().Forget(); break;
-            case BoardState.SwappingBack: EnterSwappingBack().Forget(); break;
-            case BoardState.Resolving: EnterResolving().Forget(); break;
-            case BoardState.Gravity: EnterGravity().Forget(); break;
-            case BoardState.Filling: EnterFilling().Forget(); break;
-            case BoardState.Cascade: EnterCascade(); break;
-            case BoardState.Idle: EnterIdle(); break;
-            case BoardState.Shuffling: EnterShuffling().Forget(); break;
-        }
-    }
-
-    private async UniTask<BoosterTargetSelectionResult> RunBoosterTargetSelection()
-    {
-        IBoosterChooser chooser = null;
-        bool boosterTargetsShown = false;
-        try
-        {
-            if (!activeBoosterType.HasValue) throw new InvalidOperationException("Booster targeting requires an active booster type.");
-
-            chooser = BoosterManager.CreateChooser(activeBoosterType.Value);
-            activeBoosterChooser = chooser;
-            chooser.TargetSelectionChanged += HandleBoosterTargetSelectionChanged;
-            IReadOnlyList<Vector2Int> boosterTargetCandidates = activeBoosterChooser.GetBoosterTargetCandidates(grid);
-            boardPresentationCoordinator.ShowBoosterTargets(activeBoosterType.Value, boosterTargetCandidates);
-            boosterTargetsShown = true;
-
-            BoosterTargetSelectionResult result = await activeBoosterChooser.Choose(grid, boardInputHandler);
-            activeBoosterChooser = null;
-
-            if (result.IsCanceled)
-            {
-                activeBoosterType = null;
-                TransitionTo(BoardState.Idle);
-                return result;
-            }
-
-            TransitionTo(BoardState.BoosterAuthorization);
-            return result;
-        }
-        catch
-        {
-            activeBoosterChooser = null;
-            activeBoosterType = null;
-            pendingBoosterUseResult = null;
-            TransitionTo(BoardState.Idle);
-            throw;
-        }
-        finally
-        {
-            if (chooser != null)
-                chooser.TargetSelectionChanged -= HandleBoosterTargetSelectionChanged;
-            if (boosterTargetsShown)
-                boardPresentationCoordinator.HideBoosterTargets();
-        }
-    }
-
-    private void HandleBoosterTargetSelectionChanged(Vector2Int position, bool isSelected)
-    {
-        boardPresentationCoordinator.SetBoosterTargetSelected(position, isSelected);
-    }
-
-    private async UniTask EnterSwapping()
-    {
-        pendingSkillActivations.Clear();
-        pendingMatches = new List<MatchGroup>();
-        pendingPreferredSkillSpawnPositions = Array.Empty<Vector2Int>();
-        currentCascadeDepth = 0;
-
-        BoardResolutionInput resolutionInput = BoardSwapOperation.Execute(grid, swapOrigin, swapTarget);
-        await boardPresentationCoordinator.PlaySwap(swapOrigin, swapTarget);
+        if (!boardLogic.TryBeginSwap(swapOrigin, swapTarget, out BoardResolutionInput resolutionInput)) return;
+        SetState(BoardState.Busy);
+        await boardVisual.PlaySwap(swapOrigin, swapTarget);
 
         if (!resolutionInput.RequiresResolution)
         {
-            PetalSwapper.ExecuteSwapPetal(swapOrigin, swapTarget, grid);
-            TransitionTo(BoardState.SwappingBack);
-            return;
+            await boardVisual.PlayInvalidSwapBack(swapTarget, swapOrigin);
         }
+        else
+            OnGameplayEvent?.Invoke(new PlayerMoveCommittedEvent());
 
-        LoadResolutionInput(resolutionInput);
-        isResolvingPlayerInitiatedAction = true;
-        OnGameplayEvent?.Invoke(new PlayerMoveCommittedEvent());
-        TransitionTo(BoardState.Resolving);
+        await ResolveBoard(resolutionInput, resolutionInput.RequiresResolution);
     }
 
-    private async UniTask EnterSwappingBack()
+    private async UniTask RunBooster(BoosterUseResult boosterUseResult)
     {
-        await boardPresentationCoordinator.PlayInvalidSwapBack(swapTarget, swapOrigin);
-        TransitionTo(BoardState.Idle);
+        await boardVisual.PlayBooster(boosterUseResult);
+        await ResolveBoard(boosterUseResult.ResolutionInput, true);
     }
 
-    private async UniTask EnterResolving()
+    private async UniTask ResolveBoard(BoardResolutionInput resolutionInput = null, bool isPlayerInitiated = false)
     {
-        if (pendingBoosterUseResult != null)
+        SetState(BoardState.Busy);
+        int cascadeDepth = 0;
+
+        while (true)
         {
-            BoosterUseResult boosterUseResult = pendingBoosterUseResult;
-            await boardPresentationCoordinator.PlayBooster(boosterUseResult);
-            pendingBoosterUseResult = null;
-
-            if (!boosterUseResult.ResolutionInput.RequiresResolution)
+            if (resolutionInput != null && resolutionInput.RequiresResolution)
             {
-                pendingPreferredSkillSpawnPositions = Array.Empty<Vector2Int>();
-                TransitionTo(BoardState.Idle);
-                return;
+                BoardResolution boardResolution = boardLogic.Resolve(resolutionInput, resolveObjectiveTargets);
+                await boardVisual.PlayResolution(boardResolution, this.GetCancellationTokenOnDestroy());
+                OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(boardResolution, cascadeDepth, isPlayerInitiated));
+
+                List<(Vector2Int from, Vector2Int to)> gravityMoves = boardLogic.ApplyGravity();
+                await boardVisual.PlayGravity(gravityMoves);
+
+                var filledPetals = boardLogic.Fill();
+                await boardVisual.PlayFill(filledPetals);
+
+                List<MatchGroup> cascadeMatches = boardLogic.DetectMatches();
+                if (cascadeMatches.Count > 0)
+                {
+                    cascadeDepth++;
+                    resolutionInput = new BoardResolutionInput(cascadeMatches, Array.Empty<SkillActivation>());
+                    continue;
+                }
+
+                isPlayerInitiated = false;
             }
-        }
 
-        TurnResolution turnResolution = CalculateTurnResolution();
-        await PlayTurnResolution(turnResolution);
-        TransitionTo(BoardState.Gravity);
-    }
-
-    private TurnResolution CalculateTurnResolution()
-    {
-        MatchResolveResult initialMatch = null;
-        var skillWaves = new List<SkillResolutionWave>();
-
-        if (pendingSkillActivations.Count > 0)
-        {
-            IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups = resolveObjectiveTargets(BoardSnapshotBuilder.Capture(grid));
-            List<SkillUseResult> openingSkillResults = SkillManager.UseSkills(grid, pendingSkillActivations, objectiveTargetGroups);
-            pendingSkillActivations.Clear();
-            MatchResolveResult openingResolution = MatchResolver.Resolve(openingSkillResults, grid, pendingPreferredSkillSpawnPositions);
-            skillWaves.Add(new SkillResolutionWave(openingResolution, openingSkillResults));
-            AddSkillActivations(openingResolution);
-        }
-        else
-        {
-            initialMatch = MatchResolver.Resolve(pendingMatches, grid, pendingPreferredSkillSpawnPositions);
-            pendingMatches.Clear();
-            AddSkillActivations(initialMatch);
-        }
-
-        pendingPreferredSkillSpawnPositions = Array.Empty<Vector2Int>();
-
-        while (pendingSkillActivations.Count > 0)
-        {
-            IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups = resolveObjectiveTargets(BoardSnapshotBuilder.Capture(grid));
-            List<SkillUseResult> skillResults = SkillManager.UseSkills(grid, pendingSkillActivations, objectiveTargetGroups);
-            pendingSkillActivations.Clear();
-
-            foreach (SkillUseResult skillResult in skillResults)
-                pendingMatches.Add(skillResult.MatchGroup);
-
-            MatchResolveResult resolution = MatchResolver.Resolve(pendingMatches, grid, Array.Empty<Vector2Int>());
-            pendingMatches.Clear();
-            skillWaves.Add(new SkillResolutionWave(resolution, skillResults));
-            AddSkillActivations(resolution);
-        }
-
-        return new TurnResolution(initialMatch, skillWaves);
-    }
-
-    private void AddSkillActivations(MatchResolveResult resolution)
-    {
-        foreach (MatchGroupResolveResult groupResult in resolution.GroupResults)
-            pendingSkillActivations.AddRange(groupResult.SkillActivations);
-    }
-
-    private void LoadResolutionInput(BoardResolutionInput resolutionInput)
-    {
-        pendingMatches = new List<MatchGroup>(resolutionInput.MatchGroups);
-        pendingSkillActivations.Clear();
-        pendingSkillActivations.AddRange(resolutionInput.SkillActivations);
-        pendingPreferredSkillSpawnPositions = resolutionInput.PreferredSkillSpawnPositions;
-    }
-
-    private async UniTask PlayTurnResolution(TurnResolution turnResolution)
-    {
-        int nextSkillWaveIndex;
-        if (turnResolution.InitialMatch == null)
-        {
-            if (turnResolution.SkillWaves.Count == 0)
-                throw new InvalidOperationException("Turn resolution requires an initial match or at least one skill wave.");
-
-            SkillResolutionWave openingSkillWave = turnResolution.SkillWaves[0];
-            await boardPresentationCoordinator.PlaySkillWave(openingSkillWave);
-            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(openingSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerInitiatedAction));
-            nextSkillWaveIndex = 1;
-        }
-        else
-        {
-            if (turnResolution.SkillWaves.Count == 0)
+            if (boardLogic.HasValidMove())
             {
-                await boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch);
-                OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerInitiatedAction));
+                SetState(BoardState.Idle);
                 return;
             }
 
-            SkillResolutionWave firstSkillWave = turnResolution.SkillWaves[0];
-            await UniTask.WhenAll(boardPresentationCoordinator.PlayInitialMatch(turnResolution.InitialMatch), boardPresentationCoordinator.PlaySkillWave(firstSkillWave));
-            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(turnResolution.InitialMatch, currentCascadeDepth, isResolvingPlayerInitiatedAction));
-            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(firstSkillWave.Resolution, currentCascadeDepth, isResolvingPlayerInitiatedAction));
-            nextSkillWaveIndex = 1;
+            var shuffledPetals = boardLogic.Reroll();
+            await boardVisual.PlayShuffle(shuffledPetals);
+
+            List<MatchGroup> shuffleMatches = boardLogic.DetectMatches();
+            resolutionInput = new BoardResolutionInput(shuffleMatches, Array.Empty<SkillActivation>());
+            cascadeDepth = shuffleMatches.Count > 0 ? 1 : 0;
+            if (shuffleMatches.Count == 0)
+                isPlayerInitiated = false;
         }
-
-        for (int i = nextSkillWaveIndex; i < turnResolution.SkillWaves.Count; i++)
-        {
-            SkillResolutionWave skillWave = turnResolution.SkillWaves[i];
-            await boardPresentationCoordinator.PlaySkillWave(skillWave);
-            OnGameplayEvent?.Invoke(new BoardResolutionStepCompletedEvent(skillWave.Resolution, currentCascadeDepth,
-                isResolvingPlayerInitiatedAction));
-        }
-    }
-
-    private async UniTask EnterGravity()
-    {
-        pendingMoves = GravityController.Apply(grid);
-        await boardPresentationCoordinator.PlayGravity(pendingMoves);
-        TransitionTo(BoardState.Filling);
-    }
-
-    private async UniTask EnterFilling()
-    {
-        List<Vector2Int> filled = PetalFiller.Fill(grid);
-        await boardPresentationCoordinator.PlayFill(filled);
-        TransitionTo(BoardState.Cascade);
-    }
-
-    private void EnterCascade()
-    {
-        List<MatchGroup> cascadeMatches = MatchDetector.Detect(grid);
-        if (cascadeMatches.Count == 0)
-        {
-            isResolvingPlayerInitiatedAction = false;
-            currentCascadeDepth = 0;
-            TransitionTo(BoardState.Idle);
-            return;
-        }
-
-        currentCascadeDepth++;
-        pendingMatches = cascadeMatches;
-        pendingPreferredSkillSpawnPositions = Array.Empty<Vector2Int>();
-        TransitionTo(BoardState.Resolving);
-    }
-
-    private void EnterIdle()
-    {
-        if (!DeadlockDetector.HasValidMove(grid))
-        {
-            TransitionTo(BoardState.Shuffling);
-            return;
-        }
-
-        IdleStateChanged?.Invoke(true);
-    }
-
-    private async UniTask EnterShuffling()
-    {
-        currentCascadeDepth = 0;
-        List<Vector2Int> shuffled = BoardShuffler.Shuffle(grid);
-        await boardPresentationCoordinator.PlayShuffle(shuffled);
-        TransitionTo(BoardState.Cascade);
     }
 
     private void OnDestroy()
     {
-        if (boardInputHandler != null)
-        {
-            boardInputHandler.OnSwapRequested -= HandleSwap;
-            boardInputHandler.OnEditRequested -= HandleEditRequested;
-        }
-
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.OnPetalEditConfirmed -= HandlePetalEditConfirmed;
-        }
+        if (boardInputHandler != null) boardInputHandler.OnSwapRequested -= HandleSwap;
+        boardPetalEditor?.Dispose();
+        boardBoosterInteraction?.Dispose();
     }
 }

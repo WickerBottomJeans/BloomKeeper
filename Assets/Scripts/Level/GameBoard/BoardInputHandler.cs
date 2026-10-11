@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 
 public class BoardInputHandler : MonoBehaviour
 {
-    [SerializeField] private float dragThresholdPx = 20f;
+    [SerializeField] private float dragThresholdPixels = 20f;
     [SerializeField] private InputActionReference pointerPressAction;
     [SerializeField] private InputActionReference pointerPositionAction;
     
@@ -25,21 +25,21 @@ public class BoardInputHandler : MonoBehaviour
     public event Action OnPointerCanceled;
 
     private BoardLayout boardLayout;
-    private Camera _camera;
+    private Camera boardCamera;
 
     private bool isDragging;
     private bool swapRequested;
-    private Vector2 touchStartScreenPos;
+    private Vector2 touchStartScreenPosition;
     private Vector2Int selectedTile;
-    private Vector3 lastResolvedWorldPos;
+    private Vector3 lastResolvedWorldPosition;
     private Vector2Int lastResolvedTile;
     
     private float lastTapTime = -1f;
     private Vector2Int lastTappedTile;
-    public void Init(BoardLayout boardLayout, Camera camera)
+    public void Init(BoardLayout boardLayout, Camera boardCamera)
     {
         this.boardLayout = boardLayout;
-        this._camera = camera;
+        this.boardCamera = boardCamera;
     }
 
     private void Update()
@@ -60,47 +60,47 @@ public class BoardInputHandler : MonoBehaviour
             OnTouchMoved(pointerPositionAction.action.ReadValue<Vector2>());
     }
 
-    private void OnTouchBegan(Vector2 screenPos)
+    private void OnTouchBegan(Vector2 screenPosition)
     {
-        if (!TryResolveTile(screenPos, out var tile)) return;
+        if (!TryResolveTile(screenPosition, out var tilePosition)) return;
 
         if (GlobalState.IsAdminMode)
         {
             float timeSinceLast = Time.time - lastTapTime;
-            if (timeSinceLast <= doubleTapInterval && tile == lastTappedTile)
+            if (timeSinceLast <= doubleTapInterval && tilePosition == lastTappedTile)
             {
-                OnEditRequested?.Invoke(tile);
+                OnEditRequested?.Invoke(tilePosition);
                 lastTapTime = -1f;
                 return;
             }
 
             lastTapTime = Time.time;
-            lastTappedTile = tile;
+            lastTappedTile = tilePosition;
             return;
         }
 
         isDragging = true;
         swapRequested = false;
-        touchStartScreenPos = screenPos;
-        selectedTile = tile;
-        OnPointerPressed?.Invoke(tile);
+        touchStartScreenPosition = screenPosition;
+        selectedTile = tilePosition;
+        OnPointerPressed?.Invoke(tilePosition);
     }
 
-    private void OnTouchMoved(Vector2 screenPos)
+    private void OnTouchMoved(Vector2 screenPosition)
     {
-        if (!TryResolveTile(screenPos, out Vector2Int tile))
+        if (!TryResolveTile(screenPosition, out Vector2Int tilePosition))
         {
             CancelPointer();
             return;
         }
 
-        OnPointerMoved?.Invoke(tile);
+        OnPointerMoved?.Invoke(tilePosition);
         if (swapRequested) return;
 
-        Vector2 delta = screenPos - touchStartScreenPos;
-        if (delta.magnitude < dragThresholdPx) return;
+        Vector2 pointerDelta = screenPosition - touchStartScreenPosition;
+        if (pointerDelta.magnitude < dragThresholdPixels) return;
 
-        Vector2Int direction = ResolveDirection(delta);
+        Vector2Int direction = ResolveDirection(pointerDelta);
         Vector2Int targetTile = selectedTile + direction;
 
         if (!IsInBounds(targetTile)) 
@@ -113,12 +113,12 @@ public class BoardInputHandler : MonoBehaviour
         swapRequested = true;
     }
 
-    private void OnTouchEnded(Vector2 screenPos)
+    private void OnTouchEnded(Vector2 screenPosition)
     {
         if (!isDragging) return;
 
-        if (TryResolveTile(screenPos, out Vector2Int tile))
-            OnPointerReleased?.Invoke(tile);
+        if (TryResolveTile(screenPosition, out Vector2Int tilePosition))
+            OnPointerReleased?.Invoke(tilePosition);
         else
             OnPointerCanceled?.Invoke();
 
@@ -135,7 +135,7 @@ public class BoardInputHandler : MonoBehaviour
     {
         isDragging = false;
         swapRequested = false;
-        touchStartScreenPos = default;
+        touchStartScreenPosition = default;
         selectedTile = default;
     }
 
@@ -145,18 +145,18 @@ public class BoardInputHandler : MonoBehaviour
             CancelPointer();
     }
 
-    private bool TryResolveTile(Vector2 screenPos, out Vector2Int tile)
+    private bool TryResolveTile(Vector2 screenPosition, out Vector2Int tilePosition)
     {
-        tile = default;
-        Vector3 worldPos = _camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Mathf.Abs(_camera.transform.position.z)));
-        lastResolvedWorldPos = worldPos;
+        tilePosition = default;
+        Vector3 worldPosition = boardCamera.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, Mathf.Abs(boardCamera.transform.position.z)));
+        lastResolvedWorldPosition = worldPosition;
         
-        int col = Mathf.RoundToInt((worldPos.x - boardLayout.OriginWorldPos.x) / boardLayout.TileSize);
-        int row = Mathf.RoundToInt((worldPos.y - boardLayout.OriginWorldPos.y) / boardLayout.TileSize);
-        tile = new Vector2Int(col, row);
-        lastResolvedTile = tile;
+        int columnIndex = Mathf.RoundToInt((worldPosition.x - boardLayout.OriginWorldPosition.x) / boardLayout.TileSize);
+        int rowIndex = Mathf.RoundToInt((worldPosition.y - boardLayout.OriginWorldPosition.y) / boardLayout.TileSize);
+        tilePosition = new Vector2Int(columnIndex, rowIndex);
+        lastResolvedTile = tilePosition;
 
-        return IsInBounds(tile);
+        return IsInBounds(tilePosition);
     }
 
     private void OnDrawGizmos()
@@ -166,29 +166,29 @@ public class BoardInputHandler : MonoBehaviour
         
         if (isDragging)
         {
-            Vector2 selected = boardLayout.OriginWorldPos + new Vector2(selectedTile.x * boardLayout.TileSize, selectedTile.y * boardLayout.TileSize);
+            Vector2 selected = boardLayout.OriginWorldPosition + new Vector2(selectedTile.x * boardLayout.TileSize, selectedTile.y * boardLayout.TileSize);
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(selected, Vector3.one * boardLayout.TileSize);
         }
 
         Gizmos.color = Color.red;
-        Gizmos.DrawSphere(lastResolvedWorldPos, boardLayout.TileSize * 0.05f);
+        Gizmos.DrawSphere(lastResolvedWorldPosition, boardLayout.TileSize * 0.05f);
 
         Gizmos.color = Color.blue;
-        Vector2 resolvedCenter = boardLayout.OriginWorldPos + new Vector2(lastResolvedTile.x * boardLayout.TileSize, lastResolvedTile.y * boardLayout.TileSize);
+        Vector2 resolvedCenter = boardLayout.OriginWorldPosition + new Vector2(lastResolvedTile.x * boardLayout.TileSize, lastResolvedTile.y * boardLayout.TileSize);
         Gizmos.DrawWireCube(resolvedCenter, Vector3.one * boardLayout.TileSize);
     }
 
-    private bool IsInBounds(Vector2Int tile) =>
-        tile.x >= 0 && tile.x < boardLayout.Cols &&
-        tile.y >= 0 && tile.y < boardLayout.Rows;
+    private bool IsInBounds(Vector2Int tilePosition) =>
+        tilePosition.x >= 0 && tilePosition.x < boardLayout.ColumnCount &&
+        tilePosition.y >= 0 && tilePosition.y < boardLayout.RowCount;
 
-    private  Vector2Int ResolveDirection(Vector2 delta)
+    private  Vector2Int ResolveDirection(Vector2 pointerDelta)
     {
-        if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
-            return delta.x > 0 ? Vector2Int.right : Vector2Int.left;
+        if (Mathf.Abs(pointerDelta.x) > Mathf.Abs(pointerDelta.y))
+            return pointerDelta.x > 0 ? Vector2Int.right : Vector2Int.left;
         else
-            return delta.y > 0 ? Vector2Int.up : Vector2Int.down;
+            return pointerDelta.y > 0 ? Vector2Int.up : Vector2Int.down;
     }
     
 }

@@ -56,12 +56,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e5a090069ee45e79ef6798eb82aae92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIGameBoard
-  paddingX: 0.05
-  paddingY: 0.05
   petalViewManager: {fileID: 5895882996990725671}
   tileViewManager: {fileID: 3912862298464110975}
   boardVFXManager: {fileID: 5176382947618204359}
-  skillRepresentationOrchestrator: {fileID: 8200000000000000001}
+  skillAnimationLibrary: {fileID: 8200000000000000001}
   boardAudioManager: {fileID: 8623135926172344794}
   boardInputHandler: {fileID: 7623217431080173358}
 --- !u!114 &5895882996990725671
@@ -89,7 +87,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 141caad2df484c068245b471c07c3dd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoardInputHandler
-  dragThresholdPx: 20
+  dragThresholdPixels: 20
   pointerPressAction: {fileID: -427491133528726287, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   pointerPositionAction: {fileID: 8421343764587312106, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   doubleTapInterval: 0.3
@@ -150,7 +148,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 77c5198bd7b7472c80994024e74f3ae6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Skills.SkillRepresentationOrchestrator
+  m_EditorClassIdentifier: Assembly-CSharp::Skills.SkillAnimationLibrary
   bubblePrepareDuration: 0.4
   bubbleFireDuration: 0.3
   bubbleFinishDuration: 0.2
@@ -196,5 +194,5 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83ae0c9b772d4eb8ab9fb0178a10ed2c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Boosters.BoosterRepresentationOrchestrator
+  m_EditorClassIdentifier: Assembly-CSharp::Boosters.BoosterPresenter
   boosterTargetPresentationConfig: {fileID: 11400000, guid: 31cd44c42c1d9d2478400e35267147e1, type: 2}

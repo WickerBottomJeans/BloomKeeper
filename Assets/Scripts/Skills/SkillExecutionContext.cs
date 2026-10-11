@@ -9,12 +9,13 @@ namespace Skills
     {
         public Tile[,] Grid { get; }
         public IReadOnlyList<ObjectiveTileTargetGroup> ObjectiveTargetGroups { get; }
-        public Dictionary<Vector2Int, int> AssignedButterflyCounts { get; } = new Dictionary<Vector2Int, int>();
+        public System.Random Random { get; }
 
-        public SkillExecutionContext(Tile[,] grid, IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups)
+        public SkillExecutionContext(Tile[,] grid, IReadOnlyList<ObjectiveTileTargetGroup> objectiveTargetGroups, System.Random random = null)
         {
             Grid = grid;
             ObjectiveTargetGroups = objectiveTargetGroups;
+            Random = random ?? new System.Random();
         }
     }
 }

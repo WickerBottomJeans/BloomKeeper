@@ -84,7 +84,7 @@ namespace DefaultNamespace
     }
 
     /// <summary>
-    /// Result of a shop purchase request.
+    /// skillPlan of a shop purchase request.
     /// </summary>
     public enum BuyShopOfferOutcome
     {

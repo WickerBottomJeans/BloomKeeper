@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DefaultNamespace;
 using DefaultNamespace.UI;
-using Petals;
 using UnityEngine;
 
 namespace Boosters
@@ -14,16 +13,17 @@ namespace Boosters
 
         private readonly PetalViewManager petalViewManager;
         private readonly TileViewManager tileViewManager;
-        private readonly BoardActionCoordinator boardActionCoordinator;
-        private readonly Dictionary<Vector2Int, ViewAccessKey> selectionAccessKeys = new Dictionary<Vector2Int, ViewAccessKey>();
+        private readonly BoardVisual _boardVisual;
+        private readonly PetalViewScope selectionViews;
 
         public override BoosterType BoosterType => DefaultNamespace.BoosterType.GardenersGlove;
 
-        public GardenersGlovePresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardActionCoordinator boardActionCoordinator)
+        public GardenersGlovePresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVisual boardVisual)
         {
             this.petalViewManager = petalViewManager;
             this.tileViewManager = tileViewManager;
-            this.boardActionCoordinator = boardActionCoordinator;
+            this._boardVisual = boardVisual;
+            selectionViews = new PetalViewScope(petalViewManager, SelectionViewUserName);
         }
 
         public override void ShowTargets(IReadOnlyList<Vector2Int> positions, BoosterTargetPresentationConfig.BoosterTargetMaterialMapping presentation)
@@ -51,40 +51,36 @@ namespace Boosters
                 return;
             }
 
-            if (selectionAccessKeys.ContainsKey(position)) throw new InvalidOperationException($"Gardener's Glove target at {position} is already selected.");
-            if (!petalViewManager.TryAcquireView(position, SelectionViewUserName, out ViewAccessKey accessKey)) throw new InvalidOperationException($"Gardener's Glove could not acquire the petal view at {position}.");
-
-            selectionAccessKeys.Add(position, accessKey);
+            if (selectionViews.Owns(position)) throw new InvalidOperationException($"Gardener's Glove target at {position} is already selected.");
+            selectionViews.AcquireRequired(position);
             try
             {
-                petalViewManager.ShowBoosterSelection(position, selectionAccessKeys);
+                petalViewManager.ShowBoosterSelection(position, selectionViews);
             }
             catch
             {
-                selectionAccessKeys.Remove(position);
-                petalViewManager.ReleaseView(accessKey);
+                selectionViews.Release(position);
                 throw;
             }
         }
 
         private void DeselectTarget(Vector2Int position)
         {
-            if (!selectionAccessKeys.TryGetValue(position, out ViewAccessKey accessKey)) throw new InvalidOperationException($"Gardener's Glove target at {position} is not selected.");
+            if (!selectionViews.Owns(position)) throw new InvalidOperationException($"Gardener's Glove target at {position} is not selected.");
 
-            petalViewManager.HideBoosterSelection(position, selectionAccessKeys);
-            petalViewManager.ReleaseView(accessKey);
-            selectionAccessKeys.Remove(position);
+            petalViewManager.HideBoosterSelection(position, selectionViews);
+            selectionViews.Release(position);
         }
 
         protected override UniTask Play(GardenersGloveRepresentationData representation)
         {
             ClearSelectedTargets();
-            return boardActionCoordinator.PlaySwap(representation.OriginPosition, representation.TargetPosition);
+            return _boardVisual.PlaySwap(representation.OriginPosition, representation.TargetPosition);
         }
 
         private void ClearSelectedTargets()
         {
-            var selectedPositions = new List<Vector2Int>(selectionAccessKeys.Keys);
+            var selectedPositions = new List<Vector2Int>(selectionViews.Keys);
             foreach (Vector2Int position in selectedPositions)
                 DeselectTarget(position);
         }

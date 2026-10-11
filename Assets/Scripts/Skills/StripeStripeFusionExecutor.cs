@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace Skills
 {
-    public class StripeStripeFusionExecutor : ISkillExecutor
+    public static class StripeStripeFusionExecutor
     {
-        public SkillUseResult Execute(SkillExecutionContext context, SkillActivation activation)
+        public static SkillPlan Execute(SkillExecutionContext context, SkillActivation activation)
         {
             if (activation.EffectType != SkillExecutionType.StripeStripeFusion)
                 throw new ArgumentException("Activation is not a Stripe + Stripe fusion.", nameof(activation));
@@ -37,13 +37,11 @@ namespace Skills
             }
 
             IReadOnlyList<Vector2Int> consumedInputPositions = activation.GetConsumedInputPositions();
-            var inputMatchGroup = new MatchGroup(new List<Vector2Int>(consumedInputPositions), MatchShape.None, isFromSkillCombo: true);
-            var effectMatchGroup = new MatchGroup(affectedPositions, MatchShape.None, new Petal(swapInitiator.Petal));
             var representation = new StripeStripeFusionRepresentationData(anchor, affectedPositions, consumedInputPositions);
-            return new SkillUseResult(effectMatchGroup, representation, inputMatchGroup);
+            return new SkillPlan(affectedPositions, new Petal(swapInitiator.Petal), representation, consumedInputPositions);
         }
 
-        private  bool IsStriped(SpecialSkillType skillType)
+        private static bool IsStriped(SpecialSkillType skillType)
         {
             return skillType == SpecialSkillType.StripedHorizontal || skillType == SpecialSkillType.StripedVertical;
         }

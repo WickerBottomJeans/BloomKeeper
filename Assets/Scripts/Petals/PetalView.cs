@@ -3,7 +3,6 @@ using DefaultNamespace.Utility;
 using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Petals;
 using UnityEngine;
 
 public class PetalView : MonoBehaviour

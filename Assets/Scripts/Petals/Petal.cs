@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using DefaultNamespace;
-using Petals;
 using UnityEngine;
 
 public class Petal

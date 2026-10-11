@@ -7,19 +7,10 @@ public class MatchGroup
 {
     public List<Vector2Int> TilePositions;
     public MatchShape Shape;
-    public Petal Causer;
-    
-    /// <summary>
-    /// From a skill combo swap. Resolver wont activate skill in this match nor animation
-    /// </summary>
-    public bool IsFromSkillCombo;
-    
-    public MatchGroup(List<Vector2Int> tilePositions, MatchShape shape, Petal causer = null, bool isFromSkillCombo = false)
+    public MatchGroup(List<Vector2Int> tilePositions, MatchShape shape)
     {
         TilePositions = tilePositions;
         Shape = shape;
-        Causer = causer;
-        IsFromSkillCombo = isFromSkillCombo;
     }
 }
 

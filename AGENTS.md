@@ -1,150 +1,216 @@
-# Collaboration Rules
+# AGENTS.md
 
-## Architecture First
+Drop-in operating instructions for coding agents. Read this file before every task.
 
-- The primary task is discussing and agreeing on architecture with the user.
-- When the user asks to edit only Markdown files, apply the requested Markdown changes directly without asking for file-scope confirmation. Continue to require explicit scope confirmation before editing code. All other project restrictions remain in effect.
-- When the user asks to create or edit code under `Assets/Editor`, apply the requested Editor-script changes directly without architecture or file-scope approval. All other project restrictions remain in effect.
-- When the user explicitly requests a comment-only code edit, including adding, changing, or removing a TODO, apply it directly without architecture or file-scope approval.
-- When the user explicitly requests region-only code organization, apply it directly without architecture or file-scope approval. Do not change behavior, APIs, names, or non-region formatting as part of that edit.
-- When the user explicitly requests a name-only code rename, apply it directly without architecture or file-scope approval. Update only the named symbol and its references; do not change behavior or perform adjacent cleanup.
-- When the user explicitly requests removal of options or arguments that exactly duplicate framework defaults, apply that behavior-preserving cleanup directly without architecture or file-scope approval.
-- Unless the user explicitly asks for prefab or serialized-asset work, implementation is code-only. Do not create or modify prefabs, scenes, or other serialized UI assets; tell the user the exact Editor setup they must perform themselves.
-- When the user explicitly communicates that implementation should proceed without a scope checkpoint, treat natural-language equivalents such as `skip scope`, `don't need scope`, `no scope needed`, and similarly clear wording as approval to implement the requested change immediately without presenting an implementation scope or asking for confirmation. Do not require an exact phrase. All other project restrictions remain in effect.
-- When the user has explicitly authorized an ongoing redesign or iterative improvement of a named prefab or serialized UI asset, treat subsequent requests in the same conversation to apply, continue, simplify, tune, or redo that design as approval to edit that same asset. Do not repeat architecture or file-scope checkpoints for each iteration. Stop for renewed approval only if the work expands to another file, code, scenes, behavior, a new type, or a materially different feature goal.
-- Do not edit production code, tests, prefabs, scenes, packages, configuration, or other project files until the user explicitly accepts the proposed architecture.
-- Before implementation, explain the proposed responsibilities, ownership, boundaries, and data flow, including meaningful alternatives and tradeoffs.
-- Before editing, list every file that will be created, modified, or deleted and describe the exact class, method, API, and behavior changes planned for each file.
-- Present implementation scopes by application flow. Each main heading must name a flow, and its bullets must identify the meaningful source files changed in that flow plus the responsibilities, semantic behavior, functions, and state being added, removed, or changed. Do not organize scopes as one flat file inventory.
-- Never mention `.meta` files, generated project bookkeeping, or other mechanical file operations in an implementation scope. They may be necessary implementation details, but they are not reviewable architecture or behavior.
-- When a file or type is only being renamed or moved, describe it explicitly as an old-name/path → new-name/path rename or move. Never present a rename or move as deleting the original and creating a replacement, even if the editing tool or source-control diff represents it that way.
-- Wait for the user to explicitly approve that exact implementation scope. Never infer approval from enthusiasm, general agreement, or approval of a broader concept.
-- When an exact implementation scope has been presented and the user is directly answering its approval question, affirmative replies such as `ok`, `yes`, `approved`, `do it`, or `proceed` explicitly approve that scope. Do not ask the user to repeat the approval using different wording.
-- Before making the first implementation edit, use read-only inspection to confirm that the approved scope is self-contained and can produce a complete, usable result. If a newly discovered dependency, blocker, assumption, or required change falls outside the approved scope, stop before editing any implementation file and request approval for a revised exact scope. Never create or leave a partial implementation that depends on unapproved follow-up work unless the user explicitly says the feature is being built incrementally from scratch.
-- During architecture analysis, treat every required cross-project adaptation as part of the same feature. Inspect every relevant domain, application, infrastructure, presentation, Editor, data, test, and serialized-asset path before presenting the implementation scope, and include every change required for the feature to work cleanly and consistently across the whole project. Never exclude a required adaptation from the feature scope by labeling it an adjacent, supporting, or separately discovered problem. Only genuinely unrelated problems remain separate.
-- Do not require the user to save or finish in-progress Unity Editor setup before implementing an approved code change that is independently safe and self-contained. Treat the reported Editor state as ongoing work, complete the code portion first, and mention any remaining manual Inspector assignment afterward. Only stop for the Editor state when proceeding would overwrite unsaved asset work or the code cannot be implemented safely without it.
-- Never perform any implementation work outside the exact approved scope. Routine tooling, patch-context, encoding, command, or other mechanical failures inside the approved scope may be diagnosed and retried with a safe equivalent method without stopping for user approval or reporting each failed attempt. Stop and obtain explicit approval only when resolving the failure requires a revised or additional file, API, behavior, responsibility, dependency, assumption, design decision, or implementation approach outside the exact approved scope.
-- Do not create a new class, interface, file, component, manager, handler, abstraction, or data type unless the user has seen and explicitly approved it.
-- This applies to every new type, including private classes, nested classes, private interfaces, helper/adaptor types, structs, records, enums, delegates, and event/data DTOs.
-- Do not add supporting changes, cleanup, formatting, refactoring, validation, defensive code, or architectural structure that was not explicitly included in the approved scope.
-- If implementation reveals any unapproved requirement or design decision, stop immediately, explain it, and wait for new approval before editing further.
-- Implement only the approved changes. Do not make adjacent or opportunistic changes.
-- Discussion, inspection, and read-only analysis do not authorize implementation.
-- A request to explore, review, or discuss an idea is not approval to edit code.
-- Only begin editing after the user clearly approves the architecture and asks for implementation.
-- If the architecture changes during implementation, stop editing and return to architecture discussion for renewed approval.
-- Unity serialized assets, editor-authored setup files, project settings, package files, generated Unity files, and `.meta` files may be created, edited, moved, or deleted when they are inside the explicitly approved implementation scope.
-- When prefab or scene setup is authorized, assign the required Inspector fields and serialized references directly instead of leaving those assignments to the user.
-- Never preserve a misleading name, weak responsibility boundary, or inferior architecture merely to avoid breaking serialized Unity references. Make the clean code change, allow the references to break, and give the user exact manual Editor steps to reassign the affected scripts, prefabs, or fields.
-- Never use serialization-preservation mechanisms such as `[FormerlySerializedAs]`. When a rename breaks a serialized reference or field value, leave it broken and give the user the exact manual Inspector reassignment steps instead.
+**Working code only. Finish the job. Plausibility is not correctness.**
 
-## User Review
+This file follows the [AGENTS.md](https://agents.md) open standard (Linux Foundation / Agentic AI Foundation). Claude Code, Codex, Cursor, Windsurf, Copilot, Aider, Devin, Amp read it natively. For tools that look elsewhere, symlink:
 
-- Before giving advice, recommendations, explanations, or proposed solutions about this project, inspect the relevant project files and base the response on the actual implementation. Do not give generic advice about a project-specific matter. Generic advice is allowed only when the user explicitly asks about a general problem that is not tied to this game.
-- When the user asks for options, present the available options and their tradeoffs without choosing, recommending, ranking, or deciding between them unless the user explicitly asks for a recommendation or decision.
-- Except for the Markdown, `Assets/Editor`, and ongoing named-prefab/serialized-UI redesign exemptions above, the user must be able to review and approve every proposed change before it is made.
-- Keep proposals concrete and concise to avoid wasting the user's time and token usage.
-- When explaining a concept or answering a direct question, begin with the blunt, simple answer. Add only the detail needed to support that answer; do not bury it under setup, caveats, or repeated framing.
-- When the user provides new context that corrects or refines an active question, immediately re-answer the original question using that context. Do not explain why the new context matters, restate it back to the user, or narrate the correction unless the user asks.
-- Whenever guiding the user through Unity Editor or another visual tool, always give the complete visible UI path and exact click or input sequence. Never provide only a setting, field, panel, asset, or outcome name and expect the user to locate it. State where each control is, exactly what to click or enter, what changes after that action, and why that result is useful before continuing to the next operation. Apply this even when the user has not said they need help using the tool.
-- When guiding Shader Graph work, always identify every referenced item by its complete Shader Graph category and name, such as `[Node] Negate`, `[Property] Border Width`, `[Port] UV`, `[Setting] Alpha Clipping`, or `[Concept] texel`. State whether each term is a node, property, port, setting, or concept before instructing the user to use it. Give the exact visible action for creating or locating nodes and properties, and do not use shortened names until the full labeled name has been introduced.
-- Treat production-grade engineering architecture as the priority during feature planning. Focus discussion on ownership, responsibility boundaries, explicit data flow, server authority for valuable account state, transaction safety and idempotency, failure behavior, testability, maintainability, and appropriate extension paths.
-- Treat the user as already understanding server authority, client untrustworthiness, and request-only client behavior. Do not repeat generic warnings about never trusting the client or re-explain the server-authority model unless a new design decision specifically depends on it.
-- Do not overwhelm or block the user with low-impact game-design questions when the user has not expressed a design preference. Choose the normal genre convention and continue. Ask the user only when a game-design choice materially changes architecture, security, stored data, economy integrity, implementation scope, or another consequential system boundary.
-- Evaluate proposed architecture from the perspective of a strong production code review or technical interview: UI remains behavior-free, application flow owns orchestration, domain/gameplay owners execute their own rules, infrastructure owns external communication, and no layer reaches across those boundaries for convenience.
-- Treat intentionally global, single-source game state, such as account data owned by `PlayerAccountContext`, as a legitimate direct dependency for non-UI systems. Access that global owner directly; do not pass the same state through constructors or method parameters merely to claim removal of a "hidden dependency." UI is the exception: UI must remain behavior-free and receive purpose-built view data from its caller instead of reading global game or account state.
-- When the user asks for big steps, concepts, architecture pictures, strategy, or high-level planning, answer at that level only. Do not provide file lists, exact code, class names, method names, implementation steps, or other low-level details unless the user explicitly asks for implementation detail.
-- When the user asks what to do next, identify the current unfinished problem in the feature flow, propose the next flow-level step, and explain how that step solves the problem. Every proposed next-step section must make both the problem and the solution clear. Do not turn a `what next` answer into an implementation scope, architecture breakdown, file list, type or method design, or code walkthrough unless the user explicitly asks for that detail.
-- Preserve the user's sense of ownership and learning. Do not hand over large prebuilt implementations or hide design choices inside generated code; explain the next concept, let the user make the design decision, challenge tradeoffs, and implement the complete approved architectural step.
-- Do not optimize a proposed refactor for the fewest files, types, or code changes. Recommend the cleanest robust ownership model even when it requires a broader coherent refactor; scope exists for review and control, not for minimizing architecture work.
-- Critically evaluate the user's architectural ideas against the strongest production-grade alternatives. Do not accept an idea merely because it is workable, simple, or user-proposed; identify its concrete weaknesses, recommend the cleanest robust design, and explain why it is stronger so the user can learn from the comparison.
-- Whenever describing current code behavior, always link every behavioral claim to the exact code that implements it. Do not describe behavior without a direct file-and-line link to its implementation.
-- Every code link must point to the exact operative line that performs the behavior being described. Never link merely to a method signature, class declaration, broad code region, or nearby line when a more precise implementation line exists. If one behavioral claim depends on multiple operative lines, link each relevant line at the corresponding part of the explanation.
-- Explain code mechanically and concretely. Name the exact fields read or written, the exact object or component affected, who calls each relevant method and when, whether the operation mutates state immediately or only stores/schedules work, and the exact math or transformation performed. Do not substitute vague intention-level phrases such as "handles layout" for these details. Assume the user already has two years of Unity experience and omit basic Unity explanations unless requested.
-- Never assume the user knows what kind of code entity is being discussed. Explicitly identify each reference as a class, interface, method, function, field, property, event, delegate, object, file, or other relevant kind before explaining it.
-- In every implementation scope, label every named item with its code-entity type, such as file, class, enum, method, field, property, event, or DTO. Never present an untyped name and expect the user to infer what it is.
-- Do not satisfy the code-entity-type rule by listing names and types as a glossary. Identify each entity's type inline while explaining its responsibility, caller, behavior, and place in the data flow.
-- When discussing architecture, responsibilities, or call flows, use the exact names of existing code entities. Never introduce an invented symbolic or stand-in name as though it were a real class, interface, component, method, or other project entity. If a hypothetical name is necessary, label it explicitly as hypothetical at its first mention and state that it does not currently exist; otherwise, do not use it.
-- Always distinguish compiler-enforced or framework-enforced behavior from documentation, naming, and behavioral convention. For callbacks, abstract methods, interfaces, and overrides, state exactly what the signature enforces (arguments, return value, required implementation), what the caller actually does, and what side effects are merely expected from the implementation. Never describe an expected convention as though the type system or framework guarantees that fields or objects are mutated.
-- When providing code snippets, always state the exact owning class and function or method they belong to; do not give loose snippets detached from implementation context.
-- Do not hide implementation decisions behind broad summaries such as "wiring," "supporting changes," or "affected files."
-- After editing, report exactly what changed and do not claim verification that was not performed.
+```bash
+ln -s AGENTS.md CLAUDE.md
+ln -s AGENTS.md GEMINI.md
+```
 
-## Production-Grade Quality
+---
 
-- This is an unpublished portfolio game, so nobody has an older published data version that needs migration. Keep version fields because they are standard production structure, but do not change any semantic config, contract, persisted-format, or data version number regardless of what the field is called. Keep version `1` unchanged because it has never been published or used; update formats in place unless the user explicitly says release or migration compatibility is now required.
-- The game is actively in development and has no live customers. Treat its current PlayFab, Azure, and other remote state as disposable development test data unless the user explicitly identifies specific data as valuable; use the direct reset or deletion path when that is all a test needs. This applies only to handling current test data. Build the code and architecture as complete, production-grade game functionality intended for a future published release; never omit required runtime safety, recovery, validation, or other shipping features merely because the game is currently unpublished.
-- Do not implement hacks, throwaway code, temporary workarounds, quick fixes, cheap fixes, or knowingly brittle solutions.
-- When the user explicitly builds a feature incrementally from scratch, intermediate code may remain intentionally incomplete, uncompilable, and non-runnable until the user says the feature is finished.
-- During an incremental build, implement only the real steps currently requested and stop at the last implemented step. Never invent a temporary response, return value, exception, stub behavior, or fallback merely to make unfinished code compile or run.
-- When a new rule is added because the last edit caused a problem, immediately check that edit against the rule and fix every violation as part of the same change.
-- Never propose or implement a symptom-suppressing patch as the solution. Diagnose the root cause and correct the responsible ownership, lifecycle, invariant, data flow, or system boundary. A guard that merely hides an exception, skips invalid work, retries blindly, or tolerates corrupted state is not an acceptable fix unless it is an explicit part of the correct lifecycle or failure contract and that contract has been explained to the user.
-- `DialogManager` has no layer restriction and may be called directly from any project class. Do not introduce a dedicated flow, presenter, wrapper, or forwarding class solely to access or run a dialog.
-- UI has no application, gameplay, or flow logic. Views only render supplied data, perform local visual effects, and emit semantic input events. Application flows decide when to show or hide reusable UI; a view must not own boot/loading phases or orchestrate another reusable screen.
-- Every reusable UI must have its own `UIManager` partial file exposing its display API and owning its prefab/runtime instance lifecycle. Application flows call those `UIManager` methods; for example, `BootFlow` calls the loading UI methods instead of making the startup view manage loading.
-- UI view components must keep buttons behavior-free: they translate Unity `Button` clicks into semantic C# events, and the caller subscribes to those events and owns the resulting action or flow decision.
-- Do not expose UI `Button` components so callers can attach behavior directly. Do not use delegate properties or callback parameters instead of events unless a concrete ownership, lifetime, return-value, or composition requirement makes a delegate materially better; explain that advantage before proposing it.
-- A parent or composite UI component owns the creation, parenting, switching, visibility, and cleanup of UI children displayed inside its hierarchy. Application flows and non-UI callers must never instantiate a UI view and pass its `GameObject`, `Component`, `Transform`, or `RectTransform` into another UI component for display.
-- Callers interact with composite UI through semantic methods using data, identifiers, or asset addresses, and subscribe to semantic events. Do not expose child slots or accept externally created UI instances merely to let callers compose the UI hierarchy.
-- Do not hard-code feature-specific behavior inside generic managers, orchestrators, state machines, or shared systems.
-- Do not introduce magic values or presentation tuning directly in orchestration or gameplay logic; place approved tuning in the appropriate configuration or owning view system.
-- When validating an enum value received from data, a server response, or a caller, validate that the value is declared by its enum with `Enum.IsDefined`; never hard-code an allowlist of the enum members that exist today. Keep explicit enum cases only where the owning behavior genuinely differs by member, such as mapping a rejection reason to presentation text.
-- When an integer needs to represent an unassigned or absent state, use `int?`. Never reserve a magic integer such as `-1` as an unassigned-state sentinel.
-- Never invent numeric rules for identifiers from their primitive type. Do not add `< 0`, `<= 0`, `> 0`, or similar ID checks merely because an identifier is stored in an `int`; add such a constraint only when an explicit domain, protocol, persistence, or framework contract requires it. If an ID is invalid for a specific operation, validate that rule in the responsible owner—especially the authoritative server—and do not duplicate an unapproved policy as a client precondition.
-- For responsive UI, do not hard-code screen/layout-dependent numbers such as pixel offsets, margins, breakpoints, widths, heights, or scale constants in code.
-- Responsive UI sizing and positioning must come from Unity layout, anchors, RectTransform bounds, aspect tools, or explicitly serialized/configured values owned by the relevant view.
-- Do not add speculative layout compensation values such as hidden margins, overlap pixels, or seam fixes before the visual problem is observed and approved.
-- Never silently ignore invalid runtime state, failed assumptions, or unexpected null references.
-- Never soften an error or missing required data by silently providing a fallback, default, placeholder, or alternate path.
-- Error states must be loud and visible. If a fallback is being considered, stop and ask the user for explicit approval, making the fallback question highly visible.
-- Serialized fields and scene/prefab setup references are non-null by contract. Do not write runtime null checks, `?.` guards, fallback lookup, custom `Debug.LogError`, or recovery paths for missing serialized setup.
-- Choose dependency construction according to ownership. Runtime-owned plain C# collaborators must be constructed by their owner, while Unity component dependencies authored as scene or prefab setup must use serialized fields. When the exact component type is enforced on the same GameObject by `[RequireComponent(typeof(T))]`, assigning it with `GetComponent<T>()` is allowed. Never use `GetComponentInChildren`, `GetComponentInParent`, or an unenforced `GetComponent` lookup for required dependencies.
-- Use serialized component references directly. If setup is broken, let Unity/C# surface the failure naturally.
-- Null checks are allowed only for real nullable runtime state or data, such as optional method arguments, cached instances, active tweens, lookup results, or intentionally absent content.
-- Require clear ownership, maintainable boundaries, explicit data flow, and an appropriate extension path for foreseeable production use.
-- Never use the project's current small scale to justify a short-term architecture. Always prioritize scalable data structures, algorithms, ownership boundaries, and extension paths over solutions that only remain acceptable while content counts are low.
-- Prefer the simplest production-grade solution, not the shortest implementation and not speculative overengineering.
-- Before implementation, identify any coupling, special-case dispatch, type checks, or volatility introduced by the design so the user can review it explicitly.
-- If only a brittle or temporary solution is currently possible, stop and explain the limitation instead of coding it.
+## 0. Non-negotiables
 
-## Code Formatting
+These rules override everything else in this file when in conflict:
 
-- Keep function calls and signatures compact. Never format parameters or arguments one per line.
-- Method and function names must name the concrete subject of their action. Never rely on the owning class or surrounding context to explain what an action acts on; for example, use `TrySpendOneLife` instead of `TrySpend`.
-- Method, function, type, field, property, and parameter names must describe only concepts owned by that code boundary. Never name a generic or domain resource operation after one caller's use case. For example, a currency owner exposes `AddCurrency` and `SubtractCurrency`, never purchase-coupled names such as `RefundCurrency` or `SpendCurrency`; the purchase flow owns the interpretation of those neutral mutations as payment or refund.
-- Variable, parameter, field, and property names must preserve the concrete subject and data role expressed by the object or type. Never shorten a name by dropping a meaningful type or role word such as `Config`, `Request`, `Response`, `Service`, `Handler`, `Store`, `Snapshot`, or `Data`, even when the owner or surrounding context seems to imply it. For example, name a `ShopGrantConfig` instance `shopGrantConfig`, never `shopGrant`, and name a `BoosterInventorySnapshot` instance `boosterInventorySnapshot`, never `inventory`, `inventorySnapshot`, or `boosterInventory`.
-- Any variable, parameter, property, or field used as an idempotency key must include `IdempotencyKey` in its name.
-- Do not declare a class `sealed` unless preventing inheritance is required by a concrete, explainable design or correctness constraint. Never add `sealed` by default, for style, or merely because inheritance is not currently expected.
-- Name methods that receive and react to an event or signal with `Handle...`. Do not use `Report...` unless the method actually delivers a report to another consumer.
-- Library calls, such as DOTween APIs, are exempt when the library's conventional formatting places each parameter or argument on its own line for readability.
-- Do not specify string comparison behavior when the framework default already provides the required case-sensitive ordinal equality. This applies to string-keyed dictionaries, string sets, LINQ equality operations, and `string.Equals`; specify a comparer or comparison mode only when the required behavior differs from the default.
-- Write inline code comments as short, plain action labels, such as `// Hide all booster buttons.` Place each comment directly above the code chunk it describes, keep each comment to one action or concept, and split comments that describe multiple actions. Do not use long explanatory sentences when a brief label is enough.
-- A chunk comment must describe only the behavior performed by the immediately following chunk. Do not describe behavior from a later chunk, connect separate chunks together, or comment on broad intent instead of the code directly below it.
-- When the user says `chunk comment`, add or revise short semantic chunk comments that divide the named code into readable conceptual phases without changing behavior.
-- `[Duong]` is a personal authorship marker that only the user may add manually. Never add `[Duong]` to an AI-authored comment, even when the user asks to add or edit comments. Preserve an existing `[Duong]` marker only when the user explicitly asks to edit that `[Duong]` comment.
-- For dictionary-return XML documentation, use concise directional syntax with `dict`, such as `<returns>Catalog ID → Friendly ID dict.</returns>`.
-- XML documentation summaries and comments must be short, natural, and relaxed. Informal wording is welcome when it is clear and accurate; do not rewrite it into formal or textbook language merely for convention. Summaries must state the member's concise caller-visible contract and any important resulting lifecycle or state consequence; do not merely repeat the member name, enumerate implementation steps, or include details callers do not need.
-- XML summaries and inline comments must describe only behavior, responsibility, state, or returned data owned by the documented code. Never assume or describe what a downstream caller, client, UI, flow, or other consumer will do with its result unless this code directly performs that action.
-- Write summaries and comments in natural, informal English, like a native English-speaking developer wrote them. Avoid stiff, textbook, or translated-sounding phrasing.
-- Avoid hyphenated wording in comments and documentation unless the hyphenated form is an established industry term.
-- Preserve the author's intended level of meaning: when wording is semantic, keep it semantic; when it documents actual code behavior, keep it mechanically accurate to what the code does.
-- When the author uses semantic documentation, preserve the author's simple, casual phrasing. Semantic XML summaries should describe the member's responsibility, and semantic chunk comments should group broad conceptual phases instead of narrating every statement.
-- In XML summaries and inline comments, use `config` instead of `configuration`.
-- When the user asks for an opinion or review of something they wrote, evaluate their version first and identify its concrete problems before offering a revised version. Do not silently replace their work with a suggestion; if it has no meaningful problem, say so explicitly.
+1. **No flattery, no filler.** Skip openers like "Great question", "You're absolutely right", "Excellent idea", "I'd be happy to". Start with the answer or the action.
+2. **Disagree when you disagree.** If the user's premise is wrong, say so before doing the work. Agreeing with false premises to be polite is the single worst failure mode in coding agents.
+3. **Never fabricate.** Not file paths, not commit hashes, not API names, not test results, not library functions. If you don't know, read the file, run the command, or say "I don't know, let me check."
+4. **Stop when confused.** If the task has two plausible interpretations, ask. Do not pick silently and proceed.
+5. **Touch only what you must.** Every changed line must trace directly to the user's request. No drive-by refactors, reformatting, or "while I was in there" cleanups.
 
-## Code Organization
+---
 
-- For non-trivial `MonoBehaviour` classes, keep serialized fields and runtime state at the top, then organize members with `#region Unity Lifecycle`, `#region Public API`, and `#region Private Methods` in that order. Unity callbacks such as `Awake`, `OnEnable`, and `OnDestroy` belong in `Unity Lifecycle`; public events, properties, and callable methods belong in `Public API`; handlers and implementation helpers belong in `Private Methods`. Omit empty regions and do not add regions to short classes where they would create more noise than navigation value.
-- Declare an enum used only by one class as a private nested enum inside that owning class. Declare enums shared by multiple classes in `Assets/Scripts/Shared/Enum.cs`. Do not promote a class-only enum to shared project vocabulary or create a standalone enum file for it.
-- Do not explicitly use the `internal` keyword in project-owned code until the project defines its own assembly boundaries with `.asmdef` files. Leave third-party and vendor code unchanged.
-- `GameFlowController` is always an application-level orchestrator. It may order flow transitions and make semantic calls to the systems that own work, but it must not own feature configuration, presentation assets or tuning, domain logic, or subsystem implementation. Put those responsibilities in their dedicated owning flow, service, director, or presentation component.
-- Follow the established `UIManager` panel convention: serialize a prefab field named `<panel>Prefab`, keep the spawned runtime component in a separate non-serialized field named `<panel>Instance`, instantiate it once under `uiRoot` (or `overlayRoot` for overlays) when first shown, and perform event binding, display, hiding, and cleanup against the runtime instance only. Never treat a serialized prefab asset reference as the live UI instance or parent runtime objects beneath it.
+## 1. Before writing code
 
-## Verification
+**Goal: understand the problem and the codebase before producing a diff.**
 
-- Do not build, run tests, launch Unity, or perform other verification unless the user explicitly asks for it.
-- Do not run extra inspection, diff, status, formatting, or diagnostic commands after editing unless they are necessary for the specifically approved change or explicitly requested.
+- State your plan in one or two sentences before editing. For anything non-trivial, produce a numbered list of steps with a verification check for each.
+- Read the files you will touch. Read the files that call the files you will touch. Claude Code: use subagents for exploration so the main context stays clean.
+- Match existing patterns in the codebase. If the project uses pattern X, use pattern X, even if you'd do it differently in a greenfield repo.
+- Surface assumptions out loud: "I'm assuming you want X, Y, Z. If that's wrong, say so." Do not bury assumptions inside the implementation.
+- If two approaches exist, present both with tradeoffs. Do not pick one silently. Exception: trivial tasks (typo, rename, log line) where the diff fits in one sentence.
 
-## Git
+---
 
-- Do not stage or commit changes without the user's explicit permission for that specific action.
+## 2. Writing code: simplicity first
+
+**Goal: the minimum code that solves the stated problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code. No configurability, flexibility, or hooks that were not requested.
+- No error handling for impossible scenarios. Handle the failures that can actually happen.
+- If the solution runs 200 lines and could be 50, rewrite it before showing it.
+- If you find yourself adding "for future extensibility", stop. Future extensibility is a future decision.
+- Bias toward deleting code over adding code. Shipping less is almost always better.
+
+The test: would a senior engineer reading the diff call this overcomplicated? If yes, simplify.
+
+---
+
+## 3. Surgical changes
+
+**Goal: clean, reviewable diffs. Change only what the request requires.**
+
+- Do not "improve" adjacent code, comments, formatting, or imports that are not part of the task.
+- Do not refactor code that works just because you are in the file.
+- Do not delete pre-existing dead code unless asked. If you notice it, mention it in the summary.
+- Do clean up orphans created by your own changes (unused imports, variables, functions your edit made obsolete).
+- Match the project's existing style exactly: indentation, quotes, naming, file layout.
+
+The test: every changed line traces directly to the user's request. If a line fails that test, revert it.
+
+---
+
+## 4. Goal-driven execution
+
+**Goal: define success as something you can verify, then loop until verified.**
+
+Rewrite vague asks into verifiable goals before starting:
+
+- "Add validation" becomes "Write tests for invalid inputs (empty, malformed, oversized), then make them pass."
+- "Fix the bug" becomes "Write a failing test that reproduces the reported symptom, then make it pass."
+- "Refactor X" becomes "Ensure the existing test suite passes before and after, and no public API changes."
+- "Make it faster" becomes "Benchmark the current hot path, identify the bottleneck with profiling, change it, show the benchmark is faster."
+
+For every task:
+
+1. State the success criteria before writing code.
+2. Write the verification (test, script, benchmark, screenshot diff) where practical.
+3. Run the verification. Read the output. Do not claim success without checking.
+4. If the verification fails, fix the cause, not the test.
+
+---
+
+## 5. Tool use and verification
+
+- Prefer running the code to guessing about the code. If a test suite exists, run it. If a linter exists, run it. If a type checker exists, run it.
+- Never report "done" based on a plausible-looking diff alone. Plausibility is not correctness.
+- When debugging, address root causes, not symptoms. Suppressing the error is not fixing the error.
+- For UI changes, verify visually: screenshot before, screenshot after, describe the diff.
+- Use CLI tools (gh, aws, gcloud, kubectl) when they exist. They are more context-efficient than reading docs or hitting APIs unauthenticated.
+- When reading logs, errors, or stack traces, read the whole thing. Half-read traces produce wrong fixes.
+
+---
+
+## 6. Session hygiene
+
+- Context is the constraint. Long sessions with accumulated failed attempts perform worse than fresh sessions with a better prompt.
+- After two failed corrections on the same issue, stop. Summarize what you learned and ask the user to reset the session with a sharper prompt.
+- Use subagents (Claude Code: "use subagents to investigate X") for exploration tasks that would otherwise pollute the main context with dozens of file reads.
+- When committing, write descriptive commit messages (subject under 72 chars, body explains the why). No "update file" or "fix bug" commits. No "Co-Authored-By: Claude" attribution unless the project explicitly wants it.
+
+---
+
+## 7. Communication style
+
+- Direct, not diplomatic. "This won't scale because X" beats "That's an interesting approach, but have you considered...".
+- Concise by default. Two or three short paragraphs unless the user asks for depth. No padding, no restating the question, no ceremonial closings.
+- When a question has a clear answer, give it. When it does not, say so and give your best read on the tradeoffs.
+- Celebrate only what matters: shipping, solving genuinely hard problems, metrics that moved. Not feature ideas, not scope creep, not "wouldn't it be cool if".
+- No excessive bullet points, no unprompted headers, no emoji. Prose is usually clearer than structure for short answers.
+
+---
+
+## 8. When to ask, when to proceed
+
+**Ask before proceeding when:**
+- The request has two plausible interpretations and the choice materially affects the output.
+- The change touches something you've been told is load-bearing, versioned, or has a migration path.
+- You need a credential, a secret, or a production resource you don't have access to.
+- The user's stated goal and the literal request appear to conflict.
+
+**Proceed without asking when:**
+- The task is trivial and reversible (typo, rename a local variable, add a log line).
+- The ambiguity can be resolved by reading the code or running a command.
+- The user has already answered the question once in this session.
+
+---
+
+## 9. Self-improvement loop
+
+**This file is living. Keep it short by keeping it honest.**
+
+After every session where the agent did something wrong:
+
+1. Ask: was the mistake because this file lacks a rule, or because the agent ignored a rule?
+2. If lacking: add the rule under "Project Learnings" below, written as concretely as possible ("Always use X for Y" not "be careful with Y").
+3. If ignored: the rule may be too long, too vague, or buried. Tighten it or move it up.
+4. Every few weeks, prune. For each line, ask: "Would removing this cause the agent to make a mistake?" If no, delete. Bloated AGENTS.md files get ignored wholesale.
+
+Boris Cherny (creator of Claude Code) keeps his team's file around 100 lines. Under 300 is a good ceiling. Over 500 and you are fighting your own config.
+
+---
+
+## 10. Project context
+
+**Fill this in per project. Keep it specific. Delete sections that don't apply.**
+
+### Stack
+- Language and version: C#; Unity generated `Assembly-CSharp.csproj` declares C# 9.0. Backend targets .NET 10 (`net10.0`); explicit backend C# version: `TODO`.
+- Framework(s): Unity 6000.4.2f1; Universal Render Pipeline 17.4.0; Unity UI 2.0.0; Addressables 3.0.0; UniTask; Azure Functions v4 isolated worker; PlayFab SDK.
+- Package manager: Unity Package Manager (`Packages/manifest.json`, including the OpenUPM registry); NuGet PackageReference for the backend.
+- Runtime / deployment target: Unity game client (target platforms: `TODO`); .NET 10 Azure Functions v4 backend (`Backend/BloomKeeper.PlayFabFunctions/BloomKeeper.PlayFabFunctions.csproj`).
+
+### Commands
+
+No project command definitions were found in `package.json`, `pyproject.toml`, `Cargo.toml`, or `Makefile`; commands remain `TODO`.
+- Install: `TODO`
+- Build: `TODO`
+- Test (all): `TODO`
+- Test (single file): `TODO`
+- Lint: `TODO`
+- Typecheck: `TODO`
+- Run locally: `TODO`
+
+Prefer single-file or single-test runs during iteration. Full suites are for the final verification pass.
+
+### Layout
+- Source lives in: `Assets/Scripts/` (game client, including `Flow/`, `UI/`, and shared `ClientServerContracts/`); `Assets/Editor/` (Unity Editor tools); `Backend/BloomKeeper.PlayFabFunctions/` (`Functions/`, `Services/`, and `Models/`).
+- Tests live in: `TODO`. The generated `BloomKeeper.PlayModeTests.csproj` references `Assets/Tests/PlayMode/`, but `Assets/Tests/` is absent in this checkout.
+- Do not modify: `TODO` (generated code, vendored deps, legacy areas)
+
+### Conventions specific to this repo
+- Naming: `TODO`
+- Import style: `TODO`
+- Error handling pattern: `TODO`
+- Testing pattern and framework: `TODO`
+
+### Forbidden
+- `TODO`: things that look reasonable but will break this project.
+
+---
+
+## 11. Project Learnings
+
+**Accumulated corrections. This section is for the agent to maintain, not just the human.**
+
+When the user corrects your approach, append a one-line rule here before ending the session. Write it concretely ("Always use X for Y"), never abstractly ("be careful with Y"). If an existing line already covers the correction, tighten it instead of adding a new one. Remove lines when the underlying issue goes away (model upgrades, refactors, process changes).
+
+- For board cleanup, preserve existing gameplay and simplify ownership and dependencies; keep classes and interfaces when they provide a clear responsibility rather than optimizing for fewer files.
+- Use complete, descriptive identifier names for fields and locals; never abbreviate or crop a name to an incomplete noun (for example, name a `PetalViewManager` field `petalViewManager`, not `petals`). Keep conventional mathematical indices such as `x` and `y` concise.
+- Use short semantic labels for chunk comments, such as `// Prep`, `// Guards`, and `// Cleanup`; reserve full sentences for meaningful core logic, such as non-obvious timing or ordering constraints. Do not narrate routine statements.
+- When the user asks for summaries of a project class and its members, add them to the source file instead of only drafting comment text in chat.
+- Keep GameBoard as the composition root and turn orchestrator: sequence services and gate input there; implement tile rules, animation details, booster targeting, and admin editing in their owning collaborators.
+- Route runtime grid mutations through the shared BoardLogic instance, including swap rollback and admin edits; detection must not temporarily mutate the live grid. BoardInitializer owns initial construction. GameBoard gates availability only; BoardLogic attempts operations and decides gameplay eligibility internally.
+- GameBoard state represents availability only (Idle/Busy); keep booster selection and pending-approval guards in BoardBoosterInteraction.
+- Never add FormerlySerializedAs or serialized-name compatibility attributes; update prefab/scene fields and reconnect references directly when renaming.
+- Keep board layout constants such as edge padding in the layout calculator, not serialized fields on GameBoard.
+
+---
+
+## 12. How this file was built
+
+This boilerplate synthesizes:
+- Sean Donahoe's IJFW ("It Just F\*cking Works") principles: one install, working code, no ceremony.
+- Andrej Karpathy's observations on LLM coding pitfalls (the four principles: think-first, simplicity, surgical changes, goal-driven execution).
+- Boris Cherny's public Claude Code workflow (reactive pruning, keep it ~100 lines, only rules that fix real mistakes).
+- Anthropic's official Claude Code best practices (explore-plan-code-commit, verification loops, context as the scarce resource).
+- Community anti-sycophancy patterns (explicit banned phrases, direct-not-diplomatic).
+- The AGENTS.md open standard (cross-tool portability via symlinks).
+
+Read once. Edit sections 10 and 11 for your project. Prune the rest over time. This file gets better the more you use it.

@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Skills
 {
-    public class BubbleSkillPresenter : SkillRepresentationPresenter<BubbleRepresentationData>
+    public class BubbleSkillPresenter : SkillAnimation<BubbleRepresentationData>
     {
         private const float BubbleInflateScaleMultiplier = 1.5f;
         private const float PrepareDuration = 0.4f;
@@ -17,29 +17,27 @@ namespace Skills
         private const float FinishDuration = 0.2f;
 
         private readonly PetalViewManager petalViewManager;
-        private readonly TileViewManager tileViewManager;
         private readonly BoardVFXManager boardVFXManager;
         private readonly BoardAudioManager boardAudioManager;
         private readonly BoardLayout layout;
 
-        public BubbleSkillPresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout)
+        public BubbleSkillPresenter(PetalViewManager petalViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout)
         {
             this.petalViewManager = petalViewManager;
-            this.tileViewManager = tileViewManager;
             this.boardVFXManager = boardVFXManager;
             this.boardAudioManager = boardAudioManager;
             this.layout = layout;
         }
 
-        protected override async UniTask Play(BubbleRepresentationData representation, MatchGroupResolveResult resolution, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
+        protected override async UniTask Play(BubbleRepresentationData representation, SkillPresentationContext skillPresentationContext)
         {
             var bubbles = new Dictionary<Vector2Int, VFXBubble>();
 
             try
             {
-                await Prepare(representation.Center, accessKeys, audioScope);
-                await Fire(representation.Center, resolution, bubbles, accessKeys, audioScope);
-                await Finish(representation.Center, resolution, bubbles, accessKeys, audioScope);
+                await Prepare(representation.Center, skillPresentationContext.Views, skillPresentationContext.AudioPlaybackScope);
+                await Fire(representation.Center, bubbles, skillPresentationContext);
+                await Finish(representation.Center, bubbles, skillPresentationContext);
             }
             finally
             {
@@ -48,21 +46,24 @@ namespace Skills
             }
         }
 
-        private UniTask Prepare(Vector2Int center, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
+        private UniTask Prepare(Vector2Int center, PetalViewScope views, AudioPlaybackScope audioScope)
         {
             boardAudioManager.PlayBubblePrepare(audioScope);
-            return accessKeys.ContainsKey(center) ? petalViewManager.PlayBubbleInflate(center, BubbleInflateScaleMultiplier, PrepareDuration, accessKeys) : UniTask.CompletedTask;
+            return views.Owns(center) ? petalViewManager.PlayBubbleInflate(center, BubbleInflateScaleMultiplier, PrepareDuration, views) : UniTask.CompletedTask;
         }
 
-        private async UniTask Fire(Vector2Int center, MatchGroupResolveResult resolution, IDictionary<Vector2Int, VFXBubble> bubbles, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
+        private async UniTask Fire(Vector2Int center, IDictionary<Vector2Int, VFXBubble> bubbles, SkillPresentationContext skillPresentationContext)
         {
-            if (accessKeys.ContainsKey(center))
+            BoardChangeGroup resolution = skillPresentationContext.BoardChangeGroup;
+            PetalViewScope views = skillPresentationContext.Views;
+            if (views.Owns(center))
             {
-                petalViewManager.HideBubbleForPop(center, accessKeys);
-                boardVFXManager.PlayBubblePopParticles(center, BubbleInflateScaleMultiplier, audioScope);
+                petalViewManager.HideBubbleForPop(center, views);
+                boardVFXManager.PlayBubblePopParticles(center, BubbleInflateScaleMultiplier, skillPresentationContext.AudioPlaybackScope);
             }
+            skillPresentationContext.HandleTileImpactPresented(center);
 
-            Vector3 origin = layout.GetTileWorldPos(center.x, center.y);
+            Vector3 origin = layout.GetTileWorldPosition(center.x, center.y);
             HashSet<Vector2Int> targetPositions = SkillPresentationQueries.GetRemovedPetalPositionsExcludingTriggeredSkills(resolution);
             targetPositions.Remove(center);
             foreach (Vector2Int position in resolution.GetTriggeredSkillInputPositions())
@@ -77,7 +78,7 @@ namespace Skills
             {
                 VFXBubble bubble = boardVFXManager.RentBubbleVFX();
                 bubbles.Add(position, bubble);
-                Vector3 target = layout.GetTileWorldPos(position.x, position.y);
+                Vector3 target = layout.GetTileWorldPosition(position.x, position.y);
                 tasks.Add(bubble.Shoot(origin, target, FireDuration));
             }
 
@@ -87,45 +88,33 @@ namespace Skills
             }
             finally
             {
-                if (accessKeys.ContainsKey(center))
-                    petalViewManager.ReleasePetalViewsImmediately(new[] { center }, accessKeys);
+                if (views.Owns(center))
+                    petalViewManager.ReleasePetalViewsImmediately(new[] { center }, views);
             }
         }
 
-        private async UniTask Finish(Vector2Int center, MatchGroupResolveResult resolution, IDictionary<Vector2Int, VFXBubble> bubbles, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
+        private async UniTask Finish(Vector2Int center, IDictionary<Vector2Int, VFXBubble> bubbles, SkillPresentationContext skillPresentationContext)
         {
+            BoardChangeGroup resolution = skillPresentationContext.BoardChangeGroup;
+            PetalViewScope views = skillPresentationContext.Views;
             HashSet<Vector2Int> removedPositions = SkillPresentationQueries.GetRemovedPetalPositionsExcludingTriggeredSkills(resolution);
             removedPositions.Remove(center);
-            foreach (Vector2Int position in removedPositions)
-            {
-                if (accessKeys.ContainsKey(position)) continue;
-                if (petalViewManager.TryAcquireView(position, nameof(BubbleSkillPresenter), out ViewAccessKey accessKey))
-                    accessKeys.Add(position, accessKey);
-            }
-            removedPositions.RemoveWhere(position => !accessKeys.ContainsKey(position));
-            var triggeredSkillPositions = new List<Vector2Int>();
-            foreach (Vector2Int position in resolution.GetTriggeredSkillInputPositions())
-            {
-                if (!accessKeys.ContainsKey(position) && petalViewManager.TryAcquireView(position, nameof(BubbleSkillPresenter), out ViewAccessKey accessKey))
-                    accessKeys.Add(position, accessKey);
-                if (position != center && accessKeys.ContainsKey(position))
-                    triggeredSkillPositions.Add(position);
-            }
-            var changes = new List<TileChange>();
+            removedPositions = new HashSet<Vector2Int>(views.AcquireAvailable(removedPositions));
+            List<Vector2Int> triggeredSkillPositions = views.AcquireAvailable(resolution.TriggeredSkillPositions);
+            triggeredSkillPositions.Remove(center);
             foreach (TileChange change in resolution.TileChanges)
             {
                 if (change.FeatureChanged)
-                    changes.Add(change);
+                    skillPresentationContext.HandleTileImpactPresented(change.Position);
             }
 
-            var tasks = new List<UniTask>(3);
-            tasks.Add(PopBubblesOverDuration(bubbles, removedPositions, accessKeys, audioScope));
-            tasks.Add(petalViewManager.PlayAboutToExecute(triggeredSkillPositions, accessKeys));
-            tasks.Add(tileViewManager.PlayTileChanges(changes));
+            var tasks = new List<UniTask>(2);
+            tasks.Add(PopBubblesOverDuration(bubbles, removedPositions, skillPresentationContext));
+            tasks.Add(petalViewManager.PlayAboutToExecute(triggeredSkillPositions, views));
             await UniTask.WhenAll(tasks);
         }
 
-        private async UniTask PopBubblesOverDuration(IDictionary<Vector2Int, VFXBubble> bubbles, ISet<Vector2Int> removedPositions, IDictionary<Vector2Int, ViewAccessKey> accessKeys, AudioPlaybackScope audioScope)
+        private async UniTask PopBubblesOverDuration(IDictionary<Vector2Int, VFXBubble> bubbles, ISet<Vector2Int> removedPositions, SkillPresentationContext skillPresentationContext)
         {
             var popDelays = new Dictionary<Vector2Int, float>(bubbles.Count);
             var popOrder = new List<Vector2Int>(bubbles.Keys);
@@ -142,9 +131,10 @@ namespace Skills
 
                 VFXBubble bubble = bubbles[position];
                 bubbles.Remove(position);
-                boardVFXManager.PopBubbleVFX(bubble, audioScope);
+                boardVFXManager.PopBubbleVFX(bubble, skillPresentationContext.AudioPlaybackScope);
                 if (removedPositions.Contains(position))
-                    petalViewManager.ReleasePetalViewsImmediately(new[] { position }, accessKeys);
+                    petalViewManager.ReleasePetalViewsImmediately(new[] { position }, skillPresentationContext.Views);
+                skillPresentationContext.HandleTileImpactPresented(position);
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(FinishDuration - elapsed));
