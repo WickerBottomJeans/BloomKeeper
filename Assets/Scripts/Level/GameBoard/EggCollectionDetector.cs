@@ -18,7 +18,17 @@ namespace DefaultNamespace
     /// <summary>Finds one basket per adjacent egg without changing the board.</summary>
     public static class EggCollectionDetector
     {
-        private static readonly Vector2Int[] NeighborOffsets = { Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left };
+        private static readonly Vector2Int[] NeighborOffsets =
+        {
+            Vector2Int.up,
+            Vector2Int.right,
+            Vector2Int.down,
+            Vector2Int.left,
+            new Vector2Int(-1, -1),
+            new Vector2Int(-1, 1),
+            new Vector2Int(1, -1),
+            new Vector2Int(1, 1)
+        };
 
         public static List<EggCollectionTarget> Detect(Tile[,] grid)
         {
