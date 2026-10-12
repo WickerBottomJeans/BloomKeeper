@@ -23,6 +23,7 @@ namespace DefaultNamespace
         public StartLevelAttemptOutcome outcome;
         public StartLevelAttemptRejectionReason? rejectionReason;
         public string levelAttemptId;
+        public string levelJson;
         public PlayerLivesSnapshot lives;
     }
 

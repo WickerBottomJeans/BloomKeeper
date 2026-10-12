@@ -191,6 +191,8 @@ When the user corrects your approach, append a one-line rule here before ending 
 - Keep board layout constants such as edge padding in the layout calculator, not serialized fields on GameBoard.
 - Check `Tile.Piece` with explicit type patterns for piece-specific rules; do not add cast-backed convenience properties such as `Tile.Petal` that conflate an empty tile with another piece type.
 - When explaining a feature's code, start with a plain-language map and explain each step as if the reader has not seen the code; introduce class names through what they do and save implementation details for follow-up questions.
+- For live level JSON at stable R2 paths, use the server's fetched JSON as the attempt snapshot; add a revision manifest only when rollback or immutable release paths are required.
+- Keep the full level JSON as the attempt payload; when the backend needs only level metadata, read those fields without creating a second partial `LevelData` class.
 - For new-build replacements, delete obsolete sprite loaders, atlases, and dependent editor code instead of preserving compatibility paths.
 - When serializing Sprite references by hand, check the texture importer mode: single sprites use fileID 21300000 even if their .meta retains old slice IDs.
 

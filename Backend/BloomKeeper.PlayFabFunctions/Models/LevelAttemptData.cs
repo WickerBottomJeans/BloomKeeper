@@ -8,6 +8,7 @@ public class LevelAttemptData
     public string attemptId;
     public string startLevelRequestIdempotencyKey;
     public int levelId;
+    public string levelJson;
     public LevelAttemptStatus status;
     public bool didSpendLife;
     public bool? didWin;

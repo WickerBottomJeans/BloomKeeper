@@ -14,11 +14,11 @@ namespace DefaultNamespace
             Active
         }
 
-        private readonly ConfigManager configManager;
         private readonly PlayFabLevelAttemptService levelAttemptService;
         private readonly PlayFabInventoryService inventoryService;
         private readonly PlayerLivesPresentationService playerLivesPresentationService;
         private int? currentLevelId;
+        private int? currentNextLevelId;
         private Texture2D capturedBackground;
         private State state;
 
@@ -26,9 +26,8 @@ namespace DefaultNamespace
         public event Action<int> RetryRequested;
         public event Action<int> NextLevelRequested;
 
-        public FinishLevelFlow(ConfigManager configManager, PlayFabLevelAttemptService levelAttemptService, PlayFabInventoryService inventoryService, PlayerLivesPresentationService playerLivesPresentationService)
+        public FinishLevelFlow(PlayFabLevelAttemptService levelAttemptService, PlayFabInventoryService inventoryService, PlayerLivesPresentationService playerLivesPresentationService)
         {
-            this.configManager = configManager ?? throw new ArgumentNullException(nameof(configManager));
             this.levelAttemptService = levelAttemptService ?? throw new ArgumentNullException(nameof(levelAttemptService));
             this.inventoryService = inventoryService ?? throw new ArgumentNullException(nameof(inventoryService));
             this.playerLivesPresentationService = playerLivesPresentationService ?? throw new ArgumentNullException(nameof(playerLivesPresentationService));
@@ -90,6 +89,7 @@ namespace DefaultNamespace
             }
 
             currentLevelId = result.LevelId;
+            currentNextLevelId = response.nextLevelId;
             ShowResult(result, response);
             state = State.Active;
             return true;
@@ -110,6 +110,7 @@ namespace DefaultNamespace
             UIManager.Instance.HideLoseScreen();
             UIManager.Instance.HideBackground();
             currentLevelId = null;
+            currentNextLevelId = null;
             UnityEngine.Object.Destroy(capturedBackground);
             capturedBackground = null;
             state = State.Inactive;
@@ -177,7 +178,12 @@ namespace DefaultNamespace
         /// </summary>
         private bool TryGetNextUnlockedLevelId(int levelId, out int nextLevelId)
         {
-            if (!configManager.TryGetNextLevelId(levelId, out nextLevelId)) return false;
+            if (!currentNextLevelId.HasValue)
+            {
+                nextLevelId = default;
+                return false;
+            }
+            nextLevelId = currentNextLevelId.Value;
             if (nextLevelId > PlayerAccountContext.Instance.GetCurrentProgression().highestUnlockedLevel)
                 throw new InvalidOperationException($"Level {nextLevelId} follows completed level {levelId} but is not unlocked by confirmed progression.");
             return true;

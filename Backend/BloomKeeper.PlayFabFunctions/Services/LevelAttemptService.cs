@@ -8,7 +8,7 @@ public class LevelAttemptService
     /// <summary>
     /// [Duong] Try to start the requested level attempt for the player.
     /// </summary>
-    public (StartLevelAttemptResponse response, LevelAttemptData levelAttempt, bool levelAttemptChanged) TryStartLevelAttempt(PlayerProgressionData progression, LevelAttemptData currentLevelAttempt, StartLevelAttemptRequest request, LevelData level)
+    public (StartLevelAttemptResponse response, LevelAttemptData levelAttempt, bool levelAttemptChanged) TryStartLevelAttempt(PlayerProgressionData progression, LevelAttemptData currentLevelAttempt, StartLevelAttemptRequest request, string levelJson)
     {
         //[Duong] safety check
         if (progression == null) throw new ArgumentNullException(nameof(progression));
@@ -21,13 +21,16 @@ public class LevelAttemptService
         {
             if (currentLevelAttempt.levelId != request.levelId)
                 return (CreateStartRejectedResponse(StartLevelAttemptRejectionReason.OperationConflict), currentLevelAttempt, false);
+            if (levelJson == null)
+                return (CreateStartRejectedResponse(StartLevelAttemptRejectionReason.LevelUnavailable), currentLevelAttempt, false);
 
-            return (CreateStartedResponse(currentLevelAttempt.attemptId), currentLevelAttempt, false);
+            LevelService.ReadLevelFields(request.levelId, levelJson);
+            return (CreateStartedResponse(currentLevelAttempt.attemptId, levelJson), currentLevelAttempt, false);
         }
 
         //[Duong] Reject if this level is unavailable or still locked
-        if (!LevelService.IsLevelAvailable(level)) return (CreateStartRejectedResponse(StartLevelAttemptRejectionReason.LevelUnavailable), currentLevelAttempt, false);
-        if (!LevelService.IsLevelUnlocked(progression, level)) return (CreateStartRejectedResponse(StartLevelAttemptRejectionReason.LevelLocked), currentLevelAttempt, false);
+        if (levelJson == null || !LevelService.ReadLevelFields(request.levelId, levelJson).published) return (CreateStartRejectedResponse(StartLevelAttemptRejectionReason.LevelUnavailable), currentLevelAttempt, false);
+        if (request.levelId > progression.highestUnlockedLevel) return (CreateStartRejectedResponse(StartLevelAttemptRejectionReason.LevelLocked), currentLevelAttempt, false);
         
         // Create active level attempt
         var levelAttempt = new LevelAttemptData
@@ -35,9 +38,10 @@ public class LevelAttemptService
             attemptId = Guid.NewGuid().ToString("N"),
             startLevelRequestIdempotencyKey = startLevelRequestIdempotencyKey,
             levelId = request.levelId,
+            levelJson = levelJson,
             status = LevelAttemptStatus.Active
         };
-        return (CreateStartedResponse(levelAttempt.attemptId), levelAttempt, true);
+        return (CreateStartedResponse(levelAttempt.attemptId, levelJson), levelAttempt, true);
     }
 
     public (AbandonLevelAttemptResponse response, LevelAttemptData levelAttempt, bool levelAttemptChanged) Abandon(LevelAttemptData currentLevelAttempt, AbandonLevelAttemptRequest request)
@@ -60,7 +64,7 @@ public class LevelAttemptService
     /// <summary>
     /// [Duong] Completes the current level attempt when valid and tells the caller what changed.
     /// </summary>
-    public LevelAttemptCompletionResult CompleteLevelAttempt(PlayerProgressionData progression, LevelAttemptData currentLevelAttempt, CompleteLevelAttemptRequest request, LevelData level)
+    public LevelAttemptCompletionResult CompleteLevelAttempt(PlayerProgressionData progression, LevelAttemptData currentLevelAttempt, CompleteLevelAttemptRequest request, string levelJson)
     {
         if (progression == null) throw new ArgumentNullException(nameof(progression));
         if (request == null) throw new ArgumentNullException(nameof(request));
@@ -73,12 +77,18 @@ public class LevelAttemptService
             return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptNotCurrent), null, null);
         if (currentLevelAttempt.levelId != request.levelId)
             return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptLevelMismatch), null, null);
+        int? nextLevelId = null;
+        if (request.didWin)
+        {
+            if (string.IsNullOrEmpty(levelJson)) throw new InvalidOperationException($"Published level {request.levelId} is missing from remote Config.");
+            nextLevelId = LevelService.ReadLevelFields(request.levelId, levelJson).nextLevelId;
+        }
         if (currentLevelAttempt.status == LevelAttemptStatus.Completed)
         {
             if (!MatchesCompletedResult(currentLevelAttempt, request))
                 return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptResultConflict), null, null);
 
-            return new LevelAttemptCompletionResult(CreateCompleteSavedResponse(progression, request.levelId), null, null);
+            return new LevelAttemptCompletionResult(CreateCompleteSavedResponse(progression, request.levelId, nextLevelId), null, null);
         }
         if (currentLevelAttempt.status != LevelAttemptStatus.Active)
             return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, CompleteLevelAttemptRejectionReason.AttemptNotActive), null, null);
@@ -87,13 +97,13 @@ public class LevelAttemptService
         if (rejectionReason.HasValue)
             return new LevelAttemptCompletionResult(CreateCompleteRejectedResponse(progression, request.levelId, rejectionReason.Value), null, null);
 
-        PlayerProgressionData? updatedProgression = request.didWin ? CreateUpdatedProgression(progression, request, level) : null;
+        PlayerProgressionData? updatedProgression = request.didWin ? CreateUpdatedProgression(progression, request, nextLevelId) : null;
         LevelAttemptData updatedLevelAttempt = CreateCompletedLevelAttempt(currentLevelAttempt, request);
-        CompleteLevelAttemptResponse response = CreateCompleteSavedResponse(updatedProgression ?? progression, request.levelId);
+        CompleteLevelAttemptResponse response = CreateCompleteSavedResponse(updatedProgression ?? progression, request.levelId, nextLevelId);
         return new LevelAttemptCompletionResult(response, updatedProgression, updatedLevelAttempt);
     }
 
-    private PlayerProgressionData CreateUpdatedProgression(PlayerProgressionData progression, CompleteLevelAttemptRequest request, LevelData level)
+    private PlayerProgressionData CreateUpdatedProgression(PlayerProgressionData progression, CompleteLevelAttemptRequest request, int? nextLevelId)
     {
         var updatedProgression = new PlayerProgressionData { schemaVersion = progression.schemaVersion, highestUnlockedLevel = progression.highestUnlockedLevel };
         foreach ((int levelId, LevelProgressData levelProgress) in progression.levels)
@@ -106,7 +116,6 @@ public class LevelAttemptService
         updatedLevelProgress.completed = true;
         updatedLevelProgress.bestStars = Math.Max(updatedLevelProgress.bestStars, request.stars);
         updatedLevelProgress.bestScore = Math.Max(updatedLevelProgress.bestScore, request.score);
-        int? nextLevelId = LevelService.GetNextLevelId(level, request.levelId);
         if (nextLevelId.HasValue) updatedProgression.highestUnlockedLevel = Math.Max(updatedProgression.highestUnlockedLevel, nextLevelId.Value);
         updatedProgression.levels[request.levelId] = updatedLevelProgress;
         return updatedProgression;
@@ -120,6 +129,7 @@ public class LevelAttemptService
             attemptId = currentLevelAttempt.attemptId,
             startLevelRequestIdempotencyKey = currentLevelAttempt.startLevelRequestIdempotencyKey,
             levelId = currentLevelAttempt.levelId,
+            levelJson = currentLevelAttempt.levelJson,
             status = LevelAttemptStatus.Completed,
             didSpendLife = currentLevelAttempt.didSpendLife,
             didWin = request.didWin,
@@ -140,9 +150,9 @@ public class LevelAttemptService
         return null;
     }
 
-    private  StartLevelAttemptResponse CreateStartedResponse(string levelAttemptId)
+    private StartLevelAttemptResponse CreateStartedResponse(string levelAttemptId, string levelJson)
     {
-        return new StartLevelAttemptResponse { schemaVersion = LevelAttemptContract.CurrentSchemaVersion, outcome = StartLevelAttemptOutcome.Approved, levelAttemptId = levelAttemptId };
+        return new StartLevelAttemptResponse { schemaVersion = LevelAttemptContract.CurrentSchemaVersion, outcome = StartLevelAttemptOutcome.Approved, levelAttemptId = levelAttemptId, levelJson = levelJson };
     }
 
     public StartLevelAttemptResponse CreateStartRejectedResponse(StartLevelAttemptRejectionReason rejectionReason)
@@ -160,11 +170,11 @@ public class LevelAttemptService
         return new AbandonLevelAttemptResponse { schemaVersion = LevelAttemptContract.CurrentSchemaVersion, outcome = AbandonLevelAttemptOutcome.Rejected, rejectionReason = rejectionReason };
     }
 
-    private  CompleteLevelAttemptResponse CreateCompleteSavedResponse(PlayerProgressionData progression, int levelId)
+    private CompleteLevelAttemptResponse CreateCompleteSavedResponse(PlayerProgressionData progression, int levelId, int? nextLevelId)
     {
         progression.levels.TryGetValue(levelId, out LevelProgressData levelProgress);
         levelProgress ??= new LevelProgressData();
-        return new CompleteLevelAttemptResponse { outcome = CompleteLevelAttemptOutcome.Saved, levelId = levelId, levelProgress = levelProgress, highestUnlockedLevel = progression.highestUnlockedLevel };
+        return new CompleteLevelAttemptResponse { outcome = CompleteLevelAttemptOutcome.Saved, levelId = levelId, levelProgress = levelProgress, highestUnlockedLevel = progression.highestUnlockedLevel, nextLevelId = nextLevelId };
     }
 
     private  CompleteLevelAttemptResponse CreateCompleteRejectedResponse(PlayerProgressionData progression, int levelId, CompleteLevelAttemptRejectionReason rejectionReason)

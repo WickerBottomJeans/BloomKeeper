@@ -18,8 +18,6 @@ namespace DefaultNamespace
         private readonly LevelDataLoader levelDataLoader;
         private readonly ShopCachePolicyLoader shopCachePolicyLoader;
         private readonly ScoreLoader scoreLoader;
-        private readonly Dictionary<int, ChapterDefinition> chapterDefinitions = new();
-        private readonly Dictionary<int, LevelData> levelDefinitions = new();
         private ChapterIndex chapterIndex;
         private ShopCachePolicyConfig mainShopCachePolicy;
         private ScoreConfig scoreConfig;
@@ -66,25 +64,15 @@ namespace DefaultNamespace
             scoreConfig = new ScoreConfig(loadedConfigs.Item3);
         }
 
-        public async UniTask<ChapterDefinition> GetChapterDefinitionAsync(int chapterId)
+        public UniTask<ChapterDefinition> GetChapterDefinitionAsync(int chapterId)
         {
-            if (chapterDefinitions.TryGetValue(chapterId, out ChapterDefinition chapterDefinition))
-                return chapterDefinition;
-
             ChapterIndexEntry chapterEntry = ChapterIndex.GetEntry(chapterId);
-            chapterDefinition = await chapterDefinitionLoader.LoadAsync(chapterEntry.configPath);
-            chapterDefinitions.Add(chapterId, chapterDefinition);
-            return chapterDefinition;
+            return chapterDefinitionLoader.LoadAsync(chapterEntry.configPath);
         }
 
-        public async UniTask<LevelData> GetLevelDataAsync(int levelId)
+        public UniTask<LevelData> GetLevelDataAsync(int levelId)
         {
-            if (levelDefinitions.TryGetValue(levelId, out LevelData levelDefinition))
-                return levelDefinition;
-
-            levelDefinition = await levelDataLoader.LoadAsync(levelId);
-            levelDefinitions.Add(levelId, levelDefinition);
-            return levelDefinition;
+            return levelDataLoader.LoadAsync(levelId);
         }
 
         public async UniTask<ChapterContent> GetChapterContentAsync(int chapterId)
@@ -100,21 +88,6 @@ namespace DefaultNamespace
                 chapterLevels.Add(chapterDefinition.levels[i].levelId, loadedLevels[i]);
 
             return new ChapterContent(chapterDefinition, chapterLevels);
-        }
-
-        public bool TryGetNextLevelId(int currentLevelId, out int nextLevelId)
-        {
-            if (!levelDefinitions.TryGetValue(currentLevelId, out LevelData currentLevel))
-                throw new InvalidOperationException($"Level {currentLevelId} has not been loaded into the config cache.");
-
-            if (!currentLevel.nextLevelId.HasValue)
-            {
-                nextLevelId = default;
-                return false;
-            }
-
-            nextLevelId = currentLevel.nextLevelId.Value;
-            return true;
         }
 
         private static void ValidateShopCachePolicy(ShopCachePolicyConfig shopCachePolicy)

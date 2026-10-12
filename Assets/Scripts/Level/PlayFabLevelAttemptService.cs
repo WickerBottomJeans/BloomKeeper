@@ -107,8 +107,8 @@ namespace DefaultNamespace
         private  void ValidateStartLevelAttemptResponse(StartLevelAttemptResponse response)
         {
             if (response.schemaVersion != LevelAttemptContract.CurrentSchemaVersion) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned unsupported schema version {response.schemaVersion}.");
-            if (response.outcome == StartLevelAttemptOutcome.Approved && (!Guid.TryParseExact(response.levelAttemptId, "N", out _) || response.rejectionReason.HasValue)) throw new InvalidOperationException("PlayFab StartLevelAttempt returned invalid started-attempt data.");
-            if (response.outcome == StartLevelAttemptOutcome.Rejected && (!response.rejectionReason.HasValue || !string.IsNullOrEmpty(response.levelAttemptId))) throw new InvalidOperationException("PlayFab StartLevelAttempt returned invalid rejection data.");
+            if (response.outcome == StartLevelAttemptOutcome.Approved && (!Guid.TryParseExact(response.levelAttemptId, "N", out _) || response.rejectionReason.HasValue || string.IsNullOrWhiteSpace(response.levelJson))) throw new InvalidOperationException("PlayFab StartLevelAttempt returned invalid started-attempt data.");
+            if (response.outcome == StartLevelAttemptOutcome.Rejected && (!response.rejectionReason.HasValue || !string.IsNullOrEmpty(response.levelAttemptId) || !string.IsNullOrEmpty(response.levelJson))) throw new InvalidOperationException("PlayFab StartLevelAttempt returned invalid rejection data.");
             if (response.rejectionReason.HasValue && !Enum.IsDefined(typeof(StartLevelAttemptRejectionReason), response.rejectionReason.Value)) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned undefined rejection reason {response.rejectionReason}.");
             if (!Enum.IsDefined(typeof(StartLevelAttemptOutcome), response.outcome)) throw new InvalidOperationException($"PlayFab StartLevelAttempt returned undefined outcome {response.outcome}.");
             PlayerLivesContract.ValidateSnapshot(response.lives);

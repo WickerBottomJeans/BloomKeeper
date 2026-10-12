@@ -51,7 +51,6 @@ public class CompleteLevelAttemptFunction
         var dataApi = contextReader.CreateDataApi(context);
         var dataEntity = contextReader.GetCallerEntity(context);
         PlayerLivesConfig livesConfig = await livesConfigService.Load(context.TitleAuthenticationContext.Id);
-        LevelData level = attemptRequest.didWin ? await levelService.Load(attemptRequest.levelId) : null;
         DateTimeOffset operationTimeUtc = DateTimeOffset.UtcNow;
 
         for (int writeAttempt = 1; writeAttempt <= MaxWriteAttempts; writeAttempt++)
@@ -69,8 +68,12 @@ public class CompleteLevelAttemptFunction
             LevelAttemptData levelAttempt = (await levelAttemptTask).levelAttempt;
             PlayerLivesData lives = (await livesTask).lives;
 
+            string levelJson = null;
+            if (attemptRequest.didWin && levelAttempt != null && levelAttempt.levelId == attemptRequest.levelId)
+                levelJson = !string.IsNullOrEmpty(levelAttempt.levelJson) ? levelAttempt.levelJson : await levelService.Load(levelAttempt.levelId);
+
             LevelAttemptCompletionResult completionResult =
-                levelAttemptService.CompleteLevelAttempt(progression, levelAttempt, attemptRequest, level);
+                levelAttemptService.CompleteLevelAttempt(progression, levelAttempt, attemptRequest, levelJson);
             CompleteLevelAttemptResponse response = completionResult.Response;
             PlayerProgressionData? updatedProgression = completionResult.UpdatedProgression;
             LevelAttemptData? updatedLevelAttempt = completionResult.UpdatedLevelAttempt;

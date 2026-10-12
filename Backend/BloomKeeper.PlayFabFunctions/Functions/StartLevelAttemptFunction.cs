@@ -29,12 +29,12 @@ public class StartLevelAttemptFunction
         //[Duong] Load request context and PlayFab data access
         PlayFabFunctionExecutionContext context = await contextReader.ReadContext(request);
         StartLevelAttemptRequest startRequest = contextReader.GetFunctionArgument<StartLevelAttemptRequest>(context);
+        string normalizedStartKey = Guid.ParseExact(startRequest.startLevelRequestIdempotencyKey, "N").ToString("N");
         var dataApi = contextReader.CreateDataApi(context);
         var dataEntity = contextReader.GetCallerEntity(context);
         
         //[Duong] Load level and lives config
         PlayerLivesConfig livesConfig = await livesConfigService.Load(context.TitleAuthenticationContext.Id);
-        LevelData level = await levelService.Load(startRequest.levelId);
         DateTimeOffset operationTimeUtc = DateTimeOffset.UtcNow;
 
         for (int writeAttempt = 1; writeAttempt <= MaxWriteAttempts; writeAttempt++)
@@ -49,9 +49,14 @@ public class StartLevelAttemptFunction
             var (progression, _) = await progressionTask;
             var (levelAttempt, _) = await levelAttemptTask;
             var (lives, _) = await livesTask;
+
+            bool retryingCurrentAttempt = levelAttempt != null && levelAttempt.startLevelRequestIdempotencyKey == normalizedStartKey && levelAttempt.levelId == startRequest.levelId;
+            string levelJson = retryingCurrentAttempt && !string.IsNullOrEmpty(levelAttempt.levelJson)
+                ? levelAttempt.levelJson
+                : await levelService.Load(startRequest.levelId);
             
             bool livesChanged = livesService.UpdateLivesToCurrentTime(lives, livesConfig, operationTimeUtc);
-            (StartLevelAttemptResponse response, LevelAttemptData updatedLevelAttempt, bool levelAttemptChanged) = levelAttemptService.TryStartLevelAttempt(progression, levelAttempt, startRequest, level);
+            (StartLevelAttemptResponse response, LevelAttemptData updatedLevelAttempt, bool levelAttemptChanged) = levelAttemptService.TryStartLevelAttempt(progression, levelAttempt, startRequest, levelJson);
 
             //[Duong] If another attempt is made, mean player play a new level => gonna try charging them lives
             if (levelAttemptChanged)

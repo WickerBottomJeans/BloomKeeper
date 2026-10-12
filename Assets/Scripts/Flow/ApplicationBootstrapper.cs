@@ -58,10 +58,10 @@ namespace DefaultNamespace
             var playerSessionLoader = new PlayerSessionLoader(playerStateService, inventoryService);
             var authFlow = new AuthFlow(guestLoginService, playerSessionLoader, playerLivesPresentationService);
             var homeFlow = new HomeFlow(addressableContentService, playerLivesPresentationService, homeTutorialConfig);
-            var levelSetupFlow = new LevelSetupFlow(ConfigManager.Instance, levelAttemptService, playerLivesPresentationService);
+            var levelSetupFlow = new LevelSetupFlow(levelAttemptService, playerLivesPresentationService);
             var playLevelFlow = new PlayLevelFlow(levelSessionRuntime);
             var quitLevelFlow = new QuitLevelFlow(levelAttemptService);
-            var finishLevelFlow = new FinishLevelFlow(ConfigManager.Instance, levelAttemptService, inventoryService, playerLivesPresentationService);
+            var finishLevelFlow = new FinishLevelFlow(levelAttemptService, inventoryService, playerLivesPresentationService);
             var settingsFlow = new SettingsFlow();
             return new ApplicationStateMachine(bootFlow, authFlow, homeFlow, levelSetupFlow, playLevelFlow, quitLevelFlow, finishLevelFlow, settingsFlow, musicStateController);
         }
