@@ -23,11 +23,11 @@ namespace DefaultNamespace.Editor
         [SerializeField] private int requestedWidth = 8;
         [SerializeField] private int requestedHeight = 8;
         [SerializeField] private bool brushIsVoid;
-        [SerializeField] private bool brushIsPlayable = true;
         [SerializeField] private bool brushHasFeature;
         [SerializeField] private TileFeatureType brushFeatureType = TileFeatureType.Web;
         [SerializeField] private int brushWebLayers = 1;
         [SerializeField] private PetalType brushPetalType;
+        [SerializeField] private bool brushHasEgg;
         [SerializeField] private SpecialSkillType brushSkillType;
         [SerializeField] private float cellSize = 86f;
         private Vector2 boardScroll;
@@ -181,7 +181,7 @@ namespace DefaultNamespace.Editor
                     Rect cellRect = new Rect(boardRect.x + column * cellSize, boardRect.y + row * cellSize, cellSize - 2f, cellSize - 2f);
                     EditorGUI.DrawRect(cellRect, GetTileColor(tileData));
                     string label = GetTileLabel(tileData);
-                    GUI.Label(cellRect, new GUIContent(label, $"Column {column + 1}, row {row + 1} from top\n{label}\nSkill: {tileData.skillType}"), cellLabelStyle);
+                    GUI.Label(cellRect, new GUIContent(label, $"Column {column + 1}, row {row + 1} from top\n{label}\nSkill: {tileData?.skillType ?? SpecialSkillType.None}"), cellLabelStyle);
                 }
             }
             HandleBoardPainting(levelData, boardRect);
@@ -231,21 +231,23 @@ namespace DefaultNamespace.Editor
             brushIsVoid = EditorGUILayout.Toggle("Empty board space", brushIsVoid);
             using (new EditorGUI.DisabledScope(brushIsVoid))
             {
-                brushIsPlayable = EditorGUILayout.Toggle("Playable tile", brushIsPlayable);
-                using (new EditorGUI.DisabledScope(!brushIsPlayable))
+                brushHasFeature = EditorGUILayout.Toggle("Has feature", brushHasFeature);
+                if (brushHasFeature)
                 {
-                    brushHasFeature = EditorGUILayout.Toggle("Has feature", brushHasFeature);
-                    if (brushHasFeature)
-                    {
-                        brushFeatureType = (TileFeatureType)EditorGUILayout.EnumPopup("Feature", brushFeatureType);
-                        if (brushFeatureType == TileFeatureType.Web) brushWebLayers = EditorGUILayout.IntSlider("Web layers", brushWebLayers, 1, WebFeature.MaxLayers);
-                    }
+                    brushFeatureType = (TileFeatureType)EditorGUILayout.EnumPopup("Feature", brushFeatureType);
+                    if (brushFeatureType == TileFeatureType.Web) brushWebLayers = EditorGUILayout.IntSlider("Web layers", brushWebLayers, 1, WebFeature.MaxLayers);
                 }
-                bool canContainPetal = brushIsPlayable && !brushHasFeature;
+                if (brushHasFeature && brushFeatureType == TileFeatureType.Basket) EditorGUILayout.HelpBox("Permanent basket: blocks pieces, gravity, and refill through its cell. Eggs collect from four neighboring cells.", MessageType.Info);
+                bool canContainPetal = !brushHasFeature;
                 using (new EditorGUI.DisabledScope(!canContainPetal))
                 {
-                    brushPetalType = (PetalType)EditorGUILayout.EnumPopup("Flower (None = random)", brushPetalType);
-                    using (new EditorGUI.DisabledScope(brushPetalType == PetalType.None)) brushSkillType = (SpecialSkillType)EditorGUILayout.EnumPopup("Skill", brushSkillType);
+                    brushHasEgg = EditorGUILayout.Toggle("Egg", brushHasEgg);
+                    using (new EditorGUI.DisabledScope(brushHasEgg))
+                    {
+                        brushSkillType = (SpecialSkillType)EditorGUILayout.EnumPopup("Skill", brushSkillType);
+                        if (brushSkillType == SpecialSkillType.PrismaticBloom) brushPetalType = PetalType.None;
+                        using (new EditorGUI.DisabledScope(brushSkillType == SpecialSkillType.PrismaticBloom)) brushPetalType = (PetalType)EditorGUILayout.EnumPopup("Flower (None = random)", brushPetalType);
+                    }
                 }
             }
             if (GUILayout.Button("Fill board with brush") && EditorUtility.DisplayDialog("Fill board", "Replace every cell with the current brush? You can undo this action.", "Fill", "Cancel"))
@@ -278,12 +280,14 @@ namespace DefaultNamespace.Editor
                     }
                     if (GUILayout.Button("Add flower goal")) objectiveJson.petals.Add(new PetalGoal { petalType = PetalType.Strawberry, amount = 10 });
                 }
+                if (objectiveJson.type == ObjectiveType.CollectEgg) objectiveJson.eggsToCollect = EditorGUILayout.IntField("Eggs to collect", objectiveJson.eggsToCollect);
                 if (objectiveJson.type == ObjectiveType.ClearSpiderWeb) objectiveJson.spiderWebsToClear = EditorGUILayout.IntField("Web tiles to clear", objectiveJson.spiderWebsToClear);
                 EditorGUILayout.EndVertical();
                 if (remove) levelData.objectives.RemoveAt(index--);
             }
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("+ Match")) levelData.objectives.Add(new ObjectiveJson { type = ObjectiveType.Match, petals = new List<PetalGoal> { new PetalGoal { petalType = PetalType.Strawberry, amount = 10 } } });
+            if (GUILayout.Button("+ Collect eggs")) levelData.objectives.Add(new ObjectiveJson { type = ObjectiveType.CollectEgg, eggsToCollect = 1 });
             if (GUILayout.Button("+ Clear webs")) levelData.objectives.Add(new ObjectiveJson { type = ObjectiveType.ClearSpiderWeb, spiderWebsToClear = 1 });
             EditorGUILayout.EndHorizontal();
         }
@@ -345,16 +349,16 @@ namespace DefaultNamespace.Editor
             if (currentEvent.type == EventType.MouseDown && currentEvent.button == 1)
             {
                 TileData tileData = levelData.tiles[index];
-                brushIsVoid = tileData.isVoid;
-                brushIsPlayable = tileData.isPlayable;
-                brushHasFeature = tileData.feature != null;
+                brushIsVoid = tileData == null;
+                brushHasFeature = tileData?.feature != null;
                 if (brushHasFeature)
                 {
                     brushFeatureType = tileData.feature.type;
                     if (brushFeatureType == TileFeatureType.Web) brushWebLayers = tileData.feature.web.layers;
                 }
-                brushPetalType = tileData.petalType;
-                brushSkillType = tileData.skillType;
+                brushHasEgg = tileData?.hasEgg ?? false;
+                brushPetalType = tileData?.petalType ?? PetalType.None;
+                brushSkillType = tileData?.skillType ?? SpecialSkillType.None;
                 currentEvent.Use();
                 Repaint();
             }
@@ -384,19 +388,23 @@ namespace DefaultNamespace.Editor
 
         private TileData CreateBrushTileData()
         {
-            bool isPlayable = !brushIsVoid && brushIsPlayable;
+            if (brushIsVoid) return null;
             TileFeatureData tileFeatureData = null;
-            if (isPlayable && brushHasFeature)
+            if (brushHasFeature)
             {
                 tileFeatureData = brushFeatureType switch
                 {
+                    TileFeatureType.Basket => new TileFeatureData { type = brushFeatureType },
                     TileFeatureType.Web => new TileFeatureData { type = brushFeatureType, web = new WebFeatureData { layers = brushWebLayers } },
                     _ => throw new InvalidOperationException($"No brush is configured for feature {brushFeatureType}.")
                 };
             }
 
-            bool canContainPetal = isPlayable && tileFeatureData == null;
-            return new TileData { isVoid = brushIsVoid, isPlayable = isPlayable, feature = tileFeatureData, petalType = canContainPetal ? brushPetalType : PetalType.None, skillType = canContainPetal && brushPetalType != PetalType.None ? brushSkillType : SpecialSkillType.None };
+            bool hasEgg = tileFeatureData == null && brushHasEgg;
+            bool canContainPetal = tileFeatureData == null && !hasEgg;
+            PetalType petalType = canContainPetal && brushSkillType != SpecialSkillType.PrismaticBloom ? brushPetalType : PetalType.None;
+            SpecialSkillType skillType = canContainPetal && (petalType != PetalType.None || brushSkillType == SpecialSkillType.PrismaticBloom) ? brushSkillType : SpecialSkillType.None;
+            return new TileData { feature = tileFeatureData, hasEgg = hasEgg, petalType = petalType, skillType = skillType };
         }
 
         private void ResizeLevelBoard(LevelData levelData)
@@ -411,7 +419,7 @@ namespace DefaultNamespace.Editor
             var tiles = new List<TileData>(requestedWidth * requestedHeight);
             for (int row = 0; row < requestedHeight; row++)
                 for (int column = 0; column < requestedWidth; column++)
-                    tiles.Add(row < levelData.boardHeight && column < levelData.boardWidth ? levelData.tiles[row * levelData.boardWidth + column] : new TileData { isPlayable = true });
+                    tiles.Add(row < levelData.boardHeight && column < levelData.boardWidth ? levelData.tiles[row * levelData.boardWidth + column] : new TileData());
             levelData.tiles = tiles;
             levelData.boardWidth = requestedWidth;
             levelData.boardHeight = requestedHeight;
@@ -421,7 +429,7 @@ namespace DefaultNamespace.Editor
         private void CreateNewLevelDocument()
         {
             var levelData = new LevelData { levelId = 1, chapterId = 1, boardWidth = 8, boardHeight = 8, allowedBoosters = new List<BoosterType>(), tiles = new List<TileData>(), objectives = new List<ObjectiveJson> { new ObjectiveJson { type = ObjectiveType.Match, petals = new List<PetalGoal> { new PetalGoal { petalType = PetalType.Strawberry, amount = 10 } } } }, constrainers = new List<ConstrainerJson> { new ConstrainerJson { type = ConstrainerType.MoveLimit, moveLimit = 20, warningAtRemaining = 5 } }, starScoreThresholds = new List<StarScoreThresholdJson> { new StarScoreThresholdJson { starCount = 1, score = 100 }, new StarScoreThresholdJson { starCount = 2, score = 300 }, new StarScoreThresholdJson { starCount = 3, score = 1000 } } };
-            for (int index = 0; index < levelData.boardWidth * levelData.boardHeight; index++) levelData.tiles.Add(new TileData { isPlayable = true });
+            for (int index = 0; index < levelData.boardWidth * levelData.boardHeight; index++) levelData.tiles.Add(new TileData());
             ReplaceLevelDocument(JsonConvert.SerializeObject(levelData, Formatting.Indented), null, null, false);
         }
 
@@ -567,18 +575,20 @@ namespace DefaultNamespace.Editor
 
         private static string GetTileLabel(TileData tileData)
         {
-            if (tileData.isVoid) return "VOID";
-            if (!tileData.isPlayable) return "INACTIVE";
+            if (tileData == null) return "HOLE";
             if (tileData.feature?.type == TileFeatureType.Web) return $"WEB\n{tileData.feature.web.layers} layers";
-            string flowerLabel = tileData.petalType == PetalType.None ? "RANDOM" : tileData.petalType.ToString();
+            if (tileData.feature?.type == TileFeatureType.Basket) return "BASKET";
+            if (tileData.hasEgg) return "EGG";
+            string flowerLabel = tileData.skillType == SpecialSkillType.PrismaticBloom ? "PRISMATIC" : tileData.petalType == PetalType.None ? "RANDOM" : tileData.petalType.ToString();
             return tileData.skillType == SpecialSkillType.None ? flowerLabel : $"{flowerLabel}\n{tileData.skillType}";
         }
 
         private static Color GetTileColor(TileData tileData)
         {
-            if (tileData.isVoid) return new Color(0.12f, 0.12f, 0.14f);
-            if (!tileData.isPlayable) return new Color(0.28f, 0.28f, 0.3f);
+            if (tileData == null) return new Color(0.12f, 0.12f, 0.14f);
             if (tileData.feature?.type == TileFeatureType.Web) return new Color(0.36f, 0.32f, 0.44f);
+            if (tileData.feature?.type == TileFeatureType.Basket) return new Color(0.6f, 0.36f, 0.16f);
+            if (tileData.hasEgg) return new Color(0.9f, 0.8f, 0.57f);
             if (tileData.petalType == PetalType.None) return new Color(0.2f, 0.37f, 0.34f);
             return Color.HSVToRGB((int)tileData.petalType / ((float)Enum.GetValues(typeof(PetalType)).Length - 1), 0.62f, 0.55f);
         }

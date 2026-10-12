@@ -17,6 +17,9 @@ public static class PetalFactory
     /// <returns></returns>
     public static Petal CreateForTileMap(TileData data)
     {
+        if (data.skillType == SpecialSkillType.PrismaticBloom)
+            return new Petal(data.petalType, data.skillType);
+
         PetalType petalType = data.petalType == PetalType.None
             ? GetRandomPetalType()
             : data.petalType;

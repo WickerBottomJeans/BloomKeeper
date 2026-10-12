@@ -26,24 +26,24 @@ namespace Skills
             { PetalType.Daisy, new Color32(255, 245, 205, 255) }
         };
 
-        private readonly PetalViewManager petalViewManager;
+        private readonly PieceViewManager pieceViewManager;
         private readonly BoardVFXManager boardVFXManager;
         private readonly BoardLayout layout;
 
-        public ButterflySkillPresenter(PetalViewManager petalViewManager, BoardVFXManager boardVFXManager, BoardLayout layout)
+        public ButterflySkillPresenter(PieceViewManager pieceViewManager, BoardVFXManager boardVFXManager, BoardLayout layout)
         {
-            this.petalViewManager = petalViewManager;
+            this.pieceViewManager = pieceViewManager;
             this.boardVFXManager = boardVFXManager;
             this.layout = layout;
         }
 
         protected override async UniTask Play(ButterflyRepresentationData representation, SkillPresentationContext skillPresentationContext)
         {
-            PetalViewScope views = skillPresentationContext.Views;
+            PieceViewScope views = skillPresentationContext.Views;
             if (!representation.Target.HasValue)
             {
                 IReadOnlyList<Vector2Int> source = views.Owns(representation.Source) ? new[] { representation.Source } : System.Array.Empty<Vector2Int>();
-                await petalViewManager.PlayDisappearAndRelease(source, FinishDuration, views);
+                await pieceViewManager.PlayDisappearAndRelease(source, FinishDuration, views);
                 return;
             }
 
@@ -52,31 +52,31 @@ namespace Skills
             await Finish(butterflyVFX, representation.Source, representation.Target.Value, skillPresentationContext);
         }
 
-        private async UniTask<VFXButterflySkill> Prepare(Vector2Int source, PetalType sourcePetalType, PetalViewScope views, AudioPlaybackScope audioScope)
+        private async UniTask<VFXButterflySkill> Prepare(Vector2Int source, PetalType sourcePetalType, PieceViewScope views, AudioPlaybackScope audioScope)
         {
             if (!views.Owns(source))
                 return null;
 
-            Transform visualTransform = petalViewManager.GetAccessibleVisualTransform(source, views);
+            Transform visualTransform = pieceViewManager.GetAccessibleVisualTransform(source, views);
             VFXButterflySkill butterflyVFX = boardVFXManager.RentButterflySkillVFX(visualTransform);
             butterflyVFX.SetColor(ParticleColors[sourcePetalType]);
-            await UniTask.WhenAll(butterflyVFX.Prepare(PrepareDuration, audioScope), petalViewManager.PlayRootScale(source, SourcePetalPrepareScale, PrepareDuration, views));
+            await UniTask.WhenAll(butterflyVFX.Prepare(PrepareDuration, audioScope), pieceViewManager.PlayRootScale(source, SourcePetalPrepareScale, PrepareDuration, views));
             return butterflyVFX;
         }
 
-        private async UniTask Fire(VFXButterflySkill butterflyVFX, Vector2Int source, Vector2Int target, PetalViewScope views)
+        private async UniTask Fire(VFXButterflySkill butterflyVFX, Vector2Int source, Vector2Int target, PieceViewScope views)
         {
             if (butterflyVFX == null)
                 return;
 
             butterflyVFX.Fire();
-            await petalViewManager.PlayFly(source, target, layout, FireDuration, FlightCurveAmplitudeInTiles, views);
+            await PetalPresentation.PlayFly(pieceViewManager, source, target, layout, FireDuration, FlightCurveAmplitudeInTiles, views);
         }
 
         private async UniTask Finish(VFXButterflySkill butterflyVFX, Vector2Int source, Vector2Int target, SkillPresentationContext skillPresentationContext)
         {
             BoardChangeGroup resolution = skillPresentationContext.BoardChangeGroup;
-            PetalViewScope views = skillPresentationContext.Views;
+            PieceViewScope views = skillPresentationContext.Views;
             bool targetNeedsView = target != source && (SkillPresentationQueries.WasPetalRemovedAt(resolution, target) || resolution.IsTriggeredSkillInputPosition(target));
             if (targetNeedsView) views.TryAcquire(target);
             var disappearingPositions = new List<Vector2Int>();
@@ -93,8 +93,8 @@ namespace Skills
                 boardVFXManager.FinishButterflySkillVFX(butterflyVFX, FinishDuration, skillPresentationContext.AudioPlaybackScope).Forget();
             }
 
-            UniTask disappearanceTask = petalViewManager.PlayDisappearAndRelease(disappearingPositions, FinishDuration, views);
-            UniTask triggerTask = petalViewManager.PlayAboutToExecute(triggeredSkillPositions, views);
+            UniTask disappearanceTask = pieceViewManager.PlayDisappearAndRelease(disappearingPositions, FinishDuration, views);
+            UniTask triggerTask = PetalPresentation.PlayAboutToExecute(pieceViewManager, triggeredSkillPositions, views);
             skillPresentationContext.HandleTileImpactPresented(target);
             await UniTask.WhenAll(disappearanceTask, triggerTask);
         }

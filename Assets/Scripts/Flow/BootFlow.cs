@@ -24,8 +24,7 @@ namespace DefaultNamespace
                 await UIManager.Instance.ShowLoading();
                 await addressableContentService.InitializeAsync();
                 await ConfigManager.Instance.InitializeAsync();
-                // TODO: Move the shared sprite atlases to remote Addressables.
-                await SpriteLoader.Instance.LoadAll();
+                await SpriteCatalogProvider.Instance.LoadAsync();
             }
             finally
             {

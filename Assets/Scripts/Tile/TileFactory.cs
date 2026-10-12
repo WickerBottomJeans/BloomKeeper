@@ -7,17 +7,14 @@ namespace DefaultNamespace
         public static Tile Create(TileData data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
-            if (data.isVoid)
-            {
-                if (data.isPlayable || data.feature != null || data.petalType != PetalType.None || data.skillType != SpecialSkillType.None)
-                    throw new ArgumentException("A board hole cannot contain playable tile data.", nameof(data));
-                return null;
-            }
+
+            if (data.hasEgg && (data.petalType != PetalType.None || data.skillType != SpecialSkillType.None))
+                throw new ArgumentException("An egg cannot share its tile with a flower or skill.", nameof(data));
 
             TileFeature tileFeature = data.feature == null ? null : TileFeatureFactory.CreateTileFeature(data.feature);
-            var tile = new Tile(data.isPlayable, tileFeature);
-            if (!tile.CanReceiveNewPetal() && (data.petalType != PetalType.None || data.skillType != SpecialSkillType.None))
-                throw new ArgumentException("This tile cannot contain configured flower or skill data.", nameof(data));
+            var tile = new Tile(tileFeature);
+            if (!tile.CanReceivePiece() && (data.hasEgg || data.petalType != PetalType.None || data.skillType != SpecialSkillType.None))
+                throw new ArgumentException("This tile cannot contain a configured piece.", nameof(data));
             return tile;
         }
     }

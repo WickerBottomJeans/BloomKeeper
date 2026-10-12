@@ -13,6 +13,7 @@ namespace DefaultNamespace
 
             return tileFeatureData.type switch
             {
+                TileFeatureType.Basket => new BasketFeature(),
                 TileFeatureType.Web => new WebFeature((tileFeatureData.web ?? throw new ArgumentException("Web feature config is missing.", nameof(tileFeatureData))).layers),
                 _ => throw new ArgumentOutOfRangeException(nameof(tileFeatureData), tileFeatureData.type, "Tile feature construction is not configured.")
             };

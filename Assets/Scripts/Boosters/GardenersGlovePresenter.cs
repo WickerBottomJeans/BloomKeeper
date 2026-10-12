@@ -11,19 +11,19 @@ namespace Boosters
     {
         private const string SelectionViewUserName = nameof(GardenersGlovePresenter);
 
-        private readonly PetalViewManager petalViewManager;
+        private readonly PieceViewManager pieceViewManager;
         private readonly TileViewManager tileViewManager;
         private readonly BoardVisual _boardVisual;
-        private readonly PetalViewScope selectionViews;
+        private readonly PieceViewScope selectionViews;
 
         public override BoosterType BoosterType => DefaultNamespace.BoosterType.GardenersGlove;
 
-        public GardenersGlovePresenter(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVisual boardVisual)
+        public GardenersGlovePresenter(PieceViewManager pieceViewManager, TileViewManager tileViewManager, BoardVisual boardVisual)
         {
-            this.petalViewManager = petalViewManager;
+            this.pieceViewManager = pieceViewManager;
             this.tileViewManager = tileViewManager;
             this._boardVisual = boardVisual;
-            selectionViews = new PetalViewScope(petalViewManager, SelectionViewUserName);
+            selectionViews = new PieceViewScope(pieceViewManager, SelectionViewUserName);
         }
 
         public override void ShowTargets(IReadOnlyList<Vector2Int> positions, BoosterTargetPresentationConfig.BoosterTargetMaterialMapping presentation)
@@ -55,7 +55,7 @@ namespace Boosters
             selectionViews.AcquireRequired(position);
             try
             {
-                petalViewManager.ShowBoosterSelection(position, selectionViews);
+                pieceViewManager.ShowBoosterSelection(position, selectionViews);
             }
             catch
             {
@@ -68,7 +68,7 @@ namespace Boosters
         {
             if (!selectionViews.Owns(position)) throw new InvalidOperationException($"Gardener's Glove target at {position} is not selected.");
 
-            petalViewManager.HideBoosterSelection(position, selectionViews);
+            pieceViewManager.HideBoosterSelection(position, selectionViews);
             selectionViews.Release(position);
         }
 

@@ -11,7 +11,7 @@ namespace DefaultNamespace
         public Vector2Int Position => Before.Position;
         public bool PetalChanged => Before.PetalType != After.PetalType || Before.SkillType != After.SkillType;
         public bool FeatureChanged => !TileFeatureState.AreFeatureStatesEqual(Before.FeatureState, After.FeatureState);
-        public bool HasAnyChange => Before.IsVoid != After.IsVoid || Before.IsPlayable != After.IsPlayable || PetalChanged || FeatureChanged;
+        public bool HasAnyChange => Before.IsVoid != After.IsVoid || PetalChanged || Before.HasEgg != After.HasEgg || FeatureChanged;
         public bool PetalWasRemoved => Before.PetalType.HasValue && !After.PetalType.HasValue;
         public PetalType RemovedPetalType => PetalWasRemoved ? Before.PetalType.Value : PetalType.None;
         public SpecialSkillType RemovedSkillType => PetalWasRemoved ? Before.SkillType : SpecialSkillType.None;

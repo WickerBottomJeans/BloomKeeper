@@ -8,7 +8,7 @@ namespace DefaultNamespace
     {
         ObjectiveType ObjectiveType { get; }
         bool CheckObjective();
-        void Apply(IReadOnlyList<TileChange> changes);
+        void Apply(BoardResolution resolution);
         List<ObjectiveViewData> GetViewData();
     }
 

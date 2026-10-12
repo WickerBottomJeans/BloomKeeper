@@ -69,9 +69,9 @@ public static class MatchDetector
 
                 Tile tile = grid[x, y];
 
-                if (tile != null && tile.IsMatchable())
+                if (tile?.Piece is Petal petal && tile.IsMatchable())
                 {
-                    PetalType type = tile.Petal.PetalType;
+                    PetalType type = petal.PetalType;
                     if (type == lastType)
                     {
                         current.Add(new Vector2Int(x, y));
@@ -213,9 +213,9 @@ public static class MatchDetector
         foreach (var c in tiles)
         {
             Tile tile = grid[c.x, c.y];
-            if (tile == null || !tile.IsMatchable()) return false;
-            if (type == null) type = tile.Petal.PetalType;
-            else if (tile.Petal.PetalType != type) return false;
+            if (tile?.Piece is not Petal petal || !tile.IsMatchable()) return false;
+            if (type == null) type = petal.PetalType;
+            else if (petal.PetalType != type) return false;
         }
         return true;
     }

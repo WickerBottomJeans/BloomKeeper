@@ -21,7 +21,7 @@ namespace DefaultNamespace
         public void Handle(BoardResolutionStepCompletedEvent gameplayEvent)
         {
             foreach (IObjective objective in objectives)
-                objective.Apply(gameplayEvent.Result.TileChanges);
+                objective.Apply(gameplayEvent.Result);
 
             OnProgressUpdated?.Invoke();
 

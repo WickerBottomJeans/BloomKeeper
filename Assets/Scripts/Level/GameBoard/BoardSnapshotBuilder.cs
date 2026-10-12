@@ -17,11 +17,15 @@ namespace DefaultNamespace
         public static TileState CaptureTile(Tile[,] grid, Vector2Int position)
         {
             Tile tile = grid[position.x, position.y];
-            bool isPlayable = tile != null && tile.IsPlayable;
-            PetalType? petalType = tile?.Petal?.PetalType;
-            SpecialSkillType skillType = tile?.Petal?.Skill ?? SpecialSkillType.None;
+            PetalType? petalType = null;
+            SpecialSkillType skillType = SpecialSkillType.None;
+            if (tile?.Piece is Petal petal)
+            {
+                petalType = petal.PetalType;
+                skillType = petal.Skill;
+            }
             TileFeatureState tileFeatureState = tile?.Feature?.CaptureFeatureState();
-            return new TileState(position, tile == null, isPlayable, petalType, skillType, tileFeatureState, tile?.CanClearPetal() ?? false);
+            return new TileState(position, tile == null, petalType, skillType, tileFeatureState, tile?.CanClearPetal() ?? false, tile?.Piece is Egg);
         }
     }
 }

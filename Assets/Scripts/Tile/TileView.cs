@@ -9,8 +9,7 @@ namespace DefaultNamespace
     public class TileView : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer _baseRenderer;
-        [SerializeField] private Sprite playableTileSprite;
-        [SerializeField] private Sprite inactiveTileSprite;
+        [SerializeField] private Sprite tileSprite;
 
         private float tileSize;
         private Vector3 restingLocalPosition;
@@ -20,7 +19,13 @@ namespace DefaultNamespace
         private IReadOnlyDictionary<TileFeatureType, TileFeatureView> tileFeaturePrefabsByType;
 
         #region Public API
-        public void Init(float tileSize, int baseSortingOrder, bool isPlayable, TileFeatureState tileFeatureState, IReadOnlyDictionary<TileFeatureType, TileFeatureView> tileFeaturePrefabsByType)
+        internal TFeatureView GetFeatureView<TFeatureView>() where TFeatureView : TileFeatureView
+        {
+            if (tileFeatureViewInstance is not TFeatureView view) throw new InvalidOperationException($"This tile does not display a {typeof(TFeatureView).Name}.");
+            return view;
+        }
+
+        public void Init(float tileSize, int baseSortingOrder, TileFeatureState tileFeatureState, IReadOnlyDictionary<TileFeatureType, TileFeatureView> tileFeaturePrefabsByType)
         {
             if (tileSize <= 0f) throw new ArgumentOutOfRangeException(nameof(tileSize));
 
@@ -29,7 +34,6 @@ namespace DefaultNamespace
             restingLocalPosition = transform.localPosition;
             normalBaseMaterial = _baseRenderer.sharedMaterial;
             _baseRenderer.sortingOrder = baseSortingOrder;
-            Sprite tileSprite = isPlayable ? playableTileSprite : inactiveTileSprite;
             _baseRenderer.sprite = tileSprite;
             _baseRenderer.transform.localScale = Vector3.one * (tileSize / tileSprite.bounds.size.x);
             if (tileFeatureState != null) SpawnTileFeatureView(tileFeatureState);

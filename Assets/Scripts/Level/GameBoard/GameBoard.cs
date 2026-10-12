@@ -21,7 +21,7 @@ using Utility;
 [RequireComponent(typeof(BoosterPresenter))]
 public class GameBoard : MonoBehaviour
 {
-    [SerializeField] private PetalViewManager petalViewManager;
+    [SerializeField] private PieceViewManager pieceViewManager;
     [SerializeField] private TileViewManager tileViewManager;
     [SerializeField] private BoardVFXManager boardVFXManager;
     [SerializeField] private SkillAnimationLibrary skillAnimationLibrary;
@@ -55,12 +55,12 @@ public class GameBoard : MonoBehaviour
 
         BoardLayout boardLayout = BoardLayoutCalculator.Calculate(boardGrid.GetLength(0), boardGrid.GetLength(1), camera, playAreaScreenRect);
 
-        petalViewManager.Init(boardGrid, boardLayout);
+        pieceViewManager.Init(boardGrid, boardLayout);
         tileViewManager.Init(boardGrid, boardLayout);
         boardVFXManager.Init(boardLayout, camera);
-        skillAnimationLibrary.Init(petalViewManager, boardVFXManager, boardAudioManager, boardLayout);
+        skillAnimationLibrary.Init(pieceViewManager, boardVFXManager, boardAudioManager, boardLayout);
         BoosterPresenter boosterPresenter = GetComponent<BoosterPresenter>();
-        boardVisual = new BoardVisual(petalViewManager, tileViewManager, boardVFXManager, skillAnimationLibrary, boosterPresenter, boardAudioManager, boardLayout);
+        boardVisual = new BoardVisual(pieceViewManager, tileViewManager, boardVFXManager, skillAnimationLibrary, boosterPresenter, boardAudioManager, boardLayout);
 
         boardInputHandler.Init(boardLayout, camera);
 
@@ -172,11 +172,11 @@ public class GameBoard : MonoBehaviour
                 var filledPetals = boardLogic.Fill();
                 await boardVisual.PlayFill(filledPetals);
 
-                List<MatchGroup> cascadeMatches = boardLogic.DetectMatches();
-                if (cascadeMatches.Count > 0)
+                BoardResolutionInput nextResolution = boardLogic.DetectResolution();
+                if (nextResolution.RequiresResolution)
                 {
-                    cascadeDepth++;
-                    resolutionInput = new BoardResolutionInput(cascadeMatches, Array.Empty<SkillActivation>());
+                    if (nextResolution.MatchGroups.Count > 0) cascadeDepth++;
+                    resolutionInput = nextResolution;
                     continue;
                 }
 
@@ -192,10 +192,9 @@ public class GameBoard : MonoBehaviour
             var shuffledPetals = boardLogic.Reroll();
             await boardVisual.PlayShuffle(shuffledPetals);
 
-            List<MatchGroup> shuffleMatches = boardLogic.DetectMatches();
-            resolutionInput = new BoardResolutionInput(shuffleMatches, Array.Empty<SkillActivation>());
-            cascadeDepth = shuffleMatches.Count > 0 ? 1 : 0;
-            if (shuffleMatches.Count == 0)
+            resolutionInput = boardLogic.DetectResolution();
+            cascadeDepth = resolutionInput.MatchGroups.Count > 0 ? 1 : 0;
+            if (!resolutionInput.RequiresResolution)
                 isPlayerInitiated = false;
         }
     }

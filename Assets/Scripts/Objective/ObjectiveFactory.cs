@@ -12,6 +12,7 @@ public static class ObjectiveFactory
     {
         switch (json.type)
         {
+            case ObjectiveType.CollectEgg: return new CollectEggObjective(json);
             case ObjectiveType.Match: return new MatchObjective(json);
             case ObjectiveType.ClearSpiderWeb: return new ClearSpiderWebObjective(json);
             //case ObjectiveType.Butterfly: return new ButterflyObjective(data);

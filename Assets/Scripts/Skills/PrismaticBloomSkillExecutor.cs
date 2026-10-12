@@ -33,7 +33,7 @@ namespace Skills
             if (!prismaticBloomParticipant.HasValue)
                 throw new InvalidOperationException("Prismatic Bloom effect has no Prismatic Bloom participant.");
 
-            PetalType? targetPetalType = SelectTargetPetalType(combinationPartner, activation.TriggerPetal, context.Grid);
+            PetalType? targetPetalType = SelectTargetPetalType(combinationPartner, activation.TriggerPetalType, context.Grid);
             SpecialSkillType replacementSkill = combinationPartner.HasValue ? combinationPartner.Value.Petal.Skill : SpecialSkillType.None;
 
             if (targetPetalType == PetalType.None)
@@ -62,15 +62,14 @@ namespace Skills
             foreach (PetalChange change in petalChanges)
                 mutatedPositions.Add(change.Position);
 
-            var effectCauser = new Petal(targetPetalType.Value, SpecialSkillType.PrismaticBloom);
             var representation = new PrismaticBloomRepresentationData(source, replacementSkill, petalChanges, consumedInputPositions);
-            return new SkillPlan(mutatedPositions, effectCauser, representation, consumedPositions, petalChanges);
+            return new SkillPlan(mutatedPositions, selfPetal, representation, consumedPositions, petalChanges, targetPetalType);
         }
 
-        private static PetalType? SelectTargetPetalType(SkillParticipant? combinationPartner, Petal triggerPetal, Tile[,] grid)
+        private static PetalType? SelectTargetPetalType(SkillParticipant? combinationPartner, PetalType? triggerPetalType, Tile[,] grid)
         {
             if (combinationPartner.HasValue) return combinationPartner.Value.Petal.PetalType;
-            if (triggerPetal != null) return triggerPetal.PetalType;
+            if (triggerPetalType.HasValue) return triggerPetalType.Value;
             return FindMostCommonPetalType(grid);
         }
 
@@ -82,8 +81,7 @@ namespace Skills
             for (int x = 0; x < grid.GetLength(0); x++)
             for (int y = 0; y < grid.GetLength(1); y++)
             {
-                Petal petal = grid[x, y]?.Petal;
-                if (petal == null || petal.PetalType == PetalType.None) continue;
+                if (grid[x, y]?.Piece is not Petal petal || petal.PetalType == PetalType.None) continue;
 
                 if (counts.TryGetValue(petal.PetalType, out int count))
                 {
@@ -121,7 +119,7 @@ namespace Skills
             for (int x = 0; x < columns; x++)
             for (int y = 0; y < rows; y++)
             {
-                if (grid[x, y]?.Petal?.PetalType == targetType)
+                if (grid[x, y]?.Piece is Petal petal && petal.PetalType == targetType)
                     positions.Add(new Vector2Int(x, y));
             }
 
@@ -137,9 +135,8 @@ namespace Skills
             for (int x = 0; x < columns; x++)
             for (int y = 0; y < rows; y++)
             {
-                if (grid[x, y]?.Petal?.PetalType != targetType) continue;
+                if (grid[x, y]?.Piece is not Petal before || before.PetalType != targetType) continue;
 
-                Petal before = grid[x, y].Petal;
                 Petal after = new Petal(targetType, newSkill);
                 changes.Add(new PetalChange(new Vector2Int(x, y), before, after));
             }

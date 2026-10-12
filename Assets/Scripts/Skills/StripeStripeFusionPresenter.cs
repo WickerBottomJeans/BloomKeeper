@@ -14,12 +14,12 @@ namespace Skills
         private const float FireDuration = 0.2f;
         private const float FinishDuration = 0.1f;
 
-        private readonly PetalViewManager petalViewManager;
+        private readonly PieceViewManager pieceViewManager;
         private readonly BoardVFXManager boardVFXManager;
 
-        public StripeStripeFusionPresenter(PetalViewManager petalViewManager, BoardVFXManager boardVFXManager)
+        public StripeStripeFusionPresenter(PieceViewManager pieceViewManager, BoardVFXManager boardVFXManager)
         {
-            this.petalViewManager = petalViewManager;
+            this.pieceViewManager = pieceViewManager;
             this.boardVFXManager = boardVFXManager;
         }
 
@@ -46,7 +46,7 @@ namespace Skills
         private UniTask Prepare(VFXStripeHalo halo, IReadOnlyList<Vector2Int> consumedInputPositions, SkillPresentationContext skillPresentationContext)
         {
             UniTask haloTask = halo.Prepare(PrepareDuration, skillPresentationContext.AudioPlaybackScope);
-            UniTask removalTask = petalViewManager.PlayNormalRemovals(consumedInputPositions, skillPresentationContext.Views);
+            UniTask removalTask = pieceViewManager.PlayNormalRemovals(consumedInputPositions, skillPresentationContext.Views);
             foreach (Vector2Int position in consumedInputPositions)
                 skillPresentationContext.HandleConsumedInputPresented(position);
             return UniTask.WhenAll(haloTask, removalTask);
@@ -61,7 +61,7 @@ namespace Skills
 
         private async UniTask Finish(VFXStripeBeamAxis horizontalBeam, VFXStripeBeamAxis verticalBeam, VFXStripeHalo halo, StripeStripeFusionRepresentationData representation, SkillPresentationContext skillPresentationContext)
         {
-            await skillPresentationContext.ClearImmediately(petalViewManager);
+            await skillPresentationContext.ClearImmediately(pieceViewManager);
             await UniTask.WhenAll(horizontalBeam.Finish(FinishDuration), verticalBeam.Finish(FinishDuration), halo.Finish(FinishDuration));
         }
     }

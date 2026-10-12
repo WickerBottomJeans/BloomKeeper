@@ -15,8 +15,13 @@ MonoBehaviour:
   m_GroupName: Shared_Sprites
   m_GUID: 9ba8bad9733f2e149b859813b9d9f119
   m_SerializeEntries:
-  - m_GUID: 3323c3c1d976c024d967eddfdf42fe06
-    m_Address: PetalSpriteSheet
+  - m_GUID: 307fc2a72e8c4bf9ae0a9becb563ad54
+    m_Address: PetalSpriteCatalog
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d9d4406fe91646e284c0f12dbecdd0ec
+    m_Address: ObjectiveSpriteCatalog
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

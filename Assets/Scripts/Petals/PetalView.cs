@@ -1,149 +1,51 @@
-﻿using DefaultNamespace;
-using DefaultNamespace.Utility;
+using DefaultNamespace;
 using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
-public class PetalView : MonoBehaviour
+public class PetalView : PieceView
 {
-    private const int FlyingSortingOrderOffset = 1;
-    private const int ShadowSortingOrderOffset = -1;
-
-    public SpriteRenderer spriteRenderer;
-
-    [SerializeField] private Transform stretchAxis;
-    [SerializeField] private SpriteRenderer shadowRenderer;
     [SerializeField] private SpriteRenderer bubbleOverlay;
     [SerializeField] private Material aboutToExecuteMaterial;
     [SerializeField] private float bubbleBounceDuration = 0.3f;
     [SerializeField] private float bubbleBounceOvershoot = 2f;
-    [SerializeField] [Range(0f, 1f)] private float paddingXRatio = 0.2f;
-    [SerializeField] [Range(0f, 1f)] private float paddingYRatio = 0.2f;
-    [SerializeField] [Range(0f, 0.25f)] private float directionalJellyStrength = 0.025f;
-    [SerializeField] [Range(0f, 0.95f)] private float maxDirectionalJellyStretch = 0.16f;
-    [SerializeField] [Range(0f, 1f)] private float directionalJellySquashDurationRatio = 0.25f;
-    [SerializeField] [Range(0f, 1f)] private float directionalJellySettleDurationRatio = 0.3f;
     [SerializeField] private Vector2 petalChangeSquashScale = new Vector2(1.18f, 0.82f);
     [SerializeField] private Vector2 petalChangeStretchScale = new Vector2(0.9f, 1.1f);
     [SerializeField] [Range(0f, 1f)] private float petalChangeSquashDurationRatio = 0.3f;
     [SerializeField] [Range(0f, 1f)] private float petalChangeStretchDurationRatio = 0.35f;
-    [SerializeField] private float boosterSelectionScaleMultiplier = 1.2f;
-    [SerializeField] private float boosterSelectionPulseHalfDuration = 0.25f;
-    [SerializeField] private float boosterSelectionPeakScaleMultiplier = 1.6f;
-    [SerializeField] private int boosterSelectionSortingOrderOffset = 10;
-    private Vector3 TargetScale { get; set; }
-    public Transform VisualTransform => spriteRenderer.transform;
-    private Material defaultMaterial;
-    private Color defaultColor;
-    private Color defaultShadowColor;
-    private Vector3 defaultRootScale;
     private Vector3 defaultBubbleScale;
     private Color defaultBubbleColor;
-    private int defaultSortingOrder;
     private int defaultBubbleSortingLayerId;
     private int defaultBubbleSortingOrder;
-    private bool isBoosterSelected;
 
-    private void Awake()
+    protected override void Awake()
     {
-        defaultColor = spriteRenderer.color;
-        defaultShadowColor = shadowRenderer.color;
-        defaultRootScale = transform.localScale;
+        base.Awake();
         defaultBubbleScale = bubbleOverlay.transform.localScale;
         defaultBubbleColor = bubbleOverlay.color;
-        defaultSortingOrder = spriteRenderer.sortingOrder;
         defaultBubbleSortingLayerId = bubbleOverlay.sortingLayerID;
         defaultBubbleSortingOrder = bubbleOverlay.sortingOrder;
-        SyncShadowSorting();
-        CacheDefaultMaterial();
     }
 
-    public void Refresh(Petal petal, float tileSize)
+    public override void Refresh(IBoardPiece piece, float tileSize)
     {
-        CacheDefaultMaterial();
-        RestoreDefaultMaterial();
-        string spriteKey = SpriteKeyHelper.GetPetalSpriteKey(petal.PetalType, petal.Skill);
-        var sprite = SpriteLoader.Instance.GetSprite(spriteKey);
-        if (sprite == null)
-        {
-            Debug.LogError($"Sprite {spriteKey} not found");
-            return;
-        }
-        spriteRenderer.sprite = sprite;
-        shadowRenderer.sprite = sprite;
-        SyncShadowSorting();
-
-        Vector2 spriteWorldSize = sprite.bounds.size;
-
-        float targetWidth = tileSize * (1f - paddingXRatio);
-        float targetHeight = tileSize * (1f - paddingYRatio);
-
-        float scale = Mathf.Min(
-            targetWidth / spriteWorldSize.x,
-            targetHeight / spriteWorldSize.y
-        );
-        TargetScale = Vector3.one * scale;
-        transform.localScale = defaultRootScale;
-        ResetDirectionalJelly();
-        VisualTransform.localPosition = Vector3.zero;
-        VisualTransform.localScale = TargetScale;
+        if (piece is not Petal petal) throw new ArgumentException("A petal view requires a petal.", nameof(piece));
+        Sprite sprite = SpriteCatalogProvider.Instance.GetPetalSprite(petal.PetalType, petal.Skill);
+        RefreshSprite(sprite, tileSize);
         ConfigureSkillDecorations(petal.Skill);
     }
 
-    public UniTask PlaySwap(Vector2 targetPos, float tileSize)
+    public override void ResetForPool()
     {
-        return PlayJellyishMove(targetPos, tileSize, 0.2f, Ease.OutQuad);
+        base.ResetForPool();
+        SetBubbleVisible(false);
     }
 
-    public UniTask PlayDisappear(float duration, Ease ease = Ease.InBack, float delay = 0f)
+    protected override void OnSelectionChanged(bool selected)
     {
-        KillVisualTweens();
-        RestoreDefaultMaterial();
-        Sequence sequence = DOTween.Sequence().SetLink(gameObject, LinkBehaviour.KillOnDestroy);
-        sequence.AppendInterval(delay);
-        sequence.Append(VisualTransform.DOScale(Vector3.zero, duration).SetEase(ease));
-        return sequence.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
-    }
-
-    public UniTask PlayScale(float scaleMultiplier, float duration, Ease ease = Ease.OutBack)
-    {
-        KillVisualAnimation();
-        return VisualTransform.DOScale(TargetScale * scaleMultiplier, duration)
-            .SetEase(ease)
-            .SetLink(gameObject, LinkBehaviour.KillOnDestroy)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
-    }
-
-    public void ShowBoosterSelection()
-    {
-        if (isBoosterSelected) throw new InvalidOperationException("Petal booster selection is already visible.");
-
-        isBoosterSelected = true;
-        KillVisualAnimation();
-        VisualTransform.localScale = TargetScale;
-        spriteRenderer.sortingOrder = defaultSortingOrder + boosterSelectionSortingOrderOffset;
-        SyncShadowSorting();
-        bubbleOverlay.sortingLayerID = spriteRenderer.sortingLayerID;
-        bubbleOverlay.sortingOrder = defaultBubbleSortingOrder + boosterSelectionSortingOrderOffset;
-        VisualTransform.localScale = TargetScale * boosterSelectionScaleMultiplier;
-        VisualTransform.DOScale(TargetScale * boosterSelectionPeakScaleMultiplier, boosterSelectionPulseHalfDuration).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
-    }
-
-    public void HideBoosterSelection()
-    {
-        if (!isBoosterSelected) throw new InvalidOperationException("Petal booster selection is not visible.");
-
-        RestoreBoosterSelection();
-    }
-
-    public UniTask PlayRootScale(float scaleMultiplier, float duration)
-    {
-        KillRootAnimation();
-        return transform.DOScale(defaultRootScale * scaleMultiplier, duration)
-            .SetEase(Ease.OutQuad)
-            .SetLink(gameObject, LinkBehaviour.KillOnDestroy)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
+        bubbleOverlay.sortingLayerID = selected ? spriteRenderer.sortingLayerID : defaultBubbleSortingLayerId;
+        bubbleOverlay.sortingOrder = defaultBubbleSortingOrder + (selected ? boosterSelectionSortingOrderOffset : 0);
     }
 
     public UniTask PlayPrismaticBloomPrepareSpin(float duration, float maximumSpinSpeed)
@@ -182,67 +84,6 @@ public class PetalView : MonoBehaviour
         seq.SetLoops(-1, LoopType.Restart);
 
         return UniTask.CompletedTask;
-    }
-
-    public UniTask PlaySpawn()
-    {
-        KillVisualAnimation();
-        VisualTransform.localScale = Vector3.zero;
-        spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 0f);
-        shadowRenderer.color = new Color(shadowRenderer.color.r, shadowRenderer.color.g, shadowRenderer.color.b, 0f);
-
-        Sequence seq = DOTween.Sequence().SetLink(gameObject, LinkBehaviour.KillOnDestroy);
-        seq.Append(VisualTransform.DOScale(TargetScale, 0.2f).SetEase(Ease.OutBack));
-        seq.Join(spriteRenderer.DOFade(1f, 0.2f));
-        seq.Join(shadowRenderer.DOFade(defaultShadowColor.a, 0.2f));
-        return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
-    }
-
-    public UniTask PlayDrop(Vector2 targetPos, float tileSize)
-    {
-        return PlayJellyishMove(targetPos, tileSize, 0.25f, Ease.InQuad);
-    }
-
-    public UniTask PlayGather(Vector2 targetPos, float duration = 0.3f)
-    {
-        KillActiveAnimation();
-        return transform.DOMove(targetPos, duration).SetEase(Ease.InBack).SetLink(gameObject, LinkBehaviour.KillOnDestroy).ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
-    }
-
-    public UniTask PlayJellyishMove(Vector2 targetPos, float tileSize, float duration, Ease moveEase)
-    {
-        if (tileSize <= 0f)
-            throw new ArgumentOutOfRangeException(nameof(tileSize), "Directional jelly movement requires a positive tile size.");
-        if (duration <= 0f)
-            throw new ArgumentOutOfRangeException(nameof(duration), "Directional jelly movement requires a positive duration.");
-
-        KillRootAnimation();
-        stretchAxis.DOKill();
-        ResetDirectionalJelly();
-
-        Vector2 startPos = transform.position;
-        Vector2 displacement = targetPos - startPos;
-
-        if (displacement.sqrMagnitude <= Mathf.Epsilon)
-            return transform.DOMove(targetPos, duration).SetEase(moveEase).SetLink(gameObject, LinkBehaviour.KillOnDestroy).ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
-
-        PrepareDirectionalJelly(displacement, tileSize, duration, out Vector3 stretchScale, out Vector3 squashScale);
-
-        float squashDuration = duration * directionalJellySquashDurationRatio;
-        float settleDuration = duration * directionalJellySettleDurationRatio;
-
-        Sequence seq = DOTween.Sequence().SetLink(gameObject, LinkBehaviour.KillOnDestroy);
-        seq.SetTarget(transform);
-        seq.Join(transform.DOMove(targetPos, duration).SetEase(moveEase));
-        seq.Join(stretchAxis.DOScale(stretchScale, duration).SetEase(Ease.OutQuad));
-        seq.Append(stretchAxis.DOScale(squashScale, squashDuration).SetEase(Ease.InOutSine));
-        seq.Append(stretchAxis.DOScale(Vector3.one, settleDuration).SetEase(Ease.OutBack));
-        seq.OnKill(() =>
-        {
-            if (this != null)
-                ResetDirectionalJelly();
-        });
-        return seq.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
     }
 
     public async UniTask PlayFly(Vector2 targetWorldPosition, float tileSize, float duration, float curveAmplitudeInTiles)
@@ -322,25 +163,6 @@ public class PetalView : MonoBehaviour
         await sequence.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, this.GetCancellationTokenOnDestroy());
     }
 
-    private void KillActiveAnimation()
-    {
-        KillRootAnimation();
-        KillVisualAnimation();
-    }
-
-    public void ResetForPool()
-    {
-        KillActiveAnimation();
-        RestoreBoosterSelection();
-        transform.localScale = defaultRootScale;
-        spriteRenderer.color = defaultColor;
-        shadowRenderer.color = defaultShadowColor;
-        spriteRenderer.sortingOrder = defaultSortingOrder;
-        SyncShadowSorting();
-        SetBubbleVisible(false);
-        RestoreDefaultMaterial();
-    }
-
     public void SetBubbleVisible(bool isVisible)
     {
         Transform bubbleTransform = bubbleOverlay.transform;
@@ -368,79 +190,10 @@ public class PetalView : MonoBehaviour
         SetBubbleVisible(skillType == SpecialSkillType.Bubble);
     }
 
-    private void KillRootAnimation()
-    {
-        transform.DOKill();
-    }
-
-    private void KillVisualAnimation()
-    {
-        KillVisualTweens();
-        ResetDirectionalJelly();
-        RestoreDefaultMaterial();
-    }
-
-    private void KillVisualTweens()
-    {
-        stretchAxis.DOKill();
-        VisualTransform.DOKill();
-        spriteRenderer.DOKill();
-        shadowRenderer.DOKill();
-    }
-
-    private void ResetDirectionalJelly()
-    {
-        stretchAxis.localRotation = Quaternion.identity;
-        stretchAxis.localScale = Vector3.one;
-        VisualTransform.localRotation = Quaternion.identity;
-    }
-
     private void UseAboutToExecuteMaterial()
     {
         if (aboutToExecuteMaterial == null) return;
         CacheDefaultMaterial();
         spriteRenderer.sharedMaterial = aboutToExecuteMaterial;
-    }
-
-    private void RestoreDefaultMaterial()
-    {
-        if (defaultMaterial == null) return;
-        spriteRenderer.sharedMaterial = defaultMaterial;
-    }
-
-    private void CacheDefaultMaterial()
-    {
-        if (defaultMaterial != null) return;
-        defaultMaterial = spriteRenderer.sharedMaterial;
-    }
-
-    private void SyncShadowSorting()
-    {
-        shadowRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
-        shadowRenderer.sortingOrder = spriteRenderer.sortingOrder + ShadowSortingOrderOffset;
-    }
-
-    private void RestoreBoosterSelection()
-    {
-        isBoosterSelected = false;
-        VisualTransform.DOKill();
-        VisualTransform.localScale = TargetScale;
-        spriteRenderer.sortingOrder = defaultSortingOrder;
-        SyncShadowSorting();
-        bubbleOverlay.sortingLayerID = defaultBubbleSortingLayerId;
-        bubbleOverlay.sortingOrder = defaultBubbleSortingOrder;
-    }
-
-    private void PrepareDirectionalJelly(Vector2 displacement, float tileSize, float duration, out Vector3 stretchScale, out Vector3 squashScale)
-    {
-        float angle = Mathf.Atan2(displacement.y, displacement.x) * Mathf.Rad2Deg;
-        float speedTilesPerSecond = displacement.magnitude / tileSize / duration;
-        float stretchAmount = Mathf.Clamp(speedTilesPerSecond * directionalJellyStrength, 0f, maxDirectionalJellyStretch);
-
-        stretchAxis.localRotation = Quaternion.Euler(0f, 0f, angle);
-        VisualTransform.localRotation = Quaternion.Euler(0f, 0f, -angle);
-
-        stretchScale = new Vector3(1f + stretchAmount, 1f - stretchAmount, 1f);
-        squashScale = new Vector3(1f - stretchAmount, 1f + stretchAmount, 1f);
     }
 }

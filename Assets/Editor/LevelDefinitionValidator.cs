@@ -23,38 +23,43 @@ namespace DefaultNamespace.Editor
             if (levelData.nextLevelId == levelData.levelId) errors.Add("The next level cannot be this level.");
 
             int webTileCount = 0;
-            int playableTileCount = 0;
+            int eggCount = 0;
+            int basketCount = 0;
+            Tile[,] initialGrid = levelData.boardWidth > 0 && levelData.boardHeight > 0 && levelData.tiles?.Count == (long)levelData.boardWidth * levelData.boardHeight ? new Tile[levelData.boardWidth, levelData.boardHeight] : null;
+            int flowerTileCount = 0;
             if (levelData.tiles != null)
             {
                 for (int index = 0; index < levelData.tiles.Count; index++)
                 {
                     TileData tileData = levelData.tiles[index];
                     string location = levelData.boardWidth > 0 ? $"Tile (column {index % levelData.boardWidth + 1}, row {index / levelData.boardWidth + 1} from top)" : $"Tile {index}";
-                    if (tileData == null)
-                    {
-                        errors.Add($"{location}: tile data is null.");
-                        continue;
-                    }
+                    if (tileData == null) continue;
 
                     if (!Enum.IsDefined(typeof(PetalType), tileData.petalType)) errors.Add($"{location}: unknown flower type.");
                     if (!Enum.IsDefined(typeof(SpecialSkillType), tileData.skillType)) errors.Add($"{location}: unknown skill type.");
                     try
                     {
                         Tile tile = TileFactory.Create(tileData);
-                        if (tile != null && tile.CanReceiveNewPetal()) playableTileCount++;
-                        if (tile?.Feature?.FeatureType == TileFeatureType.Web) webTileCount++;
+                        if (tile.CanReceivePiece() && !tileData.hasEgg) flowerTileCount++;
+                        if (tileData.hasEgg) { tile.SetPiece(new Egg()); eggCount++; }
+                        if (tile.Feature is BasketFeature) basketCount++;
+                        if (initialGrid != null) initialGrid[index % levelData.boardWidth, index / levelData.boardWidth] = tile;
+                        if (tile.Feature?.FeatureType == TileFeatureType.Web) webTileCount++;
                     }
                     catch (ArgumentException exception)
                     {
                         errors.Add($"{location}: {exception.Message}");
                     }
 
-                    if (tileData.petalType == PetalType.None && tileData.skillType != SpecialSkillType.None) errors.Add($"{location}: choose a fixed flower for the skill; random initialization does not preserve a configured skill.");
+                    if (tileData.skillType == SpecialSkillType.PrismaticBloom && tileData.petalType != PetalType.None) errors.Add($"{location}: Prismatic Bloom must have no flower type.");
+                    else if (tileData.petalType == PetalType.None && tileData.skillType != SpecialSkillType.None && tileData.skillType != SpecialSkillType.PrismaticBloom) errors.Add($"{location}: choose a fixed flower for the skill; random initialization does not preserve a configured skill.");
                 }
             }
-            if (playableTileCount == 0) errors.Add("The board needs at least one tile that can initially contain a flower.");
+            if (flowerTileCount == 0) errors.Add("The board needs at least one tile that can initially contain a flower.");
 
-            ValidateLevelObjectives(levelData.objectives, webTileCount, errors);
+            if (initialGrid != null && EggCollectionDetector.Detect(initialGrid).Count > 0) errors.Add("Eggs cannot start beside a basket.");
+            if (eggCount > 0 && basketCount == 0) errors.Add("A board with eggs needs at least one basket.");
+            ValidateLevelObjectives(levelData.objectives, webTileCount, eggCount, basketCount, errors);
             ValidateLevelConstrainers(levelData.constrainers, errors);
             ValidateStarThresholds(levelData.starScoreThresholds, errors);
 
@@ -71,7 +76,7 @@ namespace DefaultNamespace.Editor
             return errors;
         }
 
-        private static void ValidateLevelObjectives(List<ObjectiveJson> objectives, int webTileCount, List<string> errors)
+        private static void ValidateLevelObjectives(List<ObjectiveJson> objectives, int webTileCount, int eggCount, int basketCount, List<string> errors)
         {
             if (objectives == null || objectives.Count == 0)
             {
@@ -106,6 +111,10 @@ namespace DefaultNamespace.Editor
                                 if (petalGoal.amount <= 0) errors.Add($"{label}: flower amounts must be positive.");
                             }
                         }
+                        break;
+                    case ObjectiveType.CollectEgg:
+                        if (objectiveJson.eggsToCollect <= 0 || objectiveJson.eggsToCollect > eggCount) errors.Add($"{label}: egg target must be between 1 and {eggCount}, the number of placed eggs.");
+                        if (basketCount == 0) errors.Add($"{label}: egg collection requires a basket.");
                         break;
                     case ObjectiveType.ClearSpiderWeb:
                         if (objectiveJson.spiderWebsToClear <= 0 || objectiveJson.spiderWebsToClear > webTileCount) errors.Add($"{label}: web target must be between 1 and {webTileCount}, the number of tiles with webs (not layers).");

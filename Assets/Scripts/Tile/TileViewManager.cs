@@ -19,6 +19,9 @@ namespace DefaultNamespace
         private bool _boosterTargetsShown;
 
         #region Public API
+        public Vector3 GetBasketReceivingPosition(Vector2Int position) => _views[position.x, position.y].GetFeatureView<BasketFeatureView>().ReceivingPosition;
+        public UniTask PlayBasketReceive(Vector2Int position, CancellationToken cancellationToken) => _views[position.x, position.y].GetFeatureView<BasketFeatureView>().PlayReceive(cancellationToken);
+
         public void Init(Tile[,] grid, BoardLayout layout)
         {
             foreach (TileFeatureView tileFeaturePrefab in tileFeaturePrefabs)
@@ -42,7 +45,7 @@ namespace DefaultNamespace
                     Vector3 worldPos = layout.GetTileWorldPosition(col, row);
                     TileView view = Instantiate(_tileViewPrefab, worldPos, Quaternion.identity, transform);
                     TileFeatureState tileFeatureState = tile.Feature?.CaptureFeatureState();
-                    view.Init(layout.TileSize, -row, tile.IsPlayable, tileFeatureState, tileFeaturePrefabsByType);
+                    view.Init(layout.TileSize, -row, tileFeatureState, tileFeaturePrefabsByType);
                     _views[col, row] = view;
                     displayedFeatureStates[col, row] = tileFeatureState;
                 }

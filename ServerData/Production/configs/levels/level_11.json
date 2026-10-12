@@ -1,7 +1,7 @@
 {
   "levelId": 11,
   "published": true,
-  "chapterId": 2,
+  "chapterId": 3,
   "nextLevelId": 12,
   "allowedBoosters": [1, 2],
   "starScoreThresholds": [
@@ -12,17 +12,18 @@
   "boardWidth": 8,
   "boardHeight": 8,
   "tiles": [
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }
+    {}, {}, {}, {}, {}, {}, {}, {},
+    {}, { "hasEgg": true }, {}, {}, {}, {}, { "hasEgg": true }, {},
+    {}, { "feature": { "type": 1, "web": { "layers": 1 } } }, {}, {}, {}, {}, {}, {},
+    {}, {}, {}, { "hasEgg": true }, {}, {}, {}, {},
+    {}, {}, {}, { "feature": { "type": 1, "web": { "layers": 1 } } }, {}, {}, {}, {},
+    {}, {}, {}, {}, {}, {}, {}, {},
+    {}, {}, {}, {}, {}, {}, {}, {},
+    {}, {}, { "feature": { "type": 2 } }, {}, {}, { "feature": { "type": 2 } }, {}, {}
   ],
   "objectives": [
-    { "type": 1, "petals": [{ "petalType": 3, "amount": 10 }, { "petalType": 4, "amount": 10 }] }
+    { "type": 1, "petals": [{ "petalType": 3, "amount": 10 }, { "petalType": 4, "amount": 10 }] },
+    { "type": 4, "eggsToCollect": 3 }
   ],
   "constrainers": [
     { "type": 1, "moveLimit": 30, "warningAtRemaining": 5 },

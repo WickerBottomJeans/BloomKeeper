@@ -12,14 +12,14 @@
   "boardWidth": 8,
   "boardHeight": 8,
   "tiles": [
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true }, { "isPlayable": true, "feature": {"type":1,"web":{"layers":2}} }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true },
-    { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }, { "isPlayable": true }
+    {}, {}, {}, {}, {}, {}, {}, {},
+    {}, {}, {}, { "feature": {"type":1,"web":{"layers":2}} }, { "feature": {"type":1,"web":{"layers":2}} }, {}, {}, {},
+    {}, {}, { "feature": {"type":1,"web":{"layers":2}} }, {}, {}, { "feature": {"type":1,"web":{"layers":2}} }, {}, {},
+    {}, { "feature": {"type":1,"web":{"layers":2}} }, { "petalType": 3 }, { "petalType": 4 }, { "petalType": 3 }, {}, { "feature": {"type":1,"web":{"layers":2}} }, {},
+    {}, { "feature": {"type":1,"web":{"layers":2}} }, { "petalType": 4 }, { "petalType": 3 }, { "petalType": 4 }, {}, { "feature": {"type":1,"web":{"layers":2}} }, {},
+    {}, {}, {}, {}, {}, {}, {}, {},
+    {}, {}, {}, {}, {}, {}, {}, {},
+    {}, {}, {}, {}, {}, {}, {}, {}
   ],
   "objectives": [
     { "type": 1, "petals": [{ "petalType": 3, "amount": 18 }] },

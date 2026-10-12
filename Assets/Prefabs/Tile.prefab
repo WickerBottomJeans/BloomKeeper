@@ -137,5 +137,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.TileView
   _baseRenderer: {fileID: 3963126070083693751}
-  playableTileSprite: {fileID: 7223950226953391895, guid: 22e718ae82afce84384f05563fd8ee97, type: 3}
-  inactiveTileSprite: {fileID: -4684333735789482159, guid: 22e718ae82afce84384f05563fd8ee97, type: 3}
+  tileSprite: {fileID: 7223950226953391895, guid: 22e718ae82afce84384f05563fd8ee97, type: 3}

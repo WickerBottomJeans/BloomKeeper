@@ -16,12 +16,12 @@ namespace Boosters
         private Dictionary<BoosterType, IBoosterRepresentationPresenter> targetPresenters;
         private IBoosterRepresentationPresenter activeTargetPresenter;
 
-        public void Init(PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardVisual boardVisual, BoardLayout boardLayout)
+        public void Init(PieceViewManager pieceViewManager, TileViewManager tileViewManager, BoardVFXManager boardVFXManager, BoardVisual boardVisual, BoardLayout boardLayout)
         {
             presenters = new Dictionary<Type, IBoosterRepresentationPresenter>();
             targetPresenters = new Dictionary<BoosterType, IBoosterRepresentationPresenter>();
             Register(new BloomWandPresenter(tileViewManager, boardVFXManager, boardLayout));
-            Register(new GardenersGlovePresenter(petalViewManager, tileViewManager, boardVisual));
+            Register(new GardenersGlovePresenter(pieceViewManager, tileViewManager, boardVisual));
         }
 
         public void ShowBoosterTargets(BoosterType boosterType, IReadOnlyList<Vector2Int> positions)

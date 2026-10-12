@@ -1,32 +1,24 @@
-﻿using System.Collections.Generic;
 using DefaultNamespace;
-using UnityEngine;
+using System;
 
-public class Petal
+public class Petal : IBoardPiece
 {
     public PetalType PetalType { get; }
     public SpecialSkillType Skill { get; }
 
     public Petal(PetalType petalType, SpecialSkillType skill = SpecialSkillType.None)
     {
+        if ((skill == SpecialSkillType.PrismaticBloom) != (petalType == PetalType.None))
+            throw new ArgumentException("Only Prismatic Bloom can have no petal type, and Prismatic Bloom cannot have a petal type.", nameof(petalType));
+
         PetalType = petalType;
         Skill = skill;
     }
     
-    public Petal(Petal source)
-    {
-        if (source == null)
-        {
-            Debug.LogError("Petal source is null");
-            return;
-        }
-
-        PetalType = source.PetalType;
-        Skill = source.Skill;
-    }
+    public Petal(Petal source) : this(source?.PetalType ?? throw new ArgumentNullException(nameof(source)), source.Skill) { }
 
     public bool IsMatchable()
     {
-        return Skill != SpecialSkillType.PrismaticBloom;
+        return PetalType != PetalType.None;
     }
 }

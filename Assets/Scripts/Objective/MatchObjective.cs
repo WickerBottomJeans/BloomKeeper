@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System;
 using System.Linq;
 using DefaultNamespace.UI;
-using DefaultNamespace.Utility;
 using UnityEngine;
 
 namespace DefaultNamespace
@@ -25,9 +24,9 @@ namespace DefaultNamespace
         public ObjectiveType ObjectiveType { get; } = ObjectiveType.Match;
         public bool CheckObjective() => goals.All(g => g.amount <= 0);
 
-        public void Apply(IReadOnlyList<TileChange> changes)
+        public void Apply(BoardResolution resolution)
         {
-            foreach (TileChange change in changes)
+            foreach (TileChange change in resolution.TileChanges)
             {
                 if (!change.PetalWasRemoved) continue;
                 PetalGoal goal = goals.FirstOrDefault(g => g.petalType == change.RemovedPetalType);
@@ -39,7 +38,8 @@ namespace DefaultNamespace
         {
             return goals.ConvertAll(g => new ObjectiveViewData
             {
-                spriteKey = SpriteKeyHelper.GetPetalSpriteKey(g.petalType, SpecialSkillType.None),
+                objectiveType = ObjectiveType,
+                petalType = g.petalType,
                 objectiveText = Mathf.Max(0, g.amount).ToString(),
                 remainingAmount = Mathf.Max(0, g.amount)
             });

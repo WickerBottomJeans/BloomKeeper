@@ -5,6 +5,7 @@
         Match = 1,
         Butterfly = 2,
         ClearSpiderWeb = 3,
+        CollectEgg = 4,
     }
 
     public enum ObjectiveUpdateState
@@ -34,7 +35,8 @@
 
     public enum TileFeatureType
     {
-        Web = 1
+        Web = 1,
+        Basket = 2
     }
 
     public enum SpecialSkillType

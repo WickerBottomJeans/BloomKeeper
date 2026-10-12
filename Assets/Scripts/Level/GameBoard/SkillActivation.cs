@@ -24,22 +24,22 @@ namespace DefaultNamespace.UI
         public SkillParticipant? SwapInitiator { get; }
         public SkillParticipant? SwapPartner { get; }
 
-        // The petal whose effect triggered this skill in a chain.
-        public Petal TriggerPetal { get; }
+        // The color carried into a chained Prismatic Bloom effect.
+        public PetalType? TriggerPetalType { get; }
 
-        private SkillActivation(SkillExecutionType effectType, IReadOnlyList<SkillParticipant> consumedInputs, Petal triggerPetal, SkillParticipant? swapInitiator, SkillParticipant? swapPartner)
+        private SkillActivation(SkillExecutionType effectType, IReadOnlyList<SkillParticipant> consumedInputs, PetalType? triggerPetalType, SkillParticipant? swapInitiator, SkillParticipant? swapPartner)
         {
             if (consumedInputs.Count == 0)
                 throw new ArgumentException("A skill activation requires at least one consumed input.", nameof(consumedInputs));
 
             EffectType = effectType;
             ConsumedInputs = new List<SkillParticipant>(consumedInputs).AsReadOnly();
-            TriggerPetal = triggerPetal;
+            TriggerPetalType = triggerPetalType;
             SwapInitiator = swapInitiator;
             SwapPartner = swapPartner;
         }
 
-        public static SkillActivation FromPetalSkill(SkillParticipant consumedInput, Petal triggerPetal = null)
+        public static SkillActivation FromPetalSkill(SkillParticipant consumedInput, PetalType? triggerPetalType = null)
         {
             SkillExecutionType effectType = consumedInput.Petal.Skill switch
             {
@@ -51,7 +51,7 @@ namespace DefaultNamespace.UI
                 _ => throw new ArgumentOutOfRangeException(nameof(consumedInput), consumedInput.Petal.Skill, "Petal skill has no executable behavior.")
             };
 
-            return new SkillActivation(effectType, new[] { consumedInput }, triggerPetal, null, null);
+            return new SkillActivation(effectType, new[] { consumedInput }, triggerPetalType, null, null);
         }
 
         public static SkillActivation FromSwap(SkillExecutionType effectType, SkillParticipant swapInitiator, SkillParticipant swapPartner)
@@ -101,14 +101,16 @@ namespace DefaultNamespace.UI
         public IReadOnlyList<Vector2Int> ConsumedPositions { get; }
         public IReadOnlyList<PetalChange> PetalChanges { get; }
         public Petal Causer { get; }
+        public PetalType? TriggerPetalType { get; }
         public SkillRepresentationData Representation { get; }
 
-        public SkillPlan(IReadOnlyList<Vector2Int> affectedPositions, Petal causer, SkillRepresentationData representation, IReadOnlyList<Vector2Int> consumedPositions = null, IReadOnlyList<PetalChange> petalChanges = null)
+        public SkillPlan(IReadOnlyList<Vector2Int> affectedPositions, Petal causer, SkillRepresentationData representation, IReadOnlyList<Vector2Int> consumedPositions = null, IReadOnlyList<PetalChange> petalChanges = null, PetalType? triggerPetalType = null)
         {
             AffectedPositions = affectedPositions;
             ConsumedPositions = consumedPositions ?? Array.Empty<Vector2Int>();
             PetalChanges = petalChanges ?? Array.Empty<PetalChange>();
             Causer = causer;
+            TriggerPetalType = triggerPetalType;
             Representation = representation;
         }
     }

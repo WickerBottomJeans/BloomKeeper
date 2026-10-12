@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Owns the petal views used by one animation. Disposing releases every remaining view.
-public sealed class PetalViewScope : IDisposable
+// Holds exclusive piece-view access for one animation. Disposing releases access, not pooled views.
+public sealed class PieceViewScope : IDisposable
 {
-    private readonly PetalViewManager manager;
+    private readonly PieceViewManager manager;
     private readonly Dictionary<Vector2Int, ViewAccessKey> keys = new();
     public string Name { get; }
     internal ViewAccessKey this[Vector2Int position] => keys[position];
     public IEnumerable<Vector2Int> Keys => keys.Keys;
 
-    public PetalViewScope(PetalViewManager manager, string name)
+    public PieceViewScope(PieceViewManager manager, string name)
     {
         this.manager = manager;
         Name = name;
@@ -26,7 +26,7 @@ public sealed class PetalViewScope : IDisposable
 
     public void AcquireRequired(Vector2Int position)
     {
-        if (!TryAcquire(position)) throw new InvalidOperationException($"Petal view at {position} cannot be acquired by {Name}.");
+        if (!TryAcquire(position)) throw new InvalidOperationException($"Piece view at {position} cannot be acquired by {Name}.");
     }
 
     public List<Vector2Int> AcquireAvailable(IEnumerable<Vector2Int> positions)

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using DefaultNamespace;
 using DefaultNamespace.UI;
-using DefaultNamespace.Utility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -53,10 +52,7 @@ namespace UI.UIForTester
 
             foreach (PetalType petalType in Enum.GetValues(typeof(PetalType)))
             {
-                if (petalType == PetalType.None)
-                    continue;
-
-                CreateHeader(petalType.ToString(), $"Header_{petalType}");
+                CreateHeader(petalType == PetalType.None ? "Untyped" : petalType.ToString(), $"Header_{petalType}");
 
                 foreach (SpecialSkillType skillType in selectableSkills)
                     CreateSelectionTile(petalType, skillType);
@@ -77,8 +73,8 @@ namespace UI.UIForTester
             button.gameObject.name = $"{petalType}_{skillType}";
             button.gameObject.SetActive(true);
 
-            string spriteKey = SpriteKeyHelper.GetPetalSpriteKey(petalType, skillType);
-            Sprite sprite = SpriteLoader.Instance.GetSprite(spriteKey);
+            bool validCombination = (petalType == PetalType.None) == (skillType == SpecialSkillType.PrismaticBloom);
+            Sprite sprite = validCombination ? SpriteCatalogProvider.Instance.GetPetalSprite(petalType, skillType) : null;
             Image image = button.image;
 
             image.sprite = sprite;

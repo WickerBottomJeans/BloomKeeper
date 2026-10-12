@@ -16,14 +16,14 @@ namespace Skills
         private const float FireDuration = 0.3f;
         private const float FinishDuration = 0.2f;
 
-        private readonly PetalViewManager petalViewManager;
+        private readonly PieceViewManager pieceViewManager;
         private readonly BoardVFXManager boardVFXManager;
         private readonly BoardAudioManager boardAudioManager;
         private readonly BoardLayout layout;
 
-        public BubbleSkillPresenter(PetalViewManager petalViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout)
+        public BubbleSkillPresenter(PieceViewManager pieceViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout)
         {
-            this.petalViewManager = petalViewManager;
+            this.pieceViewManager = pieceViewManager;
             this.boardVFXManager = boardVFXManager;
             this.boardAudioManager = boardAudioManager;
             this.layout = layout;
@@ -46,19 +46,19 @@ namespace Skills
             }
         }
 
-        private UniTask Prepare(Vector2Int center, PetalViewScope views, AudioPlaybackScope audioScope)
+        private UniTask Prepare(Vector2Int center, PieceViewScope views, AudioPlaybackScope audioScope)
         {
             boardAudioManager.PlayBubblePrepare(audioScope);
-            return views.Owns(center) ? petalViewManager.PlayBubbleInflate(center, BubbleInflateScaleMultiplier, PrepareDuration, views) : UniTask.CompletedTask;
+            return views.Owns(center) ? PetalPresentation.PlayBubbleInflate(pieceViewManager, center, BubbleInflateScaleMultiplier, PrepareDuration, views) : UniTask.CompletedTask;
         }
 
         private async UniTask Fire(Vector2Int center, IDictionary<Vector2Int, VFXBubble> bubbles, SkillPresentationContext skillPresentationContext)
         {
             BoardChangeGroup resolution = skillPresentationContext.BoardChangeGroup;
-            PetalViewScope views = skillPresentationContext.Views;
+            PieceViewScope views = skillPresentationContext.Views;
             if (views.Owns(center))
             {
-                petalViewManager.HideBubbleForPop(center, views);
+                PetalPresentation.HideBubbleForPop(pieceViewManager, center, views);
                 boardVFXManager.PlayBubblePopParticles(center, BubbleInflateScaleMultiplier, skillPresentationContext.AudioPlaybackScope);
             }
             skillPresentationContext.HandleTileImpactPresented(center);
@@ -89,14 +89,14 @@ namespace Skills
             finally
             {
                 if (views.Owns(center))
-                    petalViewManager.ReleasePetalViewsImmediately(new[] { center }, views);
+                    pieceViewManager.ReleasePieceViewsImmediately(new[] { center }, views);
             }
         }
 
         private async UniTask Finish(Vector2Int center, IDictionary<Vector2Int, VFXBubble> bubbles, SkillPresentationContext skillPresentationContext)
         {
             BoardChangeGroup resolution = skillPresentationContext.BoardChangeGroup;
-            PetalViewScope views = skillPresentationContext.Views;
+            PieceViewScope views = skillPresentationContext.Views;
             HashSet<Vector2Int> removedPositions = SkillPresentationQueries.GetRemovedPetalPositionsExcludingTriggeredSkills(resolution);
             removedPositions.Remove(center);
             removedPositions = new HashSet<Vector2Int>(views.AcquireAvailable(removedPositions));
@@ -110,7 +110,7 @@ namespace Skills
 
             var tasks = new List<UniTask>(2);
             tasks.Add(PopBubblesOverDuration(bubbles, removedPositions, skillPresentationContext));
-            tasks.Add(petalViewManager.PlayAboutToExecute(triggeredSkillPositions, views));
+            tasks.Add(PetalPresentation.PlayAboutToExecute(pieceViewManager, triggeredSkillPositions, views));
             await UniTask.WhenAll(tasks);
         }
 
@@ -133,7 +133,7 @@ namespace Skills
                 bubbles.Remove(position);
                 boardVFXManager.PopBubbleVFX(bubble, skillPresentationContext.AudioPlaybackScope);
                 if (removedPositions.Contains(position))
-                    petalViewManager.ReleasePetalViewsImmediately(new[] { position }, skillPresentationContext.Views);
+                    pieceViewManager.ReleasePieceViewsImmediately(new[] { position }, skillPresentationContext.Views);
                 skillPresentationContext.HandleTileImpactPresented(position);
             }
 

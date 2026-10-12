@@ -12,14 +12,14 @@
   "boardWidth": 8,
   "boardHeight": 8,
   "tiles": [
-    { "isPlayable": true, "petalType": 1, "skillType": 4 }, { "isPlayable": true, "petalType": 2 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 5 }, { "isPlayable": true, "petalType": 4, "skillType": 3 }, { "isPlayable": true, "petalType": 7 }, { "isPlayable": true, "petalType": 1 },
-    { "isPlayable": true, "petalType": 2 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 6 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 5 }, { "isPlayable": true, "petalType": 1 }, { "isPlayable": true, "petalType": 2 },
-    { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 3, "skillType": 5 }, { "isPlayable": true, "petalType": 6 }, { "isPlayable": true, "petalType": 7 }, { "isPlayable": true, "petalType": 1 }, { "isPlayable": true, "petalType": 2 }, { "isPlayable": true, "petalType": 3 },
-    { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 7 }, { "isPlayable": true, "petalType": 1 }, { "isPlayable": true, "petalType": 2 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 },
-    { "isPlayable": true, "petalType": 5 }, { "isPlayable": true, "petalType": 6 }, { "isPlayable": true, "petalType": 7 }, { "isPlayable": true, "petalType": 1 }, { "isPlayable": true, "petalType": 2 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 5 },
-    { "isPlayable": true, "petalType": 6 }, { "isPlayable": true, "petalType": 7 }, { "isPlayable": true, "petalType": 1 }, { "isPlayable": true, "petalType": 2 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 5 }, { "isPlayable": true, "petalType": 6 },
-    { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 5 }, { "isPlayable": true, "petalType": 1 }, { "isPlayable": true, "petalType": 6 }, { "isPlayable": true, "petalType": 7 }, { "isPlayable": true, "petalType": 2 }, { "isPlayable": true, "petalType": 3 },
-    { "isPlayable": true, "petalType": 2 }, { "isPlayable": true, "petalType": 1 }, { "isPlayable": true, "petalType": 1 }, { "isPlayable": true, "petalType": 2, "skillType": 2 }, { "isPlayable": true, "petalType": 1 }, { "isPlayable": true, "petalType": 3 }, { "isPlayable": true, "petalType": 4 }, { "isPlayable": true, "petalType": 5 }
+    { "skillType": 4 }, { "petalType": 2 }, { "petalType": 3 }, { "petalType": 4 }, { "petalType": 5 }, { "petalType": 4, "skillType": 3 }, { "petalType": 7 }, { "petalType": 1 },
+    { "petalType": 2 }, { "petalType": 3 }, { "petalType": 6 }, { "petalType": 4 }, { "petalType": 4 }, { "petalType": 5 }, { "petalType": 1 }, { "petalType": 2 },
+    { "petalType": 3 }, { "petalType": 4 }, { "petalType": 3, "skillType": 5 }, { "petalType": 6 }, { "petalType": 7 }, { "petalType": 1 }, { "petalType": 2 }, { "petalType": 3 },
+    { "petalType": 3 }, { "petalType": 3 }, { "petalType": 4 }, { "petalType": 7 }, { "petalType": 1 }, { "petalType": 2 }, { "petalType": 3 }, { "petalType": 4 },
+    { "petalType": 5 }, { "petalType": 6 }, { "petalType": 7 }, { "petalType": 1 }, { "petalType": 2 }, { "petalType": 3 }, { "petalType": 4 }, { "petalType": 5 },
+    { "petalType": 6 }, { "petalType": 7 }, { "petalType": 1 }, { "petalType": 2 }, { "petalType": 3 }, { "petalType": 4 }, { "petalType": 5 }, { "petalType": 6 },
+    { "petalType": 3 }, { "petalType": 4 }, { "petalType": 5 }, { "petalType": 1 }, { "petalType": 6 }, { "petalType": 7 }, { "petalType": 2 }, { "petalType": 3 },
+    { "petalType": 2 }, { "petalType": 1 }, { "petalType": 1 }, { "petalType": 2, "skillType": 2 }, { "petalType": 1 }, { "petalType": 3 }, { "petalType": 4 }, { "petalType": 5 }
   ],
   "objectives": [
     { "type": 1, "petals": [{ "petalType": 1, "amount": 12 }, { "petalType": 2, "amount": 12 }] }

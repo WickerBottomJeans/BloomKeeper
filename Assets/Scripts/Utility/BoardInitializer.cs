@@ -15,6 +15,8 @@ namespace Utility
         {
             int cols = data.boardWidth;
             int rows = data.boardHeight;
+            if (cols <= 0 || rows <= 0 || data.tiles == null || data.tiles.Count != (long)cols * rows)
+                throw new System.ArgumentException("The board needs positive dimensions and one tiles entry per cell, including null for holes.", nameof(data));
             Tile[,] grid = new Tile[cols, rows];
 
             for (int i = 0; i < data.tiles.Count; i++)
@@ -22,7 +24,7 @@ namespace Utility
                 int x = i % cols;
                 int y = rows - 1 - (i / cols);
                 TileData tileData = data.tiles[i];
-                grid[x, y] = TileFactory.Create(tileData);
+                grid[x, y] = tileData == null ? null : TileFactory.Create(tileData);
             }
 
             for (int y = rows - 1; y >= 0; y--)
@@ -30,23 +32,25 @@ namespace Utility
                 for (int x = 0; x < cols; x++)
                 {
                     int index = (rows - 1 - y) * cols + x;
-                    TileData tileData = index < data.tiles.Count ? data.tiles[index] : new TileData();
+                    TileData tileData = data.tiles[index];
                     Tile tile = grid[x, y];
 
-                    if (tile == null) continue;
-                    if (!tile.CanReceiveNewPetal())
+                    if (tile == null || !tile.CanReceivePiece()) continue;
+
+                    if (tileData.hasEgg)
                     {
-                        if (tileData.petalType != PetalType.None || tileData.skillType != SpecialSkillType.None)
-                            throw new System.InvalidOperationException($"Tile at ({x}, {y}) cannot contain configured petal data.");
+                        tile.SetPiece(new Egg());
                         continue;
                     }
 
-                    tile.SetPetal(tileData.petalType != PetalType.None
+                    tile.SetPiece(tileData.skillType == SpecialSkillType.PrismaticBloom || tileData.petalType != PetalType.None
                         ? PetalFactory.CreateForTileMap(tileData)
                         : CreatePetalWithConstrained(grid, x, y));
                 }
             }
 
+            if (EggCollectionDetector.Detect(grid).Count > 0)
+                throw new System.InvalidOperationException("An egg cannot start beside a basket.");
             return grid;
         }
 
@@ -57,10 +61,10 @@ namespace Utility
 
             foreach (PetalType type in allTypes)
             {
-                grid[x, y].SetPetal(PetalFactory.CreatePetal(type, SpecialSkillType.None));
+                grid[x, y].SetPiece(PetalFactory.CreatePetal(type, SpecialSkillType.None));
                 if (MatchDetector.WouldCompleteMatch(grid, x, y))
                     excluded.Add(type);
-                grid[x, y].RemovePetal();
+                grid[x, y].RemovePiece();
             }
 
             PetalType[] candidates = System.Array.FindAll(allTypes, t => !excluded.Contains(t));

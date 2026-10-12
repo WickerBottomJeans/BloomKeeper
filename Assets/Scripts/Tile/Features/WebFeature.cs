@@ -9,7 +9,7 @@ namespace DefaultNamespace
         public override TileFeatureType FeatureType => TileFeatureType.Web;
         public int RemainingLayers { get; private set; }
         public override bool IsRemoved => RemainingLayers == 0;
-        public override bool AllowsPetals => IsRemoved;
+        public override bool AllowsPieces => IsRemoved;
         public override bool AllowsGravity => IsRemoved;
 
         public WebFeature(int webLayers)

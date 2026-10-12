@@ -15,15 +15,15 @@ namespace Skills
         private const float FireDuration = 0.3f;
         private const float MaximumSpinSpeed = 1200f;
 
-        private readonly PetalViewManager petalViewManager;
+        private readonly PieceViewManager pieceViewManager;
         private readonly BoardVFXManager boardVFXManager;
         private readonly BoardLayout layout;
         private readonly AudioCue audioCue;
         private readonly AudioCue finishCue;
 
-        public PrismaticBloomSkillPresenter(PetalViewManager petalViewManager, BoardVFXManager boardVFXManager, BoardLayout layout, AudioCue audioCue, AudioCue finishCue)
+        public PrismaticBloomSkillPresenter(PieceViewManager pieceViewManager, BoardVFXManager boardVFXManager, BoardLayout layout, AudioCue audioCue, AudioCue finishCue)
         {
-            this.petalViewManager = petalViewManager;
+            this.pieceViewManager = pieceViewManager;
             this.boardVFXManager = boardVFXManager;
             this.layout = layout;
             this.audioCue = audioCue;
@@ -42,18 +42,18 @@ namespace Skills
             await Fire(representation, targets, skillPresentationContext);
         }
 
-        private UniTask Prepare(Vector2Int source, PetalViewScope views, AudioPlaybackScope audioScope)
+        private UniTask Prepare(Vector2Int source, PieceViewScope views, AudioPlaybackScope audioScope)
         {
             AudioService.Instance.PlaySfx(audioCue, audioScope);
-            return petalViewManager.PlayPrismaticBloomPrepareSpin(source, PrepareDuration, MaximumSpinSpeed, views);
+            return PetalPresentation.PlayPrismaticBloomPrepareSpin(pieceViewManager, source, PrepareDuration, MaximumSpinSpeed, views);
         }
 
         private async UniTask Fire(PrismaticBloomRepresentationData representation, IReadOnlyList<Vector2Int> targets, SkillPresentationContext skillPresentationContext)
         {
-            PetalViewScope views = skillPresentationContext.Views;
+            PieceViewScope views = skillPresentationContext.Views;
             Vector2Int source = representation.Source;
             Vector3 origin = layout.GetTileWorldPosition(source.x, source.y);
-            UniTask spinTask = petalViewManager.PlayPrismaticBloomFireSpin(source, FireDuration, MaximumSpinSpeed, views);
+            UniTask spinTask = PetalPresentation.PlayPrismaticBloomFireSpin(pieceViewManager, source, FireDuration, MaximumSpinSpeed, views);
             var projectileTasks = new List<UniTask>(targets.Count);
 
             foreach (Vector2Int target in targets)
@@ -65,7 +65,7 @@ namespace Skills
             await spinTask;
             AudioService.Instance.PlaySfx(finishCue, skillPresentationContext.AudioPlaybackScope);
             boardVFXManager.PlayPrismaticBloomFinisher(origin);
-            UniTask sourceDisappearTask = petalViewManager.PlayNormalRemovals(new[] { source }, views);
+            UniTask sourceDisappearTask = pieceViewManager.PlayNormalRemovals(new[] { source }, views);
             skillPresentationContext.HandleConsumedInputPresented(source);
             projectileTasks.Add(sourceDisappearTask);
             await UniTask.WhenAll(projectileTasks);
@@ -80,17 +80,17 @@ namespace Skills
         private async UniTask PlayTargetImpact(Vector2Int target, PrismaticBloomRepresentationData representation, SkillPresentationContext skillPresentationContext)
         {
             BoardChangeGroup resolution = skillPresentationContext.BoardChangeGroup;
-            PetalViewScope views = skillPresentationContext.Views;
+            PieceViewScope views = skillPresentationContext.Views;
             if (representation.ReplacementSkill != SpecialSkillType.None)
             {
                 PetalChange change = GetChangeAt(representation, target);
-                await petalViewManager.PlayPetalChange(change, layout, views);
-                await petalViewManager.PlayAboutToExecute(new[] { target }, views);
+                await PetalPresentation.PlayPetalChange(pieceViewManager, change, layout, views);
+                await PetalPresentation.PlayAboutToExecute(pieceViewManager, new[] { target }, views);
                 skillPresentationContext.HandleTileImpactPresented(target);
                 return;
             }
 
-            UniTask impactTask = resolution.IsTriggeredSkillInputPosition(target) ? petalViewManager.PlayAboutToExecute(new[] { target }, views) : petalViewManager.PlayNormalRemovals(new[] { target }, views);
+            UniTask impactTask = resolution.IsTriggeredSkillInputPosition(target) ? PetalPresentation.PlayAboutToExecute(pieceViewManager, new[] { target }, views) : pieceViewManager.PlayNormalRemovals(new[] { target }, views);
             skillPresentationContext.HandleTileImpactPresented(target);
             await impactTask;
         }

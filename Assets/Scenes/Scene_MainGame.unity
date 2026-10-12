@@ -442,11 +442,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 438607901}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 868c67f0ea4042e3bb34e20017c4b23e, type: 3}
+  m_Script: {fileID: 11500000, guid: fa391d7b8a194c3fb63549f70e9bdc37, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.SpriteLoader
-  atlasKeys:
-  - PetalSpriteSheet
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.SpriteCatalogProvider
+  petalSpriteCatalogReference:
+    m_AssetGUID: 307fc2a72e8c4bf9ae0a9becb563ad54
+    m_SubObjectName:
+    m_SubObjectType:
+  objectiveSpriteCatalogReference:
+    m_AssetGUID: d9d4406fe91646e284c0f12dbecdd0ec
+    m_SubObjectName:
+    m_SubObjectType:
 --- !u!114 &438607908
 MonoBehaviour:
   m_ObjectHideFlags: 0

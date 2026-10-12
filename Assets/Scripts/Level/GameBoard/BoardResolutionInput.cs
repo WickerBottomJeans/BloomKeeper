@@ -10,9 +10,10 @@ namespace DefaultNamespace.UI
         public IReadOnlyList<SkillActivation> SkillActivations { get; }
         public SwapContext? Swap { get; }
         public IReadOnlyList<Vector2Int> ClearPositions { get; }
-        public bool RequiresResolution => MatchGroups.Count > 0 || SkillActivations.Count > 0 || ClearPositions.Count > 0;
+        public IReadOnlyList<EggCollectionTarget> EggCollections { get; }
+        public bool RequiresResolution => EggCollections.Count > 0 || MatchGroups.Count > 0 || SkillActivations.Count > 0 || ClearPositions.Count > 0;
 
-        public BoardResolutionInput(IReadOnlyList<MatchGroup> matchGroups, IReadOnlyList<SkillActivation> skillActivations, SwapContext? swap = null, IReadOnlyList<Vector2Int> clearPositions = null)
+        public BoardResolutionInput(IReadOnlyList<MatchGroup> matchGroups, IReadOnlyList<SkillActivation> skillActivations, SwapContext? swap = null, IReadOnlyList<Vector2Int> clearPositions = null, IReadOnlyList<EggCollectionTarget> eggCollections = null)
         {
             if (matchGroups == null) throw new ArgumentNullException(nameof(matchGroups));
             if (skillActivations == null) throw new ArgumentNullException(nameof(skillActivations));
@@ -21,6 +22,7 @@ namespace DefaultNamespace.UI
             MatchGroups = new List<MatchGroup>(matchGroups).AsReadOnly();
             SkillActivations = new List<SkillActivation>(skillActivations).AsReadOnly();
             Swap = swap;
+            EggCollections = new List<EggCollectionTarget>(eggCollections ?? Array.Empty<EggCollectionTarget>()).AsReadOnly();
             ClearPositions = new List<Vector2Int>(clearPositions ?? Array.Empty<Vector2Int>()).AsReadOnly();
         }
     }

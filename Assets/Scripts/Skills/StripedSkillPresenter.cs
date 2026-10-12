@@ -16,12 +16,12 @@ namespace Skills
         private const float FireDuration = 0.2f;
         private const float FinishDuration = 0.1f;
 
-        private readonly PetalViewManager petalViewManager;
+        private readonly PieceViewManager pieceViewManager;
         private readonly BoardVFXManager boardVFXManager;
 
-        public StripedSkillPresenter(PetalViewManager petalViewManager, BoardVFXManager boardVFXManager)
+        public StripedSkillPresenter(PieceViewManager pieceViewManager, BoardVFXManager boardVFXManager)
         {
-            this.petalViewManager = petalViewManager;
+            this.pieceViewManager = pieceViewManager;
             this.boardVFXManager = boardVFXManager;
         }
 
@@ -44,10 +44,10 @@ namespace Skills
             }
         }
 
-        private UniTask Prepare(VFXStripeHalo halo, Vector2Int source, PetalViewScope views, AudioPlaybackScope audioScope)
+        private UniTask Prepare(VFXStripeHalo halo, Vector2Int source, PieceViewScope views, AudioPlaybackScope audioScope)
         {
             return UniTask.WhenAll(halo.Prepare(PrepareDuration, audioScope),
-                petalViewManager.PlayScale(source, SourcePetalPrepareScale, PrepareDuration, Ease.OutCubic, views));
+                pieceViewManager.PlayScale(source, SourcePetalPrepareScale, PrepareDuration, Ease.OutCubic, views));
         }
 
         private UniTask Fire(VFXStripeBeamAxis beamAxis, Vector2Int source, bool isVertical)
@@ -57,7 +57,7 @@ namespace Skills
 
         private async UniTask Finish(VFXStripeBeamAxis beamAxis, VFXStripeHalo halo, Vector2Int source, SkillPresentationContext skillPresentationContext)
         {
-            await skillPresentationContext.ClearImmediately(petalViewManager, source);
+            await skillPresentationContext.ClearImmediately(pieceViewManager, source);
             await UniTask.WhenAll(beamAxis.Finish(FinishDuration), halo.Finish(FinishDuration));
         }
     }

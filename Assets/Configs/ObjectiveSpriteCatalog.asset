@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f58d45bf6c94d6da27032ef00a50d1e, type: 3}
+  m_Name: ObjectiveSpriteCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.ObjectiveSpriteCatalog
+  matchPetalSprites:
+  - petalType: 1
+    sprite: {fileID: -4408906938756110447, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 2
+    sprite: {fileID: -5971529712519202139, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 3
+    sprite: {fileID: 138874962496516619, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 4
+    sprite: {fileID: 3234460474562127226, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 5
+    sprite: {fileID: 7974869367103266702, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 6
+    sprite: {fileID: -7723644376667363023, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 7
+    sprite: {fileID: -4508104085187513110, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  spiderWebSprite: {fileID: 4229658373125635459, guid: d809beab859d44545b5535b5c40cdb04, type: 3}
+  eggSprite: {fileID: 21300000, guid: a1fd6466bde741ba996ed4b097a6680f, type: 3}

@@ -25,7 +25,7 @@ namespace DefaultNamespace
             public override int GetHashCode() => HashCode.Combine(A, B);
         }
 
-        private static readonly Dictionary<SkillKey, Func<Tile[,], Vector2Int, Vector2Int, List<SkillActivation>>> _handlers =
+        private static readonly Dictionary<SkillKey, Func<SkillParticipant, SkillParticipant, List<SkillActivation>>> _handlers =
             new()
             {
                 { new SkillKey(SpecialSkillType.PrismaticBloom, SpecialSkillType.None), HandlePrismaticBloom },
@@ -40,18 +40,19 @@ namespace DefaultNamespace
 
         public static List<SkillActivation> DetectOnSwap(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
         {
-            Petal petalA = grid[tileA.x, tileA.y].Petal;
-            Petal petalB = grid[tileB.x, tileB.y].Petal;
+            if (grid[tileA.x, tileA.y].Piece is not Petal petalA || grid[tileB.x, tileB.y].Piece is not Petal petalB) return new List<SkillActivation>();
 
-            SpecialSkillType skillA = petalA?.Skill ?? SpecialSkillType.None;
-            SpecialSkillType skillB = petalB?.Skill ?? SpecialSkillType.None;
+            SpecialSkillType skillA = petalA.Skill;
+            SpecialSkillType skillB = petalB.Skill;
 
             var key = new SkillKey(skillA, skillB);
 
             if (!_handlers.TryGetValue(key, out var handler))
                 return new List<SkillActivation>();
 
-            return handler(grid, tileA, tileB);
+            var swapInitiator = new SkillParticipant(tileB, new Petal(petalB));
+            var swapPartner = new SkillParticipant(tileA, new Petal(petalA));
+            return handler(swapInitiator, swapPartner);
         }
 
         public static bool HasActivationOnSwap(SpecialSkillType skillA, SpecialSkillType skillB)
@@ -59,22 +60,16 @@ namespace DefaultNamespace
             return _handlers.ContainsKey(new SkillKey(skillA, skillB));
         }
 
-        private static List<SkillActivation> HandlePrismaticBloom(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
+        private static List<SkillActivation> HandlePrismaticBloom(SkillParticipant swapInitiator, SkillParticipant swapPartner)
         {
-            var swapInitiator = new SkillParticipant(tileB, new Petal(grid[tileB.x, tileB.y].Petal));
-            var swapPartner = new SkillParticipant(tileA, new Petal(grid[tileA.x, tileA.y].Petal));
-
             return new List<SkillActivation>
             {
                 SkillActivation.FromSwap(SkillExecutionType.PrismaticBloom, swapInitiator, swapPartner)
             };
         }
 
-        private static List<SkillActivation> HandleStripeStripeFusion(Tile[,] grid, Vector2Int tileA, Vector2Int tileB)
+        private static List<SkillActivation> HandleStripeStripeFusion(SkillParticipant swapInitiator, SkillParticipant swapPartner)
         {
-            var swapInitiator = new SkillParticipant(tileB, new Petal(grid[tileB.x, tileB.y].Petal));
-            var swapPartner = new SkillParticipant(tileA, new Petal(grid[tileA.x, tileA.y].Petal));
-
             return new List<SkillActivation>
             {
                 SkillActivation.FromSwap(SkillExecutionType.StripeStripeFusion, swapInitiator, swapPartner)

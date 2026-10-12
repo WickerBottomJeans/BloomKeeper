@@ -2,12 +2,12 @@ using UnityEngine;
 
 internal sealed class ViewAccessKey
 {
-    public PetalView View { get; }
+    public PieceView View { get; }
     public Vector2Int Position { get; }
     public string UserName => Owner.Name;
-    internal PetalViewScope Owner { get; }
+    internal PieceViewScope Owner { get; }
 
-    public ViewAccessKey(PetalView view, Vector2Int position, PetalViewScope owner)
+    public ViewAccessKey(PieceView view, Vector2Int position, PieceViewScope owner)
     {
         View = view;
         Position = position;

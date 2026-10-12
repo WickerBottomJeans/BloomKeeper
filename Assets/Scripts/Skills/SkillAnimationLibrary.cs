@@ -16,14 +16,14 @@ namespace Skills
 
         private Dictionary<Type, ISkillAnimation> presenters;
 
-        public void Init(PetalViewManager petalViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout)
+        public void Init(PieceViewManager pieceViewManager, BoardVFXManager boardVFXManager, BoardAudioManager boardAudioManager, BoardLayout layout)
         {
             presenters = new Dictionary<Type, ISkillAnimation>();
-            Register(new BubbleSkillPresenter(petalViewManager, boardVFXManager, boardAudioManager, layout));
-            Register(new StripedSkillPresenter(petalViewManager, boardVFXManager));
-            Register(new StripeStripeFusionPresenter(petalViewManager, boardVFXManager));
-            Register(new ButterflySkillPresenter(petalViewManager, boardVFXManager, layout));
-            Register(new PrismaticBloomSkillPresenter(petalViewManager, boardVFXManager, layout, prismaticBloomCue, prismaticBloomFinishCue));
+            Register(new BubbleSkillPresenter(pieceViewManager, boardVFXManager, boardAudioManager, layout));
+            Register(new StripedSkillPresenter(pieceViewManager, boardVFXManager));
+            Register(new StripeStripeFusionPresenter(pieceViewManager, boardVFXManager));
+            Register(new ButterflySkillPresenter(pieceViewManager, boardVFXManager, layout));
+            Register(new PrismaticBloomSkillPresenter(pieceViewManager, boardVFXManager, layout, prismaticBloomCue, prismaticBloomFinishCue));
         }
 
         private void Register(ISkillAnimation presenter)

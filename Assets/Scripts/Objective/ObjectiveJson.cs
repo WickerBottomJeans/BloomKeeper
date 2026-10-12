@@ -21,5 +21,6 @@ namespace DefaultNamespace
 
         //Only use for type ClearSpiderWeb
         public int spiderWebsToClear;
+        public int eggsToCollect;
     }
 }

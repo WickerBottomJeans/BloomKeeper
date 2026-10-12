@@ -26,7 +26,7 @@ namespace DefaultNamespace.UI
         public void Display(ObjectiveViewData viewData)
         {
             label.text = viewData.objectiveText;
-            icon.sprite = SpriteLoader.Instance.GetSprite(viewData.spriteKey);
+            icon.sprite = SpriteCatalogProvider.Instance.GetObjectiveSprite(viewData.objectiveType, viewData.petalType);
             SetContentAlpha(viewData.remainingAmount <= 0 ? completedAlpha : 1f);
             displayedRemainingAmount = viewData.remainingAmount;
         }

@@ -17,7 +17,7 @@ namespace DefaultNamespace.UI
     {
         // Dependencies
         private readonly TileViewManager tileViewManager;
-        private readonly PetalViewManager petalViewManager;
+        private readonly PieceViewManager pieceViewManager;
         private readonly SkillAnimationLibrary skillAnimationLibrary;
         private readonly BoardLayout boardLayout;
         private readonly BoardAudioManager boardAudioManager;
@@ -44,13 +44,13 @@ namespace DefaultNamespace.UI
 
         public CancellationToken CancellationToken => presentationCancellationTokenSource.Token;
 
-        public ResolutionPlayback(BoardResolution boardResolution, PetalViewManager petalViewManager, TileViewManager tileViewManager, BoardAudioManager boardAudioManager, SkillAnimationLibrary skillAnimationLibrary, BoardLayout boardLayout, CancellationToken cancellationToken)
+        public ResolutionPlayback(BoardResolution boardResolution, PieceViewManager pieceViewManager, TileViewManager tileViewManager, BoardAudioManager boardAudioManager, SkillAnimationLibrary skillAnimationLibrary, BoardLayout boardLayout, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             // Init
             this._boardResolution = boardResolution;
-            this.petalViewManager = petalViewManager;
+            this.pieceViewManager = pieceViewManager;
             this.skillAnimationLibrary = skillAnimationLibrary;
             this.boardLayout = boardLayout;
             this.tileViewManager = tileViewManager;
@@ -76,7 +76,7 @@ namespace DefaultNamespace.UI
         {
             // Prep
             using var audioScope = new AudioPlaybackScope();
-            using var normalViews = new PetalViewScope(petalViewManager, "Normal clears");
+            using var normalViews = new PieceViewScope(pieceViewManager, "Normal clears");
             var skillPlaybacks = CreateSkillPlaybacks(audioScope);
             var normalTileEffects = GetNormalEffects();
             var normalEffectsCompleted = new UniTaskCompletionSource();
@@ -93,6 +93,7 @@ namespace DefaultNamespace.UI
                 // Start playback
                 foreach (SkillPlayback skillPlayback in skillPlaybacks) presentationTasks.Add(PlaySkill(skillPlayback, normalEffectsCompleted));
                 presentationTasks.Add(PlayNormalEffects(normalTileEffects, normalViews, normalEffectsCompleted));
+                presentationTasks.Add(PlayEggCollections());
 
                 // Each task reports failure without throwing, so all running animations drain before cleanup.
                 await UniTask.WhenAll(presentationTasks);
@@ -110,6 +111,19 @@ namespace DefaultNamespace.UI
             }
         }
 
+        private async UniTask PlayEggCollections()
+        {
+            try
+            {
+                var presenter = new EggCollectionPresenter(pieceViewManager, tileViewManager, boardLayout);
+                await presenter.Play(_boardResolution.EggCollections, this);
+            }
+            catch (Exception exception)
+            {
+                FailPresentation(exception);
+            }
+        }
+
         private List<SkillPlayback> CreateSkillPlaybacks(AudioPlaybackScope audioScope)
         {
             // Prep
@@ -122,7 +136,7 @@ namespace DefaultNamespace.UI
             {
                 ISkillAnimation skillAnimation = skillAnimationLibrary.GetPresenter(resolvedSkill.skillPlan.Representation);
                 var requiredViews = new HashSet<Vector2Int>(skillAnimation.RequiredViews(resolvedSkill.skillPlan.Representation, resolvedSkill.Effect));
-                var context = new SkillPresentationContext(resolvedSkill.Effect, resolvedSkill.ConsumedInputs, this, new PetalViewScope(petalViewManager, skillAnimation.GetType().Name), audioScope);
+                var context = new SkillPresentationContext(resolvedSkill.Effect, resolvedSkill.ConsumedInputs, this, new PieceViewScope(pieceViewManager, skillAnimation.GetType().Name), audioScope);
                 skillPlaybacks.Add(new SkillPlayback(resolvedSkill, skillAnimation, context, requiredViews, requiredViews.Overlaps(spawnedPetalPositions)));
             }
             return skillPlaybacks;
@@ -166,7 +180,7 @@ namespace DefaultNamespace.UI
             }
         }
 
-        private async UniTask PlayNormalEffects(IReadOnlyList<BoardChangeGroup> tileEffects, PetalViewScope petalViewScope, UniTaskCompletionSource effectsCompleted)
+        private async UniTask PlayNormalEffects(IReadOnlyList<BoardChangeGroup> tileEffects, PieceViewScope petalViewScope, UniTaskCompletionSource effectsCompleted)
         {
             try
             {
@@ -208,7 +222,7 @@ namespace DefaultNamespace.UI
                 foreach (Vector2Int position in requiredViews) Context.Views.AcquireRequired(position);
             }
         }
-        private void AcquireSkillPetalSpawnViews(IReadOnlyList<SkillPetalSpawn> skillPetalSpawns, PetalViewScope petalViewScope)
+        private void AcquireSkillPetalSpawnViews(IReadOnlyList<SkillPetalSpawn> skillPetalSpawns, PieceViewScope petalViewScope)
         {
             foreach (SkillPetalSpawn skillPetalSpawn in skillPetalSpawns)
             {
@@ -220,7 +234,7 @@ namespace DefaultNamespace.UI
             }
         }
 
-        private void AcquireViews(BoardChangeGroup groupResult, PetalViewScope petalViewScope)
+        private void AcquireViews(BoardChangeGroup groupResult, PieceViewScope petalViewScope)
         {
             var positions = new List<Vector2Int>();
             AddNormalRemovals(groupResult, positions);
@@ -231,7 +245,7 @@ namespace DefaultNamespace.UI
             }
         }
 
-        private async UniTask PlayMatches(IReadOnlyList<BoardChangeGroup> groupResults, IReadOnlyList<SkillPetalSpawn> skillPetalSpawns, PetalViewScope petalViewScope)
+        private async UniTask PlayMatches(IReadOnlyList<BoardChangeGroup> groupResults, IReadOnlyList<SkillPetalSpawn> skillPetalSpawns, PieceViewScope petalViewScope)
         {
             // Prep
             var normalRemovals = new List<Vector2Int>();
@@ -257,8 +271,8 @@ namespace DefaultNamespace.UI
             normalRemovals.RemoveAll(position => !petalViewScope.Owns(position));
 
             // Animate
-            presentationTasks.Add(petalViewManager.PlayNormalRemovals(normalRemovals, petalViewScope));
-            presentationTasks.Add(petalViewManager.PlaySkillPetalCreations(skillPetalSpawns, boardLayout, petalViewScope));
+            presentationTasks.Add(pieceViewManager.PlayNormalRemovals(normalRemovals, petalViewScope));
+            presentationTasks.Add(PetalPresentation.PlaySkillPetalCreations(pieceViewManager, skillPetalSpawns, boardLayout, petalViewScope));
 
             // Report impacts now so reactions can overlap the finishing petal animations.
             foreach (BoardChangeGroup groupResult in groupResults)

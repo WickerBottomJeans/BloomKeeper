@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using DefaultNamespace.UI;
-using DefaultNamespace.Utility;
 using UnityEngine;
 
 namespace DefaultNamespace
@@ -18,10 +17,10 @@ namespace DefaultNamespace
         public ObjectiveType ObjectiveType { get; } = ObjectiveType.ClearSpiderWeb;
         public bool CheckObjective() => spiderWebCount <= 0;
 
-        public void Apply(IReadOnlyList<TileChange> changes)
+        public void Apply(BoardResolution resolution)
         {
             int clearedWebCount = 0;
-            foreach (TileChange change in changes)
+            foreach (TileChange change in resolution.TileChanges)
             {
                 if (change.Before.FeatureState?.FeatureType == TileFeatureType.Web && change.FeatureWasRemoved)
                     clearedWebCount++;
@@ -36,7 +35,7 @@ namespace DefaultNamespace
             {
                 new ObjectiveViewData
                 {
-                    spriteKey = SpriteKeyHelper.GetObjectiveSpriteKey(ObjectiveType),
+                    objectiveType = ObjectiveType,
                     objectiveText = spiderWebCount.ToString(),
                     remainingAmount = spiderWebCount
                 }

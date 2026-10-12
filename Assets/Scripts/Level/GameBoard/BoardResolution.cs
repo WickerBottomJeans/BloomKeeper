@@ -4,7 +4,7 @@ namespace DefaultNamespace.UI
 {
     /// <summary>
     /// The result of one BoardLogic.Resolve call: matches, activated and chained skills,
-    /// spawned skill petals, and their tile changes, all before gravity and refill.
+    /// spawned skill petals, collected eggs, and their tile changes, all before gravity and refill.
     /// GameBoard.ResolveBoard may produce several of these results during its cascade loop
     /// before returning to Idle; this represents one resolution, not that entire loop.
     /// </summary>
@@ -14,9 +14,11 @@ namespace DefaultNamespace.UI
         public IReadOnlyList<SkillPetalSpawn> SpawnedPetals { get; }
         public IReadOnlyList<TileChange> TileChanges { get; }
         public IReadOnlyList<ResolvedSkill> SkillResults { get; }
+        public IReadOnlyList<EggCollection> EggCollections { get; }
 
-        public BoardResolution(List<BoardChangeGroup> effects, List<SkillPetalSpawn> spawnedPetals, IReadOnlyList<TileChange> tileChanges, IReadOnlyList<ResolvedSkill> skillResults)
+        public BoardResolution(List<BoardChangeGroup> effects, List<SkillPetalSpawn> spawnedPetals, IReadOnlyList<TileChange> tileChanges, IReadOnlyList<ResolvedSkill> skillResults, IReadOnlyList<EggCollection> eggCollections = null)
         {
+            EggCollections = new List<EggCollection>(eggCollections ?? System.Array.Empty<EggCollection>()).AsReadOnly();
             Effects = new List<BoardChangeGroup>(effects).AsReadOnly();
             SpawnedPetals = new List<SkillPetalSpawn>(spawnedPetals).AsReadOnly();
             SkillResults = new List<ResolvedSkill>(skillResults).AsReadOnly();

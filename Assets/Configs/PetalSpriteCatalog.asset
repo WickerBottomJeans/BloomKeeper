@@ -1,0 +1,121 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d31e246f7a44ed297bfe1e67c932740, type: 3}
+  m_Name: PetalSpriteCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::PetalSpriteCatalog
+  entries:
+  - petalType: 1
+    skillType: 0
+    sprite: {fileID: -4408906938756110447, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 1
+    skillType: 1
+    sprite: {fileID: 1896407088105901486, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 1
+    skillType: 2
+    sprite: {fileID: 2925614552506313940, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 1
+    skillType: 3
+    sprite: {fileID: -7849477738210277183, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 1
+    skillType: 5
+    sprite: {fileID: -4461018958292000692, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 2
+    skillType: 0
+    sprite: {fileID: -5971529712519202139, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 2
+    skillType: 1
+    sprite: {fileID: 8416392122959248779, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 2
+    skillType: 2
+    sprite: {fileID: -6379812629350660343, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 2
+    skillType: 3
+    sprite: {fileID: -64890738673955329, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 2
+    skillType: 5
+    sprite: {fileID: 2785230211217196494, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 3
+    skillType: 0
+    sprite: {fileID: 138874962496516619, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 3
+    skillType: 1
+    sprite: {fileID: -5379179880594584770, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 3
+    skillType: 2
+    sprite: {fileID: -4643999379548046393, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 3
+    skillType: 3
+    sprite: {fileID: 7847449880043966781, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 3
+    skillType: 5
+    sprite: {fileID: -834560787093049852, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 4
+    skillType: 0
+    sprite: {fileID: 3234460474562127226, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 4
+    skillType: 1
+    sprite: {fileID: -8218993731297944233, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 4
+    skillType: 2
+    sprite: {fileID: 6576201314668573318, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 4
+    skillType: 3
+    sprite: {fileID: -3561202144488316383, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 4
+    skillType: 5
+    sprite: {fileID: 2614345998196034759, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 5
+    skillType: 0
+    sprite: {fileID: 7974869367103266702, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 5
+    skillType: 1
+    sprite: {fileID: 4150579344493707002, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 5
+    skillType: 2
+    sprite: {fileID: 5002553187632062459, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 5
+    skillType: 3
+    sprite: {fileID: 3875515384899716169, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 5
+    skillType: 5
+    sprite: {fileID: -1593337987799913353, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 6
+    skillType: 0
+    sprite: {fileID: -7723644376667363023, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 6
+    skillType: 1
+    sprite: {fileID: -9080989761530387810, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 6
+    skillType: 2
+    sprite: {fileID: 4454478600426566855, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 6
+    skillType: 3
+    sprite: {fileID: -7932174138965884787, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 6
+    skillType: 5
+    sprite: {fileID: -8697376212223977200, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 7
+    skillType: 0
+    sprite: {fileID: -4508104085187513110, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 7
+    skillType: 1
+    sprite: {fileID: -668967204189055197, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 7
+    skillType: 2
+    sprite: {fileID: -6428829673468490688, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 7
+    skillType: 3
+    sprite: {fileID: -3842605357785805146, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  - petalType: 7
+    skillType: 5
+    sprite: {fileID: -929544841694520820, guid: 00be8108d8dd1f74a96381c8e61ccf2c, type: 3}
+  prismaticBloomSprite: {fileID: 21300000, guid: 3d544a3b894803142a320627360b4af6, type: 3}

@@ -36,7 +36,7 @@ namespace DefaultNamespace.UI
         private bool CanSwap(Vector2Int origin, Vector2Int target)
         {
             return origin != target && Contains(origin) && Contains(target)
-                && boardGrid[origin.x, origin.y]?.CanSwapPetal() == true && boardGrid[target.x, target.y]?.CanSwapPetal() == true;
+                && boardGrid[origin.x, origin.y]?.CanSwapPiece() == true && boardGrid[target.x, target.y]?.CanSwapPiece() == true;
         }
 
         // False rejects the resolutionInput without mutation. True returns either a resolving move or a swap-back.
@@ -46,47 +46,49 @@ namespace DefaultNamespace.UI
             if (!CanSwap(origin, target)) return false;
             boardResolutionInput = SwapAndDetect(origin, target);
             // Invalid player swaps leave the model unchanged; presentation still plays out and back.
-            if (!boardResolutionInput.RequiresResolution) SwapPetals(origin, target);
+            if (!boardResolutionInput.RequiresResolution) SwapPieces(origin, target);
             return true;
         }
 
         private BoardResolutionInput SwapAndDetect(Vector2Int origin, Vector2Int target)
         {
-            SwapPetals(origin, target);
+            SwapPieces(origin, target);
             try
             {
                 List<SkillActivation> skillActivations = SkillDetector.DetectOnSwap(boardGrid, origin, target);
                 IReadOnlyList<MatchGroup> matchGroups = skillActivations.Count > 0 ? Array.Empty<MatchGroup>() : MatchDetector.Detect(boardGrid);
-                return new BoardResolutionInput(matchGroups, skillActivations, new SwapContext(origin, target));
+                return new BoardResolutionInput(matchGroups, skillActivations, new SwapContext(origin, target), eggCollections: EggCollectionDetector.Detect(boardGrid));
             }
             catch
             {
-                SwapPetals(origin, target);
+                SwapPieces(origin, target);
                 throw;
             }
         }
 
-        private void SwapPetals(Vector2Int origin, Vector2Int target)
+        private void SwapPieces(Vector2Int origin, Vector2Int target)
         {
-            Petal petal = boardGrid[origin.x, origin.y].Petal;
-            boardGrid[origin.x, origin.y].SetPetal(boardGrid[target.x, target.y].Petal);
-            boardGrid[target.x, target.y].SetPetal(petal);
+            IBoardPiece piece = boardGrid[origin.x, origin.y].Piece;
+            boardGrid[origin.x, origin.y].SetPiece(boardGrid[target.x, target.y].Piece);
+            boardGrid[target.x, target.y].SetPiece(piece);
         }
 
         public List<MatchGroup> DetectMatches() => MatchDetector.Detect(boardGrid);
+
+        public BoardResolutionInput DetectResolution() => new BoardResolutionInput(DetectMatches(), Array.Empty<SkillActivation>(), eggCollections: EggCollectionDetector.Detect(boardGrid));
 
         public bool CanEditPetal(Vector2Int position)
         {
             if (!Contains(position)) return false;
             Tile tile = boardGrid[position.x, position.y];
-            return tile != null && (tile.CanReceiveNewPetal() || tile.CanSwapPetal());
+            return tile != null && (tile.CanReceivePiece() || (tile.Piece is Petal && tile.CanSwapPiece()));
         }
 
         public Petal EditPetal(Vector2Int position, PetalType type, SpecialSkillType skill)
         {
             if (!CanEditPetal(position)) return null;
             var petal = new Petal(type, skill);
-            boardGrid[position.x, position.y].SetPetal(petal);
+            boardGrid[position.x, position.y].SetPiece(petal);
             return petal;
         }
 
@@ -108,15 +110,15 @@ namespace DefaultNamespace.UI
             if (!CanSwap(origin, target)) return false;
             Tile originTile = boardGrid[origin.x, origin.y];
             Tile targetTile = boardGrid[target.x, target.y];
-            if (SkillDetector.HasActivationOnSwap(originTile.Petal.Skill, targetTile.Petal.Skill)) return true;
-            if (!originTile.IsMatchable() || !targetTile.IsMatchable()) return false;
+            if (originTile.Piece is Petal originPetal && targetTile.Piece is Petal targetPetal && SkillDetector.HasActivationOnSwap(originPetal.Skill, targetPetal.Skill)) return true;
 
             // Only the two hypothetical cells differ. Detection reads the shared remaining cells.
             var previewGrid = (Tile[,])boardGrid.Clone();
-            previewGrid[origin.x, origin.y] = new Tile(originTile.IsPlayable, originTile.Feature);
-            previewGrid[target.x, target.y] = new Tile(targetTile.IsPlayable, targetTile.Feature);
-            previewGrid[origin.x, origin.y].SetPetal(targetTile.Petal);
-            previewGrid[target.x, target.y].SetPetal(originTile.Petal);
+            previewGrid[origin.x, origin.y] = new Tile(originTile.Feature);
+            previewGrid[target.x, target.y] = new Tile(targetTile.Feature);
+            previewGrid[origin.x, origin.y].SetPiece(targetTile.Piece);
+            previewGrid[target.x, target.y].SetPiece(originTile.Piece);
+            if (EggCollectionDetector.Detect(previewGrid).Count > 0) return true;
             List<MatchGroup> matchGroups = MatchDetector.Detect(previewGrid);
             return matchGroups.Exists(match => match.TilePositions.Contains(origin) || match.TilePositions.Contains(target));
         }
@@ -133,16 +135,16 @@ namespace DefaultNamespace.UI
             {
                 for (int y = 0; y < rowCount; y++)
                 {
-                    if (boardGrid[x, y] == null || !boardGrid[x, y].CanReceiveNewPetal()) continue;
+                    if (boardGrid[x, y] == null || !boardGrid[x, y].CanReceivePiece()) continue;
 
                     for (int above = y + 1; above < rowCount; above++)
                     {
                         if (boardGrid[x, above] == null || !boardGrid[x, above].IsGravityAffected()) break;
-                        if (boardGrid[x, above].Petal == null) continue;
+                        if (boardGrid[x, above].Piece == null) continue;
 
-                        Petal fallingPetal = boardGrid[x, above].Petal;
-                        boardGrid[x, y].SetPetal(fallingPetal);
-                        boardGrid[x, above].RemovePetal();
+                        IBoardPiece fallingPiece = boardGrid[x, above].Piece;
+                        boardGrid[x, y].SetPiece(fallingPiece);
+                        boardGrid[x, above].RemovePiece();
                         gravityMoves.Add((new Vector2Int(x, above), new Vector2Int(x, y)));
                         break;
                     }
@@ -173,10 +175,11 @@ namespace DefaultNamespace.UI
                     }
 
                     if (tile == null || !tile.IsGravityAffected()) break;
-                    if (!tile.CanReceiveNewPetal()) continue;
+                    if (!tile.CanReceivePiece()) continue;
 
-                    tile.SetPetal(PetalFactory.CreateRandom());
-                    filledPetals.Add((new Vector2Int(x, y), tile.Petal));
+                    Petal petal = PetalFactory.CreateRandom();
+                    tile.SetPiece(petal);
+                    filledPetals.Add((new Vector2Int(x, y), petal));
                 }
             }
 
@@ -195,8 +198,9 @@ namespace DefaultNamespace.UI
                 for (int y = 0; y < rowCount; y++)
                 {
                     if (boardGrid[x, y] == null || !boardGrid[x, y].IsMatchable()) continue;
-                    boardGrid[x, y].SetPetal(PetalFactory.CreateRandom());
-                    rerolledPetals.Add((new Vector2Int(x, y), boardGrid[x, y].Petal));
+                    Petal petal = PetalFactory.CreateRandom();
+                    boardGrid[x, y].SetPiece(petal);
+                    rerolledPetals.Add((new Vector2Int(x, y), petal));
                 }
             }
 
@@ -210,7 +214,7 @@ namespace DefaultNamespace.UI
             {
                 case BoosterType.GardenersGlove:
                     if (targets.Count != 2) throw new ArgumentException("Gardener's Glove requires exactly two targets.", nameof(targets));
-                    if (!CanSwap(targets[0], targets[1])) throw new ArgumentException("Gardener's Glove targets cannot swap petals.", nameof(targets));
+                    if (!CanSwap(targets[0], targets[1])) throw new ArgumentException("Gardener's Glove targets cannot swap pieces.", nameof(targets));
                     BoardResolutionInput gloveResolutionInput = SwapAndDetect(targets[0], targets[1]);
                     return new BoosterUseResult(gloveResolutionInput, new GardenersGloveRepresentationData(targets[0], targets[1]));
                 case BoosterType.BloomWand:
@@ -238,6 +242,19 @@ namespace DefaultNamespace.UI
             var removedChanges = new List<TileChange>();
             random ??= new System.Random();
 
+            var eggCollections = new List<EggCollection>();
+            foreach (EggCollectionTarget target in boardResolutionInput.EggCollections)
+            {
+                Tile eggTile = boardGrid[target.EggPosition.x, target.EggPosition.y];
+                if (eggTile.Piece is not Egg || boardGrid[target.BasketPosition.x, target.BasketPosition.y]?.Feature is not BasketFeature)
+                    throw new InvalidOperationException("Egg collection no longer matches the board.");
+                TileState before = BoardSnapshotBuilder.CaptureTile(boardGrid, target.EggPosition);
+                eggTile.RemovePiece();
+                var removal = new TileChange(before, BoardSnapshotBuilder.CaptureTile(boardGrid, target.EggPosition));
+                tileChanges.Add(removal);
+                eggCollections.Add(new EggCollection(removal, target.BasketPosition));
+            }
+
             foreach (SkillActivation activation in boardResolutionInput.SkillActivations)
                 pendingSkills.Enqueue((activation, null));
 
@@ -260,7 +277,7 @@ namespace DefaultNamespace.UI
                 foreach (PetalChange change in plan.PetalChanges)
                 {
                     TileState before = BoardSnapshotBuilder.CaptureTile(boardGrid, change.Position);
-                    boardGrid[change.Position.x, change.Position.y].SetPetal(change.After);
+                    boardGrid[change.Position.x, change.Position.y].SetPiece(change.After);
                     transformations.Add(new TileChange(before, BoardSnapshotBuilder.CaptureTile(boardGrid, change.Position)));
                 }
 
@@ -271,7 +288,7 @@ namespace DefaultNamespace.UI
                     consumedInputs = ClearTiles(plan.ConsumedPositions, boardGrid, removedChanges, pendingSkills, activateSkills: false);
                     Record(consumedInputs);
                 }
-                BoardChangeGroup impact = ClearTiles(plan.AffectedPositions, boardGrid, removedChanges, pendingSkills, plan.Causer);
+                BoardChangeGroup impact = ClearTiles(plan.AffectedPositions, boardGrid, removedChanges, pendingSkills, plan.Causer, triggerPetalType: plan.TriggerPetalType);
                 transformations.AddRange(impact.TileChanges);
                 var effect = new BoardChangeGroup(transformations, impact.TriggeredSkillPositions, causingSkill: impact.CausingSkill);
                 Record(effect);
@@ -279,7 +296,7 @@ namespace DefaultNamespace.UI
                 tileChanges.AddRange(ApplyAdjacentClearEffects(boardGrid, removedChanges));
             }
 
-            return new BoardResolution(effects, spawnedPetals, tileChanges, skills);
+            return new BoardResolution(effects, spawnedPetals, tileChanges, skills, eggCollections);
 
             void Record(BoardChangeGroup effect)
             {
@@ -304,11 +321,12 @@ namespace DefaultNamespace.UI
             if (!spawnSkill.HasValue) return;
             
             //If the match group has a skill petal in it, then execute that skill petal, not forming new skill petal
-            bool hasSkillPetal = match.TilePositions.Any(t => boardGrid[t.x, t.y].Petal?.Skill != SpecialSkillType.None);
+            bool hasSkillPetal = match.TilePositions.Any(t => boardGrid[t.x, t.y].Piece is Petal petal && petal.Skill != SpecialSkillType.None);
             if (hasSkillPetal) return;
 
-            PetalType matchedType = boardGrid[match.TilePositions[0].x, match.TilePositions[0].y].Petal?.PetalType
-                                    ?? throw new InvalidOperationException("Match group contains tile with null petal.");
+            if (boardGrid[match.TilePositions[0].x, match.TilePositions[0].y].Piece is not Petal matchedPetal)
+                throw new InvalidOperationException("Match group contains a tile without a petal.");
+            PetalType matchedType = matchedPetal.PetalType;
             if (spawnSkill == SpecialSkillType.PrismaticBloom)
             {
                 matchedType = PetalType.None;
@@ -317,7 +335,7 @@ namespace DefaultNamespace.UI
             pendingSpawns.Add(new SkillPetalSpawn(match.TilePositions, spawnPos, matchedType, spawnSkill.Value));
         }
 
-        private static BoardChangeGroup ClearTiles(IReadOnlyList<Vector2Int> positions, Tile[,] boardGrid, List<TileChange> removedTileChanges, Queue<(SkillActivation activation, TileChange trigger)> pendingSkills, Petal causer = null, bool activateSkills = true, MatchShape matchShape = MatchShape.None)
+        private static BoardChangeGroup ClearTiles(IReadOnlyList<Vector2Int> positions, Tile[,] boardGrid, List<TileChange> removedTileChanges, Queue<(SkillActivation activation, TileChange trigger)> pendingSkills, Petal causer = null, bool activateSkills = true, MatchShape matchShape = MatchShape.None, PetalType? triggerPetalType = null)
         {
             var impacts = new List<TileChange>(positions.Count);
             var triggeredSkillPositions = new List<Vector2Int>();
@@ -337,8 +355,7 @@ namespace DefaultNamespace.UI
 
                 if (petal.Skill != SpecialSkillType.None && activateSkills)
                 {
-                    Petal triggerPetal = causer != null ? new Petal(causer) : null;
-                    pendingSkills.Enqueue((SkillActivation.FromPetalSkill(new SkillParticipant(tilePosition, petal), triggerPetal), change));
+                    pendingSkills.Enqueue((SkillActivation.FromPetalSkill(new SkillParticipant(tilePosition, petal), triggerPetalType ?? causer?.PetalType), change));
                     triggeredSkillPositions.Add(tilePosition);
                 }
 
@@ -351,7 +368,7 @@ namespace DefaultNamespace.UI
         private static void ApplyPendingSpawns(Tile[,] boardGrid, List<SkillPetalSpawn> pendingSpawns)
         {
             foreach (SkillPetalSpawn spawn in pendingSpawns)
-                boardGrid[spawn.SpawnPosition.x, spawn.SpawnPosition.y].SetPetal(PetalFactory.CreatePetal(spawn.PetalType, spawn.SkillType));
+                boardGrid[spawn.SpawnPosition.x, spawn.SpawnPosition.y].SetPiece(PetalFactory.CreatePetal(spawn.PetalType, spawn.SkillType));
         }
 
         /// <summary>

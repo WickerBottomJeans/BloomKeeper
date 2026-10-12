@@ -15,10 +15,10 @@ namespace Skills
         private readonly Dictionary<Vector2Int, List<TileChange>> inputTileChangesByPosition = new();
 
         public BoardChangeGroup BoardChangeGroup { get; }
-        public PetalViewScope Views { get; }
+        public PieceViewScope Views { get; }
         public AudioPlaybackScope AudioPlaybackScope { get; }
 
-        public SkillPresentationContext(BoardChangeGroup effect, BoardChangeGroup consumedInputs, ResolutionPlayback playback, PetalViewScope views, AudioPlaybackScope audioPlaybackScope)
+        public SkillPresentationContext(BoardChangeGroup effect, BoardChangeGroup consumedInputs, ResolutionPlayback playback, PieceViewScope views, AudioPlaybackScope audioPlaybackScope)
         {
             BoardChangeGroup = effect;
             Views = views;
@@ -29,14 +29,14 @@ namespace Skills
                 IndexTileChanges(consumedInputs, inputTileChangesByPosition);
         }
 
-        public async UniTask ClearImmediately(PetalViewManager petals, Vector2Int? source = null)
+        public async UniTask ClearImmediately(PieceViewManager pieceViewManager, Vector2Int? source = null)
         {
             HashSet<Vector2Int> removed = SkillPresentationQueries.GetRemovedPetalPositionsExcludingTriggeredSkills(BoardChangeGroup);
             if (source.HasValue) removed.Add(source.Value);
             List<Vector2Int> ownedRemoved = Views.AcquireAvailable(removed);
             List<Vector2Int> triggered = Views.AcquireAvailable(BoardChangeGroup.TriggeredSkillPositions);
-            petals.ReleasePetalViewsImmediately(ownedRemoved, Views);
-            await petals.PlayAboutToExecute(triggered, Views);
+            pieceViewManager.ReleasePieceViewsImmediately(ownedRemoved, Views);
+            await PetalPresentation.PlayAboutToExecute(pieceViewManager, triggered, Views);
             foreach (TileChange change in BoardChangeGroup.TileChanges) HandleTileImpactPresented(change.Position);
         }
         public void HandleTileImpactPresented(Vector2Int position)
